@@ -28,7 +28,7 @@ else()
 endif()
 set(EQR_CPP_INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files" FORCE)
 
-if (SIGMA_THETA_MAIN_PROJECT AND CMAKE_GENERATOR MATCHES "Visual Studio")
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
   # If Microsoft SDK is installed create script run-msbuild.bat that
   # calls SetEnv.cmd to set up build environment and runs msbuild.
   # It is useful when building Visual Studio projects with the SDK
@@ -63,7 +63,7 @@ FetchContent_GetProperties(eigen)
 if(NOT eigen_POPULATED)
   FetchContent_Populate(eigen)
 endif()
-include_directories(${eigen_SOURCE_DIR})
+include_directories(${Eigen_SOURCE_DIR})
 # Eigen is header-only library
 
 # Formatting library
@@ -115,16 +115,15 @@ endif()
 include_directories(${spdlog_SOURCE_DIR}/include)
 # spdlog is header-only
 
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-add_library(EqR++ SHARED ${SOURCE_LIST} ${HEADER_LIST})
-target_compile_features(EqR++ PRIVATE cxx_std_20)
+add_library(EqRCpp SHARED ${SOURCE_LIST} ${HEADER_LIST})
+target_compile_features(EqRCpp PRIVATE cxx_std_20)
 
-target_include_directories(EqR++ PUBLIC 
+target_include_directories(EqRCpp PUBLIC 
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${Boost_INCLUDE_DIRS}
                            ${eigen_SOURCE_DIR}
@@ -134,7 +133,7 @@ target_include_directories(EqR++ PUBLIC
                            ${OpenXLSX_SOURCE_DIR}/OpenXLSX/headers
                            ${spdlog_SOURCE_DIR}/include)
 
-target_link_libraries(EqR++ PUBLIC
+target_link_libraries(EqRCpp PUBLIC
                       ${Boost_LIBRARIES}
                       fmt::fmt
                       nlohmann_json::nlohmann_json

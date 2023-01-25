@@ -1,5 +1,6 @@
 /* 
   From Source: ERutilities.h 
+  Original Struct: USTATS
   Description: raw-score statistics for a univariate distribution 
 */
 

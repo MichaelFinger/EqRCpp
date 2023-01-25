@@ -1,5 +1,6 @@
 /* 
   From Source: ERutilities.h 
+  Original Struct: BSTATS
   Description: raw-score statistics for a bivariate distribution 
 */
 
