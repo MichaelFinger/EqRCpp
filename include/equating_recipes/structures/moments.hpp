@@ -30,6 +30,7 @@
 #ifndef STRUCTURES_MOMENTS_HPP
 #define STRUCTURES_MOMENTS_HPP
 
+#include <map>
 #include <Eigen/Core>
 
 namespace EquatingRecipes {
@@ -41,6 +42,7 @@ namespace EquatingRecipes {
       size_t numberOfPersons;
 
       static Moments getScoreMoments(const Eigen::VectorXd& scores);
+      static Moments getScoreMoments(const std::map<double, int>& scoreFreqDist);
     };
   }
 }

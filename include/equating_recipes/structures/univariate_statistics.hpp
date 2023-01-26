@@ -3,8 +3,13 @@
   Original Struct: USTATS
   Description: raw-score statistics for a univariate distribution 
 
+  From Source: ERutilities.h, ERutilities.c
   Original Method: ReadFdGet_USTATS
   Description: Read frequency distribution from file fp
+
+  From Source: ERutilities.h, ERutilities.c
+  Original Method: ReadRawGet_USTATS
+  Description: Read raw data and get or assign all elements for struct s
 */
 
 #ifndef STRUCTURES_UNIVARIATE_STATISTICS_HPP
@@ -33,11 +38,17 @@ namespace EquatingRecipes {
       Eigen::VectorXd percentileRankDist;         // percentile rank dist
       Eigen::VectorXd moments;                    // moments: mean, sd, skew, kurt
 
-      static UnivariateStatistics create(std::map<double, int> scoreFreqDist,
-                                         double minimumScore,
-                                         double maximumScore,
-                                         double scoreIncrement,
-                                         std::string id);
+      static UnivariateStatistics create(const std::map<double, int>& scoreFreqDist,
+                                         const double& minimumScore,
+                                         const double& maximumScore,
+                                         const double& scoreIncrement,
+                                         const std::string& id);
+
+      static UnivariateStatistics create(const Eigen::VectorXd& scores,
+                                         const double& minimumScore,
+                                         const double& maximumScore,
+                                         const double& scoreIncrement,
+                                         const std::string& id);
     };
   } // namespace Structures
 } // namespace EquatingRecipes

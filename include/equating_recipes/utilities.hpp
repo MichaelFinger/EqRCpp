@@ -77,9 +77,8 @@ University of Iowa
 #include <Eigen/Core>
 
 namespace EquatingRecipes {
-  namespace Structures {
-    struct Utilities {
-      /*
+  struct Utilities {
+    /*
         Location of score x in zero-offset vector; 
 
         Input:
@@ -98,11 +97,11 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08         
       */
-      size_t scoreLocation(double score,
-                        double minimumScore,
-                        double scoreIncrement);
+    static size_t scoreLocation(const double& score,
+                                const double& minimumScore,
+                                const double& scoreIncrement);
 
-      /*
+    /*
         Number of scores (or categories in zero-offset vector; 
 
         Input:
@@ -122,11 +121,11 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08         
       */
-      int numberOfScores(double maximumScore,
-                         double mininumScore,
-                         double scoreIncrement);
+    static size_t numberOfScores(const double& maximumScore,
+                                 const double& minimumScore,
+                                 const double& scoreIncrement);
 
-      /*
+    /*
         Score associated with location in zero-offset vector 
 
         Input:
@@ -145,11 +144,11 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08  
       */
-      double score(int scoreLocation,
-                   double minimumScore,
-                   double scoreIncrement);
+    static double getScore(const size_t& scoreLocation,
+                           const double& minimumScore,
+                           const double& scoreIncrement);
 
-      /*
+    /*
         Compute cumulative relative frequencies from relative frequencies
 
         Input
@@ -168,12 +167,12 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08  
       */
-      Eigen::VectorXd cumulativeRelativeFreqDist(double minimumScore,
-                                                 double maximumScore,
-                                                 double scoreIncrement,
-                                                 Eigen::VectorXd relativeFreqDist);
+    static Eigen::VectorXd cumulativeRelativeFreqDist(const double& minimumScore,
+                                                      const double& maximumScore,
+                                                      const double& scoreIncrement,
+                                                      const Eigen::VectorXd& relativeFreqDist);
 
-      /*
+    /*
         Compute percentile rank (pr) given cumulative relative frequencies crfd[]
 
         pr can be computed for any score x, not simply those scores that are 
@@ -204,13 +203,13 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08  
       */
-      double percentileRank(double minimumScore,
-                            double maximumScore,
-                            double scoreIncrement,
-                            Eigen::VectorXd cumulativeRelativeFreqDist,
-                            double score);
+    static double percentileRank(const double& minimumScore,
+                                 const double& maximumScore,
+                                 const double& scoreIncrement,
+                                 const Eigen::VectorXd& cumulativeRelativeFreqDist,
+                                 const double& score);
 
-      /* 
+    /* 
         Interpolated value of f at x assuming there are ns score
         categories.  Function treats first category as having 
         a score of 0; last category has score of ns-1. 
@@ -229,11 +228,10 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08  
       */
-      double interpolate(double score,
-                         int numberOfScoreCategories,
-                         Eigen::VectorXd frequencies);
-    };
-  } // namespace Structures
+    static double interpolate(const double& score,
+                              const int& numberOfScoreCategories,
+                              const Eigen::VectorXd& frequencies);
+  };
 } // namespace EquatingRecipes
 
 #endif

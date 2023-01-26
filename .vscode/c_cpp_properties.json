@@ -1,25 +1,21 @@
 {
-    "configurations": [
-        {
-            "name": "Mac",
-            "includePath": [
-                "${workspaceFolder}/include/**"
-            ],
-            "defines": [],
-            "macFrameworkPath": [
-                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
-            ],
-            "compilerPath": "/usr/bin/clang++",
-            "cStandard": "c17",
-            "cppStandard": "c++20",
-            "configurationProvider": "ms-vscode.cmake-tools",
-            "intelliSenseMode": "${default}",
-            "compileCommands": "",
-            "mergeConfigurations": true,
-            "forcedInclude": [
-                "${workspaceFolder}/.vscode/eigen_fix.hpp"
-            ]
-        }
-    ],
-    "version": 4
+  "configurations": [
+    {
+      "name": "Mac",
+      "includePath": ["${workspaceFolder}/include/**/*.*"],
+      "defines": [],
+      "macFrameworkPath": [
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+      ],
+      "compilerPath": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+      "configurationProvider": "ms-vscode.cmake-tools",
+      "cppStandard": "c++20",
+      "intelliSenseMode": "${default}",
+      "cStandard": "c17",
+      "compileCommands": "",
+      "mergeConfigurations": false,
+      "forcedInclude": ["${workspaceFolder}/.vscode/eigen_fix.hpp"]
+    }
+  ],
+  "version": 4
 }
