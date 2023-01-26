@@ -1,26 +1,8 @@
 /* 
   From Source: ERutilities.h 
   Original Struct: ERAW_RESULTS
-  Description: raw-score statistics for a univariate distribution 
+  Description: equated raw score results
 */
-
-/*
-truct ERAW_RESULTS{
-  /* 
-    equated raw-score results 
-  */
-  // double msx[4];                         /* mean for x for synthetic pop */
-  // double msy[4];                         /* mean for y for synthetic pop */
-  // double ssx[4];                           /* sd for x for synthetic pop */
-  // double ssy[4];                           /* sd for y for synthetic pop */
-  // double gamma1[4];                                   /* gamma for pop 1 */
-  // double gamma2[4];                                   /* gamma for pop 2 */
-  // double a[4];                                                  /* slope */
-  // double b[4];                                              /* intercept */
-  // double **eraw;                                   /* equated raw scores */
-  // double **mts;                        /* moments for equated raw scores */
-  // double **fxs;     /* rel FD for X and syn pop: [0] for FE, [1] for MFE */
-  // double **gys;     /* rel FD for Y and syn pop: [0] for FE, [1] for MFE */
 
 #ifndef STRUCTURES_EQUATED_RAW_SCORE_RESULTS_HPP
 #define STRUCTURES_EQUATED_RAW_SCORE_RESULTS_HPP
