@@ -1,18 +1,18 @@
-#include <equating_recipes/structures/utilities.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
-  size_t Utilities::scoreLocation(const double& score,
-                                  const double& minimumScore,
-                                  const double& scoreIncrement) {
+  size_t Utilities::getScoreLocation(const double& score,
+                                     const double& minimumScore,
+                                     const double& scoreIncrement) {
     size_t location = static_cast<size_t>((score - minimumScore) / scoreIncrement + 0.5);
 
     return location;
   }
 
-  size_t Utilities::numberOfScores(const double& maximumScore,
-                                   const double& minimumScore,
+  size_t Utilities::numberOfScores(const double& minimumScore,
+                                   const double& maximumScore,
                                    const double& scoreIncrement) {
-    size_t nScores = scoreLocation(maximumScore, minimumScore, scoreIncrement) + 1;
+    size_t nScores = getScoreLocation(maximumScore, minimumScore, scoreIncrement) + 1;
 
     return nScores;
   }
@@ -29,9 +29,9 @@ namespace EquatingRecipes {
                                                         const double& maximumScore,
                                                         const double& scoreIncrement,
                                                         const Eigen::VectorXd& relativeFreqDist) {
-    size_t maximumScoreLocation = scoreLocation(maximumScore,
-                                                minimumScore,
-                                                scoreIncrement);
+    size_t maximumScoreLocation = Utilities::getScoreLocation(maximumScore,
+                                                              minimumScore,
+                                                              scoreIncrement);
 
     Eigen::VectorXd cumRelFreqDist = Eigen::VectorXd::Zero(maximumScoreLocation + 1);
 
@@ -58,7 +58,7 @@ namespace EquatingRecipes {
     } else if (score >= maximumScore + scoreIncrement / 2) {
       percRank = 100.0;
     } else {
-      size_t maxScoreLocation = scoreLocation(maximumScore, minimumScore, scoreIncrement);
+      size_t maxScoreLocation = getScoreLocation(maximumScore, minimumScore, scoreIncrement);
 
       size_t scoreIndex;
       double xStar;
@@ -97,5 +97,33 @@ namespace EquatingRecipes {
     double result = (value > 0) ? value : 1.0e-10;
 
     return result;
+  }
+
+  //----------------------------------------------------------------------------------------------------
+  // Custom Function Written for EqRCpp
+  //----------------------------------------------------------------------------------------------------
+  std::map<double, int> Utilities::getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
+                                                                    const double& minimumScore,
+                                                                    const double& maximumScore,
+                                                                    const double& scoreIncrement,
+                                                                    const bool& includeRawScoresWithZeroFrequency) {
+    std::map<double, int> freqDist;
+
+    size_t minimumScoreLocation = Utilities::getScoreLocation(minimumScore, minimumScore, scoreIncrement);
+    size_t maximumScoreLocation = Utilities::getScoreLocation(maximumScore, minimumScore, scoreIncrement);
+
+    for (size_t location = minimumScoreLocation; location <= maximumScoreLocation; ++location) {
+      double score = Utilities::getScore(location,
+                                                 minimumScore,
+                                                 scoreIncrement);
+
+      int scoreFreq = static_cast<int>(rawScores.cwiseEqual(score).count());
+
+      if (scoreFreq >= 1 || (scoreFreq == 0 && includeRawScoresWithZeroFrequency)) {
+        freqDist[score] = scoreFreq;
+      }
+    }
+
+    return freqDist;
   }
 } // namespace EquatingRecipes

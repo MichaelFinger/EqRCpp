@@ -24,8 +24,8 @@ namespace EquatingRecipes {
       // std::string inputFilename;               // name of input file
       std::string id;                             // single character id
       int numberOfExaminees;                      // number of examinees
-      double minimumObservedScore;                // min score in data
-      double maximumObservedScore;                // max score in data
+      double minimumScore;                        // min score in data
+      double maximumScore;                        // max score in data
       double freqDistMinimumScore;                // min score for fd[]
       double freqDistMaximumScore;                // max score for fd[]
       double adjacentScoresIncrement;             // increment between adjacent scores

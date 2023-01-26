@@ -36,7 +36,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct Moments {
-      Eigen::VectorXd moments;
+      Eigen::VectorXd momentValues;
       double minimumObservedScore;
       double maximumObservedScore;
       size_t numberOfPersons;

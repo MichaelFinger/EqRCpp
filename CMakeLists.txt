@@ -72,47 +72,6 @@ FetchContent_MakeAvailable(fmtlib)
 # include_directories(${fmtlib_SOURCE_DIR}/include)
 # Adds fmt::fmt
 
-# json
-FetchContent_Declare(json 
-  URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
-  DOWNLOAD_EXTRACT_TIMESTAMP ON)
-FetchContent_MakeAvailable(json)
-# include_directories(${json_SOURCE_DIR}/single_include)
-# adds nlohmann_json::nlohmann_json
-
-# OpenXLSX library
-FetchContent_Declare(
-  OpenXLSX
-  GIT_REPOSITORY https://github.com/troldal/OpenXLSX.git
-  GIT_TAG        v0.3.2
-  DOWNLOAD_EXTRACT_TIMESTAMP ON)
-FetchContent_MakeAvailable(OpenXLSX)
-# Adds OpenXLSX::OpenXLSX
-
-# Rapid CSV
-FetchContent_Declare(
-  rapidcsv
-  GIT_REPOSITORY https://github.com/d99kris/rapidcsv.git
-  GIT_TAG        v8.43
-  DOWNLOAD_EXTRACT_TIMESTAMP ON)
-FetchContent_MakeAvailable(rapidcsv)
-# Adds rapidcsv
-
-# spdlog
-set(SPDLOG_FMT_EXTERNAL_HO ON CACHE BOOL "" FORCE)
-FetchContent_Declare(
-  spdlog
-  GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG        v1.9.2
-  DOWNLOAD_EXTRACT_TIMESTAMP ON)
-if(NOT spdlog_POPULATED)
-  FetchContent_Populate(spdlog)
-endif()
-# include_directories(${spdlog_SOURCE_DIR}/include)
-# spdlog is header-only
-
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
@@ -123,17 +82,10 @@ target_include_directories(EqRCpp PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${Boost_INCLUDE_DIRS}
                            ${eigen_SOURCE_DIR}
-                           ${fmtlib_SOURCE_DIR}/include
-                           ${json_SOURCE_DIR}/single_include
-                           ${rapidcsv_SOURCE_DIR}/include
-                           ${OpenXLSX_SOURCE_DIR}/OpenXLSX/headers
-                           ${spdlog_SOURCE_DIR}/include)
+                           ${fmtlib_SOURCE_DIR}/include)
 
 target_link_libraries(EqRCpp PUBLIC
                       ${Boost_LIBRARIES}
                       fmt::fmt
-                      nlohmann_json::nlohmann_json
-                      OpenXLSX::OpenXLSX
-                      rapidcsv
                       pthread
                       dl)

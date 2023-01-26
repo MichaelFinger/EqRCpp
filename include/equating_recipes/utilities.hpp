@@ -74,6 +74,7 @@ University of Iowa
 #ifndef STRUCTURES_UTILITIES_HPP
 #define STRUCTURES_UTILITIES_HPP
 
+#include <map>
 #include <Eigen/Core>
 
 namespace EquatingRecipes {
@@ -97,9 +98,9 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08         
       */
-    static size_t scoreLocation(const double& score,
-                                const double& minimumScore,
-                                const double& scoreIncrement);
+    static size_t getScoreLocation(const double& score,
+                                   const double& minimumScore,
+                                   const double& scoreIncrement);
 
     /*
         Number of scores (or categories in zero-offset vector; 
@@ -121,8 +122,8 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08         
       */
-    static size_t numberOfScores(const double& maximumScore,
-                                 const double& minimumScore,
+    static size_t numberOfScores(const double& minimumScore,
+                                 const double& maximumScore,
                                  const double& scoreIncrement);
 
     /*
@@ -231,6 +232,13 @@ namespace EquatingRecipes {
     static double interpolate(const double& score,
                               const int& numberOfScoreCategories,
                               const Eigen::VectorXd& frequencies);
+
+    // Custom function written for EqRCpp
+    static std::map<double, int> getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
+                                                                  const double& minimumScore,
+                                                                  const double& maximumScore,
+                                                                  const double& scoreIncrement = 1,
+                                                                  const bool& includeRawScoresWithZeroFrequency = true);
   };
 } // namespace EquatingRecipes
 
