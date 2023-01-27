@@ -1,3 +1,4 @@
+#include <fmt/core.h>
 #include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {

@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iostream>
 #include <limits>
 #include <equating_recipes/structures/moments.hpp>
 #include <equating_recipes/utilities.hpp>
@@ -72,9 +71,6 @@ namespace EquatingRecipes {
       scoreMoments.momentValues(0) /= static_cast<double>(scoreMoments.numberOfExaminees);
 
       deviations = deviations - Eigen::VectorXd::Constant(deviations.size(), scoreMoments.momentValues(0));
-
-      std::cout << "deviations:\n"
-                << EquatingRecipes::Utilities::vectorXdToString(deviations, false) << "\n";
 
       for (size_t powCoeff = 2; powCoeff <= 4; powCoeff++) {
         scoreMoments.momentValues(powCoeff - 1) = (deviations.array().pow(powCoeff) * scoreFrequencies.array().cast<double>()).sum() /

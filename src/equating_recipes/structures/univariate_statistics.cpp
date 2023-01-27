@@ -25,18 +25,12 @@ namespace EquatingRecipes {
       this->percentileRankDist.setZero(this->numberOfScores);
     }
 
-    UnivariateStatistics UnivariateStatistics::create(const Eigen::VectorXi& scoreFrequencies,
-                                                      const double& minimumScore,
-                                                      const double& maximumScore,
-                                                      const double& scoreIncrement,
-                                                      const std::string& id) {
+    UnivariateStatistics UnivariateStatistics::buildFromScoreFrequencies(const Eigen::VectorXi& scoreFrequencies,
+                                                                         const double& minimumScore,
+                                                                         const double& maximumScore,
+                                                                         const double& scoreIncrement,
+                                                                         const std::string& id) {
       UnivariateStatistics univariateStatistics;
-
-      /*
-      Eigen::VectorXi cumulativeFreqDist;           // cum freq dist
-      Eigen::VectorXd cumulativeRelativeFreqDist;   // cum relative freq dist
-      Eigen::VectorXd percentileRankDist;           // percentile rank dist
-      */
 
       univariateStatistics.id = id;
       univariateStatistics.numberOfExaminees = 0;
@@ -75,22 +69,22 @@ namespace EquatingRecipes {
       return univariateStatistics;
     }
 
-    UnivariateStatistics UnivariateStatistics::create(const Eigen::VectorXd& scores,
-                                                      const double& minimumScore,
-                                                      const double& maximumScore,
-                                                      const double& scoreIncrement,
-                                                      const std::string& id) {
+    UnivariateStatistics UnivariateStatistics::buildFromScores(const Eigen::VectorXd& scores,
+                                                               const double& minimumScore,
+                                                               const double& maximumScore,
+                                                               const double& scoreIncrement,
+                                                               const std::string& id) {
       Eigen::VectorXi freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
-                                                                                                    minimumScore,
-                                                                                                    maximumScore,
-                                                                                                    scoreIncrement,
-                                                                                                    true);
+                                                                                              minimumScore,
+                                                                                              maximumScore,
+                                                                                              scoreIncrement,
+                                                                                              true);
 
-      UnivariateStatistics univariateStatistics = UnivariateStatistics::create(freqDist,
-                                                                               minimumScore,
-                                                                               maximumScore,
-                                                                               scoreIncrement,
-                                                                               id);
+      UnivariateStatistics univariateStatistics = UnivariateStatistics::buildFromScoreFrequencies(freqDist,
+                                                                                                  minimumScore,
+                                                                                                  maximumScore,
+                                                                                                  scoreIncrement,
+                                                                                                  id);
 
       return univariateStatistics;
     }

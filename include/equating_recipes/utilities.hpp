@@ -77,7 +77,6 @@ University of Iowa
 #include <map>
 #include <string>
 #include <Eigen/Core>
-#include <fmt/core.h>
 
 namespace EquatingRecipes {
   struct Utilities {

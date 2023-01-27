@@ -38,6 +38,8 @@ namespace EquatingRecipes {
                                         const double& columnScoreIncrement,
                                         const std::string& rowScoreId,
                                         const std::string& columnScoreId);
+
+      std::string toString();
     };
   } // namespace Structures
 } // namespace EquatingRecipes

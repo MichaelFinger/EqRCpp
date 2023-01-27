@@ -43,13 +43,13 @@ namespace EquatingRecipes {
                      const double& maximumScore,
                      const double& scoreIncrement);
 
-      static UnivariateStatistics create(const Eigen::VectorXi& scoreFrequencies,
+      static UnivariateStatistics buildFromScoreFrequencies(const Eigen::VectorXi& scoreFrequencies,
                                          const double& minimumScore,
                                          const double& maximumScore,
                                          const double& scoreIncrement,
                                          const std::string& id);
 
-      static UnivariateStatistics create(const Eigen::VectorXd& scores,
+      static UnivariateStatistics buildFromScores(const Eigen::VectorXd& scores,
                                          const double& minimumScore,
                                          const double& maximumScore,
                                          const double& scoreIncrement,

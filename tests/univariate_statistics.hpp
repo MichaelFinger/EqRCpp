@@ -12,7 +12,7 @@
 namespace Tests {
   struct UnivariateStatistics {
     void run() {
-      Eigen::VectorXi lsat6FreqDist = LSAT6::rawScoreFrequencyDistribution();
+      Eigen::VectorXi lsat6FreqDist = Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
 
       std::for_each(lsat6FreqDist.begin(),
                     lsat6FreqDist.end(),
@@ -20,7 +20,7 @@ namespace Tests {
                       std::cout << scoreFreq << "\n";
                     });
 
-      Eigen::VectorXd lsat6RelFreqDist = LSAT6::rawScoreRelativeFrequencyDistribution();
+      Eigen::VectorXd lsat6RelFreqDist = Tests::Fixtures::LSAT6::rawScoreRelativeFrequencyDistribution();
 
       std::for_each(lsat6RelFreqDist.begin(),
                     lsat6RelFreqDist.end(),
@@ -57,7 +57,7 @@ namespace Tests {
                                                                                  scoreIncrement);
 
       EquatingRecipes::Structures::UnivariateStatistics univariateStatistics =
-          EquatingRecipes::Structures::UnivariateStatistics::create(lsat6FreqDist,
+          EquatingRecipes::Structures::UnivariateStatistics::buildFromScoreFrequencies(lsat6FreqDist,
                                                                     0,
                                                                     5,
                                                                     1,

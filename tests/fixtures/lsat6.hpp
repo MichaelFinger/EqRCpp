@@ -3,27 +3,31 @@
 
 #include <Eigen/Core>
 
-struct LSAT6 {
-  static Eigen::VectorXi rawScoreFrequencyDistribution() {
-    Eigen::VectorXi freqDist(6);
-    
-    freqDist(0) = 3;
-    freqDist(1) = 20;
-    freqDist(2) = 85;
-    freqDist(3) = 237;
-    freqDist(4) = 357;
-    freqDist(5) = 298;
+namespace Tests {
+  namespace Fixtures {
+    struct LSAT6 {
+      static Eigen::VectorXi rawScoreFrequencyDistribution() {
+        Eigen::VectorXi freqDist(6);
 
-    return freqDist;
-  }
+        freqDist(0) = 3;
+        freqDist(1) = 20;
+        freqDist(2) = 85;
+        freqDist(3) = 237;
+        freqDist(4) = 357;
+        freqDist(5) = 298;
 
-  static Eigen::VectorXd rawScoreRelativeFrequencyDistribution() {
-    Eigen::VectorXi freqDist = LSAT6::rawScoreFrequencyDistribution();
+        return freqDist;
+      }
 
-    Eigen::VectorXd relativeFreqDist = freqDist.cast<double>() / static_cast<double>(freqDist.sum());
+      static Eigen::VectorXd rawScoreRelativeFrequencyDistribution() {
+        Eigen::VectorXi freqDist = LSAT6::rawScoreFrequencyDistribution();
 
-    return relativeFreqDist;
-  }
-};
+        Eigen::VectorXd relativeFreqDist = freqDist.cast<double>() / static_cast<double>(freqDist.sum());
+
+        return relativeFreqDist;
+      }
+    };
+  } // namespace Fixtures
+} // namespace Tests
 
 #endif
