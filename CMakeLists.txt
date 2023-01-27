@@ -89,3 +89,14 @@ target_link_libraries(EqRCpp PUBLIC
                       fmt::fmt
                       pthread
                       dl)
+
+add_executable(EqRCppTest ${CMAKE_CURRENT_SOURCE_DIR}/tests/runner.cpp)
+target_compile_features(EqRCppTest PRIVATE cxx_std_20)
+target_include_directories(EqRCppTest PUBLIC 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/tests
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(EqRCppTest PUBLIC
+                      EqRCpp
+                      pthread
+                      dl)

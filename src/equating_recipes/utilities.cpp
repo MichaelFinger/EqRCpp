@@ -114,8 +114,8 @@ namespace EquatingRecipes {
 
     for (size_t location = minimumScoreLocation; location <= maximumScoreLocation; ++location) {
       double score = Utilities::getScore(location,
-                                                 minimumScore,
-                                                 scoreIncrement);
+                                         minimumScore,
+                                         scoreIncrement);
 
       int scoreFreq = static_cast<int>(rawScores.cwiseEqual(score).count());
 
@@ -125,5 +125,65 @@ namespace EquatingRecipes {
     }
 
     return freqDist;
+  }
+
+  std::string Utilities::vectorXiToString(const Eigen::VectorXi& vec,
+                                          const bool& asRow) {
+    std::string value = "";
+    std::string sep = asRow ? ", " : "\n";
+
+    value.append(fmt::format("{}", vec(0)));
+
+    for (Eigen::Index index = 1; index < vec.size(); ++index) {
+      value.append(fmt::format("{}{}", sep, vec(index)));
+    }
+
+    return value;
+  }
+
+  std::string Utilities::vectorXdToString(const Eigen::VectorXd& vec,
+                                          const bool& asRow) {
+    std::string value = "";
+    std::string sep = asRow ? ", " : "\n";
+
+    value.append(fmt::format("{}", vec(0)));
+
+    for (Eigen::Index index = 1; index < vec.size(); ++index) {
+      value.append(fmt::format("{}{}", sep, vec(index)));
+    }
+
+    return value;
+  }
+
+  std::string Utilities::matrixXiToString(const Eigen::MatrixXi& mat) {
+    std::string value = "";
+    
+    for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
+      std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
+
+      for (Eigen::Index columnIndex = 1; columnIndex < mat.cols(); ++columnIndex) {
+        rowStr.append(fmt::format(", {}", mat(rowIndex, columnIndex)));
+      }
+
+      value.append(fmt::format("{}\n", rowStr));
+    }
+
+    return value;
+  }
+
+  std::string Utilities::matrixXdToString(const Eigen::MatrixXd& mat) {
+    std::string value = "";
+    
+    for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
+      std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
+
+      for (Eigen::Index columnIndex = 1; columnIndex < mat.cols(); ++columnIndex) {
+        rowStr.append(fmt::format(", {}", mat(rowIndex, columnIndex)));
+      }
+
+      value.append(fmt::format("{}\n", rowStr));
+    }
+
+    return value;
   }
 } // namespace EquatingRecipes

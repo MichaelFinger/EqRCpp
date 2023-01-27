@@ -16,6 +16,7 @@
 #define STRUCTURES_UNIVARIATE_STATISTICS_HPP
 
 #include <map>
+#include <string>
 #include <Eigen/Core>
 
 namespace EquatingRecipes {
@@ -49,6 +50,8 @@ namespace EquatingRecipes {
                                          const double& maximumScore,
                                          const double& scoreIncrement,
                                          const std::string& id);
+
+      std::string toString();
     };
   } // namespace Structures
 } // namespace EquatingRecipes
