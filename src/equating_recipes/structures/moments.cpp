@@ -1,12 +1,15 @@
 #include <cmath>
+#include <iostream>
+#include <limits>
 #include <equating_recipes/structures/moments.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   namespace Structures {
     Moments Moments::getScoreMoments(const Eigen::VectorXd& scores) {
       Moments scoreMoments;
 
-      scoreMoments.numberOfPersons = scores.size();
+      scoreMoments.numberOfExaminees = scores.size();
 
       scoreMoments.minimumObservedScore = scores.minCoeff();
       scoreMoments.maximumObservedScore = scores.maxCoeff();
@@ -23,51 +26,65 @@ namespace EquatingRecipes {
 
       scoreMoments.momentValues(1) = std::sqrt(variance);
       scoreMoments.momentValues(2) = skewness / std::pow(scoreMoments.momentValues(1), 3);
-      scoreMoments.momentValues(3) = kurtosis / std::pow(scoreMoments.momentValues(1), 3);
+      scoreMoments.momentValues(3) = kurtosis / std::pow(scoreMoments.momentValues(1), 4);
 
       return scoreMoments;
     }
 
-    Moments Moments::getScoreMoments(const std::map<double, int>& scoreFreqDist) {
+    Moments Moments::getScoreMoments(const Eigen::VectorXi& scoreFrequencies,
+                                     const double& minimumScore,
+                                     const double& maximumScore,
+                                     const double& scoreIncrement) {
       Moments scoreMoments;
 
-      scoreMoments.numberOfPersons = 0;
-      scoreMoments.minimumObservedScore = (*(scoreFreqDist.begin())).first;
-      scoreMoments.maximumObservedScore = (*(scoreFreqDist.end())).first;
+      size_t numberOfScores = EquatingRecipes::Utilities::numberOfScores(minimumScore,
+                                                                         maximumScore,
+                                                                         scoreIncrement);
+
+      size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(maximumScore,
+                                                                                 minimumScore,
+                                                                                 scoreIncrement);
+
+      scoreMoments.minimumObservedScore = std::numeric_limits<double>::max();
+      scoreMoments.maximumObservedScore = std::numeric_limits<double>::min();
+      scoreMoments.numberOfExaminees = scoreFrequencies.sum();
       scoreMoments.momentValues.setZero(4);
 
-      std::for_each(scoreFreqDist.begin(),
-                    scoreFreqDist.end(),
-                    [&](const std::pair<double, int>& entry) {
-                      double scoreValue = entry.first;
-                      int scoreFreq = entry.second; 
+      Eigen::VectorXd deviations(numberOfScores);
 
-                      scoreMoments.numberOfPersons += scoreFreq;
-                      scoreMoments.momentValues(0) += scoreValue * static_cast<double>(scoreFreq);
-                    });
+      for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
+        double score = EquatingRecipes::Utilities::getScore(scoreLocation,
+                                                            minimumScore,
+                                                            scoreIncrement);
 
-      scoreMoments.momentValues(0) /= static_cast<double>(scoreMoments.numberOfPersons);
+        int scoreFreq = scoreFrequencies(scoreLocation);
 
-      Eigen::VectorXd deviations(scoreFreqDist.size());
-      size_t index = 0;
-      std::for_each(scoreFreqDist.begin(),
-                    scoreFreqDist.end(),
-                    [&](const std::pair<double, int>& entry) {
-                      double scoreValue = entry.first;
-                      int scoreFreq = entry.second; 
+        deviations(scoreLocation) = score;
 
-                      deviations(index) = (scoreValue - scoreMoments.momentValues(0)) * static_cast<double>(scoreFreq);
+        if (scoreFreq >= 1) {
+          scoreMoments.minimumObservedScore = std::min(score, scoreMoments.minimumObservedScore);
+          scoreMoments.maximumObservedScore = std::max(score, scoreMoments.maximumObservedScore);
+        }
 
-                      ++index;
-                    });
+        scoreMoments.momentValues(0) += score * static_cast<double>(scoreFreq);
+      }
 
-      double variance = deviations.array().pow(2).mean();
-      double skewness = deviations.array().pow(3).mean();
-      double kurtosis = deviations.array().pow(4).mean();
+      scoreMoments.momentValues(0) /= static_cast<double>(scoreMoments.numberOfExaminees);
 
-      scoreMoments.momentValues(1) = std::sqrt(variance);
-      scoreMoments.momentValues(2) = skewness / std::pow(scoreMoments.momentValues(1), 3);
-      scoreMoments.momentValues(3) = kurtosis / std::pow(scoreMoments.momentValues(1), 3);
+      deviations = deviations - Eigen::VectorXd::Constant(deviations.size(), scoreMoments.momentValues(0));
+
+      std::cout << "deviations:\n"
+                << EquatingRecipes::Utilities::vectorXdToString(deviations, false) << "\n";
+
+      for (size_t powCoeff = 2; powCoeff <= 4; powCoeff++) {
+        scoreMoments.momentValues(powCoeff - 1) = (deviations.array().pow(powCoeff) * scoreFrequencies.array().cast<double>()).sum() /
+                        static_cast<double>(scoreMoments.numberOfExaminees);
+
+      }
+      
+      scoreMoments.momentValues(1) = std::sqrt(scoreMoments.momentValues(1));
+      scoreMoments.momentValues(2) /= std::pow(scoreMoments.momentValues(1), 3);
+      scoreMoments.momentValues(3) /= std::pow(scoreMoments.momentValues(1), 4);
 
       return scoreMoments;
     }

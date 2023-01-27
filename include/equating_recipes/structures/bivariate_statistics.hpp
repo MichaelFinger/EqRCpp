@@ -2,11 +2,16 @@
   From Source: ERutilities.h 
   Original Struct: BSTATS
   Description: raw-score statistics for a bivariate distribution 
+
+  From Source: ERutilities.h, ERutilities.c
+  Original Method: ReadRawGet_BSTATS
+  Description: Reads raw data and get or assign all elements for bivariate struct s
 */
 
 #ifndef STRUCTURES_BIVARIATE_STATISTICS_HPP
 #define STRUCTURES_BIVARIATE_STATISTICS_HPP
 
+#include <string>
 #include <Eigen/Core>
 
 #include <equating_recipes/structures/univariate_statistics.hpp>
@@ -14,20 +19,25 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct BivariateStatistics {
-      // char fname[100]; // name of input file 
-      // int n;           // number of examinees 
-      
-      // var 1 -- rows of bfd[][] 
-      UnivariateStatistics rowMarginalStatistics;
-      
-      // var 2 -- columns of bfd[][] 
-      UnivariateStatistics columnMarginalStatistics;
+      UnivariateStatistics rowScoreStatistics;
+      UnivariateStatistics columnScoreStatistics;
 
-      Eigen::MatrixXi bivariateFreqDist;        // bivariate freq dist bfd[0][0]...bfd[ns1-1][ns2-1]       
-      Eigen::MatrixXd bivariateFreqDistDouble;  // double version of bfd[][] 
-      double covariance;                        // covariance   
-      double correlation;                       // correlation   
-      double bivariateProportions;              // biv proportions[var1][var2]   
+      int numberOfExaminees;
+      Eigen::MatrixXi bivariateFreqDist;
+      Eigen::MatrixXd bivariateFreqDistDouble;
+      double covariance;
+      double correlation;
+      Eigen::MatrixXd bivariateProportions;
+
+      static BivariateStatistics create(const Eigen::MatrixXd& scores,
+                                        const double& minimumRowScore,
+                                        const double& maximumRowScore,
+                                        const double& rowScoreIncrement,
+                                        const double& minimumColumnScore,
+                                        const double& maximumColumnScore,
+                                        const double& columnScoreIncrement,
+                                        const std::string& rowScoreId,
+                                        const std::string& columnScoreId);
     };
   } // namespace Structures
 } // namespace EquatingRecipes

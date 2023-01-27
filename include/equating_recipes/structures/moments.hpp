@@ -26,7 +26,6 @@
     Date of last revision: 6/30/08  
 */
 
-
 #ifndef STRUCTURES_MOMENTS_HPP
 #define STRUCTURES_MOMENTS_HPP
 
@@ -39,12 +38,15 @@ namespace EquatingRecipes {
       Eigen::VectorXd momentValues;
       double minimumObservedScore;
       double maximumObservedScore;
-      size_t numberOfPersons;
+      size_t numberOfExaminees;
 
       static Moments getScoreMoments(const Eigen::VectorXd& scores);
-      static Moments getScoreMoments(const std::map<double, int>& scoreFreqDist);
+      static Moments getScoreMoments(const Eigen::VectorXi& scoreFrequencies,
+                                     const double& minimumScore,
+                                     const double& maximumScore,
+                                     const double& scoreIncrement);
     };
-  }
-}
+  } // namespace Structures
+} // namespace EquatingRecipes
 
 #endif

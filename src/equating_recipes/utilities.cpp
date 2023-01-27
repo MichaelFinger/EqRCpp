@@ -51,28 +51,28 @@ namespace EquatingRecipes {
                                    const double& score) {
     double percRank;
 
-    if (score < minimumScore - scoreIncrement / 2) {
+    if (score < minimumScore - scoreIncrement / 2.0) {
       percRank = 0.0;
-    } else if (score < minimumScore + scoreIncrement / 2) {
-      percRank = 100 * ((score - (minimumScore - scoreIncrement / 2)) / scoreIncrement) * cumulativeRelativeFreqDist[0];
-    } else if (score >= maximumScore + scoreIncrement / 2) {
+    } else if (score < minimumScore + scoreIncrement / 2.0) {
+      percRank = 100 * ((score - (minimumScore - scoreIncrement / 2.0)) / scoreIncrement) * cumulativeRelativeFreqDist[0];
+    } else if (score >= maximumScore + scoreIncrement / 2.0) {
       percRank = 100.0;
     } else {
-      size_t maxScoreLocation = getScoreLocation(maximumScore, minimumScore, scoreIncrement);
+      size_t maxScoreLocation = Utilities::getScoreLocation(maximumScore, minimumScore, scoreIncrement);
 
-      size_t scoreIndex;
+      size_t scoreLocation;
       double xStar;
 
-      for (scoreIndex = 1; scoreIndex <= maxScoreLocation; ++scoreIndex) {
-        double xStar = getScore(scoreIndex, minimumScore, scoreIncrement);
-        if (score < xStar + scoreIncrement / 2) {
+      for (scoreLocation = 1; scoreLocation <= maxScoreLocation; ++scoreLocation) {
+        xStar = Utilities::getScore(scoreLocation, minimumScore, scoreIncrement);
+        if (score < xStar + scoreIncrement / 2.0) {
           break;
         }
       }
 
-      percRank = 100 * (cumulativeRelativeFreqDist(scoreIndex) +
-                        ((score - (xStar - scoreIncrement / 2)) / scoreIncrement) *
-                            (cumulativeRelativeFreqDist(scoreIndex) - cumulativeRelativeFreqDist(scoreIndex - 1)));
+      percRank = 100 * (cumulativeRelativeFreqDist(scoreLocation - 1) +
+                        ((score - (xStar - scoreIncrement / 2.0)) / scoreIncrement) *
+                            (cumulativeRelativeFreqDist(scoreLocation) - cumulativeRelativeFreqDist(scoreLocation - 1)));
     }
 
     return percRank;
@@ -102,25 +102,26 @@ namespace EquatingRecipes {
   //----------------------------------------------------------------------------------------------------
   // Custom Function Written for EqRCpp
   //----------------------------------------------------------------------------------------------------
-  std::map<double, int> Utilities::getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
-                                                                    const double& minimumScore,
-                                                                    const double& maximumScore,
-                                                                    const double& scoreIncrement,
-                                                                    const bool& includeRawScoresWithZeroFrequency) {
-    std::map<double, int> freqDist;
-
+  Eigen::VectorXi Utilities::getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
+                                                              const double& minimumScore,
+                                                              const double& maximumScore,
+                                                              const double& scoreIncrement,
+                                                              const bool& includeRawScoresWithZeroFrequency) {
     size_t minimumScoreLocation = Utilities::getScoreLocation(minimumScore, minimumScore, scoreIncrement);
     size_t maximumScoreLocation = Utilities::getScoreLocation(maximumScore, minimumScore, scoreIncrement);
+    size_t numberOfScores = Utilities::numberOfScores(minimumScore, maximumScore, scoreIncrement);
 
-    for (size_t location = minimumScoreLocation; location <= maximumScoreLocation; ++location) {
-      double score = Utilities::getScore(location,
+    Eigen::VectorXi freqDist = Eigen::VectorXi::Zero(numberOfScores);
+
+    for (size_t scoreLocation = 0; scoreLocation < numberOfScores; ++scoreLocation) {
+      double score = Utilities::getScore(scoreLocation,
                                          minimumScore,
                                          scoreIncrement);
 
       int scoreFreq = static_cast<int>(rawScores.cwiseEqual(score).count());
 
       if (scoreFreq >= 1 || (scoreFreq == 0 && includeRawScoresWithZeroFrequency)) {
-        freqDist[score] = scoreFreq;
+        freqDist(scoreLocation) = scoreFreq;
       }
     }
 
@@ -157,7 +158,7 @@ namespace EquatingRecipes {
 
   std::string Utilities::matrixXiToString(const Eigen::MatrixXi& mat) {
     std::string value = "";
-    
+
     for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
       std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
 
@@ -173,7 +174,7 @@ namespace EquatingRecipes {
 
   std::string Utilities::matrixXdToString(const Eigen::MatrixXd& mat) {
     std::string value = "";
-    
+
     for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
       std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
 
@@ -185,5 +186,30 @@ namespace EquatingRecipes {
     }
 
     return value;
+  }
+
+  Eigen::VectorXd Utilities::percentileRanks(const double& minimumScore,
+                                             const double& maximumScore,
+                                             const double& scoreIncrement,
+                                             const Eigen::VectorXd& cumulativeRelativeFreqDist) {
+    size_t numberOfScores = Utilities::numberOfScores(minimumScore,
+                                                      maximumScore,
+                                                      scoreIncrement);
+
+    Eigen::VectorXd percRanks = Eigen::VectorXd::Zero(numberOfScores);
+
+    for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+      double score = Utilities::getScore(scoreLocation,
+                                         minimumScore,
+                                         scoreIncrement);
+
+      percRanks(scoreLocation) = Utilities::percentileRank(minimumScore,
+                                                           maximumScore,
+                                                           scoreIncrement,
+                                                           cumulativeRelativeFreqDist,
+                                                           score);
+    }
+
+    return percRanks;
   }
 } // namespace EquatingRecipes

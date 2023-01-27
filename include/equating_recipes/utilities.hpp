@@ -236,16 +236,21 @@ namespace EquatingRecipes {
                               const Eigen::VectorXd& frequencies);
 
     // Custom function written for EqRCpp
-    static std::map<double, int> getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
-                                                                  const double& minimumScore,
-                                                                  const double& maximumScore,
-                                                                  const double& scoreIncrement = 1,
-                                                                  const bool& includeRawScoresWithZeroFrequency = true);
+    static Eigen::VectorXi getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
+                                                            const double& minimumScore,
+                                                            const double& maximumScore,
+                                                            const double& scoreIncrement = 1,
+                                                            const bool& includeRawScoresWithZeroFrequency = true);
 
     static std::string vectorXiToString(const Eigen::VectorXi& vec, const bool& asRow);
     static std::string vectorXdToString(const Eigen::VectorXd& vec, const bool& asRow);
     static std::string matrixXiToString(const Eigen::MatrixXi& mat);
     static std::string matrixXdToString(const Eigen::MatrixXd& mat);
+
+    static Eigen::VectorXd percentileRanks(const double& minimumScore,
+                                           const double& maximumScore,
+                                           const double& scoreIncrement,
+                                           const Eigen::VectorXd& cumulativeRelativeFreqDist);
   };
 } // namespace EquatingRecipes
 
