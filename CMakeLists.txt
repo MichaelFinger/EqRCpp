@@ -73,22 +73,21 @@ FetchContent_MakeAvailable(fmtlib)
 # Adds fmt::fmt
 
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
-file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-add_library(EqRCpp SHARED ${SOURCE_LIST} ${HEADER_LIST})
-target_compile_features(EqRCpp PRIVATE cxx_std_20)
+add_library(EqRCpp INTERFACE)
+target_compile_features(EqRCpp INTERFACE cxx_std_20)
 
-target_include_directories(EqRCpp PUBLIC 
+target_include_directories(EqRCpp INTERFACE 
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${Boost_INCLUDE_DIRS}
                            ${eigen_SOURCE_DIR}
                            ${fmtlib_SOURCE_DIR}/include)
 
-target_link_libraries(EqRCpp PUBLIC
-                      ${Boost_LIBRARIES}
-                      fmt::fmt
-                      pthread
-                      dl)
+# target_link_libraries(EqRCpp PUBLIC
+#                       ${Boost_LIBRARIES}
+#                       fmt::fmt
+#                       pthread
+#                       dl)
 
 add_executable(EqRCppTest ${CMAKE_CURRENT_SOURCE_DIR}/tests/runner.cpp)
 target_compile_features(EqRCppTest PRIVATE cxx_std_20)
@@ -98,5 +97,7 @@ target_include_directories(EqRCppTest PUBLIC
 
 target_link_libraries(EqRCppTest PUBLIC
                       EqRCpp
+                      ${Boost_LIBRARIES}
+                      fmt::fmt
                       pthread
                       dl)
