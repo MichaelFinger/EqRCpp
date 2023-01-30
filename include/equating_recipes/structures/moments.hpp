@@ -32,6 +32,7 @@
 #include <cmath>
 #include <limits>
 #include <map>
+#include <string>
 
 #include <Eigen/Core>
 
@@ -46,12 +47,12 @@ namespace EquatingRecipes {
       double maximumObservedScore;
       size_t numberOfExaminees;
 
-      // template <typename Derived>
-      // void print_size(const Eigen::EigenBase<Derived>& b)
-      // {
-      //   std::cout << "size (rows, cols): " << b.size() << " (" << b.rows()
-      //             << ", " << b.cols() << ")" << std::endl;
-      // }
+      static Moments fromScores(const Eigen::VectorXi& scores) {
+        Eigen::VectorXd scoresDble;
+        Moments moments = Moments::fromScores(scoresDble);
+
+        return moments;
+      }
 
       static Moments fromScores(const Eigen::VectorXd& scores) {
         Moments scoreMoments;
@@ -79,6 +80,20 @@ namespace EquatingRecipes {
       }
 
       static Moments fromScoreFrequencies(const Eigen::VectorXi& scoreFrequencies,
+                                          const double& minimumScore,
+                                          const double& maximumScore,
+                                          const double& scoreIncrement) {
+        Eigen::VectorXd scoreFreqsDble = scoreFrequencies.cast<double>();
+
+        Moments moments = Moments::fromScoreFrequencies(scoreFreqsDble,
+                                                        minimumScore,
+                                                        maximumScore,
+                                                        scoreIncrement);
+
+        return moments;
+      }
+
+      static Moments fromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
                                           const double& minimumScore,
                                           const double& maximumScore,
                                           const double& scoreIncrement) {
@@ -132,79 +147,19 @@ namespace EquatingRecipes {
         return scoreMoments;
       }
 
-      // Based on MomentsFromRFD in ERUtilities.h, ERUtilities.c
-      static Moments fromScoreRelativeFrequencies(const Eigen::VectorXd& relativeFrequencies,
-                                                  const double& minimumScore,
-                                                  const double& maximumScore,
-                                                  const double& scoreIncrement,
-                                                  const Eigen::VectorXd& scores) {
-        Moments moments;
+      std::string toString() {
+        std::string msg = "Moments:\n";
 
-        /*
-      int i,
-      ns = nscores(max,min,inc);
-  double mean=0., var=0., skew=0., kurt=0., dev, dev2;
-  double *dscores;
-  
-  if(scores==NULL){
-    dscores = dvector(0,ns-1);
-    for(i=0;i<=ns-1;i++) dscores[i] = score(i,min,inc);
-  }
-  else
-    dscores = scores;
- 
-  for(i=0;i<=ns-1;i++) {  
-    mean += dscores[i]*rfd[i];  
-  }
+        msg.append(fmt::format("Number of Examinees: {}\n", numberOfExaminees));
+        msg.append(fmt::format("Minimum Observed Score: {}\n", minimumObservedScore));
+        msg.append(fmt::format("Maximum Observed Score: {}\n", maximumObservedScore));
+        msg.append("Moments:\n");
+        msg.append(fmt::format("\t     Mean: {}\n", momentValues(0)));
+        msg.append(fmt::format("\t       SD: {}\n", momentValues(1)));
+        msg.append(fmt::format("\t     Skew: {}\n", momentValues(2)));
+        msg.append(fmt::format("\tKurtotsis: {}\n", momentValues(3)));
 
-  moments[0] = mean;
-  
-  for(i=0;i<=ns-1;i++) { 
-    dev = dscores[i] - mean;
-    dev2 = dev*dev;
-    var += dev2*rfd[i];
-    dev *= dev2*rfd[i];
-    skew += dev;
-    dev2 = dev2*dev2*rfd[i];
-    kurt += dev2; 
-  }
-  
-  moments[1] = sqrt(var);
-  var *= moments[1];
-  moments[2] = skew / var;
-  var *= moments[1];
-  moments[3] = kurt / var;
-  
-      */
-
-        // size_t numberOfScores = EquatingRecipes::Utilities::numberOfScores(minimumScore);
-
-        return moments;
-      }
-      
-      static Moments fromScoreRelativeFrequencies(const Eigen::VectorXd& relativeFrequencies,
-                                                  const double& minimumScore,
-                                                  const double& maximumScore,
-                                                  const double& scoreIncrement) {
-        size_t numberOfScores = EquatingRecipes::Utilities::numberOfScores(minimumScore,
-                                                                           maximumScore,
-                                                                           scoreIncrement);
-
-        Eigen::VectorXd scores(numberOfScores);
-
-        for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-          scores(scoreLocation) = EquatingRecipes::Utilities::getScore(scoreLocation,
-                                                                       minimumScore,
-                                                                       maximumScore);
-        }
-
-        Moments moments = Moments::fromScoreRelativeFrequencies(relativeFrequencies,
-                                                                minimumScore,
-                                                                maximumScore,
-                                                                scoreIncrement,
-                                                                scores);
-
-        return moments;
+        return msg;
       }
     };
   } // namespace Structures
