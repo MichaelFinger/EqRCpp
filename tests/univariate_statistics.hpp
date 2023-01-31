@@ -12,11 +12,11 @@
 namespace Tests {
   struct UnivariateStatistics {
     void run() {
-      Eigen::VectorXi lsat6FreqDist = Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
+      Eigen::VectorXd lsat6FreqDist = Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
 
       std::for_each(lsat6FreqDist.begin(),
                     lsat6FreqDist.end(),
-                    [&](const int& scoreFreq) {
+                    [&](const double& scoreFreq) {
                       std::cout << scoreFreq << "\n";
                     });
 

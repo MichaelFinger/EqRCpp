@@ -6,8 +6,8 @@
 namespace Tests {
   namespace Fixtures {
     struct LSAT6 {
-      static Eigen::VectorXi rawScoreFrequencyDistribution() {
-        Eigen::VectorXi freqDist(6);
+      static Eigen::VectorXd rawScoreFrequencyDistribution() {
+        Eigen::VectorXd freqDist(6);
 
         freqDist(0) = 3;
         freqDist(1) = 20;
@@ -20,7 +20,7 @@ namespace Tests {
       }
 
       static Eigen::VectorXd rawScoreRelativeFrequencyDistribution() {
-        Eigen::VectorXi freqDist = LSAT6::rawScoreFrequencyDistribution();
+        Eigen::VectorXd freqDist = LSAT6::rawScoreFrequencyDistribution();
 
         Eigen::VectorXd relativeFreqDist = freqDist.cast<double>() / static_cast<double>(freqDist.sum());
 

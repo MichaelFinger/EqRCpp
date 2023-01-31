@@ -74,6 +74,8 @@ University of Iowa
 #ifndef STRUCTURES_UTILITIES_HPP
 #define STRUCTURES_UTILITIES_HPP
 
+#include <algorithm>
+#include <limits>
 #include <map>
 #include <string>
 #include <Eigen/Core>
@@ -231,11 +233,11 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08  
       */
-    static double percentileRank(const double& minimumScore,
-                                 const double& maximumScore,
-                                 const double& scoreIncrement,
-                                 const Eigen::VectorXd& cumulativeRelativeFreqDist,
-                                 const double& score) {
+    static double getPercentileRank(const double& minimumScore,
+                                    const double& maximumScore,
+                                    const double& scoreIncrement,
+                                    const Eigen::VectorXd& cumulativeRelativeFreqDist,
+                                    const double& score) {
       double percRank;
 
       if (score < minimumScore - scoreIncrement / 2.0) {
@@ -305,10 +307,128 @@ namespace EquatingRecipes {
       return result;
     }
 
+    // perc_point, ERUtilities.h, ERUtilities.c
+    double percentilePoint(const size_t& numberOfScores,
+                           const double& minimumScore,
+                           const double& scoreIncrement,
+                           const Eigen::VectorXd& cumulativeRelativeFreqDist,
+                           const double& percentileRank) {
+      double percentileRankProportion = percentileRank / 100.0;
+      double percentilePointLowerValue;
+      double percentilePointUpperValue;
+
+      double percPoint;
+
+      if (percentileRankProportion <= 1.0e-8) {
+        /* Special case: PR=0 and 0 freqs at bottom of rfd[].
+        First line of code means that prp <= 1.0e-8 
+        is an operational definition of prp==0.  Remaining code is
+        to handle possibility of 0 freq's at bottom of rfd[].
+        Note that for loop starts at 0 */
+
+        percentilePointLowerValue = -0.5;
+
+        size_t scoreLocation;
+        for (scoreLocation = 0; scoreLocation < numberOfScores - 1; scoreLocation++) {
+          if (cumulativeRelativeFreqDist(scoreLocation) > 1.0e-8) {
+            break;
+          }
+        }
+
+        percentilePointUpperValue = static_cast<double>(scoreLocation) - 0.5;
+
+        percPoint = minimumScore + scoreIncrement * ((percentilePointUpperValue + percentilePointLowerValue) / 2.0);
+      } else if (percentileRankProportion >= 1.0 - 1.0e-8) {
+        /* Special case: PR=1 and 0 freqs at top of rfd[].
+        First line of code means that 1 - 1.0e-8 is 
+        an operational definition of prp==1.  Remaining code is
+        to handle possibility of 0 freq's at top of rfd[].
+        Not that for loop starts at ns-1 */
+
+        percentilePointUpperValue = static_cast<double>(numberOfScores) - 0.5;
+
+        size_t scoreLocation;
+        for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
+          if (cumulativeRelativeFreqDist(scoreLocation) < 1.0 - 1.0e-8) {
+            break;
+          }
+        }
+
+        percentilePointLowerValue = 1 + scoreLocation + 0.5;
+
+        percPoint = minimumScore + scoreIncrement * ((percentilePointUpperValue + percentilePointLowerValue) / 2.0);
+      } else if (cumulativeRelativeFreqDist(0) > percentileRankProportion) {
+        /* Special case:  crfd[0] > prp can happen in equipercentile
+          equating. If this occurs, then we have the following anomalous
+          circumstances: 
+            (a) x*_U = 0 by defn on p. 45, in which case
+                crfd[x*_U - 1] = crfd[-1] which is undefined; and 
+            (b) x*_L is non-existent by defn on p. 45.
+          Next two lines of code are consistent with graphical 
+          procedures in Kolen and Brennan (sect. 2.5.1). 
+        */
+        percentilePointUpperValue = 2.0 * percentileRankProportion / cumulativeRelativeFreqDist(0);
+        percentilePointLowerValue = -1.0;
+
+        percPoint = minimumScore + scoreIncrement * ((percentileRankProportion / cumulativeRelativeFreqDist(0)) - 0.5);
+      } else {
+        /* upper pp -- get x*_U */
+
+        // for(i=1;i<=ns-1;i++) if(crfd[i] > prp) break;
+        // if(crfd[i] != crfd[i-1])
+        //   ppU =  (prp - crfd[i-1])/(crfd[i] - crfd[i-1]) + (i - .5);
+        // else
+        //   ppU = i - .5;
+
+        // /* lower pp -- get x*_L */
+
+        // for(j=ns-2;j>=0;j--) if(crfd[j] < prp) break;
+        // if(crfd[j+1] != crfd[j])
+        //   ppL = (prp - crfd[j])/(crfd[j+1] - crfd[j]) + (j + .5);
+        // else
+        //   ppL = j + .5;
+
+        // /* return area */
+
+        // return min + inc*((ppU + ppL)/2);
+        size_t scoreLocation;
+        for (scoreLocation = 1; scoreLocation < numberOfScores; scoreLocation++) {
+          if (cumulativeRelativeFreqDist(scoreLocation) > percentileRankProportion) {
+            break;
+          }
+        }
+
+        if (cumulativeRelativeFreqDist(scoreLocation) != cumulativeRelativeFreqDist(scoreLocation - 1)) {
+          percentilePointUpperValue = ((percentileRankProportion - cumulativeRelativeFreqDist(scoreLocation - 1)) /
+                                       (cumulativeRelativeFreqDist(scoreLocation) - cumulativeRelativeFreqDist(scoreLocation - 1))) +
+                                      (static_cast<double>(scoreLocation) - 0.5);
+        } else {
+          percentilePointUpperValue = static_cast<double>(scoreLocation) - 0.5;
+        }
+
+        for (scoreLocation = numberOfScores - 2; scoreLocation >= 0; scoreLocation--) {
+          if (cumulativeRelativeFreqDist(scoreLocation) < percentileRankProportion) {
+            break;
+          }
+        }
+
+        if (cumulativeRelativeFreqDist(scoreLocation + 1) != cumulativeRelativeFreqDist(scoreLocation)) {
+          percentilePointLowerValue = ((percentileRankProportion - cumulativeRelativeFreqDist(scoreLocation)) /
+                                       (cumulativeRelativeFreqDist(scoreLocation + 1) - cumulativeRelativeFreqDist(scoreLocation))) +
+                                      (static_cast<double>(scoreLocation) + 0.5);
+        } else {
+          percentilePointUpperValue = scoreLocation + 0.5;
+        }
+
+        percPoint = minimumScore + scoreIncrement * ((percentilePointUpperValue + percentilePointLowerValue) / 2.0);
+      }
+      return percPoint;
+    }
+
     //----------------------------------------------------------------------------------------------------
     // Custom Function Written for EqRCpp
     //----------------------------------------------------------------------------------------------------
-    static Eigen::VectorXi getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
+    static Eigen::VectorXd getRawScoreFrequencyDistribution(const Eigen::VectorXd& rawScores,
                                                             const double& minimumScore,
                                                             const double& maximumScore,
                                                             const double& scoreIncrement = 1,
@@ -317,7 +437,7 @@ namespace EquatingRecipes {
       size_t maximumScoreLocation = Utilities::getScoreLocation(maximumScore, minimumScore, scoreIncrement);
       size_t numberOfScores = Utilities::numberOfScores(minimumScore, maximumScore, scoreIncrement);
 
-      Eigen::VectorXi freqDist = Eigen::VectorXi::Zero(numberOfScores);
+      Eigen::VectorXd freqDist = Eigen::VectorXd::Zero(numberOfScores);
 
       for (size_t scoreLocation = 0; scoreLocation < numberOfScores; ++scoreLocation) {
         double score = Utilities::getScore(scoreLocation,
@@ -406,13 +526,46 @@ namespace EquatingRecipes {
                                            minimumScore,
                                            scoreIncrement);
 
-        percRanks(scoreLocation) = Utilities::percentileRank(minimumScore,
-                                                             maximumScore,
-                                                             scoreIncrement,
-                                                             cumulativeRelativeFreqDist,
-                                                             score);
+        percRanks(scoreLocation) = Utilities::getPercentileRank(minimumScore,
+                                                                maximumScore,
+                                                                scoreIncrement,
+                                                                cumulativeRelativeFreqDist,
+                                                                score);
       }
       return percRanks;
+    }
+
+    static double getFirstObservedScore(const Eigen::VectorXd& scoreFrequencies,
+                                        const double& minimumScore,
+                                        const double& maximumScore,
+                                        const double& scoreIncrement,
+                                        const bool& searchForward = true) {
+      double firstObservedScore = std::numeric_limits<double>::quiet_NaN();
+      size_t scoreLocation = scoreFrequencies.size();
+
+      if (searchForward) {
+        auto iter = std::find_if(scoreFrequencies.begin(),
+                                 scoreFrequencies.end(),
+                                 [](const double& scoreFrequency) {
+                                   return scoreFrequency > 0.0;
+                                 });
+
+        scoreLocation = std::distance(scoreFrequencies.begin(), iter);
+      } else {
+        for (size_t index = scoreFrequencies.size() - 1; 0; index--) {
+          if (scoreFrequencies(index) > 0.0) {
+            scoreLocation = index;
+          }
+        }
+      }
+
+      if (scoreLocation < scoreFrequencies.size()) {
+        firstObservedScore = Utilities::getScore(scoreLocation,
+                                                 minimumScore,
+                                                 scoreIncrement);
+      }
+
+      return firstObservedScore;
     }
   };
 } // namespace EquatingRecipes

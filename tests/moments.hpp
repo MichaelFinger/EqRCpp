@@ -10,14 +10,23 @@
 namespace Tests {
   struct Moments {
     void run() {
-      Eigen::VectorXi lsat6FreqDist = Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
+      // Eigen::VectorXd lsat6FreqDist = Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
 
       Eigen::VectorXd lsat6RelativeFreqDist = Tests::Fixtures::LSAT6::rawScoreRelativeFrequencyDistribution();
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Structures::Moments::fromScoreFrequencies(lsat6FreqDist,
-                                                                                                                0.0,
-                                                                                                                5.0,
-                                                                                                                1.0);
+      std::cout << "Relative Freq Dist:\n" << EquatingRecipes::Utilities::vectorXdToString(lsat6RelativeFreqDist, false) << "\n";
+
+      // EquatingRecipes::Structures::Moments moments = EquatingRecipes::Structures::Moments::fromScoreFrequencies(lsat6FreqDist,
+      //                                                                                                           0.0,
+      //                                                                                                           5.0,
+      //                                                                                                           1.0);
+
+      // std::cout << moments.toString() << "\n";
+
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Structures::Moments::fromScoreFrequencies(lsat6RelativeFreqDist,
+                                                                           0.0,
+                                                                           5.0,
+                                                                           1.0);
 
       std::cout << moments.toString() << "\n";
     }

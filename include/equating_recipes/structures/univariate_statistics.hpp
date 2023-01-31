@@ -37,9 +37,9 @@ namespace EquatingRecipes {
       double freqDistMaximumScore;                // max score for fd[]
       double scoreIncrement;                      // increment between adjacent scores
       int numberOfScores;                         // number of scores (or categories)
-      Eigen::VectorXi freqDist;                   // freq dist fd[0]...fd[ns-1]
+      Eigen::VectorXd freqDist;                   // freq dist fd[0]...fd[ns-1]
       Eigen::VectorXd freqDistDouble;             // double version of fd[]
-      Eigen::VectorXi cumulativeFreqDist;         // cum freq dist
+      Eigen::VectorXd cumulativeFreqDist;         // cum freq dist
       Eigen::VectorXd relativeFreqDist;           // relative freq dist
       Eigen::VectorXd cumulativeRelativeFreqDist; // cum relative freq dist
       Eigen::VectorXd percentileRankDist;         // percentile rank dist
@@ -63,7 +63,7 @@ namespace EquatingRecipes {
         this->percentileRankDist.setZero(this->numberOfScores);
       }
 
-      static UnivariateStatistics buildFromScoreFrequencies(const Eigen::VectorXi& scoreFrequencies,
+      static UnivariateStatistics buildFromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
                                                             const double& minimumScore,
                                                             const double& maximumScore,
                                                             const double& scoreIncrement,
@@ -81,9 +81,17 @@ namespace EquatingRecipes {
                                                                                                                   maximumScore,
                                                                                                                   scoreIncrement);
 
-        univariateStatistics.numberOfExaminees = moments.numberOfExaminees;
-        univariateStatistics.freqDistMinimumScore = moments.minimumObservedScore;
-        univariateStatistics.freqDistMaximumScore = moments.maximumObservedScore;
+        univariateStatistics.numberOfExaminees = scoreFrequencies.sum();
+        univariateStatistics.freqDistMinimumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
+                                                                                                      minimumScore,
+                                                                                                      maximumScore,
+                                                                                                      scoreIncrement,
+                                                                                                      true);
+        univariateStatistics.freqDistMaximumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
+                                                                                                      minimumScore,
+                                                                                                      maximumScore,
+                                                                                                      scoreIncrement,
+                                                                                                      false);
         univariateStatistics.momentValues = moments.momentValues;
 
         univariateStatistics.freqDist = scoreFrequencies;
@@ -112,7 +120,7 @@ namespace EquatingRecipes {
                                                   const double& maximumScore,
                                                   const double& scoreIncrement,
                                                   const std::string& id) {
-        Eigen::VectorXi freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
+        Eigen::VectorXd freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
                                                                                                 minimumScore,
                                                                                                 maximumScore,
                                                                                                 scoreIncrement,
@@ -138,9 +146,9 @@ namespace EquatingRecipes {
         msg.append(fmt::format("max score for fd[]: {}\n", freqDistMaximumScore));
         msg.append(fmt::format("increment between adjacent scores: {}\n", scoreIncrement));
         msg.append(fmt::format("number of scores (or categories): {}\n", numberOfScores));
-        msg.append(fmt::format("freq dist fd[0]...fd[ns-1]: {}\n", EquatingRecipes::Utilities::vectorXiToString(freqDist, false)));
+        msg.append(fmt::format("freq dist fd[0]...fd[ns-1]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDist, false)));
         msg.append(fmt::format("double version of fd[]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDistDouble, false)));
-        msg.append(fmt::format("cum freq dist: {}\n", EquatingRecipes::Utilities::vectorXiToString(cumulativeFreqDist, false)));
+        msg.append(fmt::format("cum freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeFreqDist, false)));
         msg.append(fmt::format("relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(relativeFreqDist, false)));
         msg.append(fmt::format("cum relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeRelativeFreqDist, false)));
         msg.append(fmt::format("percentile rank dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(percentileRankDist, false)));
