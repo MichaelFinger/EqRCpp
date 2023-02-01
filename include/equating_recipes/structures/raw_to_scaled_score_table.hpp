@@ -29,12 +29,12 @@ namespace EquatingRecipes {
         double scaledScore;
       };
 
-      Entry getEntry(const size_t& scoreLocation) {
+      Entry getEntry(const size_t& scoreLocation) const {
         Entry entry = lookup[scoreLocation];
         return entry;
       }
 
-      Entry getEntry(const double& rawScore) {
+      Entry getEntry(const double& rawScore) const {
         auto iter = std::find_if(lookup.begin(),
                                  lookup.end(),
                                  [&](const std::pair<size_t, Entry>& entry) {
@@ -46,7 +46,19 @@ namespace EquatingRecipes {
         return entry;
       }
 
-      std::string toString() {
+      Entry getFirstEntry() const {
+        Entry firstEntry = *lookup.begin();
+
+        return firstEntry;
+      }
+
+      Entry getLastEntry() const {
+        Entry lastEntry = *lookup.rbegin();
+
+        return lastEntry;
+      }
+
+      std::string toString() const {
         std::string msg;
 
         return msg;

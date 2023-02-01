@@ -75,6 +75,7 @@ University of Iowa
 #define STRUCTURES_UTILITIES_HPP
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <map>
 #include <string>
@@ -425,6 +426,122 @@ namespace EquatingRecipes {
       return percPoint;
     }
 
+    /*
+      EquiEquate
+  
+      Computes equipercentile equivalents on scale of y for percentile
+      ranks on scale of x. See comments in perc_point() for details.
+    */
+    Eigen::VectorXd getEquipercentileEquivalents(const size_t& numberOfRawScoreCategoriesY,
+                                                 const double& minimumRawScoreY,
+                                                 const double& rawScoreIncrementY,
+                                                 const Eigen::VectorXd& cumulativeRelativeFreqDistY,
+                                                 size_t numberOfRawScoreCategoriesX,
+                                                 const Eigen::VectorXd& percentileRankDistX) {
+      Eigen::VectorXd equipercentileEquivalents(numberOfRawScoreCategoriesX);
+
+      // for (i = 0; i <= nsx - 1; i++)
+      //   eraw[i] = perc_point(nsy, miny, incy, crfdy, prdx[i]);
+      for (size_t scoreLocation = 0; scoreLocation < numberOfRawScoreCategoriesX; scoreLocation++) {
+        equipercentileEquivalents(scoreLocation) = Utilities::percentilePoint(numberOfRawScoreCategoriesY,
+                                                                              minimumRawScoreY,
+                                                                              rawScoreIncrementY, ,
+                                                                              cumulativeRelativeFreqDistY,
+                                                                              percentileRankDistX(scoreLocation));
+      }
+
+      return equipercentileEquivalents;
+    }
+
+    /* 
+      From Source: ERutilities.h 
+      Original Struct: Equated_ss
+      Description: 
+        Get SS conversion given raw score equating results (eraw) and raw-to-ss
+        conversion Y (yct).  This function is for one method only, and it 
+        does not make any assumptions about the equating method used.  For the 4 
+        linear results this function can be called 4 times using eraw[0]...eraw[3] 
+
+        NOTE: It is assumed that increment for x is the same as inc in the 
+              conversion table for the base form Y
+
+        Note that:
+          (a) eraw[] goes from eraw[0] to
+              eraw[loc(max,min,inc)] = eraw[nscores(max,min.inc)-1]
+          (b) yct[*][] goes from yct[*][0] to 
+              yct[*][loc(maxp,minp,inc)+2] = yct[*][nscores(maxp,minp,inc)+1]
+          (c) raw score associated with eraw[i] is score(i,min,inc) 
+    */
+
+    void getEquatedScaledScores(const double& minimumRawScoreX,
+                                const double& maximumRawScoreX,
+                                const double& rawScoreIncrement,
+                                const double& minimumRawScoreYct,
+                                const double& maximumRawScoreYct,
+                                const double& scoreIncrementYct,
+                                const Eigen::VectorXd& equatedRawScores,
+                                const EquatingRecipes::Structures::RawToScaledScoreTable& rawToScaledScoreTable,
+                                const size_t& roundToNumberOfDecimalPlaces,
+                                const int lowestObservableRoundedScaledScore,
+                                const int highestObservableRoundedScaledScore,
+                                Eigen::MatrixXd& unroundedEquatedScaledScores,
+                                Eigen::MatrixXd& roundedEquatedScaledScores) {
+      size_t numberOfRawScoresYct = Utilities::numberOfScores(maximumRawScoreYct,
+                                                              minimumRawScoreYct,
+                                                              scoreIncrementYct);
+
+      size_t numberOfEquatedRawScores = Utilities::numberOfScores(maximumRawScoreX,
+                                                                  minimumRawScoreX,
+                                                                  rawScoreIncrement);
+
+      EquatingRecipes::Structures::RawToScaledScoreTable::Entry firstRawToScaledScoreEntry = rawToScaledScoreTable.getFirstEntry();
+      EquatingRecipes::Structures::RawToScaledScoreTable::Entry lastRawToScaledScoreEntry = rawToScaledScoreTable.getLastEntry();
+
+      size_t lastScoreLocation = 0;
+
+      for (size_t scoreLocation = 0; scoreLocation < numberOfEquatedRawScores; scoreLocation++) {
+        double equatedRawScore = equatedRawScores(scoreLocation);
+
+        if (equatedRawScore <= firstRawToScaledScoreEntry.rawScore) {
+          unroundedEquatedScaledScores(scoreLocation) = firstRawToScaledScoreEntry.scaledScore;
+        } else if (equatedRawScore >= lastRawToScaledScoreEntry.rawScore) {
+          unroundedEquatedScaledScores(scoreLocation) = lastRawToScaledScoreEntry.scaledScore;
+        } else {
+          /* find j such that yct[0][j] > y */
+          size_t innerScoreLocation;
+
+          for (innerScoreLocation = lastScoreLocation; innerScoreLocation < numberOfRawScoresYct; innerScoreLocation++) {
+            EquatingRecipes::Structures::RawToScaledScoreTable::Entry entry = rawToScaledScoreTable.getEntry(innerScoreLocation);
+
+            if (entry.rawScore > equatedRawScore) {
+              break;
+            }
+          }
+
+          EquatingRecipes::Structures::RawToScaledScoreTable::Entry entryLocationMinus1 = rawToScaledScoreTable.getEntry(innerScoreLocation - 1);
+          EquatingRecipes::Structures::RawToScaledScoreTable::Entry entryLocation = rawToScaledScoreTable.getEntry(innerScoreLocation);
+          unroundedEquatedScaledScores(scoreLocation) = entryLocationMinus1.scaledScore +
+                                                        (entryLocation.scaledScore - entryLocationMinus1.scaledScore) *
+                                                            (equatedRawScore - entryLocationMinus1.rawScore) / (entryLocation.rawScore - entryLocationMinus1.rawScore);
+
+          lastScoreLocation = innerScoreLocation;
+        }
+      }
+
+      for (size_t scoreLocation = 0; scoreLocation < numberOfEquatedRawScores; scoreLocation++) {
+        if (roundToNumberOfDecimalPlaces >= 1) {
+          roundedEquatedScaledScores(scoreLocation) = std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) *
+                                                      std::trunc(unroundedEquatedScaledScores(scoreLocation) / std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) + 0.5);
+
+          std::clamp(roundedEquatedScaledScores(scoreLocation),
+                     lowestObservableRoundedScaledScore,
+                     highestObservableRoundedScaledScore);
+        } else {
+          roundedEquatedScaledScores(scoreLocation) = unroundedEquatedScaledScores(scoreLocation);
+        }
+      }
+    }
+    
     //----------------------------------------------------------------------------------------------------
     // Custom Function Written for EqRCpp
     //----------------------------------------------------------------------------------------------------

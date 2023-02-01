@@ -35,6 +35,12 @@ namespace EquatingRecipes {
       Method method;
       Smoothing smoothing;
 
+      double minimumRawScoreYct;
+      double maximumRawScoreYct;
+      double scoreIncrementYct;
+      int lowestObservableRoundedScaledScore;                      /* lowest possible rounded scale score */
+      int highestObservableRoundedScaledScore;                     /* highest possible rounded scale score */
+
       double weightSyntheticPopulation1;                               /* weight for synthetic pop 1 */
       bool anchorIsInternal;                          /* = false (external); = true (internal) */
       double rreliabilityCommonItemsPopulation1;                    /* reliability of common items in pop 1 */
@@ -47,7 +53,7 @@ namespace EquatingRecipes {
       RawToScaledScoreTable rawToScaledScoreTable /* conversion table for Y */
       size_t numberOfBootstrapReplications;                      /* number of replications for bootstrap */
       size_t bootstrapReplicationNumber = 0;     /* rep number for bootstrap; set to 0 for actual equating */
-      size_t numberOfDecimalPlacesToRound = 0;
+      size_t roundToNumberOfDecimalPlaces = 0;
       BetaBinomalSmoothing betaBinomalSmoothingX;  /* structure for beta binomial smoothing for x */
       BetaBinomalSmoothing betaBinomalSmoothingY;  /* structure for beta binomial smoothing for y */ 
       UnivariateLogLinearSmoothing univariateLogLinearSmoothingX; /* structure for univ log-lin smoothing for x */ 
