@@ -1,7 +1,8 @@
-#include "univariate_statistics.hpp"
-#include "bivariate_statistics.hpp"
-#include "moments.hpp"
-#include "equated_scaled_scores.hpp"
+// #include "univariate_statistics.hpp"
+// #include "bivariate_statistics.hpp"
+// #include "moments.hpp"
+// #include "equated_scaled_scores.hpp"
+#include "matrix_decomp.hpp"
 
 int main(int argc, char const *argv[])
 {
@@ -14,8 +15,11 @@ int main(int argc, char const *argv[])
   // Tests::Moments moments;
   // moments.run();
 
-  Tests::EquatedScaledScores equatedScaledScores;
-  equatedScaledScores.run();
+  // Tests::EquatedScaledScores equatedScaledScores;
+  // equatedScaledScores.run();
+
+  Tests::MatrixDecomp matrixDecomp;
+  matrixDecomp.run();
 
   return 0;
 }
