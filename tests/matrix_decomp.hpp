@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <equating_recipes/utilities.hpp>
 
 namespace Tests {
   struct MatrixDecomp {
@@ -22,9 +23,9 @@ namespace Tests {
       // Eigen::MatrixXd lu = A.partialPivLu().matrixLU();
       
       // A x = B, solve for x
-      Eigen::VectorXd x = A.colPivHouseholderQr().solve(b);
+      // Eigen::VectorXd x = A.colPivHouseholderQr().solve(b);
 
-      std::cout << x << "\n";
+      // std::cout << x << "\n";
     }
   };
 } // namespace Tests

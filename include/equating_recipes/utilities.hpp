@@ -78,8 +78,13 @@ University of Iowa
 #include <cmath>
 #include <limits>
 #include <map>
+#include <stdexcept>
 #include <string>
-#include <Eigen/Core>
+
+#include <Eigen/Dense>
+#include <fmt/core.h>
+
+#include <equating_recipes/structures/raw_to_scaled_score_table.hpp>
 
 namespace EquatingRecipes {
   struct Utilities {
@@ -445,7 +450,7 @@ namespace EquatingRecipes {
       for (size_t scoreLocation = 0; scoreLocation < numberOfRawScoreCategoriesX; scoreLocation++) {
         equipercentileEquivalents(scoreLocation) = Utilities::percentilePoint(numberOfRawScoreCategoriesY,
                                                                               minimumRawScoreY,
-                                                                              rawScoreIncrementY, ,
+                                                                              rawScoreIncrementY,
                                                                               cumulativeRelativeFreqDistY,
                                                                               percentileRankDistX(scoreLocation));
       }
@@ -485,7 +490,7 @@ namespace EquatingRecipes {
                                 const int lowestObservableRoundedScaledScore,
                                 const int highestObservableRoundedScaledScore,
                                 Eigen::MatrixXd& unroundedEquatedScaledScores,
-                                Eigen::MatrixXd& roundedEquatedScaledScores) {
+                                Eigen::MatrixXi& roundedEquatedScaledScores) {
       size_t numberOfRawScoresYct = Utilities::numberOfScores(maximumRawScoreYct,
                                                               minimumRawScoreYct,
                                                               scoreIncrementYct);
@@ -530,8 +535,11 @@ namespace EquatingRecipes {
 
       for (size_t scoreLocation = 0; scoreLocation < numberOfEquatedRawScores; scoreLocation++) {
         if (roundToNumberOfDecimalPlaces >= 1) {
-          roundedEquatedScaledScores(scoreLocation) = std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) *
-                                                      std::trunc(unroundedEquatedScaledScores(scoreLocation) / std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) + 0.5);
+          roundedEquatedScaledScores(scoreLocation) = static_cast<int>(
+              std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) *
+              std::trunc(unroundedEquatedScaledScores(scoreLocation) /
+                             std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) +
+                         0.5));
 
           std::clamp(roundedEquatedScaledScores(scoreLocation),
                      lowestObservableRoundedScaledScore,
@@ -541,7 +549,7 @@ namespace EquatingRecipes {
         }
       }
     }
-    
+
     //----------------------------------------------------------------------------------------------------
     // Custom Function Written for EqRCpp
     //----------------------------------------------------------------------------------------------------
@@ -596,6 +604,7 @@ namespace EquatingRecipes {
 
       return value;
     }
+
     static std::string matrixXiToString(const Eigen::MatrixXi& mat) {
       std::string value = "";
 
@@ -683,6 +692,18 @@ namespace EquatingRecipes {
       }
 
       return firstObservedScore;
+    }
+
+    Eigen::FullPivLU<Eigen::MatrixXd> getFullPivotLUDecomposition(const Eigen::MatrixXd& mat) {
+      Eigen::FullPivLU<Eigen::MatrixXd> lu(mat);
+
+      return lu;
+    }
+
+    Eigen::PartialPivLU<Eigen::MatrixXd> getPartialPivotLUDecomposition(const Eigen::MatrixXd& mat) {
+      Eigen::PartialPivLU<Eigen::MatrixXd> lu(mat);
+
+      return lu;
     }
   };
 } // namespace EquatingRecipes

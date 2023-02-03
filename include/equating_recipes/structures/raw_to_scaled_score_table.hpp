@@ -17,12 +17,6 @@ namespace EquatingRecipes {
   namespace Structures {
     class RawToScaledScoreTable {
     public:
-      double minimumRawScore;
-      double maximumRawScore;
-      double rawScoreIncrement;
-      double lowestObservableScaledScore;
-      double highestObservableScaledScore;
-
       struct Entry {
         size_t scoreLocation;
         double rawScore;
@@ -30,7 +24,7 @@ namespace EquatingRecipes {
       };
 
       Entry getEntry(const size_t& scoreLocation) const {
-        Entry entry = lookup[scoreLocation];
+        Entry entry = lookup.at(scoreLocation);
         return entry;
       }
 
@@ -47,15 +41,19 @@ namespace EquatingRecipes {
       }
 
       Entry getFirstEntry() const {
-        Entry firstEntry = *lookup.begin();
+        std::pair<size_t, Entry> firstEntry = *(lookup.begin());
 
-        return firstEntry;
+        Entry entry = firstEntry.second;
+
+        return entry;
       }
 
       Entry getLastEntry() const {
-        Entry lastEntry = *lookup.rbegin();
+        std::pair<size_t, Entry> lastEntry = *(lookup.rbegin());
 
-        return lastEntry;
+        Entry entry = lastEntry.second;
+
+        return entry;
       }
 
       std::string toString() const {
