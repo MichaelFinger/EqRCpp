@@ -21,9 +21,7 @@
 #include <Eigen/Core>
 #include <fmt/core.h>
 
-#include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/structures/moments.hpp>
 
 namespace EquatingRecipes {
   namespace Structures {
@@ -61,78 +59,6 @@ namespace EquatingRecipes {
         this->cumulativeFreqDist.setZero(this->numberOfScores);
         this->cumulativeRelativeFreqDist.setZero(this->numberOfScores);
         this->percentileRankDist.setZero(this->numberOfScores);
-      }
-
-      static UnivariateStatistics buildFromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
-                                                            const double& minimumScore,
-                                                            const double& maximumScore,
-                                                            const double& scoreIncrement,
-                                                            const std::string& id) {
-        UnivariateStatistics univariateStatistics;
-
-        univariateStatistics.id = id;
-        univariateStatistics.numberOfExaminees = 0;
-        univariateStatistics.configure(minimumScore,
-                                       maximumScore,
-                                       scoreIncrement);
-
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Structures::Moments::fromScoreFrequencies(scoreFrequencies,
-                                                                                                                  minimumScore,
-                                                                                                                  maximumScore,
-                                                                                                                  scoreIncrement);
-
-        univariateStatistics.numberOfExaminees = scoreFrequencies.sum();
-        univariateStatistics.freqDistMinimumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
-                                                                                                      minimumScore,
-                                                                                                      maximumScore,
-                                                                                                      scoreIncrement,
-                                                                                                      true);
-        univariateStatistics.freqDistMaximumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
-                                                                                                      minimumScore,
-                                                                                                      maximumScore,
-                                                                                                      scoreIncrement,
-                                                                                                      false);
-        univariateStatistics.momentValues = moments.momentValues;
-
-        univariateStatistics.freqDist = scoreFrequencies;
-        univariateStatistics.freqDistDouble = univariateStatistics.freqDist.cast<double>();
-        univariateStatistics.relativeFreqDist = univariateStatistics.freqDistDouble /
-                                                static_cast<double>(univariateStatistics.numberOfExaminees);
-
-        univariateStatistics.cumulativeFreqDist(0) = scoreFrequencies(0);
-        for (size_t index = 1; index < scoreFrequencies.size(); index++) {
-          univariateStatistics.cumulativeFreqDist(index) = univariateStatistics.cumulativeFreqDist(index - 1) + scoreFrequencies(index);
-        }
-
-        univariateStatistics.cumulativeRelativeFreqDist = univariateStatistics.cumulativeFreqDist.cast<double>() /
-                                                          static_cast<double>(univariateStatistics.numberOfExaminees);
-
-        univariateStatistics.percentileRankDist = EquatingRecipes::Utilities::percentileRanks(minimumScore,
-                                                                                              maximumScore,
-                                                                                              scoreIncrement,
-                                                                                              univariateStatistics.cumulativeRelativeFreqDist);
-
-        return univariateStatistics;
-      }
-
-      static UnivariateStatistics buildFromScores(const Eigen::VectorXd& scores,
-                                                  const double& minimumScore,
-                                                  const double& maximumScore,
-                                                  const double& scoreIncrement,
-                                                  const std::string& id) {
-        Eigen::VectorXd freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
-                                                                                                minimumScore,
-                                                                                                maximumScore,
-                                                                                                scoreIncrement,
-                                                                                                true);
-
-        UnivariateStatistics univariateStatistics = UnivariateStatistics::buildFromScoreFrequencies(freqDist,
-                                                                                                    minimumScore,
-                                                                                                    maximumScore,
-                                                                                                    scoreIncrement,
-                                                                                                    id);
-
-        return univariateStatistics;
       }
 
       std::string toString() {

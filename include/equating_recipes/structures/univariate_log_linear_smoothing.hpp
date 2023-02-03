@@ -4,8 +4,8 @@
   Description: univariate log-linear smoothing
 */
 
-#ifndef STRUCTURES_$$$$$$$_HPP
-#define STRUCTURES_$$$$$$$_HPP
+#ifndef STRUCTURES_UNIVARIATE_LOG_LINEAR_SMOOTHING_HPP
+#define STRUCTURES_UNIVARIATE_LOG_LINEAR_SMOOTHING_HPP
 
 #include <Eigen/Core>
 

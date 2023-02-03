@@ -2,7 +2,8 @@
 // #include "bivariate_statistics.hpp"
 // #include "moments.hpp"
 // #include "equated_scaled_scores.hpp"
-#include "matrix_decomp.hpp"
+// #include "matrix_decomp.hpp"
+#include "beta_binomial.hpp"
 
 int main(int argc, char const *argv[])
 {
@@ -18,8 +19,11 @@ int main(int argc, char const *argv[])
   // Tests::EquatedScaledScores equatedScaledScores;
   // equatedScaledScores.run();
 
-  Tests::MatrixDecomp matrixDecomp;
-  matrixDecomp.run();
+  // Tests::MatrixDecomp matrixDecomp;
+  // matrixDecomp.run();
+
+  Tests::BetaBinomial betaBinomial;
+  betaBinomial.run();
 
   return 0;
 }

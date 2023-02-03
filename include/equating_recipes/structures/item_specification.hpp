@@ -13,7 +13,7 @@
 
 namespace EquatingRecipes {
   namespace Structures {
-    struct ItemSpec {
+    struct ItemSpecification {
       int itemID;
       int numberOfCategories;
       double scalingConstant;
@@ -22,7 +22,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd b;
       Eigen::VectorXd c;
       Eigen::VectorXd d;
-      IRTModel irtModel;
+      EquatingRecipes::Structures::IRTModel irtModel;
     };
   }
 }

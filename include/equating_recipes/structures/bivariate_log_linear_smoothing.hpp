@@ -17,8 +17,8 @@
 	  will put x (rows) on scale of y (cols).   
 */
 
-#ifndef STRUCTURES_$$$$$$$_HPP
-#define STRUCTURES_$$$$$$$_HPP
+#ifndef STRUCTURES_BIVARIATE_LOG_LINEAR_SMOOTHING_HPP
+#define STRUCTURES_BIVARIATE_LOG_LINEAR_SMOOTHING_HPP
 
 #include <Eigen/Core>
 

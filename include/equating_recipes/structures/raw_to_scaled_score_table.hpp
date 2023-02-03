@@ -9,8 +9,10 @@
 
 #include <map>
 #include <string>
+
 #include <Eigen/Core>
 #include <fmt/core.h>
+
 #include <equating_recipes/structures/method.hpp>
 
 namespace EquatingRecipes {

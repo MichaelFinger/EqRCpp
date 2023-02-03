@@ -478,19 +478,19 @@ namespace EquatingRecipes {
           (c) raw score associated with eraw[i] is score(i,min,inc) 
     */
 
-    void getEquatedScaledScores(const double& minimumRawScoreX,
-                                const double& maximumRawScoreX,
-                                const double& rawScoreIncrement,
-                                const double& minimumRawScoreYct,
-                                const double& maximumRawScoreYct,
-                                const double& scoreIncrementYct,
-                                const Eigen::VectorXd& equatedRawScores,
-                                const EquatingRecipes::Structures::RawToScaledScoreTable& rawToScaledScoreTable,
-                                const size_t& roundToNumberOfDecimalPlaces,
-                                const int lowestObservableRoundedScaledScore,
-                                const int highestObservableRoundedScaledScore,
-                                Eigen::MatrixXd& unroundedEquatedScaledScores,
-                                Eigen::MatrixXi& roundedEquatedScaledScores) {
+    static void getEquatedScaledScores(const double& minimumRawScoreX,
+                                       const double& maximumRawScoreX,
+                                       const double& rawScoreIncrement,
+                                       const double& minimumRawScoreYct,
+                                       const double& maximumRawScoreYct,
+                                       const double& scoreIncrementYct,
+                                       const Eigen::VectorXd& equatedRawScores,
+                                       const EquatingRecipes::Structures::RawToScaledScoreTable& rawToScaledScoreTable,
+                                       const size_t& roundToNumberOfDecimalPlaces,
+                                       const int lowestObservableRoundedScaledScore,
+                                       const int highestObservableRoundedScaledScore,
+                                       Eigen::VectorXd& unroundedEquatedScaledScores,
+                                       Eigen::VectorXd& roundedEquatedScaledScores) {
       size_t numberOfRawScoresYct = Utilities::numberOfScores(maximumRawScoreYct,
                                                               minimumRawScoreYct,
                                                               scoreIncrementYct);
@@ -535,15 +535,14 @@ namespace EquatingRecipes {
 
       for (size_t scoreLocation = 0; scoreLocation < numberOfEquatedRawScores; scoreLocation++) {
         if (roundToNumberOfDecimalPlaces >= 1) {
-          roundedEquatedScaledScores(scoreLocation) = static_cast<int>(
-              std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) *
-              std::trunc(unroundedEquatedScaledScores(scoreLocation) /
-                             std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) +
-                         0.5));
+          roundedEquatedScaledScores(scoreLocation) = std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) *
+                                                      std::trunc(unroundedEquatedScaledScores(scoreLocation) /
+                                                                     std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) +
+                                                                 0.5);
 
           std::clamp(roundedEquatedScaledScores(scoreLocation),
-                     lowestObservableRoundedScaledScore,
-                     highestObservableRoundedScaledScore);
+                     static_cast<double>(lowestObservableRoundedScaledScore),
+                     static_cast<double>(highestObservableRoundedScaledScore));
         } else {
           roundedEquatedScaledScores(scoreLocation) = unroundedEquatedScaledScores(scoreLocation);
         }

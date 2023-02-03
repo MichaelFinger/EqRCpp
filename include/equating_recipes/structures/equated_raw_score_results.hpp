@@ -21,7 +21,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd slope;                    /* slope */
       Eigen::VectorXd intercept;                /* intercept */
       Eigen::MatrixXd equatedRawScores;         /* equated raw scores */
-      Eigen::MatrixXd equatedRawScoreMoments    /* moments for equated raw scores */
+      Eigen::MatrixXd equatedRawScoreMoments;   /* moments for equated raw scores */
       Eigen::MatrixXd relativeFreqDistsX;       /* rel FD for X and syn pop: [0] for FE, [1] for MFE */
       Eigen::MatrixXd relativeFreqDistsY;       /* rel FD for Y and syn pop: [0] for FE, [1] for MFE */
     };

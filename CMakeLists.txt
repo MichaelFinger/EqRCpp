@@ -8,7 +8,7 @@ project(EQR_CPP
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CheckCXXCompilerFlag)
 # include(GNUInstallDirs)
@@ -46,7 +46,6 @@ include(FetchContent)
 
 # Boost library
 find_package(Boost REQUIRED COMPONENTS date_time)
-include_directories(${Boost_INCLUDE_DIRS})
 # Adds Boost::boost
 
 # Eigen math library
@@ -59,7 +58,6 @@ FetchContent_GetProperties(eigen)
 if(NOT eigen_POPULATED)
   FetchContent_Populate(eigen)
 endif()
-# include_directories(${Eigen_SOURCE_DIR})
 # Eigen is header-only library
 
 # Formatting library
@@ -69,34 +67,22 @@ FetchContent_Declare(
   GIT_TAG 8.0.1
   DOWNLOAD_EXTRACT_TIMESTAMP ON)
 FetchContent_MakeAvailable(fmtlib)
-# include_directories(${fmtlib_SOURCE_DIR}/include)
 # Adds fmt::fmt
 
-file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Eigen_SOURCE_DIR})
+include_directories(${fmtlib_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(EqRCpp INTERFACE)
-target_compile_features(EqRCpp INTERFACE cxx_std_20)
-
-target_include_directories(EqRCpp INTERFACE 
+add_executable(EqRCppTest ${CMAKE_CURRENT_SOURCE_DIR}/tests/runner.cpp)
+target_compile_features(EqRCppTest PRIVATE cxx_std_20)
+target_include_directories(EqRCppTest PRIVATE 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/tests
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${Boost_INCLUDE_DIRS}
                            ${eigen_SOURCE_DIR}
                            ${fmtlib_SOURCE_DIR}/include)
-
-# target_link_libraries(EqRCpp PUBLIC
-#                       ${Boost_LIBRARIES}
-#                       fmt::fmt
-#                       pthread
-#                       dl)
-
-add_executable(EqRCppTest ${CMAKE_CURRENT_SOURCE_DIR}/tests/runner.cpp)
-target_compile_features(EqRCppTest PRIVATE cxx_std_20)
-target_include_directories(EqRCppTest PUBLIC 
-                           ${CMAKE_CURRENT_SOURCE_DIR}/tests
-                           ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-target_link_libraries(EqRCppTest PUBLIC
-                      EqRCpp
+target_link_libraries(EqRCppTest PRIVATE
                       ${Boost_LIBRARIES}
                       fmt::fmt
                       pthread

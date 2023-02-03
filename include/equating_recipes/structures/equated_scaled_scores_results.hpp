@@ -22,8 +22,8 @@ namespace EquatingRecipes {
       void configure(size_t numberOfScores, size_t numberOfMethods) {
         unroundedEquatedScaledScoreMoments.setZero(numberOfMethods, numberOfScores);
         roundedEquatedScaledScoreMoments.setZero(numberOfMethods, numberOfScores);
-        unroundedEquatedScaledScoreMoments.setZero(4);
-        roundedEquatedScaledScoreMoments.setZero(4);
+        unroundedEquatedScaledScoreMoments.setZero(numberOfMethods, 4);
+        roundedEquatedScaledScoreMoments.setZero(numberOfMethods, 4);
       }
 
       std::string toString() {

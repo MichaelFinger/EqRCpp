@@ -23,7 +23,7 @@
 
 namespace EquatingRecipes {
   namespace Structures {
-    struct EquatedRawScoreBootstrapResults {
+    struct EquatedScaledScoreBootstrapResults {
       Eigen::MatrixXd sumAndMeanUnroundedScaledScores;                    /* for matrix of sum and mn for unrounded scale scores */
       Eigen::MatrixXd sumSquaredAndSDUnroundedScaledScores;              /* for matrix of sum2 and sd for unrounded scale scores */
       Eigen::MatrixXd unroundedScaledScoresBootstrapStandardErrors;         /* overall bootstrap se's for unrounded scale scales */ 
