@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.ejs": "html",
+    "__locale": "cpp"
+  }
+}

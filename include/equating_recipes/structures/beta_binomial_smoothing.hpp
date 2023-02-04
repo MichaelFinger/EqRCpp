@@ -17,7 +17,7 @@ namespace EquatingRecipes {
       int numberOfParameters;                                                    /* number of parameters (2 or 4) */
       double reliablilty;                                                    /* reliability -- almost always Kr20 */
       double lordK;		                                         /* Lord's k for approximation of compound binomial */
-      Eigen::VectorXd trueScoreDistributionParameters;	                 /* parameters of true score distribution */
+      Eigen::VectorXd betaParameters;	                 /* parameters of true score distribution */
       Eigen::VectorXd rawScoreMoments;	                                                     /* Raw score moments */
       Eigen::VectorXd fittedRawScoreMoments;	                                        /* Fitted raw score moments */
       Eigen::VectorXd trueScoreMoments;	                                                    /* True score moments */
