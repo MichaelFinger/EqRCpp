@@ -9,7 +9,7 @@ namespace Tests {
   namespace Fixtures {
     struct MondatX {
       static Eigen::MatrixXd jointRawScores() {
-        std::string filename = "../tests/fixtures/mondatx.dat";
+        std::string filename = "mondatx.dat";
 
         std::ifstream ifs(filename);
 
