@@ -10,6 +10,7 @@
 #include <equating_recipes/structures/all_structures.hpp>
 #include <equating_recipes/beta_binomial.hpp>
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/score_statistics.hpp>
 
 namespace Tests {
   struct BetaBinomial {
@@ -20,14 +21,18 @@ namespace Tests {
 
       EquatingRecipes::BetaBinomial betaBinomial;
 
-      Eigen::VectorXd obsScoreDensityX;
+      EquatingRecipes::ScoreStatistics scoreStatistics;
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = scoreStatistics.univariateFromScoreFrequencies(actMathFreqData.freqX,
+                                                                                                                               0,
+                                                                                                                               40,
+                                                                                                                               1,
+                                                                                                                               "X");
 
-      betaBinomial.observedDensity(actMathFreqData.rawScores.size(),
-                                   actMathFreqData.freqX.sum(),
-                                   betaParEstsX,
-                                   obsScoreDensityX);
+      EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomialSmoothing = betaBinomial.betaBinomialSmoothing(univariateStatisticsX,
+                                                                                                                    4,
+                                                                                                                    0.0);
 
-      std::cout << "Observed Score Density for X: " << EquatingRecipes::Utilities::vectorXdToString(obsScoreDensityX, false) << "\n";
+      std::cout << betaBinomialSmoothing.toLongString() << "\n";
     }
   };
 } // namespace Tests

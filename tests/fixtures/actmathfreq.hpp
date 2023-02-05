@@ -62,10 +62,10 @@ namespace Tests {
       static Eigen::VectorXd get4ParameterBetaEstimatesX() {
         Eigen::VectorXd parameterEstimates(4);
 
-        parameterEstimates(0) = 0.99046;
-        parameterEstimates(1) = 1.80049;
-        parameterEstimates(2) = 0.21923;
-        parameterEstimates(3) = 1.00000;
+        parameterEstimates(0) = 0.990464749260068;
+        parameterEstimates(1) = 1.800493018403728;
+        parameterEstimates(2) = 0.219225988720759;
+        parameterEstimates(3) = 1.000000000000000;
 
         return parameterEstimates;
       }

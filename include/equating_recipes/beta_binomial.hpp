@@ -28,15 +28,17 @@
 namespace EquatingRecipes {
   class BetaBinomial {
   public:
-    EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomialSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+    EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomialSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& rawScoreUnivariateStatistics,
                                                                              const size_t& numberOfParameters,
                                                                              const double& reliability) {
-      EquatingRecipes::Structures::BetaBinomialSmoothing results = smoothBetaBinomial(univariateStatisticsX.numberOfExaminees,
-                                                                                      univariateStatisticsX.numberOfScores - 1,
-                                                                                      univariateStatisticsX.freqDistDouble,
-                                                                                      univariateStatisticsX.momentValues,
+      EquatingRecipes::Structures::BetaBinomialSmoothing results = smoothBetaBinomial(rawScoreUnivariateStatistics.numberOfExaminees,
+                                                                                      rawScoreUnivariateStatistics.numberOfScores - 1,
+                                                                                      rawScoreUnivariateStatistics.freqDistDouble,
+                                                                                      rawScoreUnivariateStatistics.momentValues,
                                                                                       numberOfParameters,
                                                                                       reliability);
+
+      results.rawScoreUnivariateStatistics = rawScoreUnivariateStatistics;
 
       return results;
     }
@@ -50,7 +52,7 @@ namespace EquatingRecipes {
       return results;
     }
 
-    // private:
+  private:
     size_t maximumNumberOfIterations = 20; /* maximum number of iterations for computing upper limit */
     double KACC = 0.001;                   /* accuracy for computing lower limit in CalcBetaParaLS */
 
@@ -68,9 +70,9 @@ namespace EquatingRecipes {
       results.numberOfParameters = numberOfParameters;
       results.reliablilty = reliability;
 
-      results.fittedRawScoreDist.setZero(numberOfItems);
-      results.fittedRawScoreCumulativeRelativeFreqDist.setZero(numberOfItems);
-      results.fittedRawScorePercentileRankDist.setZero(numberOfItems);
+      results.fittedRawScoreDensity.setZero(numberOfItems + 1);
+      results.fittedRawScoreCumulativeRelativeFreqDist.setZero(numberOfItems + 1);
+      results.fittedRawScorePercentileRankDist.setZero(numberOfItems + 1);
 
       if (numberOfParameters == 2) {
         twoParameterBetaSmooting(freqDist, results);
@@ -87,47 +89,40 @@ namespace EquatingRecipes {
       return results;
     }
 
-    short fourParameterBetaSmooting(const Eigen::VectorXd& rawScoreFreqDist,
-                                    EquatingRecipes::Structures::BetaBinomialSmoothing& betaFitResults) {
-      short numberOfMomentsFit = 1;                  /* number of moments fit to obtain estimates */
-      size_t numberOfExaminees;                      /* number of persons */
-      Eigen::VectorXd smoothedProportions;           /* smoothed proportions */
-      Eigen::VectorXd smoothedFrequencies;           /* smoothed frequencies */
+    bool fourParameterBetaSmooting(const Eigen::VectorXd& rawScoreFreqDist,
+                                   EquatingRecipes::Structures::BetaBinomialSmoothing& betaFitResults) {
+      size_t numberOfExaminees = betaFitResults.numberOfExaminees;                      /* number of persons */
+      size_t numberOfItems = betaFitResults.numberOfItems;                        /* number of items on test */
+      size_t numberOfScores = numberOfItems + 1;
+      
+      betaFitResults.fittedRawScoreDensity.setZero(numberOfScores);
+      Eigen::VectorXd smoothedFrequencies = Eigen::VectorXd::Zero(numberOfScores);
       Eigen::VectorXd noncentralTrueScoreMoments(4); /* non-central true score moments */
-
-      size_t numberOfItems;                /* number of items on test */
-      size_t numberOfCategoriesLRChiSqare; /* number of categories used for chi-square */
-      size_t numberOfCategoriesLRPValue;   /* number of categories used for chi-square p-value */
-
-      numberOfExaminees = betaFitResults.numberOfExaminees;
-      numberOfItems = betaFitResults.numberOfItems;
-      smoothedProportions = betaFitResults.fittedRawScoreDist;
-      smoothedFrequencies.setZero(numberOfItems);
 
       /* calculate true score moments */
 
       betaMoments(numberOfItems,
-                  betaFitResults.likelihoodRatioChiSq,
+                  betaFitResults.lordK,
                   betaFitResults.rawScoreMoments,
                   betaFitResults.trueScoreMoments,
                   noncentralTrueScoreMoments);
 
       /* calculate parameters of beta true score distribution  */
 
-      numberOfMomentsFit = calculateBetaParameters(numberOfItems,
-                                                   betaFitResults.trueScoreMoments,
-                                                   noncentralTrueScoreMoments,
-                                                   betaFitResults.betaParameters);
+      size_t numberOfMomentsFit = calculateBetaParameters(numberOfItems,
+                                                          betaFitResults.trueScoreMoments,
+                                                          noncentralTrueScoreMoments,
+                                                          betaFitResults.betaParameters);
 
       /* calculate observed score density */
-
-      if (observedDensity(numberOfItems + 1,
-                          numberOfExaminees,
-                          betaFitResults.betaParameters,
-                          smoothedFrequencies)) {
+      if (!observedDensity(numberOfItems + 1,
+                           numberOfExaminees,
+                           betaFitResults.betaParameters,
+                           smoothedFrequencies)) {
         /* Assign uniform distribution and exit */
-        smoothedFrequencies.setConstant(1.0 / static_cast<double>(numberOfItems + 1));
+        betaFitResults.fittedRawScoreDensity.setConstant(1.0 / static_cast<double>(numberOfItems + 1));
         numberOfMomentsFit = 0;
+
       } else {
         /* adjust for compound binomial if k != 0 */
         if (betaFitResults.lordK != 0.0) {
@@ -137,18 +132,21 @@ namespace EquatingRecipes {
         }
 
         /* compute smoothed proportions */
-        smoothedProportions = smoothedFrequencies / static_cast<double>(numberOfExaminees);
+        betaFitResults.fittedRawScoreDensity = smoothedFrequencies / static_cast<double>(numberOfExaminees);
 
         /* compute chi-square values */
+        size_t numberOfCategoriesLRChiSqare = 0;
+        size_t numberOfCategoriesPearsonChiSquare = 0;
+
         betaFitResults.likelihoodRatioChiSq = likelihoodRatioChiSquare(numberOfItems + 1,
                                                                        rawScoreFreqDist,
                                                                        smoothedFrequencies,
                                                                        numberOfCategoriesLRChiSqare);
-        betaFitResults.pValueChiSq = chiSquarePValue(numberOfItems + 1,
-                                                     0.0,
-                                                     rawScoreFreqDist,
-                                                     smoothedFrequencies,
-                                                     numberOfCategoriesLRPValue);
+        betaFitResults.pearsonChiSq = pearsonChiSquare(numberOfItems + 1,
+                                                       0.0,
+                                                       rawScoreFreqDist,
+                                                       smoothedFrequencies,
+                                                       numberOfCategoriesPearsonChiSquare);
 
         /* calculate fitted observed score moments */
         EquatingRecipes::ScoreStatistics scoreStatistics;
@@ -161,26 +159,21 @@ namespace EquatingRecipes {
 
       betaFitResults.numberOfMomentsFit = numberOfMomentsFit;
 
-      return numberOfMomentsFit >= 0 ? 0 : -1;
+      return betaFitResults.numberOfMomentsFit < 0 ? false : true;
     }
 
-    short twoParameterBetaSmooting(const Eigen::VectorXd& rawScoreFreqDist,
-                                   EquatingRecipes::Structures::BetaBinomialSmoothing& betaFitResults) {
-      short numberOfMomentsFit = 0;
-
-      size_t numberOfItems;                /* number of items on test */
-      size_t numberOfCategoriesLRChiSqare; /* number of categories used for chi-square */
-      size_t numberOfCategoriesLRPValue;   /* number of categories used for chi-square p-value */
-
-      size_t numberOfExaminees;                      /* number of persons */
-      Eigen::VectorXd smoothedProportions;           /* pointer to smoothed proportions */
-      Eigen::VectorXd smoothedFrequencies;           /* pointer to smoothed frequencies */
-      Eigen::VectorXd parameterEstimates;            /* pointer to model parameter estimates */
+    bool twoParameterBetaSmooting(const Eigen::VectorXd& rawScoreFreqDist,
+                                  EquatingRecipes::Structures::BetaBinomialSmoothing& betaFitResults) {
+      size_t numberOfExaminees = betaFitResults.numberOfExaminees;                      /* number of persons */
+      size_t numberOfItems = betaFitResults.numberOfItems;                        /* number of items on test */
+      size_t numberOfScores = numberOfItems + 1;
+      
+      betaFitResults.fittedRawScoreDensity.setZero(numberOfScores);
+      Eigen::VectorXd smoothedFrequencies = Eigen::VectorXd::Zero(numberOfScores);
       Eigen::VectorXd noncentralTrueScoreMoments(4); /* non-central true score moments */
 
       numberOfExaminees = betaFitResults.numberOfExaminees;
       numberOfItems = betaFitResults.numberOfItems;
-      smoothedProportions = betaFitResults.fittedRawScoreDist;
       smoothedFrequencies.setZero(numberOfItems);
       betaFitResults.lordK = 0.0; /* binomial error distribution */
 
@@ -193,85 +186,79 @@ namespace EquatingRecipes {
 
       /* calculate parameters of beta true score distribution  */
 
-      parameterEstimates = betaFitResults.betaParameters;
-      parameterEstimates(2) = 0.0;
-      parameterEstimates(3) = 1.0;
+      betaFitResults.betaParameters(2) = 0.0;
+      betaFitResults.betaParameters(3) = 1.0;
 
       if (!estimateNegativeHyperGeometricParameters(numberOfItems,
                                                     betaFitResults.trueScoreMoments,
-                                                    parameterEstimates)) {
+                                                    betaFitResults.betaParameters)) {
         /* if two moments not fit, set alpha=1.0 and fit mean */
-        parameterEstimates(2) = 0.0;
-        parameterEstimates(3) = 1.0;
-        parameterEstimates(0) = 1.0;
-        parameterEstimates(1) = (static_cast<double>(numberOfItems) / betaFitResults.rawScoreMoments(0)) - parameterEstimates(0);
+        betaFitResults.betaParameters(2) = 0.0;
+        betaFitResults.betaParameters(3) = 1.0;
+        betaFitResults.betaParameters(0) = 1.0;
+        betaFitResults.betaParameters(1) = (static_cast<double>(numberOfItems) / betaFitResults.rawScoreMoments(0)) - betaFitResults.betaParameters(0);
 
-        if (parameterEstimates(1) > 0.0) {
-          numberOfMomentsFit = 1;
+        if (betaFitResults.betaParameters(1) > 0.0) {
+          betaFitResults.numberOfMomentsFit = 1;
         } else {
           /* if mean not fit return uniform distribution on 0 to 1.0 */
-          parameterEstimates(1) = 1.0;
-          numberOfMomentsFit = 0;
+          betaFitResults.betaParameters(1) = 1.0;
+          betaFitResults.numberOfMomentsFit = 0;
         }
       } else {
-        numberOfMomentsFit = 2;
+        betaFitResults.numberOfMomentsFit = 2;
       }
-
-      betaFitResults.betaParameters = parameterEstimates;
 
       /* calculate observed score density */
 
-      if (observedDensity(numberOfItems + 1,
+      if (!observedDensity(numberOfItems + 1,
                           numberOfExaminees,
                           betaFitResults.betaParameters,
                           smoothedFrequencies)) {
         /* Assign uniform distribution and exit */
-        smoothedProportions.setConstant(1.0 / static_cast<double>(numberOfItems + 1));
-        numberOfMomentsFit = 0;
+        betaFitResults.fittedRawScoreDensity.setConstant(1.0 / static_cast<double>(numberOfItems + 1));
+        betaFitResults.numberOfMomentsFit = 0;
       } else {
         /* compute smoothed proportions */
-
-        smoothedProportions = smoothedFrequencies / static_cast<double>(numberOfExaminees);
+        betaFitResults.fittedRawScoreDensity = smoothedFrequencies / static_cast<double>(numberOfExaminees);
 
         /* compute chi-square values */
+        size_t numberOfCategoriesLRChiSqare = 0;
+        size_t numberOfCategoriesPearsonChiSquare = 0;
+
         betaFitResults.likelihoodRatioChiSq = likelihoodRatioChiSquare(numberOfItems + 1,
                                                                        rawScoreFreqDist,
                                                                        smoothedFrequencies,
                                                                        numberOfCategoriesLRChiSqare);
 
-        betaFitResults.pValueChiSq = chiSquarePValue(numberOfItems + 1,
-                                                     0.0,
-                                                     rawScoreFreqDist,
-                                                     smoothedFrequencies,
-                                                     numberOfCategoriesLRPValue);
+        betaFitResults.pearsonChiSq = pearsonChiSquare(numberOfItems + 1,
+                                                       0.0,
+                                                       rawScoreFreqDist,
+                                                       smoothedFrequencies,
+                                                       numberOfCategoriesPearsonChiSquare);
 
         /* calculate fitted observed score moments */
-
         ScoreStatistics scoreStatistics;
-        EquatingRecipes::Structures::Moments moments = scoreStatistics.momentsFromScoreFrequencies(smoothedProportions,
+        EquatingRecipes::Structures::Moments moments = scoreStatistics.momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
                                                                                                    0.0,
                                                                                                    numberOfItems,
                                                                                                    1.0);
         betaFitResults.fittedRawScoreMoments = moments.momentValues;
       }
 
-      betaFitResults.numberOfMomentsFit = numberOfMomentsFit;
-
-      if (betaFitResults.numberOfMomentsFit < 0) {
-        return -1;
-      } else {
-        return 0;
-      }
+      return betaFitResults.numberOfMomentsFit < 0 ? false : true;
     }
 
     // void Print_BB(FILE* fp, char tt[], struct USTATS* x, struct BB_SMOOTH* s);
     // void Print_RB(FILE* fp, char tt[], struct PDATA* inall, struct ERAW_RESULTS* r);
 
-    short calculateBetaParameters(const size_t& numberOfItems,
+    size_t calculateBetaParameters(const size_t& numberOfItems,
                                   const Eigen::VectorXd& trueScoreMoments,
                                   const Eigen::VectorXd& noncentralTrueScoreMoments,
                                   Eigen::VectorXd& parameterEstimates) {
-      short numberOfMomentsFit = 0;
+      parameterEstimates.setZero(4);
+      
+      size_t numberOfMomentsFit = 0;
 
       /* 	Only try to fit more than one moment if the true score
 		  s.d. is greater than zero */
@@ -394,7 +381,9 @@ namespace EquatingRecipes {
       /* compute upper limit */
       double u = bma + l;
 
-      // /* assign values for output */
+      /* assign values for output */
+      parameterEstimates.resize(4);
+
       parameterEstimates(0) = a;
       parameterEstimates(1) = b;
       parameterEstimates(2) = l / static_cast<double>(numberOfItems);
@@ -472,7 +461,7 @@ namespace EquatingRecipes {
       }
 
       /* find solution for upper limit of 1 */
-      Eigen::VectorXd tempParameterEstimates;
+      Eigen::VectorXd tempParameterEstimates(4);
       double rkurt;
       bool existr = kurtosisFunctionUpper(1.0,
                                           numberOfItems,
@@ -1030,10 +1019,12 @@ namespace EquatingRecipes {
                          Eigen::VectorXd& observedScoreDensity) {
       /* difference in high and low cutoffs for beta */
       double differenceInBetaCutoffs = betaParameterEstimates(3) - betaParameterEstimates(2);
+
       double densityAdjustment = std::pow(differenceInBetaCutoffs, static_cast<double>(numberOfScores - 1));
       if (densityAdjustment <= 0.0) {
         return false; // underflow
       }
+      densityAdjustment *= static_cast<double>(numberOfExaminees);
 
       Eigen::MatrixXd m1;
       Eigen::MatrixXd m2;
@@ -1045,17 +1036,8 @@ namespace EquatingRecipes {
 
       /* calculate m1 */
       calculateM1(numberOfScores,
-                   betaParameterEstimates(0),
-                   m1);
-
-      std::cout << "M1: " << EquatingRecipes::Utilities::matrixXdToString(m1) << "\n";
-
-      /* calculate m5 */
-      calculateM5(numberOfScores,
-                   betaParameterEstimates(1),
-                   m5);
-
-      std::cout << "M5: " << EquatingRecipes::Utilities::matrixXdToString(m5) << "\n";
+                  betaParameterEstimates(0),
+                  m1);
 
       /* calculate m2 */
       if (!calculateM24(numberOfScores,
@@ -1064,8 +1046,10 @@ namespace EquatingRecipes {
         return false;
       }
 
-      std::cout << "M2: " << EquatingRecipes::Utilities::matrixXdToString(m2) << "\n";
-
+      /* calculate M3 */
+      calculateM3(numberOfScores,
+                  betaParameterEstimates,
+                  m3);
 
       /* calculate m4 */
       if (!calculateM24(numberOfScores,
@@ -1074,52 +1058,14 @@ namespace EquatingRecipes {
         return false;
       }
 
-      std::cout << "M4: " << EquatingRecipes::Utilities::matrixXdToString(m4) << "\n";
-
-
-      /* calculate M3 */
-      calculateM3(numberOfScores,
-                  betaParameterEstimates,
-                  m3);
-
-      std::cout << "M3: " << EquatingRecipes::Utilities::matrixXdToString(m3) << "\n";
-      
-
-      /* loop to calculate beta-binomial frequencies */
-      observedScoreDensity.setZero(numberOfScores);
-
-      // for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-      //   /* calculate first matrix product - M1 * M2 */
-      //   for (size_t innerScoreLocation = scoreLocation + 1; innerScoreLocation >= 0; innerScoreLocation--) {
-      //     prod1(innerScoreLocation) = m1(numberOfScores - 1 - scoreLocation) *
-      //                                 m2(innerScoreLocation);
-      //   }
-
-      //   /* calculate second matrix product - result of first product * M3 */
-      //   for (size_t innerScoreLocation = 0; innerScoreLocation < numberOfScores - scoreLocation; innerScoreLocation++) {
-      //     prod2(innerScoreLocation) = prod1.segment(0, scoreLocation + 1).dot(m3.row(innerScoreLocation).segment(0, scoreLocation + 1));
-      //   }
-
-      //   /* calculate third matrix product - result of second product * M4 */
-      //   for (size_t innerScoreLocation = numberOfScores - scoreLocation; innerScoreLocation >= 0; innerScoreLocation--) {
-      //     prod1(innerScoreLocation) = prod2(innerScoreLocation) * m4(innerScoreLocation);
-      //   }
-
-      //   /* calculate fourth matrix product - result of third product * M5 */
-      //   observedScoreDensity(scoreLocation) = densityAdjustment * prod1.segment(0, numberOfScores - scoreLocation).dot(m5.segment(scoreLocation, numberOfScores));
-      // }
+      /* calculate m5 */
+      calculateM5(numberOfScores,
+                  betaParameterEstimates(1),
+                  m5);
 
       Eigen::MatrixXd matProd = m1 * m2 * m3 * m4 * m5;
-      Eigen::Diagonal<Eigen::MatrixXd> matProdDiag = matProd.diagonal();
 
-      double uMinusLFactorial = 1;
-
-      for (size_t scoreLocation = 1; scoreLocation < numberOfScores; scoreLocation++) {
-        uMinusLFactorial *= (betaParameterEstimates(3) - betaParameterEstimates(2));
-        matProdDiag(scoreLocation) *= uMinusLFactorial;
-      }
-
-      std::cout << "MProduct: " << EquatingRecipes::Utilities::vectorXdToString(matProdDiag, false) << "\n";
+      observedScoreDensity = (matProd * densityAdjustment).diagonal();
 
       return true;
     }
@@ -1195,36 +1141,30 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    void calculateM3(const size_t& numberOfScores, const Eigen::VectorXd& betaParameters, Eigen::MatrixXd& m3) {
-      // register double *pc;
-      // register double fr;	   /* floating point register for temp storage */
-      // register int i;
-      // double apb;	       /* sum of shape parameters of beta distribution */
-      // int j;
-      // int nitems;
+    void calculateM3(const size_t& numberOfScores, const Eigen::VectorXd& betaParameters, Eigen::MatrixXd& m) {
+      m.setZero(numberOfScores, numberOfScores);
 
       double apb = betaParameters(0) + betaParameters(1);
       size_t numberOfItems = numberOfScores - 1;
+      Eigen::VectorXd factorialValues(numberOfScores);
+      Eigen::VectorXd apbTerms(numberOfScores);
 
-      m3.setZero(numberOfScores, numberOfScores);
-
-      /* compute first elements of all m3[j] */
-      m3(0, numberOfScores - 1) = 1.0;
-
-      for (size_t scoreLocation = 1; scoreLocation < numberOfScores; scoreLocation++) {
-        double fr = static_cast<double>(scoreLocation);
-
-        m3(0, numberOfScores - scoreLocation - 1) = (fr / (apb + fr - 1.0)) * m3(0, numberOfScores - scoreLocation);        
+      factorialValues(0) = 1.0;
+      apbTerms(0) = 1.0;
+      for (size_t index = 1; index < numberOfScores; index++) {
+        factorialValues(index) = factorialValues(index - 1) * static_cast<double>(index);
+        apbTerms(index) = apbTerms(index - 1) * (apb + index - 1);
       }
 
-      /* compute other elements */
-      for (size_t columnIndex = 1; columnIndex < numberOfScores; columnIndex++) {        
-        for (size_t rowIndex = 1; rowIndex <= columnIndex; rowIndex++) {        
-          double fr = apb - static_cast<double>(rowIndex) + static_cast<double>(columnIndex);
-          fr /= static_cast<double>(numberOfItems - rowIndex + 1);
-          fr *= m3(rowIndex - 1, numberOfScores - columnIndex - 1);
-          
-          m3(rowIndex, numberOfScores - columnIndex - 1) = fr;
+      double denominatorFactorial = factorialValues(numberOfItems);
+
+      for (size_t rowIndex = 0; rowIndex < numberOfScores; rowIndex++) {
+        for (size_t columnIndex = 0; columnIndex < numberOfScores - rowIndex; columnIndex++) {
+          double rowFactorial = factorialValues(numberOfItems - rowIndex);
+          double columnFactorial = factorialValues(numberOfItems - columnIndex);
+
+          m(rowIndex, columnIndex) = rowFactorial * columnFactorial /
+                                     (denominatorFactorial * apbTerms(numberOfItems - rowIndex));
         }
       }
     }
@@ -1248,9 +1188,9 @@ namespace EquatingRecipes {
       Date of last revision: 6/30/08 
     */
     bool calculateM24(const size_t& numberOfScores, const double& betaParameter, Eigen::MatrixXd& m) {
-      size_t numberOfItems = numberOfScores - 1;
-
       m.setZero(numberOfScores, numberOfScores);
+
+      size_t numberOfItems = numberOfScores - 1;
 
       m(0, 0) = 1.0;
 
@@ -1270,7 +1210,7 @@ namespace EquatingRecipes {
     }
 
     /*
-      Calculate matrices M1 and M5
+      Calculate matrices M1
 
       Input
         n = number of score points
@@ -1285,58 +1225,203 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    void calculateM15(const size_t& numberOfScores, const double& betaParameter, Eigen::MatrixXd& m) {
-      m.setZero(numberOfScores, numberOfScores);
-
-      m(numberOfScores - 1) = 1.0;
-
-      for (size_t scoreLocation = 1; scoreLocation < numberOfScores; scoreLocation++) {
-        double di = static_cast<double>(scoreLocation);
-
-        m(numberOfScores - 1 - scoreLocation) = ((betaParameter + (di - 1.0)) / di) * m(numberOfScores - scoreLocation);
-      }
-    }
-
     void calculateM1(const size_t& numberOfScores, const double& betaParameter, Eigen::MatrixXd& m) {
       m.setZero(numberOfScores, numberOfScores);
 
-      for (size_t rowIndex = 0; rowIndex < numberOfScores; rowIndex++) {        
-        for (size_t columnIndex = 0; columnIndex <= rowIndex; columnIndex++) {        
-          if (rowIndex == columnIndex) {
-            m(rowIndex, columnIndex) = 1.0;
-          } else {
-            m(rowIndex, columnIndex) = m(rowIndex - 1, columnIndex) * 
-              (betaParameter + static_cast<double>(rowIndex - 1)) / static_cast<double>(rowIndex - columnIndex);
-          }
+      for (size_t rowIndex = 0; rowIndex < numberOfScores; rowIndex++) {
+        for (size_t columnIndex = 0; columnIndex <= rowIndex; columnIndex++) {
+          // (alpha)_sub()
+          m(rowIndex, columnIndex) = gammaFunction(betaParameter, rowIndex - columnIndex) / factorial(rowIndex - columnIndex);
         }
       }
     }
 
+    /*
+      Calculate matrices M1
+
+      Input
+        n = number of score points
+        para = parameter from beta distribution to use in calculation
+
+      Output
+        m = matrix to calculate
+
+      Function calls other than C or NR utilities: None
+                                      
+      B. A. Hanson with updates by R. L. Brennan
+
+      Date of last revision: 6/30/08 
+    */
     void calculateM5(const size_t& numberOfScores, const double& betaParameter, Eigen::MatrixXd& m) {
       Eigen::MatrixXd tempMat;
       calculateM1(numberOfScores, betaParameter, tempMat);
 
       m.setZero(numberOfScores, numberOfScores);
 
-      for (size_t rowIndex = 0; rowIndex < numberOfScores; rowIndex++) {        
-        for (size_t columnIndex = 0; columnIndex <= rowIndex; columnIndex++) {        
+      for (size_t rowIndex = 0; rowIndex < numberOfScores; rowIndex++) {
+        for (size_t columnIndex = 0; columnIndex <= rowIndex; columnIndex++) {
           m(numberOfScores - 1 - rowIndex, columnIndex) = tempMat(rowIndex, columnIndex);
         }
       }
     }
 
-    double likelihoodRatioChiSquare(const size_t& n, const Eigen::VectorXd& rawc, const Eigen::VectorXd& fitc, size_t& ncat) {
-      double result = 0;
-      return result;
+    /*
+      computes likelihood ratio chi squared statistic
+    
+      Input
+        n = number of score points
+        rawc = raw counts
+        fitc = fitted counts
+
+      Output
+        ncat = number of categories used to compute chi-square statistic
+
+      Returns likelihood ratio chi squared statistic
+
+      Function calls other than C or NR utilities: None
+                                      
+      B. A. Hanson with updates by R. L. Brennan
+
+      Date of last revision: 6/30/08 
+    */
+    double likelihoodRatioChiSquare(const size_t& numberOfScores,
+                                    const Eigen::VectorXd& rawCounts,
+                                    const Eigen::VectorXd& fittedCounts,
+                                    size_t& numberOfCategories) {
+      double chisq = 0.0;
+
+      numberOfCategories = numberOfScores - 1;
+
+      for (size_t index = 0; index < numberOfScores; index++) {
+        if (rawCounts(index) > 0.0 && fittedCounts(index) > 0.0) {
+          chisq += rawCounts(index) * std::log(rawCounts(index) / fittedCounts(index));
+        }
+      }
+
+      chisq *= 2.0;
+
+      return (chisq);
     }
 
-    double chiSquarePValue(const size_t& n, const double& minexpcount, const Eigen::VectorXd& rawc, const Eigen::VectorXd& fitc, size_t& ncat) {
-      double result = 0;
-      return result;
+    /*
+      Computes Pearson chi squared statistic
+    
+      Input
+        n = number of score points
+        minexpcount: cells with expected counts below this value 
+                    are pooled together for the purpose of computing 
+                    the chi-squared statistic.
+        rawc = raw counts
+        fitc = fitted counts
+
+      Output
+        ncat = number of categories used to compute chi-square
+
+      Returns Pearson chi squared statistic
+
+      Function calls other than C or NR utilities: None
+                                      
+      B. A. Hanson with updates by R. L. Brennan
+
+      Date of last revision: 6/30/08 
+    */
+    double pearsonChiSquare(const size_t& numberOfScores,
+                            const double& minimumExpectedCellCount,
+                            const Eigen::VectorXd& rawCounts,
+                            const Eigen::VectorXd& fittedCounts,
+                            size_t& numberOfCategories) {
+      double chisq = 0.0;
+      numberOfCategories = 0;
+
+      double deleteraw = 0.0; /* raw counts for categories deleted due fit being too small */
+      double deletefit = 0.0; /* fitted counts for deleted categories corresponding to deleteraw */
+      size_t deleten = 0;     /* number of categories deleted due to low expected counts */
+
+      for (size_t index = 0; index < numberOfScores; index++) {
+        if (fittedCounts(index) > minimumExpectedCellCount) {
+          chisq += std::pow(rawCounts(index) - fittedCounts(index), 2) / fittedCounts(index);
+          numberOfCategories++;
+
+        } else {
+          deleteraw += rawCounts(index);
+          deletefit += fittedCounts(index);
+          deleten++;
+        }
+      }
+
+      if (deleten >= 1) {
+        /* add in chi-square value for deleted categories */
+
+        chisq += std::pow(deleteraw - deletefit, 2) / deletefit;
+        numberOfCategories++;
+      }
+
+      return (chisq);
     }
 
-    double calculateLordK(const double& kr20, const size_t numberOfItems, const Eigen::VectorXd& rawScoreMoments) {
-      double result = 0;
+    /*
+      Calculate value of Lord's k given KR20, number of items,
+      and first two moments of observed raw score distribution
+
+      Input
+        kr20 = KR20 reliability
+        nitems = number of items 
+        rmoment = raw score mean and standard deviation 
+
+      Return k = Lord's k
+
+      Function calls other than C or NR utilities: None
+                                      
+      B. A. Hanson with updates by R. L. Brennan
+
+      Date of last revision: 6/30/08 
+    */
+    double calculateLordK(const double& kr20,
+                          const size_t numberOfItems,
+                          const Eigen::VectorXd& rawScoreMoments) {
+      // double varp,dn,varr,mnm,
+      //    k;                                 /* Lord's k */
+
+      double dn = static_cast<double>(numberOfItems);
+      double mnm = rawScoreMoments(0) * (dn - rawScoreMoments(0));
+      double rawScoreVariance = std::pow(rawScoreMoments(1), 2);
+
+      /* calculate variance of item difficulties */
+
+      double itemDifficultiesVariance = mnm / (dn * dn);
+      itemDifficultiesVariance -= (rawScoreVariance / dn) * (1.0 - ((dn - 1.0) / dn) * kr20);
+
+      /* calculate k */
+      double k = mnm - rawScoreVariance - dn * itemDifficultiesVariance;
+      k *= 2.0;
+      k = (dn * dn * (dn - 1.0) * itemDifficultiesVariance) / k;
+
+      return k;
+    }
+
+    // x! = x * (x - 1) * ... * 1
+    double factorial(const size_t& x) {
+      double fact = 1.0;
+
+      if (x >= 2) {
+        for (size_t index = x; index >= 2; index--) {
+          fact *= static_cast<double>(index);
+        }
+      }
+
+      return fact;
+    }
+
+    // (x)_sub_r = x * (x + 1) * ... * (x + j - 1); (x)_sub_0 = 1
+    double gammaFunction(const double& value, const size_t& freq) {
+      double result = 1.0;
+
+      if (freq >= 1) {
+        for (size_t index = 0; index < freq; index++) {
+          result = result * (value + static_cast<double>(index));
+        }
+      }
+
       return result;
     }
   };
