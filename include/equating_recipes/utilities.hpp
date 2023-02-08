@@ -315,10 +315,10 @@ namespace EquatingRecipes {
 
     // perc_point, ERUtilities.h, ERUtilities.c
     static double percentilePoint(const size_t& numberOfScores,
-                           const double& minimumScore,
-                           const double& scoreIncrement,
-                           const Eigen::VectorXd& cumulativeRelativeFreqDist,
-                           const double& percentileRank) {
+                                  const double& minimumScore,
+                                  const double& scoreIncrement,
+                                  const Eigen::VectorXd& cumulativeRelativeFreqDist,
+                                  const double& percentileRank) {
       double percentileRankProportion = percentileRank / 100.0;
       double percentilePointLowerValue;
       double percentilePointUpperValue;
@@ -425,11 +425,11 @@ namespace EquatingRecipes {
       ranks on scale of x. See comments in perc_point() for details.
     */
     static Eigen::VectorXd getEquipercentileEquivalents(const size_t& numberOfRawScoreCategoriesY,
-                                                 const double& minimumRawScoreY,
-                                                 const double& rawScoreIncrementY,
-                                                 const Eigen::VectorXd& cumulativeRelativeFreqDistY,
-                                                 size_t numberOfRawScoreCategoriesX,
-                                                 const Eigen::VectorXd& percentileRankDistX) {
+                                                        const double& minimumRawScoreY,
+                                                        const double& rawScoreIncrementY,
+                                                        const Eigen::VectorXd& cumulativeRelativeFreqDistY,
+                                                        size_t numberOfRawScoreCategoriesX,
+                                                        const Eigen::VectorXd& percentileRankDistX) {
       Eigen::VectorXd equipercentileEquivalents(numberOfRawScoreCategoriesX);
 
       // for (i = 0; i <= nsx - 1; i++)
@@ -567,12 +567,15 @@ namespace EquatingRecipes {
 
     static std::string vectorXiToString(const Eigen::VectorXi& vec, const bool& asRow) {
       std::string value = "";
-      std::string sep = asRow ? ", " : "\n";
 
-      value.append(fmt::format("{}", vec(0)));
+      if (vec.size() >= 1) {
+        std::string sep = asRow ? ", " : "\n";
 
-      for (Eigen::Index index = 1; index < vec.size(); ++index) {
-        value.append(fmt::format("{}{}", sep, vec(index)));
+        value.append(fmt::format("{}", vec(0)));
+
+        for (Eigen::Index index = 1; index < vec.size(); ++index) {
+          value.append(fmt::format("{}{}", sep, vec(index)));
+        }
       }
 
       return value;
@@ -580,12 +583,15 @@ namespace EquatingRecipes {
 
     static std::string vectorXdToString(const Eigen::VectorXd& vec, const bool& asRow) {
       std::string value = "";
-      std::string sep = asRow ? ", " : "\n";
 
-      value.append(fmt::format("{}", vec(0)));
+      if (vec.size() >= 1) {
+        std::string sep = asRow ? ", " : "\n";
 
-      for (Eigen::Index index = 1; index < vec.size(); ++index) {
-        value.append(fmt::format("{}{}", sep, vec(index)));
+        value.append(fmt::format("{}", vec(0)));
+
+        for (Eigen::Index index = 1; index < vec.size(); ++index) {
+          value.append(fmt::format("{}{}", sep, vec(index)));
+        }
       }
 
       return value;
@@ -594,30 +600,33 @@ namespace EquatingRecipes {
     static std::string matrixXiToString(const Eigen::MatrixXi& mat) {
       std::string value = "";
 
-      for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
-        std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
+      if (mat.rows() >= 1 && mat.cols() >= 1) {
+        for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
+          std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
 
-        for (Eigen::Index columnIndex = 1; columnIndex < mat.cols(); ++columnIndex) {
-          rowStr.append(fmt::format(", {}", mat(rowIndex, columnIndex)));
+          for (Eigen::Index columnIndex = 1; columnIndex < mat.cols(); ++columnIndex) {
+            rowStr.append(fmt::format(", {}", mat(rowIndex, columnIndex)));
+          }
+
+          value.append(fmt::format("{}\n", rowStr));
         }
-
-        value.append(fmt::format("{}\n", rowStr));
       }
-
       return value;
     }
 
     static std::string matrixXdToString(const Eigen::MatrixXd& mat) {
       std::string value = "";
 
-      for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
-        std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
+      if (mat.rows() >= 1 && mat.cols() >= 1) {
+        for (Eigen::Index rowIndex = 0; rowIndex < mat.rows(); ++rowIndex) {
+          std::string rowStr = fmt::format("{}", mat(rowIndex, 0));
 
-        for (Eigen::Index columnIndex = 1; columnIndex < mat.cols(); ++columnIndex) {
-          rowStr.append(fmt::format(", {}", mat(rowIndex, columnIndex)));
+          for (Eigen::Index columnIndex = 1; columnIndex < mat.cols(); ++columnIndex) {
+            rowStr.append(fmt::format(", {}", mat(rowIndex, columnIndex)));
+          }
+
+          value.append(fmt::format("{}\n", rowStr));
         }
-
-        value.append(fmt::format("{}\n", rowStr));
       }
 
       return value;

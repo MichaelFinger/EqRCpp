@@ -170,13 +170,13 @@ namespace EquatingRecipes {
                                                                                     univariateStatisticsX.percentileRankDist);
       }
 
-      equatedRawScoreResults.equatedRawScores.col(0) = equatedRawScores;
+      equatedRawScoreResults.equatedRawScores.row(0) = equatedRawScores;
 
       /* get moments */
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
                                                                                                                    pData.scoreFrequenciesX);
 
-      equatedRawScoreResults.equatedRawScoreMoments(pData.methods.size(), moments.momentValues);
+      equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
     }
 
     /*

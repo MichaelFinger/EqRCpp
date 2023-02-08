@@ -26,6 +26,8 @@
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 
+#include <iostream>
+
 namespace EquatingRecipes {
   struct ScoreStatistics {
     static EquatingRecipes::Structures::BivariateStatistics bivariate(const Eigen::MatrixXd& scores,
@@ -120,6 +122,7 @@ namespace EquatingRecipes {
                                                                                                     maximumScore,
                                                                                                     scoreIncrement,
                                                                                                     true);
+
       univariateStatistics.freqDistMaximumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
                                                                                                     minimumScore,
                                                                                                     maximumScore,
@@ -218,7 +221,7 @@ namespace EquatingRecipes {
       size_t numberOfScores = scores.size();
       double numberOfExaminees = scoreFrequencies.sum();
 
-      scoreMoments.momentValues(0) = scores.cwiseProduct(scoreFrequencies).sum() / numberOfExaminees;
+      scoreMoments.momentValues(0) = scores.dot(scoreFrequencies) / numberOfExaminees;
 
       Eigen::VectorXd deviations = scores - Eigen::VectorXd::Constant(scores.size(), scoreMoments.momentValues(0));
 

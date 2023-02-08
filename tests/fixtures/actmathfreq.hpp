@@ -25,7 +25,7 @@ namespace Tests {
         while (ifs) {
           std::getline(ifs, lineRead);
 
-          if (lineRead.empty()) {
+          if (lineRead.empty() || lineRead.size() < 20) {
             break;
           }
 
@@ -42,7 +42,7 @@ namespace Tests {
         actMathFreqData.freqY.setZero(numberOfRows);
 
         size_t rowIndex = 0;
-        while (ifs) {
+        while (ifs && rowIndex < numberOfRows) {
           std::getline(ifs, lineRead);
 
           if (lineRead.empty()) {

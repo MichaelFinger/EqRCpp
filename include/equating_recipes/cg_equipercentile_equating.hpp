@@ -30,6 +30,7 @@ University of Iowa
 #ifndef CG_EQUIV_EQUATING_HPP
 #define CG_EQUIV_EQUATING_HPP
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <Eigen/Core>
@@ -121,28 +122,141 @@ namespace EquatingRecipes {
     //   a[]        slope for Braun-Holland Method
     //   b[]        intercept for Braun-Holland Method
     //   erawBH[]   Braun-Holland linear equated raw scores
-
-    EquatingRecipes::Structures::CGEquipercentileEquatingResults equipercentileEquating(const double& population1Weight,
-                                                                                        const bool& isInternalAnchor,
-                                                                                        const size_t& numberOfScoresV,
-                                                                                        const double& mininumScoreV,
-                                                                                        const double& maximumScoreV,
-                                                                                        const size_t& numberOfScoresX,
-                                                                                        const double& mininumScoreX,
-                                                                                        const double& maximumScoreX,
-                                                                                        const size_t& numberOfScoresY,
-                                                                                        const double& mininumScoreY,
-                                                                                        const double& maximumScoreY,
-                                                                                        const double& scoreIncrement,
-                                                                                        const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
-                                                                                        const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
-                                                                                        const double& reliabilityCommonItemsPopulation1 = 0.0,
-                                                                                        const double& reliabilityCommonItemsPopulation2 = 0.0) {
+    EquatingRecipes::Structures::CGEquipercentileEquatingResults feOrMFEEquipEquating(const double& population1Weight,
+                                                                                      const bool& isInternalAnchor,
+                                                                                      const size_t& numberOfScoresV,
+                                                                                      const double& mininumScoreV,
+                                                                                      const double& maximumScoreV,
+                                                                                      const size_t& numberOfScoresX,
+                                                                                      const double& mininumScoreX,
+                                                                                      const double& maximumScoreX,
+                                                                                      const size_t& numberOfScoresY,
+                                                                                      const double& mininumScoreY,
+                                                                                      const double& maximumScoreY,
+                                                                                      const double& scoreIncrement,
+                                                                                      const bool& doBraunHollandLinearEquating,
+                                                                                      const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
+                                                                                      const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
+                                                                                      const double& reliabilityCommonItemsPopulation1 = 0.0,
+                                                                                      const double& reliabilityCommonItemsPopulation2 = 0.0) {
       EquatingRecipes::Structures::CGEquipercentileEquatingResults results;
+
+      Eigen::MatrixXd bivRelFreqDistXV = bivariateStatisticsXV.bivariateProportions;
+      Eigen::MatrixXd bivRelFreqDistYV = bivariateStatisticsYV.bivariateProportions;
+      Eigen::VectorXd relFreqDistXSynPop; // (numberOfScoresX);
+      Eigen::VectorXd relFreqDistYSynPop; // (numberOfScoresY);
+
+      /* relFreqDistXSynPop and relFreqDistYSynPop: densities for x and y in synthetic population 
+     Note: if 0 < reliabilityCommonItemsPopulation1, reliabilityCommonItemsPopulation2 <= 1, results are for MFE;
+           otherwise, results are for FE */
+
+      syntheticDensities(population1Weight,
+                         isInternalAnchor,
+                         numberOfScoresV,
+                         numberOfScoresX,
+                         bivRelFreqDistXV,
+                         numberOfScoresY,
+                         bivRelFreqDistYV,
+                         reliabilityCommonItemsPopulation1,
+                         reliabilityCommonItemsPopulation2,
+                         relFreqDistXSynPop,
+                         relFreqDistYSynPop);
+
+      /* Fxs, Gys, and prxs */
+      Eigen::VectorXd cumRelFreqDistXSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(mininumScoreX,
+                                                                                                     maximumScoreX,
+                                                                                                     scoreIncrement,
+                                                                                                     relFreqDistXSynPop);
+
+      Eigen::VectorXd cumRelFreqDistYSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(mininumScoreY,
+                                                                                                     maximumScoreY,
+                                                                                                     scoreIncrement,
+                                                                                                     relFreqDistYSynPop);
+
+      Eigen::VectorXd percentileRanksXSynPop(numberOfScoresX);
+      for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
+        double score = EquatingRecipes::Utilities::getScore(scoreLocation,
+                                                            mininumScoreX,
+                                                            scoreIncrement);
+
+        percentileRanksXSynPop(scoreLocation) = EquatingRecipes::Utilities::getPercentileRank(mininumScoreX,
+                                                                                              maximumScoreX,
+                                                                                              scoreIncrement,
+                                                                                              cumRelFreqDistXSynPop,
+                                                                                              score);
+      }
+
+      /* Equipercentile equating */
+      results.equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(numberOfScoresY,
+                                                                                          mininumScoreY,
+                                                                                          scoreIncrement,
+                                                                                          cumRelFreqDistYSynPop,
+                                                                                          numberOfScoresX,
+                                                                                          percentileRanksXSynPop);
+
+      /* Braun-Holland linear equating */
+      if (doBraunHollandLinearEquating) {
+        Eigen::VectorXd slopes(1);
+        Eigen::VectorXd intercepts(1);
+
+        braunHollandLinearEquating(mininumScoreX,
+                                   maximumScoreX,
+                                   mininumScoreY,
+                                   maximumScoreY,
+                                   scoreIncrement,
+                                   relFreqDistXSynPop,
+                                   relFreqDistYSynPop,
+                                   slopes(0),
+                                   intercepts(0));
+
+        results.slope = slopes;
+        results.intercept = intercepts;
+        Eigen::VectorXd braunHollandEquatedRawScores(numberOfScoresX);
+
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
+          double score = EquatingRecipes::Utilities::getScore(scoreLocation,
+                                                              mininumScoreX,
+                                                              scoreIncrement);
+
+          braunHollandEquatedRawScores(scoreLocation) = slopes(0) * score + intercepts(0);
+        }
+      }
 
       return results;
     }
 
+    /*
+      Synthetic population densities for x and y
+
+      Input
+        w1       weight for population 1 (x)
+        internal internal anchor if non-zero; external anchor if zero
+        nsv      number of score categories for common items (v)
+        nsx      number of score categories for x
+        bxv      starts as bivariate rel freq dist for v (rows) and x (cols);
+                ends as biv rel freq dist of x given v with v as rows
+        nsy      number of score categories for y
+        byv      starts as bivariate rel freq dist for y (rows) and v (cols);
+                ends as biv rel freq dist of y given v with y as rows
+        rv1      rel of common items in pop 1 (0-->FE; non-0-->MFE)
+        rv2      rel of common items in pop 2 (0-->FE; non-0-->MFE)
+
+      Output
+        fxs    synthetic pop distribution (relative frequencies) for x
+        gys    synthetic pop distribution (relative frequencies) for y
+
+      NOTE: space for fxs and gys allocated before call
+
+      Function calls other than C or NR utilities:
+        MixSmooth()
+        CondBivDist(() 
+        ModCondBivDist()
+        runerror()
+                                                    
+      B. A. Hanson with updates by R. L. Brennan
+
+      Date of last revision: 2/3/09 
+    */
     void syntheticDensities(const double& population1Weight,
                             const bool& isInternalAnchor,
                             const size_t& numberOfScoresV,
@@ -153,15 +267,165 @@ namespace EquatingRecipes {
                             const double& reliabilityCommonItemsPopulation1,
                             const double& reliabilityCommonItemsPopulation2,
                             Eigen::VectorXd& syntheticPopulationRelativeFreqDistX,
-                            Eigen::VectorXd& syntheticPopulationRelativeFreqDistY) {}
+                            Eigen::VectorXd& syntheticPopulationRelativeFreqDistY) {
+      Eigen::VectorXd postSmoothingRelFreqDistVPop1(numberOfScoresV); /* rel freq dist for v in pop 1 after smoothing */
+      Eigen::VectorXd postSmoothingRelFreqDistVPop2(numberOfScoresV); /* rel freq dist for v in pop 2 after smoothing */
+      Eigen::VectorXd postSmoothingRelFreqDistXPop1(numberOfScoresX); /* rel freq dist of x in pop 1 after smoothing */
+      Eigen::VectorXd postSmoothingRelFreqDistYPop2(numberOfScoresY); /* rel freq dist of y in pop 2 after smoothing */
+      double postSmoothingMeanVPop1 = 0.0;                            /* mean of v in pop 1 after smoothing */
+      double postSmoothingMeanVPop2 = 0.0;                            /* mean of v in pop 2 after smoothing */
+      double uniformMixingProportion = 1.0e-10;
 
+      /* Smooth f1(x,v); get h1(v) & f1(x) */
+      mixSmooth(numberOfScoresV,
+                numberOfScoresX,
+                uniformMixingProportion,
+                bivariateRelativeFreqDistXV,
+                postSmoothingRelFreqDistXPop1,
+                postSmoothingRelFreqDistVPop1);
+
+      uniformMixingProportion = 1.0e-10;
+
+      /* Smooth g2(y,v); get h2(v) & g2(y) */
+      mixSmooth(numberOfScoresV,
+                numberOfScoresY,
+                uniformMixingProportion,
+                bivariateRelativeFreqDistYV,
+                postSmoothingRelFreqDistYPop2,
+                postSmoothingRelFreqDistVPop2);
+
+      /* get f1(x|v) with v as rows */
+      conditionalBivariateDistribution(numberOfScoresX,
+                                       numberOfScoresV,
+                                       bivariateRelativeFreqDistXV,
+                                       postSmoothingRelFreqDistVPop1);
+
+      /* get g2(y|v) with v as rows */
+      conditionalBivariateDistribution(numberOfScoresY,
+                                       numberOfScoresV,
+                                       bivariateRelativeFreqDistYV,
+                                       postSmoothingRelFreqDistVPop2);
+
+      /* modified conditional bivariate distributions for MFE */
+      if (reliabilityCommonItemsPopulation1 != 0.0 &&
+          reliabilityCommonItemsPopulation2 != 0.0) {
+        if (reliabilityCommonItemsPopulation1 < 0.0 ||
+            reliabilityCommonItemsPopulation1 > 1.0 ||
+            reliabilityCommonItemsPopulation2 < 0.0 ||
+            reliabilityCommonItemsPopulation2 > 1.0) {
+          throw std::runtime_error("\nrv1 or rv2 invalid");
+        }
+
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScoresV; scoreLocation++) {
+          postSmoothingMeanVPop1 += static_cast<double>(scoreLocation) * postSmoothingRelFreqDistVPop1(scoreLocation);
+          postSmoothingMeanVPop2 += static_cast<double>(scoreLocation) * postSmoothingRelFreqDistVPop2(scoreLocation);
+        }
+
+        /* mod f2(x|v) */
+        modifiedConditionalBivariateDistribution(isInternalAnchor,
+                                                 numberOfScoresV,
+                                                 numberOfScoresX,
+                                                 reliabilityCommonItemsPopulation1,
+                                                 reliabilityCommonItemsPopulation2,
+                                                 postSmoothingMeanVPop1,
+                                                 postSmoothingMeanVPop2,
+                                                 bivariateRelativeFreqDistXV);
+
+        /* mod g1(y|v) */
+        modifiedConditionalBivariateDistribution(isInternalAnchor,
+                                                 numberOfScoresV,
+                                                 numberOfScoresX,
+                                                 reliabilityCommonItemsPopulation2,
+                                                 reliabilityCommonItemsPopulation1,
+                                                 postSmoothingMeanVPop2,
+                                                 postSmoothingMeanVPop1,
+                                                 bivariateRelativeFreqDistYV);
+      }
+
+      /* synthetic densities using Kolen and Brennan (2004, Eq 5.8) */
+      syntheticPopulationRelativeFreqDistX.resize(numberOfScoresX);
+      syntheticPopulationRelativeFreqDistY.resize(numberOfScoresY);
+
+      /* syn density for x */
+      for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+        syntheticPopulationRelativeFreqDistX(scoreLocationX) = population1Weight * postSmoothingRelFreqDistXPop1(scoreLocationX);
+
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          syntheticPopulationRelativeFreqDistX(scoreLocationX) += (1.0 - population1Weight) *
+                                                                  bivariateRelativeFreqDistXV(scoreLocationX, scoreLocationV) *
+                                                                  postSmoothingRelFreqDistVPop2(scoreLocationV);
+        }
+      }
+
+      /* syn density for y */
+      for (size_t scoreLocationY = 0; scoreLocationY < numberOfScoresY; scoreLocationY++) {
+        syntheticPopulationRelativeFreqDistY(scoreLocationY) = (1.0 - population1Weight) * postSmoothingRelFreqDistYPop2(scoreLocationY);
+
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          syntheticPopulationRelativeFreqDistY(scoreLocationY) += population1Weight *
+                                                                  bivariateRelativeFreqDistYV(scoreLocationY, scoreLocationV) *
+                                                                  postSmoothingRelFreqDistVPop1(scoreLocationV);
+        }
+      }
+    }
+
+    /*
+      "Smooth" bivariate distribution of v and x by mixing it with a 
+      "small" uniform distribution.  The primary purpose of doing so is to 
+      replace f(v)=0 with slightly positive relative frequencies.
+      Note that descriptions and code are presented in terms of x and v,
+      but function obviously applies to y and v, as well.
+      
+      Input
+        nsv     number of categories for v
+        nsx	    number of categories for x
+        unimix	mixing proportion for uniform distribution; 1-unimix
+                is mixing proportion for observed distribution.
+        bxv	    observed bivariate rel freqs for x (rows) and v (cols)
+
+      Output
+        bxv	    "smoothed" bivariate probabilities of x and v 
+        fx		"smoothed" marginal univariate probabilities for x 
+        hv		"smoothed" marginal univariate probabilities for v
+
+        NOTE: space for fx and hv must be allocated before function called
+
+      Function calls other than C or NR utilities: None
+                                                    
+      B. A. Hanson with updates/revisions by R. L. Brennan
+
+      Date of last revision: 6/30/08 
+    */
     void mixSmooth(const size_t& numberOfScoresV,
                    const size_t& numberOfScoresX,
-                   const double& mixingProportion,
-                   const Eigen::MatrixXd& observedBivariateRelativeFreqDistXV,
-                   Eigen::MatrixXd& smoothedBivariateProbabilitiesXV,
-                   Eigen::VectorXd& smoothedMarginalProbabilitiesX,
-                   Eigen::VectorXd& smoothedMarginalProbabilitiesV) {}
+                   double& uniformMixingProportion,
+                   Eigen::MatrixXd& bivariateProbabilitiesXV,
+                   Eigen::VectorXd& marginalProbabilitiesX,
+                   Eigen::VectorXd& marginalProbabilitiesV) {
+      marginalProbabilitiesV.setZero(numberOfScoresV);
+      marginalProbabilitiesX.setZero(numberOfScoresX);
+
+      double observedMixingProportion = 1.0 - uniformMixingProportion;                          /* weight for actual relative freq in a cell */
+      double uniformProbability = 1.0 / static_cast<double>(numberOfScoresV * numberOfScoresX); /* cell probability = 1/(nrow*ncol) */
+
+      uniformMixingProportion *= uniformProbability; /* unimix scaled so that sum of "smoothed" bxv[][]=1 */
+
+      for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+        for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+          double smoothedRelativeFrequency = (observedMixingProportion *
+                                              bivariateProbabilitiesXV(scoreLocationX, scoreLocationV)) +
+                                             uniformMixingProportion;
+          bivariateProbabilitiesXV(scoreLocationX, scoreLocationV) = smoothedRelativeFrequency; /* "smoothed" elements of bxv[][] */
+          marginalProbabilitiesV(scoreLocationV) += smoothedRelativeFrequency;                  /* "smoothed" rel freq of i-th element of v */
+        }
+      }
+
+      for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          marginalProbabilitiesX(scoreLocationX) += bivariateProbabilitiesXV(scoreLocationX, scoreLocationV); /* "smoothed rel freq of j-th element of fx */
+        }
+      }
+    }
 
     /*
       Conditional bivariate distribution of x given v. (Obviously applies
@@ -183,12 +447,15 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    Eigen::MatrixXd conditionBivariateDistribution(const size_t& numberOfScoresV,
-                                                   const size_t& numberOfScoresX,
-                                                   const Eigen::MatrixXd& bivariateRelativeFreqDistXV,
-                                                   const Eigen::VectorXd& marginalRelativeFreqDistV) {
-      Eigen::MatrixXd condBivDist;
-      return condBivDist;
+    void conditionalBivariateDistribution(const size_t& numberOfScoresV,
+                                          const size_t& numberOfScoresX,
+                                          Eigen::MatrixXd& bivariateRelativeFreqDistXV,
+                                          const Eigen::VectorXd& marginalRelativeFreqDistV) {
+      for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+        for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+          bivariateRelativeFreqDistXV(scoreLocationX, scoreLocationV) /= marginalRelativeFreqDistV(scoreLocationV);
+        }
+      }
     }
 
     /*
@@ -214,15 +481,31 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    void braunHollandLinearEquating(const size_t& minimumScoreX,
-                                    const size_t& maximumScoreX,
-                                    const size_t& minimumScoreY,
-                                    const size_t& maximumScoreY,
-                                    const double& scoreIncrement,
-                                    const Eigen::VectorXd& syntheticDensityX,
-                                    const Eigen::VectorXd& syntheticDensityY,
-                                    double& slope,
-                                    double& intercept) {}
+    void
+    braunHollandLinearEquating(const size_t& minimumScoreX,
+                               const size_t& maximumScoreX,
+                               const size_t& minimumScoreY,
+                               const size_t& maximumScoreY,
+                               const double& scoreIncrement,
+                               const Eigen::VectorXd& syntheticDensityX,
+                               const Eigen::VectorXd& syntheticDensityY,
+                               double& slope,
+                               double& intercept) {
+      /* moments for x in syn pop */
+      EquatingRecipes::Structures::Moments momentsXSynPop = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(syntheticDensityX,
+                                                                                                                          minimumScoreX,
+                                                                                                                          maximumScoreX,
+                                                                                                                          scoreIncrement);
+
+      /* moments for y in syn pop */
+      EquatingRecipes::Structures::Moments momentsYSynPop = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(syntheticDensityY,
+                                                                                                                          minimumScoreY,
+                                                                                                                          maximumScoreY,
+                                                                                                                          scoreIncrement);
+
+      slope = momentsYSynPop.momentValues(1) / momentsXSynPop.momentValues(1);
+      intercept = momentsYSynPop.momentValues(0) - slope * momentsXSynPop.momentValues(0);
+    }
 
     /*
       For MFE method, modify conditional bivariate distribution of
@@ -268,8 +551,108 @@ namespace EquatingRecipes {
                                                   const double& reliabilityCommonItemsPopulation2,
                                                   const double& population1MeanV,
                                                   const double& population2MeanV,
-                                                  const Eigen::MatrixXd& bivariateDistributionXVPopulation1,
-                                                  Eigen::MatrixXd& bivariateDistributionXVPopulation2) {
+                                                  Eigen::MatrixXd& bivariateDistributionXVPopulation) {
+      //   double v1,                   /* non integer v in pop 1 associated with integer v in pop 2 */
+
+      /* slope for MFE */
+      double slope = std::sqrt(reliabilityCommonItemsPopulation2 /
+                               reliabilityCommonItemsPopulation1);
+
+      /* intercept for MFE */
+      double intercept = ((1.0 - std::sqrt(reliabilityCommonItemsPopulation2)) / std::sqrt(reliabilityCommonItemsPopulation1)) * population2MeanV -
+                         ((1.0 - std::sqrt(reliabilityCommonItemsPopulation1)) / std::sqrt(reliabilityCommonItemsPopulation1)) * population1MeanV;
+
+      Eigen::MatrixXd bXVWorkingValues(numberOfScoresX, numberOfScoresV);
+      Eigen::MatrixXd bUVCollapsedValues;
+      Eigen::MatrixXd bUVInterpolatedValues;
+
+      //       intercept = ((1 - sqrt(rv2)) / sqrt(rv1)) * muv2 -
+      //                   ((1 - sqrt(rv1)) / sqrt(rv1)) * muv1,
+      //       **temp,                                           /* working values of bxv */
+      //       **temp_collapsed,                                 /* working values of buv */
+      //       **temp_interpolated,                              /* interpolated values of buv */
+      //       sum;
+      //   int v, j, u,
+      //       v2,  /* integer v score in pop 2 */
+      //       nsu; /* number of non-anchor score categories */
+
+      //   temp = dmatrix(0, nsx - 1, 0, nsv - 1); /* allocate */
+
+      if (!isInternalAnchor) {
+        /****************************external anchor ****************************/
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          double transformedScore = intercept + slope * static_cast<double>(scoreLocationV);
+
+          for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+            bXVWorkingValues(scoreLocationX, scoreLocationV) = EquatingRecipes::Utilities::interpolate(transformedScore,
+                                                                                                       numberOfScoresV,
+                                                                                                       bivariateDistributionXVPopulation.row(scoreLocationX));
+          }
+        }
+      } else {
+        /****************************internal anchor ****************************/
+        size_t numberOfScoresU = numberOfScoresX - numberOfScoresV + 1;
+        bUVCollapsedValues.resize(numberOfScoresU, numberOfScoresV);
+        bUVInterpolatedValues.resize(numberOfScoresU, numberOfScoresV);
+
+        /* store non-structural-zero elements of bxv[][]
+        in temp_collapsed[][]; in essense, collapse bxv[][] to buv[][] */
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          size_t scoreLocationU = 0;
+
+          for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+            if (scoreLocationX < scoreLocationV || scoreLocationX > numberOfScoresU - 1 + scoreLocationV) {
+              /* do nothing: skip structural zeros */
+            } else {
+              bUVCollapsedValues(scoreLocationU++, scoreLocationV) = bivariateDistributionXVPopulation(scoreLocationX,
+                                                                                                       scoreLocationV);
+            }
+          }
+        }
+
+        /* get interpolated values under MFE for internal anchor */
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          double score = intercept + slope * static_cast<double>(scoreLocationV);
+
+          for (size_t scoreLocationU; scoreLocationU < numberOfScoresU; scoreLocationU++) {
+            bUVInterpolatedValues(scoreLocationU, scoreLocationV) = EquatingRecipes::Utilities::interpolate(score,
+                                                                                                            numberOfScoresV,
+                                                                                                            bUVCollapsedValues.row(scoreLocationU));
+          }
+        }
+
+        /* expand temp_interpolated[0...nsu][v2] to temp[0...nsx][v2] */
+        for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+          size_t scoreLocationU = 0;
+
+          for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+            if (scoreLocationX < scoreLocationV || scoreLocationX > numberOfScoresU - 1 + scoreLocationV) {
+              bXVWorkingValues(scoreLocationX, scoreLocationV) = 0.0;
+            } else {
+              bXVWorkingValues(scoreLocationX, scoreLocationV) = bUVInterpolatedValues(scoreLocationU++, scoreLocationV);
+            }
+          }
+        }
+      }
+
+      /* for both external and internal anchor
+      normalize such that sum-over-x of f(x|v) = 1 */
+      for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
+        double sum = 0.0;
+
+        for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+          sum += bXVWorkingValues(scoreLocationX, scoreLocationV);
+        }
+
+        /* transfer to bxv[][] */
+        for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+          if (sum > 0) {
+            bivariateDistributionXVPopulation(scoreLocationX, scoreLocationV) = bXVWorkingValues(scoreLocationX, scoreLocationV) / sum;
+          } else {
+            bivariateDistributionXVPopulation(scoreLocationX, scoreLocationV) = 0;
+          }
+        }
+      }
     }
 
     /*
@@ -309,15 +692,50 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    Eigen::VectorXd ChainedEquipercentileEquating(const size_t& numberOfScoresXPopulation1,
-                                                  const Eigen::VectorXd& percentileRanksXPopulation1,
+    Eigen::VectorXd ChainedEquipercentileEquating(const size_t& numberOfScoresX,
+                                                  const Eigen::VectorXd& percentileRanksX,
                                                   const double& minimumScoreV,
                                                   const double& maximumScoreV,
-                                                  const double& scoreIncrement,
-                                                  const size_t& numberOfScoresXPopulation2,
-                                                  const Eigen::VectorXd& cumlativeRelativeFreqDistYPopulation2,
-                                                  const Eigen::VectorXd& cumlativeRelativeFreqDistVPopulation2) {
-      Eigen::VectorXd equatedRawScores;
+                                                  const double& scoreIncrementV,
+                                                  const size_t& numberOfScoresV,
+                                                  const Eigen::VectorXd& cumlativeRelativeFreqDistVPop1,
+                                                  const double& minimumScoreY,
+                                                  const double& scoreIncrementY,
+                                                  const size_t& numberOfScoresY,
+                                                  const Eigen::VectorXd& cumlativeRelativeFreqDistYPop2,
+                                                  const Eigen::VectorXd& cumlativeRelativeFreqDistVPop2) {
+      Eigen::VectorXd percentileRanksVEquivalents(numberOfScoresX);
+
+      /* Put X on scale of V in pop 1; there are nsx
+        (non-integer) V equivalents in extov[] */
+      Eigen::VectorXd vEquivalentsXPop1 = EquatingRecipes::Utilities::getEquipercentileEquivalents(numberOfScoresV,
+                                                                                                   minimumScoreV,
+                                                                                                   scoreIncrementV,
+                                                                                                   cumlativeRelativeFreqDistVPop1,
+                                                                                                   numberOfScoresX,
+                                                                                                   percentileRanksX);
+
+      /* Get PRs (relative to V for pop 2)
+        for the non-integer V scores in extov[].
+        Note that there are nsx equivalents */
+      for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+        percentileRanksVEquivalents(scoreLocationX) = EquatingRecipes::Utilities::getPercentileRank(minimumScoreV,
+                                                                                                    maximumScoreV,
+                                                                                                    scoreIncrementV,
+                                                                                                    cumlativeRelativeFreqDistVPop2,
+                                                                                                    vEquivalentsXPop1(scoreLocationX));
+      }
+
+      /* Using the PRs in prv2[] get the Y equivalents of X;
+      i.e., put V equivalents on scale of Y */
+
+      Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(numberOfScoresY,
+                                                                                                  minimumScoreY,
+                                                                                                  scoreIncrementY,
+                                                                                                  cumlativeRelativeFreqDistYPop2,
+                                                                                                  numberOfScoresX,
+                                                                                                  percentileRanksVEquivalents);
+
       return equatedRawScores;
     }
 
