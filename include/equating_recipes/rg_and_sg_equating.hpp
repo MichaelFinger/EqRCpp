@@ -176,7 +176,7 @@ namespace EquatingRecipes {
       EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
-      equatedRawScoreResults.equatedRawScoreMoments(moments.momentValues);
+      equatedRawScoreResults.equatedRawScoreMoments(pData.methods.size(), moments.momentValues);
     }
 
     /*
@@ -269,11 +269,11 @@ namespace EquatingRecipes {
         pData.method = method;
         pData.smoothing = smoothing;
 
-        pData.mininumScoreX = bivariateStatisticsXY.univariateStatisticsX.minimumScore;
-        pData.maximumScoreX = bivariateStatisticsXY.univariateStatisticsX.maximumScore;
-        pData.scoreIncrementX = bivariateStatisticsXY.univariateStatisticsX.scoreIncrement;
-        pData.scoreFrequenciesX = bivariateStatisticsXY.univariateStatisticsX.freqDistDouble;
-        pData.numberOfExaminees = bivariateStatisticsXY.univariateStatisticsX.numberOfExaminees;
+        pData.mininumScoreX = bivariateStatisticsXY.univariateStatisticsRow.minimumScore;
+        pData.maximumScoreX = bivariateStatisticsXY.univariateStatisticsRow.maximumScore;
+        pData.scoreIncrementX = bivariateStatisticsXY.univariateStatisticsRow.scoreIncrement;
+        pData.scoreFrequenciesX = bivariateStatisticsXY.univariateStatisticsRow.freqDistDouble;
+        pData.numberOfExaminees = bivariateStatisticsXY.univariateStatisticsRow.numberOfExaminees;
       }
 
       /* allocation and assignments for r */
@@ -283,25 +283,25 @@ namespace EquatingRecipes {
                                                                                    pData.mininumScoreX,
                                                                                    pData.scoreIncrementX);
 
-        equatedRawScoreResults.equatedRawScores.setZero(maximumScoreLocation + 1);
-        equatedRawScoreResults.equatedRawScoreMoments.setZero(4);
+        equatedRawScoreResults.equatedRawScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
+        equatedRawScoreResults.equatedRawScoreMoments.setZero(pData.methods.size(), 4);
       }
 
       /* Compute equating results */
 
       //   if(method != 'E')
       if (method == EquatingRecipes::Structures::Method::EQUIPERCENTILE) {
-        equatedRawScoreResults.equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(bivariateStatisticsXY.univariateStatisticsY.numberOfScores,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsY.minimumScore,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsY.scoreIncrement,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsY.cumulativeRelativeFreqDist,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsX.numberOfScores,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsX.percentileRankDist);
+        equatedRawScoreResults.equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
+                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.minimumScore,
+                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.scoreIncrement,
+                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.cumulativeRelativeFreqDist,
+                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
+                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.percentileRankDist);
       } else {
-        equatedRawScoreResults.equatedRawScores = linearEquating(bivariateStatisticsXY.univariateStatisticsX.momentValues(0),
-                                                                 bivariateStatisticsXY.univariateStatisticsX.momentValues(1),
-                                                                 bivariateStatisticsXY.univariateStatisticsY.momentValues(0),
-                                                                 bivariateStatisticsXY.univariateStatisticsY.momentValues(1),
+        equatedRawScoreResults.equatedRawScores = linearEquating(bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
+                                                                 bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
+                                                                 bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
+                                                                 bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
                                                                  method,
                                                                  pData.mininumScoreX,
                                                                  pData.maximumScoreX,

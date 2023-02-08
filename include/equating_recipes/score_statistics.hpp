@@ -42,24 +42,24 @@ namespace EquatingRecipes {
       size_t rowScoreColumnIndex = 0;
       size_t columnScoreColumnIndex = 1;
 
-      bivariateStatistics.rowScoreStatistics = univariateFromScores(scores.col(rowScoreColumnIndex),
+      bivariateStatistics.univariateStatisticsRow = univariateFromScores(scores.col(rowScoreColumnIndex),
                                                                     minimumRowScore,
                                                                     maximumRowScore,
                                                                     rowScoreIncrement,
                                                                     rowScoreId);
 
-      bivariateStatistics.columnScoreStatistics = univariateFromScores(scores.col(columnScoreColumnIndex),
+      bivariateStatistics.univariateStatisticsColumn = univariateFromScores(scores.col(columnScoreColumnIndex),
                                                                        minimumColumnScore,
                                                                        maximumColumnScore,
                                                                        columnScoreIncrement,
                                                                        columnScoreId);
 
-      bivariateStatistics.bivariateFreqDist.setZero(bivariateStatistics.rowScoreStatistics.numberOfScores,
-                                                    bivariateStatistics.columnScoreStatistics.numberOfScores);
-      bivariateStatistics.bivariateFreqDistDouble.setZero(bivariateStatistics.rowScoreStatistics.numberOfScores,
-                                                          bivariateStatistics.columnScoreStatistics.numberOfScores);
-      bivariateStatistics.bivariateProportions.setZero(bivariateStatistics.rowScoreStatistics.numberOfScores,
-                                                       bivariateStatistics.columnScoreStatistics.numberOfScores);
+      bivariateStatistics.bivariateFreqDist.setZero(bivariateStatistics.univariateStatisticsRow.numberOfScores,
+                                                    bivariateStatistics.univariateStatisticsColumn.numberOfScores);
+      bivariateStatistics.bivariateFreqDistDouble.setZero(bivariateStatistics.univariateStatisticsRow.numberOfScores,
+                                                    bivariateStatistics.univariateStatisticsColumn.numberOfScores);
+      bivariateStatistics.bivariateProportions.setZero(bivariateStatistics.univariateStatisticsRow.numberOfScores,
+                                                    bivariateStatistics.univariateStatisticsColumn.numberOfScores);
 
       bivariateStatistics.numberOfExaminees = scores.rows();
 
@@ -77,8 +77,8 @@ namespace EquatingRecipes {
                                                                                   minimumColumnScore,
                                                                                   columnScoreIncrement);
 
-        bivariateStatistics.rowScoreStatistics.freqDist(rowScoreLocation)++;
-        bivariateStatistics.columnScoreStatistics.freqDist(columnScoreLocation)++;
+        bivariateStatistics.univariateStatisticsRow.freqDist(rowScoreLocation)++;
+        bivariateStatistics.univariateStatisticsColumn.freqDist(columnScoreLocation)++;
         bivariateStatistics.bivariateFreqDist(rowScoreLocation, columnScoreLocation)++;
 
         bivariateStatistics.covariance += rowScore * columnScore;
@@ -88,10 +88,10 @@ namespace EquatingRecipes {
       bivariateStatistics.bivariateProportions = bivariateStatistics.bivariateFreqDistDouble / static_cast<double>(bivariateStatistics.numberOfExaminees);
 
       bivariateStatistics.covariance = (bivariateStatistics.covariance / static_cast<double>(bivariateStatistics.numberOfExaminees)) -
-                                       (bivariateStatistics.rowScoreStatistics.momentValues(0) * bivariateStatistics.columnScoreStatistics.momentValues(0));
+                                       (bivariateStatistics.univariateStatisticsRow.momentValues(0) * bivariateStatistics.univariateStatisticsColumn.momentValues(0));
 
       bivariateStatistics.correlation = bivariateStatistics.covariance /
-                                        (bivariateStatistics.rowScoreStatistics.momentValues(1) * bivariateStatistics.columnScoreStatistics.momentValues(1));
+                                        (bivariateStatistics.univariateStatisticsRow.momentValues(1) * bivariateStatistics.univariateStatisticsColumn.momentValues(1));
 
       return bivariateStatistics;
     }

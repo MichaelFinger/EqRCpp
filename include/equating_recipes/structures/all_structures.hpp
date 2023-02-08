@@ -6,6 +6,7 @@
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/bootstrap_equated_raw_score_results.hpp>
 #include <equating_recipes/structures/bootstrap_equated_scaled_scores_results.hpp>
+#include <equating_recipes/structures/cg_equipercentile_equating_results.hpp>
 #include <equating_recipes/structures/cubic_spline_postsmoothing.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_bootstrap_results.hpp>

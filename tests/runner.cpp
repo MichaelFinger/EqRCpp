@@ -4,7 +4,7 @@
 // #include "equated_scaled_scores.hpp"
 // #include "matrix_decomp.hpp"
 // #include "beta_binomial.hpp"
-#include "rg_and_sg.hpp"
+#include "rg_and_sg_equating.hpp"
 
 int main(int argc, char const *argv[])
 {

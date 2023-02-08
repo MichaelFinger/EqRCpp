@@ -17,8 +17,8 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct BivariateStatistics {
-      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
-      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsRow;
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsColumn;
 
       int numberOfExaminees;
       Eigen::MatrixXi bivariateFreqDist;
@@ -29,11 +29,11 @@ namespace EquatingRecipes {
 
       std::string toString() {
         std::string value = "Univariate Statistics: Row Scores\n";
-        value.append(this->univariateStatisticsX.toString());
+        value.append(this->univariateStatisticsRow.toString());
         value.append("\n");
 
         value.append("Univariate Statistics: Column Scores\n");
-        value.append(this->univariateStatisticsY.toString());
+        value.append(this->univariateStatisticsColumn.toString());
         value.append("\n");
 
         value.append(fmt::format("Number of Examinees: {}\n", this->numberOfExaminees));
