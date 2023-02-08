@@ -28,15 +28,15 @@
 
 namespace EquatingRecipes {
   struct ScoreStatistics {
-    EquatingRecipes::Structures::BivariateStatistics bivariate(const Eigen::MatrixXd& scores,
-                                                               const double& minimumRowScore,
-                                                               const double& maximumRowScore,
-                                                               const double& rowScoreIncrement,
-                                                               const double& minimumColumnScore,
-                                                               const double& maximumColumnScore,
-                                                               const double& columnScoreIncrement,
-                                                               const std::string& rowScoreId,
-                                                               const std::string& columnScoreId) {
+    static EquatingRecipes::Structures::BivariateStatistics bivariate(const Eigen::MatrixXd& scores,
+                                                                      const double& minimumRowScore,
+                                                                      const double& maximumRowScore,
+                                                                      const double& rowScoreIncrement,
+                                                                      const double& minimumColumnScore,
+                                                                      const double& maximumColumnScore,
+                                                                      const double& columnScoreIncrement,
+                                                                      const std::string& rowScoreId,
+                                                                      const std::string& columnScoreId) {
       EquatingRecipes::Structures::BivariateStatistics bivariateStatistics;
 
       size_t rowScoreColumnIndex = 0;
@@ -96,11 +96,11 @@ namespace EquatingRecipes {
       return bivariateStatistics;
     }
 
-    EquatingRecipes::Structures::UnivariateStatistics univariateFromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
-                                                                                     const double& minimumScore,
-                                                                                     const double& maximumScore,
-                                                                                     const double& scoreIncrement,
-                                                                                     const std::string& id) {
+    static EquatingRecipes::Structures::UnivariateStatistics univariateFromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
+                                                                                            const double& minimumScore,
+                                                                                            const double& maximumScore,
+                                                                                            const double& scoreIncrement,
+                                                                                            const std::string& id) {
       EquatingRecipes::Structures::UnivariateStatistics univariateStatistics;
 
       univariateStatistics.id = id;
@@ -148,11 +148,11 @@ namespace EquatingRecipes {
       return univariateStatistics;
     }
 
-    EquatingRecipes::Structures::UnivariateStatistics univariateFromScores(const Eigen::VectorXd& scores,
-                                                                           const double& minimumScore,
-                                                                           const double& maximumScore,
-                                                                           const double& scoreIncrement,
-                                                                           const std::string& id) {
+    static EquatingRecipes::Structures::UnivariateStatistics univariateFromScores(const Eigen::VectorXd& scores,
+                                                                                  const double& minimumScore,
+                                                                                  const double& maximumScore,
+                                                                                  const double& scoreIncrement,
+                                                                                  const std::string& id) {
       Eigen::VectorXd freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
                                                                                               minimumScore,
                                                                                               maximumScore,
@@ -168,7 +168,7 @@ namespace EquatingRecipes {
       return univariateStatistics;
     }
 
-    EquatingRecipes::Structures::Moments momentsFromScores(const Eigen::VectorXd& scores) {
+    static EquatingRecipes::Structures::Moments momentsFromScores(const Eigen::VectorXd& scores) {
       EquatingRecipes::Structures::Moments scoreMoments;
 
       scoreMoments.momentValues.setZero(4);
@@ -188,10 +188,10 @@ namespace EquatingRecipes {
       return scoreMoments;
     }
 
-    EquatingRecipes::Structures::Moments momentsFromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
-                                                                     const double& minimumScore,
-                                                                     const double& maximumScore,
-                                                                     const double& scoreIncrement) {
+    static EquatingRecipes::Structures::Moments momentsFromScoreFrequencies(const Eigen::VectorXd& scoreFrequencies,
+                                                                            const double& minimumScore,
+                                                                            const double& maximumScore,
+                                                                            const double& scoreIncrement) {
       size_t numberOfScores = EquatingRecipes::Utilities::numberOfScores(minimumScore,
                                                                          maximumScore,
                                                                          scoreIncrement);
@@ -210,8 +210,8 @@ namespace EquatingRecipes {
       return scoreMoments;
     }
 
-    EquatingRecipes::Structures::Moments momentsFromScoreFrequencies(const Eigen::VectorXd& scores,
-                                                                     const Eigen::VectorXd& scoreFrequencies) {
+    static EquatingRecipes::Structures::Moments momentsFromScoreFrequencies(const Eigen::VectorXd& scores,
+                                                                            const Eigen::VectorXd& scoreFrequencies) {
       EquatingRecipes::Structures::Moments scoreMoments;
       scoreMoments.momentValues.setZero(4);
 

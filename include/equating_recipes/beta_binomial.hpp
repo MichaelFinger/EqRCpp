@@ -149,8 +149,7 @@ namespace EquatingRecipes {
                                                        numberOfCategoriesPearsonChiSquare);
 
         /* calculate fitted observed score moments */
-        EquatingRecipes::ScoreStatistics scoreStatistics;
-        EquatingRecipes::Structures::Moments moments = scoreStatistics.momentsFromScoreFrequencies(smoothedFrequencies,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(smoothedFrequencies,
                                                                                                    0,
                                                                                                    numberOfItems,
                                                                                                    1.0);
@@ -238,8 +237,7 @@ namespace EquatingRecipes {
                                                        numberOfCategoriesPearsonChiSquare);
 
         /* calculate fitted observed score moments */
-        ScoreStatistics scoreStatistics;
-        EquatingRecipes::Structures::Moments moments = scoreStatistics.momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
                                                                                                    0.0,
                                                                                                    numberOfItems,
                                                                                                    1.0);

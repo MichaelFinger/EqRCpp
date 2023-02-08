@@ -314,7 +314,7 @@ namespace EquatingRecipes {
     }
 
     // perc_point, ERUtilities.h, ERUtilities.c
-    double percentilePoint(const size_t& numberOfScores,
+    static double percentilePoint(const size_t& numberOfScores,
                            const double& minimumScore,
                            const double& scoreIncrement,
                            const Eigen::VectorXd& cumulativeRelativeFreqDist,
@@ -380,23 +380,6 @@ namespace EquatingRecipes {
       } else {
         /* upper pp -- get x*_U */
 
-        // for(i=1;i<=ns-1;i++) if(crfd[i] > prp) break;
-        // if(crfd[i] != crfd[i-1])
-        //   ppU =  (prp - crfd[i-1])/(crfd[i] - crfd[i-1]) + (i - .5);
-        // else
-        //   ppU = i - .5;
-
-        // /* lower pp -- get x*_L */
-
-        // for(j=ns-2;j>=0;j--) if(crfd[j] < prp) break;
-        // if(crfd[j+1] != crfd[j])
-        //   ppL = (prp - crfd[j])/(crfd[j+1] - crfd[j]) + (j + .5);
-        // else
-        //   ppL = j + .5;
-
-        // /* return area */
-
-        // return min + inc*((ppU + ppL)/2);
         size_t scoreLocation;
         for (scoreLocation = 1; scoreLocation < numberOfScores; scoreLocation++) {
           if (cumulativeRelativeFreqDist(scoreLocation) > percentileRankProportion) {
@@ -412,6 +395,8 @@ namespace EquatingRecipes {
           percentilePointUpperValue = static_cast<double>(scoreLocation) - 0.5;
         }
 
+        /* lower pp -- get x*_L */
+
         for (scoreLocation = numberOfScores - 2; scoreLocation >= 0; scoreLocation--) {
           if (cumulativeRelativeFreqDist(scoreLocation) < percentileRankProportion) {
             break;
@@ -426,6 +411,8 @@ namespace EquatingRecipes {
           percentilePointUpperValue = scoreLocation + 0.5;
         }
 
+        /* return area */
+
         percPoint = minimumScore + scoreIncrement * ((percentilePointUpperValue + percentilePointLowerValue) / 2.0);
       }
       return percPoint;
@@ -437,7 +424,7 @@ namespace EquatingRecipes {
       Computes equipercentile equivalents on scale of y for percentile
       ranks on scale of x. See comments in perc_point() for details.
     */
-    Eigen::VectorXd getEquipercentileEquivalents(const size_t& numberOfRawScoreCategoriesY,
+    static Eigen::VectorXd getEquipercentileEquivalents(const size_t& numberOfRawScoreCategoriesY,
                                                  const double& minimumRawScoreY,
                                                  const double& rawScoreIncrementY,
                                                  const Eigen::VectorXd& cumulativeRelativeFreqDistY,
@@ -693,13 +680,13 @@ namespace EquatingRecipes {
       return firstObservedScore;
     }
 
-    Eigen::FullPivLU<Eigen::MatrixXd> getFullPivotLUDecomposition(const Eigen::MatrixXd& mat) {
+    static Eigen::FullPivLU<Eigen::MatrixXd> getFullPivotLUDecomposition(const Eigen::MatrixXd& mat) {
       Eigen::FullPivLU<Eigen::MatrixXd> lu(mat);
 
       return lu;
     }
 
-    Eigen::PartialPivLU<Eigen::MatrixXd> getPartialPivotLUDecomposition(const Eigen::MatrixXd& mat) {
+    static Eigen::PartialPivLU<Eigen::MatrixXd> getPartialPivotLUDecomposition(const Eigen::MatrixXd& mat) {
       Eigen::PartialPivLU<Eigen::MatrixXd> lu(mat);
 
       return lu;

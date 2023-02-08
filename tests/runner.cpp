@@ -3,7 +3,8 @@
 // #include "moments.hpp"
 // #include "equated_scaled_scores.hpp"
 // #include "matrix_decomp.hpp"
-#include "beta_binomial.hpp"
+// #include "beta_binomial.hpp"
+#include "rg_and_sg.hpp"
 
 int main(int argc, char const *argv[])
 {
@@ -22,8 +23,11 @@ int main(int argc, char const *argv[])
   // Tests::MatrixDecomp matrixDecomp;
   // matrixDecomp.run();
 
-  Tests::BetaBinomial betaBinomial;
-  betaBinomial.run();
+  // Tests::BetaBinomial betaBinomial;
+  // betaBinomial.run();
+
+  Tests::RGAndSG rgAndSG;
+  rgAndSG.run();
 
   return 0;
 }

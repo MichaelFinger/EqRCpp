@@ -9,6 +9,7 @@
 #ifndef STRUCTURES_PDATA_HPP
 #define STRUCTURES_PDATA_HPP
 
+#include <string>
 #include <vector>
 #include <Eigen/Core>
 
@@ -44,13 +45,14 @@ namespace EquatingRecipes {
 
       double weightSyntheticPopulation1;                                                     /* weight for synthetic pop 1 */
       bool anchorIsInternal;                                                      /* = false (external); = true (internal) */
-      double rreliabilityCommonItemsPopulation1;                                   /* reliability of common items in pop 1 */
-      double rreliabilityCommonItemsPopulation2;                                   /* reliability of common items in pop 2 */
-      std::vector<Method> methods;
+      double reliabilityCommonItemsPopulation1;                                   /* reliability of common items in pop 1 */
+      double reliabilityCommonItemsPopulation2;                                   /* reliability of common items in pop 2 */
+      std::vector<std::string> methods;
       double mininumScoreX;                                                                             /* min score for x */
       double maximumScoreX;                                                                             /* max score for x */
       double scoreIncrementX;                                                   /* increment between adjacent scores for x */
       Eigen::VectorXd scoreFrequenciesX;                                                              /* fd for new form x */
+      size_t numberOfExaminees;
       EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;                                               /* conversion table for Y */
       size_t numberOfBootstrapReplications;                                        /* number of replications for bootstrap */
       size_t bootstrapReplicationNumber = 0;                     /* rep number for bootstrap; set to 0 for actual equating */

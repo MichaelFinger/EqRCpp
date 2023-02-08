@@ -81,17 +81,16 @@ namespace EquatingRecipes {
       */
 
       if (pData.scoreFrequenciesX.size() >= 1) {
-        EquatingRecipes::ScoreStatistics scoreStatistics;
         EquatingRecipes::Structures::Moments moments;
 
         for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-          moments = scoreStatistics.momentsFromScoreFrequencies(results.unroundedEquatedScaledScores.col(methodIndex),
-                                                                pData.scoreFrequenciesX);
+          moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(results.unroundedEquatedScaledScores.col(methodIndex),
+                                                                                  pData.scoreFrequenciesX);
 
           results.unroundedEquatedScaledScoreMoments.col(methodIndex) = moments.momentValues;
 
-          moments = scoreStatistics.momentsFromScoreFrequencies(results.roundedEquatedScaledScores.col(methodIndex),
-                                                                pData.scoreFrequenciesX);
+          moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(results.roundedEquatedScaledScores.col(methodIndex),
+                                                                                  pData.scoreFrequenciesX);
 
           results.roundedEquatedScaledScoreMoments.col(methodIndex) = moments.momentValues;
         }
