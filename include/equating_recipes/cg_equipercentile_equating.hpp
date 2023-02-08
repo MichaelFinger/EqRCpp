@@ -35,6 +35,7 @@ University of Iowa
 #include <vector>
 #include <Eigen/Core>
 
+#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/all_structures.hpp>
 

@@ -4,7 +4,10 @@
 // #include "equated_scaled_scores.hpp"
 // #include "matrix_decomp.hpp"
 // #include "beta_binomial.hpp"
-#include "rg_and_sg_equating.hpp"
+// #include "rg_and_sg_equating.hpp"
+
+#include <equating_recipes/cg_no_smoothing.hpp>
+#include <equating_recipes/cg_equipercentile_equating.hpp>
 
 int main(int argc, char const *argv[])
 {
@@ -26,8 +29,8 @@ int main(int argc, char const *argv[])
   // Tests::BetaBinomial betaBinomial;
   // betaBinomial.run();
 
-  Tests::RGAndSG rgAndSG;
-  rgAndSG.run();
+  // Tests::RGAndSG rgAndSG;
+  // rgAndSG.run();
 
   return 0;
 }

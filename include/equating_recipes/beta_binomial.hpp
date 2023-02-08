@@ -47,7 +47,7 @@ namespace EquatingRecipes {
                                                                                            const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsOldForm,
                                                                                            const EquatingRecipes::Structures::BetaBinomialSmoothing& betaBinomialSmoothingNewForm,
                                                                                            const EquatingRecipes::Structures::BetaBinomialSmoothing& betaBinomialSmoothingOldForm,
-                                                                                           size_t bootstrapReplicationNumber) {
+                                                                                           const size_t& bootstrapReplicationNumber) {
       EquatingRecipes::Structures::EquatedRawScoreResults results;
       return results;
     }
