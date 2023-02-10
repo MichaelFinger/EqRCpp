@@ -85,7 +85,7 @@ University of Iowa
 #include <fmt/core.h>
 
 #include <equating_recipes/structures/raw_to_scaled_score_table.hpp>
-#include <equating_recipes/structures/cineg_method.hpp>
+#include <equating_recipes/structures/method.hpp>
 
 namespace EquatingRecipes {
   struct Utilities {
@@ -749,24 +749,30 @@ namespace EquatingRecipes {
       }
     }
 
-    static std::string getCINEGMethodCode(const EquatingRecipes::Structures::CINEGMethod& cinegMethod) {
-      switch (cinegMethod) {
-        case EquatingRecipes::Structures::CINEGMethod::FE_BH:
+    static std::string getMethodCode(const EquatingRecipes::Structures::Method& method) {
+      switch (method) {
+        case EquatingRecipes::Structures::Method::MEAN:
+          return "M";
+        case EquatingRecipes::Structures::Method::LINEAR:
+          return "L";
+        case EquatingRecipes::Structures::Method::EQUIPERCENTILE:
           return "E";
-        case EquatingRecipes::Structures::CINEGMethod::MFE_BH:
+        case EquatingRecipes::Structures::Method::FE_BH:
+          return "E";
+        case EquatingRecipes::Structures::Method::MFE_BH:
           return "F";
-        case EquatingRecipes::Structures::CINEGMethod::FE_BH_MFE_BH:
+        case EquatingRecipes::Structures::Method::FE_BH_MFE_BH:
           return "G";
-        case EquatingRecipes::Structures::CINEGMethod::CHAINED:
+        case EquatingRecipes::Structures::Method::CHAINED:
           return "C";
-        case EquatingRecipes::Structures::CINEGMethod::FE_BH_CHAINED:
+        case EquatingRecipes::Structures::Method::FE_BH_CHAINED:
           return "H";
-        case EquatingRecipes::Structures::CINEGMethod::FE_BH_MFE_BH_CHAINED:
+        case EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED:
           return "A";
-        case EquatingRecipes::Structures::CINEGMethod::NONE:
+        case EquatingRecipes::Structures::Method::NONE:
           return "";
         default:
-          throw std::runtime_error("Invalid CINEG method.");
+          throw std::runtime_error("Invalid method.");
       }
     }
   };

@@ -16,14 +16,14 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct EquatedRawScoreResults {
-      Eigen::VectorXd xSyntheticPopulationMean(4); /* mean for x for synthetic pop */
-      Eigen::VectorXd ySyntheticPopulationMean(4); /* mean for y for synthetic pop */
-      Eigen::VectorXd xSyntheticPopulationSD(4);   /* sd for x for synthetic pop */
-      Eigen::VectorXd ySyntheticPopulationSD(4);   /* sd for y for synthetic pop */
-      Eigen::VectorXd gammaPopulation1(4);         /* gamma for pop 1 */
-      Eigen::VectorXd gammaPopulation2(4);         /* gamma for pop 2 */
-      Eigen::VectorXd slope(4);                    /* slope */
-      Eigen::VectorXd intercept(4);                /* intercept */
+      Eigen::VectorXd xSyntheticPopulationMean = Eigen::VectorXd(4); /* mean for x for synthetic pop */
+      Eigen::VectorXd ySyntheticPopulationMean = Eigen::VectorXd(4); /* mean for y for synthetic pop */
+      Eigen::VectorXd xSyntheticPopulationSD = Eigen::VectorXd(4);   /* sd for x for synthetic pop */
+      Eigen::VectorXd ySyntheticPopulationSD = Eigen::VectorXd(4);   /* sd for y for synthetic pop */
+      Eigen::VectorXd gammaPopulation1 = Eigen::VectorXd(4);         /* gamma for pop 1 */
+      Eigen::VectorXd gammaPopulation2 = Eigen::VectorXd(4);         /* gamma for pop 2 */
+      Eigen::VectorXd slope = Eigen::VectorXd(4);                    /* slope */
+      Eigen::VectorXd intercept = Eigen::VectorXd(4);                /* intercept */
       Eigen::MatrixXd equatedRawScores;            /* equated raw scores */
       Eigen::MatrixXd equatedRawScoreMoments;      /* moments for equated raw scores */
       Eigen::MatrixXd relativeFreqDistsX;          /* rel FD for X and syn pop: [0] for FE, [1] for MFE */

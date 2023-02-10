@@ -692,7 +692,7 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    Eigen::VectorXd ChainedEquipercentileEquating(const size_t& numberOfScoresX,
+    Eigen::VectorXd chainedEquipercentileEquating(const size_t& numberOfScoresX,
                                                   const Eigen::VectorXd& percentileRanksX,
                                                   const double& minimumScoreV,
                                                   const double& maximumScoreV,

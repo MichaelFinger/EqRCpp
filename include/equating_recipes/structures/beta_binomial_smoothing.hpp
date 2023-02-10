@@ -17,21 +17,21 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct BetaBinomialSmoothing {
-      size_t numberOfItems;                                     /* number of items on test */
-      size_t numberOfExaminees;                                 /* sample size */
-      size_t numberOfParameters;                                /* number of parameters (2 or 4) */
-      double reliablilty;                                       /* reliability -- almost always Kr20 */
-      double lordK;                                             /* Lord's k for approximation of compound binomial */
-      Eigen::VectorXd betaParameters(4);                        /* parameters of true score distribution */
-      Eigen::VectorXd rawScoreMoments(4);                       /* Raw score moments */
-      Eigen::VectorXd fittedRawScoreMoments(4);                 /* Fitted raw score moments */
-      Eigen::VectorXd trueScoreMoments(4);                      /* True score moments */
-      double likelihoodRatioChiSq;                              /* likelihood ratio chi-square for fitted dist */
-      double pearsonChiSq;                                      /* Pearson chi-square for fitted dist */
-      size_t numberOfMomentsFit;                                /* number of moments fit */
-      Eigen::VectorXd fittedRawScoreDensity;                    /* fitted raw score dist (proportions, density) */
-      Eigen::VectorXd fittedRawScoreCumulativeRelativeFreqDist; /* cum rel freq dist for fitted dist */
-      Eigen::VectorXd fittedRawScorePercentileRankDist;         /* percentile rank dist for fitted dist */
+      size_t numberOfItems;                                                /* number of items on test */
+      size_t numberOfExaminees;                                            /* sample size */
+      size_t numberOfParameters;                                           /* number of parameters (2 or 4) */
+      double reliablilty;                                                  /* reliability -- almost always Kr20 */
+      double lordK;                                                        /* Lord's k for approximation of compound binomial */
+      Eigen::VectorXd betaParameters = Eigen::VectorXd(4);           /* parameters of true score distribution */
+      Eigen::VectorXd rawScoreMoments = Eigen::VectorXd(4);          /* Raw score moments */
+      Eigen::VectorXd fittedRawScoreMoments = Eigen::VectorXd(4); /* Fitted raw score moments */
+      Eigen::VectorXd trueScoreMoments = Eigen::VectorXd(4);      /* True score moments */
+      double likelihoodRatioChiSq;                                         /* likelihood ratio chi-square for fitted dist */
+      double pearsonChiSq;                                                 /* Pearson chi-square for fitted dist */
+      size_t numberOfMomentsFit;                                           /* number of moments fit */
+      Eigen::VectorXd fittedRawScoreDensity;                               /* fitted raw score dist (proportions, density) */
+      Eigen::VectorXd fittedRawScoreCumulativeRelativeFreqDist;            /* cum rel freq dist for fitted dist */
+      Eigen::VectorXd fittedRawScorePercentileRankDist;                    /* percentile rank dist for fitted dist */
 
       EquatingRecipes::Structures::UnivariateStatistics rawScoreUnivariateStatistics;
 
@@ -65,7 +65,7 @@ namespace EquatingRecipes {
 
         msg.append("\n\n***Frequencies and Proportions***");
         msg.append("\n\nScore   freq  fitted-freq          prop  fitted-prop  fitted-crfd   fitted-prd\n");
-        
+
         for (size_t scoreLocation = 0; scoreLocation <= numberOfItems; scoreLocation++) {
           msg.append(fmt::format("\n{:5d} {:6.0f} {:12.5f}       {:12.5f} {:12.5f} {:12.5f} {:12.5f}",
                                  scoreLocation,
@@ -116,7 +116,7 @@ namespace EquatingRecipes {
 
         msg.append("\n\n***Frequencies and Proportions***");
         msg.append("\n\nScore             freq                    fitted-freq                                 prop                    fitted-prop                    fitted-crfd                    fitted-prd\n");
-        
+
         for (size_t scoreLocation = 0; scoreLocation <= numberOfItems; scoreLocation++) {
           msg.append(fmt::format("\n{:5d} {:16.0f} {:30.15f}       {:30.15f} {:30.15f} {:30.15f} {:30.15f}",
                                  scoreLocation,
