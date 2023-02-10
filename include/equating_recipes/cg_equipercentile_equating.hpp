@@ -123,11 +123,10 @@ namespace EquatingRecipes {
     //   a[]        slope for Braun-Holland Method
     //   b[]        intercept for Braun-Holland Method
     //   erawBH[]   Braun-Holland linear equated raw scores
+    
     EquatingRecipes::Structures::CGEquipercentileEquatingResults feOrMFEEquipEquating(const double& population1Weight,
                                                                                       const bool& isInternalAnchor,
                                                                                       const size_t& numberOfScoresV,
-                                                                                      const double& mininumScoreV,
-                                                                                      const double& maximumScoreV,
                                                                                       const size_t& numberOfScoresX,
                                                                                       const double& mininumScoreX,
                                                                                       const double& maximumScoreX,
@@ -136,28 +135,26 @@ namespace EquatingRecipes {
                                                                                       const double& maximumScoreY,
                                                                                       const double& scoreIncrement,
                                                                                       const bool& doBraunHollandLinearEquating,
-                                                                                      const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
-                                                                                      const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
+                                                                                      const Eigen::MatrixXd& bivariateProportionsXV,
+                                                                                      const Eigen::MatrixXd& bivariateProportionsYV,
                                                                                       const double& reliabilityCommonItemsPopulation1 = 0.0,
                                                                                       const double& reliabilityCommonItemsPopulation2 = 0.0) {
       EquatingRecipes::Structures::CGEquipercentileEquatingResults results;
 
-      Eigen::MatrixXd bivRelFreqDistXV = bivariateStatisticsXV.bivariateProportions;
-      Eigen::MatrixXd bivRelFreqDistYV = bivariateStatisticsYV.bivariateProportions;
       Eigen::VectorXd relFreqDistXSynPop; // (numberOfScoresX);
       Eigen::VectorXd relFreqDistYSynPop; // (numberOfScoresY);
 
       /* relFreqDistXSynPop and relFreqDistYSynPop: densities for x and y in synthetic population 
-     Note: if 0 < reliabilityCommonItemsPopulation1, reliabilityCommonItemsPopulation2 <= 1, results are for MFE;
+      Note: if 0 < reliabilityCommonItemsPopulation1, reliabilityCommonItemsPopulation2 <= 1, results are for MFE;
            otherwise, results are for FE */
 
       syntheticDensities(population1Weight,
                          isInternalAnchor,
                          numberOfScoresV,
                          numberOfScoresX,
-                         bivRelFreqDistXV,
+                         bivariateProportionsXV,
                          numberOfScoresY,
-                         bivRelFreqDistYV,
+                         bivariateProportionsYV,
                          reliabilityCommonItemsPopulation1,
                          reliabilityCommonItemsPopulation2,
                          relFreqDistXSynPop,
@@ -197,8 +194,8 @@ namespace EquatingRecipes {
 
       /* Braun-Holland linear equating */
       if (doBraunHollandLinearEquating) {
-        Eigen::VectorXd slopes(1);
-        Eigen::VectorXd intercepts(1);
+        double slope;
+        double intercept;
 
         braunHollandLinearEquating(mininumScoreX,
                                    maximumScoreX,
@@ -207,11 +204,11 @@ namespace EquatingRecipes {
                                    scoreIncrement,
                                    relFreqDistXSynPop,
                                    relFreqDistYSynPop,
-                                   slopes(0),
-                                   intercepts(0));
+                                   slope,
+                                   intercept);
 
-        results.slope = slopes;
-        results.intercept = intercepts;
+        results.slope = slope;
+        results.intercept = intercept;
         Eigen::VectorXd braunHollandEquatedRawScores(numberOfScoresX);
 
         for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
@@ -219,8 +216,10 @@ namespace EquatingRecipes {
                                                               mininumScoreX,
                                                               scoreIncrement);
 
-          braunHollandEquatedRawScores(scoreLocation) = slopes(0) * score + intercepts(0);
+          braunHollandEquatedRawScores(scoreLocation) = slope * score + intercept;
         }
+
+        results.braunHollandEquatedRawScores = braunHollandEquatedRawScores;
       }
 
       return results;

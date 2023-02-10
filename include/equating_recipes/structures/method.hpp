@@ -17,11 +17,12 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class Method {
-      EQUIPERCENTILE,
-      LINEAR,
       MEAN,
+      LINEAR,
+      EQUIPERCENTILE,
       FE_BH,
       MFE_BH,
+      FE_BH_MFE_BH,
       CHAINED,
       FE_BH_CHAINED,
       FE_BH_MFE_BH_CHAINED

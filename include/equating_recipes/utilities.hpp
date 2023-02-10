@@ -85,6 +85,7 @@ University of Iowa
 #include <fmt/core.h>
 
 #include <equating_recipes/structures/raw_to_scaled_score_table.hpp>
+#include <equating_recipes/structures/cineg_method.hpp>
 
 namespace EquatingRecipes {
   struct Utilities {
@@ -699,6 +700,74 @@ namespace EquatingRecipes {
       Eigen::PartialPivLU<Eigen::MatrixXd> lu(mat);
 
       return lu;
+    }
+
+    static EquatingRecipes::Structures::Method getMethod(const EquatingRecipes::Structures::Design& design,
+                                                         const std::string& methodCode) {
+      //   'M' = mean; 'L' = lin; 'E' equi (for RG and CG designs);
+      // 	 'For CG design,
+      // 		  'E' = Freq esti FE) with Braun-Holland (BH-FE)
+      //      'F' = Modified freq est (MFE) with Braun-Holland (BH-MFE)
+      //      'G' = FE + BH-FE + MFE + BH-MFE
+      //      'C' = Chained
+      // 		  'H' = FE + BH-FE + Chained
+      //      'A' = FE + BH-FE + MFE + BH-MFE + Chained
+      if (methodCode == "M") {
+        return EquatingRecipes::Structures::Method::MEAN;
+
+      } else if (methodCode == "L") {
+        return EquatingRecipes::Structures::Method::LINEAR;
+
+      } else if (methodCode == "E" &&
+                 design == EquatingRecipes::Structures::Design::RandomGroups) {
+        return EquatingRecipes::Structures::Method::EQUIPERCENTILE;
+
+      } else if (design == EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups) {
+        if (methodCode == "E") {
+          return EquatingRecipes::Structures::Method::FE_BH;
+
+        } else if (methodCode == "F") {
+          return EquatingRecipes::Structures::Method::MFE_BH;
+
+        } else if (methodCode == "G") {
+          return EquatingRecipes::Structures::Method::FE_BH_MFE_BH;
+
+        } else if (methodCode == "C") {
+          return EquatingRecipes::Structures::Method::CHAINED;
+
+        } else if (methodCode == "H") {
+          return EquatingRecipes::Structures::Method::FE_BH_CHAINED;
+
+        } else if (methodCode == "A") {
+          return EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED;
+          
+        } else {
+          throw std::runtime_error("Invalid method code for CINEG design.");
+        }
+      } else {
+        throw std::runtime_error("Invalid method code.");
+      }
+    }
+
+    static std::string getCINEGMethodCode(const EquatingRecipes::Structures::CINEGMethod& cinegMethod) {
+      switch (cinegMethod) {
+        case EquatingRecipes::Structures::CINEGMethod::FE_BH:
+          return "E";
+        case EquatingRecipes::Structures::CINEGMethod::MFE_BH:
+          return "F";
+        case EquatingRecipes::Structures::CINEGMethod::FE_BH_MFE_BH:
+          return "G";
+        case EquatingRecipes::Structures::CINEGMethod::CHAINED:
+          return "C";
+        case EquatingRecipes::Structures::CINEGMethod::FE_BH_CHAINED:
+          return "H";
+        case EquatingRecipes::Structures::CINEGMethod::FE_BH_MFE_BH_CHAINED:
+          return "A";
+        case EquatingRecipes::Structures::CINEGMethod::NONE:
+          return "";
+        default:
+          throw std::runtime_error("Invalid CINEG method.");
+      }
     }
   };
 } // namespace EquatingRecipes

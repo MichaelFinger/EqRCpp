@@ -10,8 +10,8 @@ namespace EquatingRecipes {
       Eigen::VectorXd syntheticPopulationRelativeFreqDistX;              //   fxs[]      rel freq dist for x in syn pop
       Eigen::VectorXd syntheticPopulationRelativeFreqDistY;              //   gys[]      rel freq dist for y in syn pop
       Eigen::VectorXd equatedRawScores;                                  //   eraw[]     equipercentile equated raw scores
-      std::optional<Eigen::VectorXd> slope;                              //   a[]        slope for Braun-Holland Method
-      std::optional<Eigen::VectorXd> intercept;                          //   b[]        intercept for Braun-Holland Method
+      std::optional<double> slope;                                       //   a        slope for Braun-Holland Method
+      std::optional<double> intercept;                                   //   b        intercept for Braun-Holland Method
       std::optional<Eigen::VectorXd> braunHollandEquatedRawScores;       //   erawBH[]   Braun-Holland linear equated raw scores
     };
   } // namespace Structures

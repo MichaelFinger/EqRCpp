@@ -63,7 +63,7 @@ namespace EquatingRecipes {
                 'F' = Modified freq est (MFE) with Braun-Holland (BH) under MFE
                 'G' = FE + BH-FE + MFE + BH-MFE
                 'C' = Chained
-          'H' = FE + BH-FE + Chained
+                'H' = FE + BH-FE + Chained
                 'A' = FE + BH-FE + MFE + BH-MFE + Chained
                   
         smoothing = 'N' (none)  
@@ -141,7 +141,297 @@ namespace EquatingRecipes {
              const size_t& bootstrapReplicationNumber,
              EquatingRecipes::Structures::PData& pData,
              EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      std::vector<std::string> methodNames = {"    Tucker",
+                                              "   Lev Obs",
+                                              "  Lev True",
+                                              "  ChainedL",
+                                              "        FE",
+                                              "     BH-FE",
+                                              "       MFE",
+                                              "    BH-MFE",
+                                              "  ChainedE"};
 
+      /* should be set to 0 for actual equating. */
+      /* Counting of replications done in Wrapper_Bootstrap(),
+      which is why this statement cannot be in the if statement below */
+      pData.bootstrapReplicationNumber = bootstrapReplicationNumber;
+
+      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(design,
+                                                                         method);
+
+      /* allocation and assignments for in
+          Note that for every assignment of the form inall->(var) = xv->(var)
+          values vary depending on whether xv is for actual equating or
+          a bootstrap sample; all other values are the same for the
+          actual equating and a bootstrap sample */
+      if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
+        pData.summaryRawDataXV = bivariateStatisticsXV;
+        pData.summaryRawDataYV = bivariateStatisticsYV;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+
+        if (population1Weight < 0.0 || population1Weight > 1.0) {
+          /* proportional wts if w1 outside [0,1] */
+          pData.weightSyntheticPopulation1 = static_cast<double>(bivariateStatisticsXV.numberOfExaminees) /
+                                             static_cast<double>(bivariateStatisticsXV.numberOfExaminees + bivariateStatisticsYV.numberOfExaminees);
+        } else {
+          pData.weightSyntheticPopulation1 = population1Weight;
+        }
+
+        pData.isInternalAnchor = isInternalAnchor;
+        pData.reliabilityCommonItemsPopulation1 = reliabilityCommonItemsPopulation1;
+        pData.reliabilityCommonItemsPopulation2 = reliabilityCommonItemsPopulation2;
+
+        pData.methodCode = methodCode;
+
+        if ((methodCode == "F" ||
+             methodCode == "G" ||
+             methodCode == "A") &&
+            (reliabilityCommonItemsPopulation1 == 0.0 ||
+             reliabilityCommonItemsPopulation2 == 0.0)) {
+          throw std::runtime_error("\nMFE cannot be conducted since reliabilityCommonItemsPopulation1 == 0 or reliabilityCommonItemsPopulation2 == 0");
+        }
+
+        size_t methodStartIndex;
+        size_t methodEndIndex;
+
+        if (methodCode == "M" ||
+            methodCode == "L") {
+          methodStartIndex = 0;
+          methodEndIndex = 3;
+
+        } else if (methodCode == "E") {
+          methodStartIndex = 4;
+          methodEndIndex = 5;
+
+        } else if (methodCode == "F") {
+          methodStartIndex = 6;
+          methodEndIndex = 7;
+
+        } else if (methodCode == "G") {
+          methodStartIndex = 4;
+          methodEndIndex = 7;
+
+        } else if (methodCode == "C") {
+          methodStartIndex = 8;
+          methodEndIndex = 8;
+
+        } else if (methodCode == "H") {
+          methodStartIndex = 4;
+          methodEndIndex = 5;
+        } else if (methodCode == "A") {
+          methodStartIndex = 4;
+          methodEndIndex = 8;
+        } else {
+          throw std::runtime_error("Invalid method code.");
+        }
+
+        for (size_t methodIndex = methodStartIndex; methodIndex <= methodEndIndex; methodIndex++) {
+          pData.methods.push_back(methodNames[methodIndex]);
+        }
+
+        if (methodCode == "H") {
+          pData.methods.push_back(methodNames[8]);
+        }
+
+        pData.mininumScoreX = bivariateStatisticsXV.univariateStatisticsRow.minimumScore;
+        pData.maximumScoreX = bivariateStatisticsXV.univariateStatisticsRow.maximumScore;
+        pData.scoreIncrementX = bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement;
+        pData.scoreFrequenciesX = bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble;
+        pData.numberOfExaminees = bivariateStatisticsXV.numberOfExaminees;
+      }
+
+      /* allocation and assignments for r */
+
+      if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+        size_t scoreLocationX = EquatingRecipes::Utilities::getScoreLocation(bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                                             bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                                                             bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement);
+
+        size_t scoreLocationY = EquatingRecipes::Utilities::getScoreLocation(bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+                                                                             bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                             bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement);
+
+        equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), scoreLocationX + 1);
+        equatedRawScoreResults.equatedRawScoreMoments.resize(4);
+        equatedRawScoreResults.relativeFreqDistsX(1, scoreLocationX + 1);
+        equatedRawScoreResults.relativeFreqDistsY(1, scoreLocationY + 1);
+        equatedRawScoreResults.slope(pData.methods.size());
+        equatedRawScoreResults.intercept(pData.methods.size());
+      }
+
+      /* Mean and Linear equating results:
+
+         xv and yv variables relative to variables in CI_LinEq()
+
+         Function  Function Call
+          mnx1      xv->mts1[0]
+          sdx1      xv->mts1[1]
+          mnv1      xv->mts2[0]
+          sdv1      xv->mts2[1]
+          covxv1    xv->cov
+
+          mny2      yv->mts1[0]
+          sdy2      yv->mts1[1]
+          mnv2      yv->mts2[0]
+          sdv2      yv->mts2[1]
+          covyv2    yv->cov
+
+          In function, 1 and 2 are populations; in xv and yv, 1 and 2 are variables
+      */
+
+      if (methodCode == "M" || methodCode == "L") {
+        commonItemLinearEquating(bivariateStatisticsXV.univariateStatisticsRow.momentValues(0),
+                                 bivariateStatisticsXV.univariateStatisticsRow.momentValues(1),
+                                 bivariateStatisticsXV.univariateStatisticsColumn.momentValues(0),
+                                 bivariateStatisticsXV.univariateStatisticsColumn.momentValues(1),
+                                 bivariateStatisticsXV.covariance,
+                                 bivariateStatisticsYV.univariateStatisticsRow.momentValues(0),
+                                 bivariateStatisticsYV.univariateStatisticsRow.momentValues(1),
+                                 bivariateStatisticsYV.univariateStatisticsColumn.momentValues(0),
+                                 bivariateStatisticsYV.univariateStatisticsColumn.momentValues(1),
+                                 bivariateStatisticsYV.covariance,
+                                 pData.weightSyntheticPopulation1,
+                                 isInternalAnchor,
+                                 pData.method,
+                                 bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                 bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                 bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement,
+                                 pData.methods.size(),
+                                 equatedRawScoreResults.xSyntheticPopulationMean,
+                                 equatedRawScoreResults.ySyntheticPopulationMean,
+                                 equatedRawScoreResults.xSyntheticPopulationSD,
+                                 equatedRawScoreResults.ySyntheticPopulationSD,
+                                 equatedRawScoreResults.gammaPopulation1,
+                                 equatedRawScoreResults.gammaPopulation2,
+                                 equatedRawScoreResults.slope,
+                                 equatedRawScoreResults.intercept,
+                                 equatedRawScoreResults.equatedRawScores);
+      }
+
+      /* Equipercentile results, including Braun-Holland (BH) linear.
+         Note: For FE syn densities are in fxs[0] and gys[0]
+               For MFE syn densities are in fxs[1] and gys[1]
+               For BH under FE, slope in a[0] and intercept in b[0]
+               For BH under MFE, slope in a[1] and intercept in b[1]
+      */
+
+     CGEquipercentileEquating cgEquipercentileEquating;
+
+      /* FE + BH-FE in positions 0 and 1 */
+      if (methodCode == "E" || methodCode == "G" || methodCode == "A" || methodCode == "H") {
+        EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
+            cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
+                                                          pData.isInternalAnchor,
+                                                          bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                          bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                          bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                                          bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                          bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                          bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                          bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+                                                          bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                          true,
+                                                          bivariateStatisticsXV.bivariateProportions,
+                                                          bivariateStatisticsYV.bivariateProportions,
+                                                          0.0,
+                                                          0.0);
+
+        equatedRawScoreResults.relativeFreqDistsX.row(0) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.row(0) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.row(0) = cgResults.equatedRawScores;
+        if (cgResults.slope.has_value()) {
+          equatedRawScoreResults.slope(0) = cgResults.slope;
+        }
+
+        if (cgResults.intercept.has_value()) {
+          equatedRawScoreResults.intercept(0) = cgResults.intercept;
+        }
+        
+        equatedRawScoreResults.equatedRawScores.row(1) = cgResults.braunHollandEquatedRawScores;
+      }
+      
+      
+      if (methodCode == "F") {
+        /* MFE + BH-MFE in positions 0 and 1 */    
+        EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
+            cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
+            pData.isInternalAnchor,
+            bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+            bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+            bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+            bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+            bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+            bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+            bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+            bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+            bivariateStatisticsXV.bivariateProportions,
+            bivariateStatisticsYV.bivariateProportions,
+            pData.reliabilityCommonItemsPopulation1,
+            pData.reliabilityCommonItemsPopulation2);
+
+        equatedRawScoreResults.relativeFreqDistsX.col(1) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.col(1) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.col(0) = cgResults.equatedRawScores;
+
+        if (cgResults.slope.has_value()) {
+          equatedRawScoreResults.slope(1) = cgResults.slope.value();
+        }
+
+        if (cgResults.intercept.has_value()) {
+          equatedRawScoreResults.intercept(1) = cgResults.intercept.value();
+        }        
+        
+        if (cgResults.braunHollandEquatedRawScores.has_value()) {
+          equatedRawScoreResults.equatedRawScores.col(1) = cgResults.braunHollandEquatedRawScores.value();
+        }
+      }
+      
+      if (methodCode == "G" || methodCode == "A") {
+        /* MFE + BH-MFE in positions 2 and 3 */
+        
+
+        //     FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1,
+        //                yv->ns1, yv->min1, yv->max1, yv->inc1,
+        //                xv->bp12, yv->bp12, inall->rv1, inall->rv2,
+        //                r->fxs[1], r->gys[1], r->eraw[2],
+        //                &r->a[1], &r->b[1], r->eraw[3]);
+
+      }
+      
+      /* Chained equipercentile method */
+
+      if (methodCode == "C") {
+        /* Chained in position 0 */
+
+        //     Chained_EE(xv->ns1, xv->prd1, xv->min2, xv->max2, xv->inc2,
+        //                xv->ns2, xv->crfd2, yv->min1, yv->inc1, yv->ns1,
+        //                yv->crfd1, yv->crfd2, r->eraw[0]);
+      }
+
+      /* All methods: FE, BF under FE, MFE, BH under MFE, Chained */
+      if (methodCode == "A") {
+        /* Chained in position 4 */
+
+        //     Chained_EE(xv->ns1, xv->prd1, xv->min2, xv->max2, xv->inc2,
+        //                xv->ns2, xv->crfd2, yv->min1, yv->inc1, yv->ns1,
+        //                yv->crfd1, yv->crfd2, r->eraw[4]);
+      }
+
+      //  /* FE, BF under FE, Chained */
+      if (methodCode == "H") {
+        /* Chained in position 2 */ 
+        //     Chained_EE(xv->ns1, xv->prd1, xv->min2, xv->max2, xv->inc2,
+        //                xv->ns2, xv->crfd2, yv->min1, yv->inc1, yv->ns1,
+        //                yv->crfd1, yv->crfd2, r->eraw[2]);
+
+      }
+
+      /* get moments */
+
+      //   for(i=0;i<=inall->nm-1;i++)
+      //     MomentsFromFD(xv->min1,xv->max1,xv->inc1,r->eraw[i],xv->fd1,r->mts[i]);
     }
 
     /*
@@ -188,7 +478,6 @@ namespace EquatingRecipes {
           b[] = vector of intercepts (for the methods)
           eraw[][] =  method (rows) by raw score (columns) matrix
                       of equated scores; see Wrapper_CLN()for more details
-          mts[][] = method (rows) by moments (columns) matrix
                     
           NOTE:  it is assumed that storage already allocated for
                 all vectors and eraw[][]
@@ -202,16 +491,21 @@ namespace EquatingRecipes {
       */
     void commonItemLinearEquating(const double& meanXPop1,
                                   const double& sdXPop1,
-                                  const double& meanVPop1,
-                                  const double& sdVPop1,
-                                  const double& covYVPop2,
+                                  const double& meanXPop2,
+                                  const double& sdXPop2,
+                                  const double& covXV,
+                                  const double& meanYPop1,
+                                  const double& sdYPop1,
+                                  const double& meanYPop2,
+                                  const double& sdYPop2,
+                                  const double& covYV,
                                   const double& population1Weight,
                                   const bool& isInternalAnchor,
                                   const EquatingRecipes::Structures::Method& method,
-                                  const double& mininumScoreX,
-                                  const double& maximumScoreX,
-                                  const double& scoreIncrementX, 
-                                  const Eigen::VectorXd freqDistX,
+                                  const double& mininumScore,
+                                  const double& maximumScore,
+                                  const double& scoreIncrement,
+                                  const size_t& numberOfMethods,
                                   Eigen::VectorXd& meanVectorXSynPop,
                                   Eigen::VectorXd& meanVectorYSynPop,
                                   Eigen::VectorXd& sdVectorXSynPop,
@@ -220,8 +514,9 @@ namespace EquatingRecipes {
                                   Eigen::VectorXd& gammaVectorPop2,
                                   Eigen::VectorXd& slopes,
                                   Eigen::VectorXd& intercepts,
-                                  Eigen::MatrixXd& methodByEquatedRawScores,
-                                  Eigen::MatrixXd& methodByMomemnts) {}
+                                  Eigen::MatrixXd& methodByEquatedRawScores) {
+
+    }
 
     /* 
       For a linear observed score equating method and a CINEG design,

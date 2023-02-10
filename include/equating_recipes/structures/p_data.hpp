@@ -36,15 +36,14 @@ namespace EquatingRecipes {
       EquatingRecipes::Structures::Design design;
       EquatingRecipes::Structures::Method method;
       EquatingRecipes::Structures::Smoothing smoothing;
-
+      std::string methodCode;
       double minimumRawScoreYct;
       double maximumRawScoreYct;
       double scoreIncrementYct;
       int lowestObservableRoundedScaledScore;                                       /* lowest possible rounded scale score */
       int highestObservableRoundedScaledScore;                                     /* highest possible rounded scale score */
-
       double weightSyntheticPopulation1;                                                     /* weight for synthetic pop 1 */
-      bool anchorIsInternal;                                                      /* = false (external); = true (internal) */
+      bool isInternalAnchor;                                                      /* = false (external); = true (internal) */
       double reliabilityCommonItemsPopulation1;                                   /* reliability of common items in pop 1 */
       double reliabilityCommonItemsPopulation2;                                   /* reliability of common items in pop 2 */
       std::vector<std::string> methods;

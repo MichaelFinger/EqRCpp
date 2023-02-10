@@ -41,7 +41,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd relativeFreqDist;           // relative freq dist
       Eigen::VectorXd cumulativeRelativeFreqDist; // cum relative freq dist
       Eigen::VectorXd percentileRankDist;         // percentile rank dist
-      Eigen::VectorXd momentValues;               // moments: mean, sd, skew, kurt
+      Eigen::VectorXd momentValues(4);            // moments: mean, sd, skew, kurt
 
       void configure(const double& minimumScore,
                      const double& maximumScore,
