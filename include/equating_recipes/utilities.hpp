@@ -85,6 +85,7 @@ University of Iowa
 #include <fmt/core.h>
 
 #include <equating_recipes/structures/raw_to_scaled_score_table.hpp>
+#include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/method.hpp>
 
 namespace EquatingRecipes {
@@ -769,8 +770,6 @@ namespace EquatingRecipes {
           return "H";
         case EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED:
           return "A";
-        case EquatingRecipes::Structures::Method::NONE:
-          return "";
         default:
           throw std::runtime_error("Invalid method.");
       }

@@ -135,8 +135,8 @@ namespace EquatingRecipes {
                                                                                       const double& maximumScoreY,
                                                                                       const double& scoreIncrement,
                                                                                       const bool& doBraunHollandLinearEquating,
-                                                                                      const Eigen::MatrixXd& bivariateProportionsXV,
-                                                                                      const Eigen::MatrixXd& bivariateProportionsYV,
+                                                                                      Eigen::MatrixXd& bivariateProportionsXV,
+                                                                                      Eigen::MatrixXd& bivariateProportionsYV,
                                                                                       const double& reliabilityCommonItemsPopulation1 = 0.0,
                                                                                       const double& reliabilityCommonItemsPopulation2 = 0.0) {
       EquatingRecipes::Structures::CGEquipercentileEquatingResults results;

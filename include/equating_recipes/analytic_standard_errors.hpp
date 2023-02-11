@@ -28,7 +28,9 @@ namespace EquatingRecipes {
         if (percentileRankProportion >= 1.0) {
           standardErrors(scoreLocationX) = 0.0;
         } else {
-          for (size_t scoreLocationY = 1; scoreLocationY < numberOfRawScoreCategoriesY; scoreLocationY++) {
+          size_t scoreLocationY;
+
+          for (scoreLocationY = 1; scoreLocationY < numberOfRawScoreCategoriesY; scoreLocationY++) {
             if (cumulativeRelativeFreqDistY(scoreLocationY) > percentileRankProportion) {
               break;
             }

@@ -139,8 +139,8 @@ namespace EquatingRecipes {
              const bool& isInternalAnchor,
              const double& reliabilityCommonItemsPopulation1,
              const double& reliabilityCommonItemsPopulation2,
-             const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
-             const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
+             EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
+             EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
              const size_t& bootstrapReplicationNumber,
              EquatingRecipes::Structures::PData& pData,
              EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
@@ -256,7 +256,7 @@ namespace EquatingRecipes {
                                                                              bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement);
 
         equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), scoreLocationX + 1);
-        equatedRawScoreResults.equatedRawScoreMoments.resize(4);
+        equatedRawScoreResults.equatedRawScoreMoments.resize(pData.methods.size(), 4);
         equatedRawScoreResults.relativeFreqDistsX(1, scoreLocationX + 1);
         equatedRawScoreResults.relativeFreqDistsY(1, scoreLocationY + 1);
         equatedRawScoreResults.slope(pData.methods.size());
@@ -484,9 +484,10 @@ namespace EquatingRecipes {
 
       /* get moments */
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-        equatedRawScoreResults.equatedRawScoreMoments.col(methodIndex) =
-            EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.col(methodIndex),
-                                                                          bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble);
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.col(methodIndex),
+                                                                                                                     bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble);
+
+        equatedRawScoreResults.equatedRawScoreMoments.col(methodIndex) = moments.momentValues;
       }
     }
 
@@ -748,7 +749,27 @@ namespace EquatingRecipes {
                                           double& sdYSynPop,
                                           double& slope,
                                           double& intercept) {
+      double population2Weight = 1.0 - population1Weight;
+      double meanUSynPopX = meanXPop1 - population2Weight * gammaPop1 * (meanVPop1 - meanVPop2);
+      double meanUSynPopY = meanYPop2 - population1Weight * gammaPop2 * (meanVPop1 - meanVPop2);
 
+      if (method != EquatingRecipes::Structures::Method::MEAN) {
+        double varXSynPop = std::pow(sdXPop1, 2) -
+                            population2Weight * std::pow(gammaPop1, 2) * (std::pow(sdVPop1, 2) - std::pow(sdVPop2, 2)) +
+                            population1Weight * population2Weight * std::pow(gammaPop1, 2) * std::pow(meanVPop1 - meanVPop2, 2);
+
+        double varYSynPop = std::pow(sdYPop2, 2) -
+                            population1Weight * std::pow(gammaPop2, 2) * (std::pow(sdVPop1, 2) - std::pow(sdVPop2, 2)) +
+                            population1Weight * population2Weight * std::pow(gammaPop2, 2) * std::pow(meanVPop1 - meanVPop2, 2);
+
+        slope = std::sqrt(varYSynPop / varXSynPop);
+        sdXSynPop = std::sqrt(varXSynPop);
+        sdYSynPop = std::sqrt(varYSynPop);
+      }
+
+      intercept = meanUSynPopY - slope * meanUSynPopX;
+      meanXSynPop = meanUSynPopX;
+      meanYSynPop = meanUSynPopY;
     }
   };
 } // namespace EquatingRecipes
