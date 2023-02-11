@@ -35,7 +35,7 @@
 #include <equating_recipes/cg_equipercentile_equating.hpp>
 
 namespace EquatingRecipes {
-  struct CINEGDeisgnEquatingNoSmoothing {
+  struct CGEquatingNoSmoothing {
     /*
       Wrapper for getting mean, linear, or equipercentile equating for CINEG design
       with no smoothing. Equipercentile equating includes frequency estimation with 
@@ -159,8 +159,7 @@ namespace EquatingRecipes {
       which is why this statement cannot be in the if statement below */
       pData.bootstrapReplicationNumber = bootstrapReplicationNumber;
 
-      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(design,
-                                                                         method);
+      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(method);
 
       /* allocation and assignments for in
           Note that for every assignment of the form inall->(var) = xv->(var)
@@ -345,14 +344,16 @@ namespace EquatingRecipes {
         equatedRawScoreResults.relativeFreqDistsY.row(0) = cgResults.syntheticPopulationRelativeFreqDistY;
         equatedRawScoreResults.equatedRawScores.row(0) = cgResults.equatedRawScores;
         if (cgResults.slope.has_value()) {
-          equatedRawScoreResults.slope(0) = cgResults.slope;
+          equatedRawScoreResults.slope(0) = cgResults.slope.value();
         }
 
         if (cgResults.intercept.has_value()) {
-          equatedRawScoreResults.intercept(0) = cgResults.intercept;
+          equatedRawScoreResults.intercept(0) = cgResults.intercept.value();
         }
 
-        equatedRawScoreResults.equatedRawScores.row(1) = cgResults.braunHollandEquatedRawScores;
+        if (cgResults.braunHollandEquatedRawScores.has_value()) {
+          equatedRawScoreResults.equatedRawScores.row(1) = cgResults.braunHollandEquatedRawScores.value();
+        }
       }
 
       if (methodCode == "F") {
@@ -368,6 +369,7 @@ namespace EquatingRecipes {
                                                           bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
                                                           bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
                                                           bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                          true,
                                                           bivariateStatisticsXV.bivariateProportions,
                                                           bivariateStatisticsYV.bivariateProportions,
                                                           pData.reliabilityCommonItemsPopulation1,
@@ -411,7 +413,7 @@ namespace EquatingRecipes {
 
         equatedRawScoreResults.relativeFreqDistsX.col(1) = cgResults.syntheticPopulationRelativeFreqDistX;
         equatedRawScoreResults.relativeFreqDistsY.col(1) = cgResults.syntheticPopulationRelativeFreqDistY;
-        equatedRawScoreResults.equatedRawScores(2) = cgResults.equatedRawScores;
+        equatedRawScoreResults.equatedRawScores.col(2) = cgResults.equatedRawScores;
 
         if (cgResults.slope.has_value()) {
           equatedRawScoreResults.slope(1) = cgResults.slope.value();
@@ -547,7 +549,7 @@ namespace EquatingRecipes {
                                   const double& sdXPop1,
                                   const double& meanVPop1,
                                   const double& sdVPop1,
-                                  const double& covXV1,
+                                  const double& covXVPop1,
                                   const double& meanYPop2,
                                   const double& sdYPop2,
                                   const double& meanVPop2,
@@ -586,52 +588,108 @@ namespace EquatingRecipes {
 
       /* Tucker */
       gammaVectorPop1(0) = covXVPop1 / std::pow(sdVPop1, 2);
+      gammaVectorPop2(0) = covYVPop2 / std::pow(sdVPop2, 2);
 
-      gamma1[0] = covxv1 / (sdv1 * sdv1);
-      gamma2[0] = covyv2 / (sdv2 * sdv2);
-      CI_LinObsEq(mnx1, sdx1, mnv1, sdv1, mny2, sdy2, mnv2, sdv2,
-                  w1, method, gamma1[0], gamma2[0],
-                  &msx[0], &msy[0], &ssx[0], &ssy[0], &a[0], &b[0]);
+      commonItemLinearObservedEquating(meanXPop1,
+                                       sdXPop1,
+                                       meanVPop1,
+                                       sdVPop1,
+                                       meanYPop2,
+                                       sdYPop2,
+                                       meanVPop2,
+                                       sdVPop2,
+                                       population1Weight,
+                                       method,
+                                       gammaVectorPop1(0),
+                                       gammaVectorPop2(0),
+                                       meanVectorXSynPop(0),
+                                       meanVectorYSynPop(0),
+                                       sdVectorXSynPop(0),
+                                       sdVectorYSynPop(0),
+                                       slopes(0),
+                                       intercepts(0));
 
       /* Levine */
 
-      if (anchor != 0) { /* internal anchor */
-        gamma1[1] = sdx1 * sdx1 / covxv1;
-        gamma2[1] = sdy2 * sdy2 / covyv2;
-      } else { /* external anchor */
-        gamma1[1] = (sdx1 * sdx1 + covxv1) / (sdv1 * sdv1 + covxv1);
-        gamma2[1] = (sdy2 * sdy2 + covyv2) / (sdv2 * sdv2 + covyv2);
+      if (isInternalAnchor) {
+        gammaVectorPop1(1) = std::pow(sdXPop1, 2) / covXVPop1;
+        gammaVectorPop2(1) = std::pow(sdYPop2, 2) / covYVPop2;
+      } else {
+        gammaVectorPop1(1) = (std::pow(sdXPop1, 2) + covXVPop1) / (std::pow(sdVPop1, 2) + covXVPop1);
+        gammaVectorPop2(1) = (std::pow(sdYPop2, 2) + covYVPop2) / (std::pow(sdVPop2, 2) + covYVPop2);
       }
 
-      CI_LinObsEq(mnx1, sdx1, mnv1, sdv1, mny2, sdy2, mnv2, sdv2,
-                  w1, method, gamma1[1], gamma2[1],
-                  &msx[1], &msy[1], &ssx[1], &ssy[1], &a[1], &b[1]); /* Levine lin obs */
+      /* Levine lin obs */
+      commonItemLinearObservedEquating(meanXPop1,
+                                       sdXPop1,
+                                       meanVPop1,
+                                       sdVPop1,
+                                       meanYPop2,
+                                       sdYPop2,
+                                       meanVPop2,
+                                       sdVPop2,
+                                       population1Weight,
+                                       method,
+                                       gammaVectorPop1(1),
+                                       gammaVectorPop2(1),
+                                       meanVectorXSynPop(1),
+                                       meanVectorYSynPop(1),
+                                       sdVectorXSynPop(1),
+                                       sdVectorYSynPop(1),
+                                       slopes(1),
+                                       intercepts(1));
 
-      gamma1[2] = gamma1[1];
-      gamma2[2] = gamma2[1];
-      if (method != 'M')
-        a[2] = gamma2[2] / gamma1[2];                          /* Levine lin true slope */
-      b[2] = (mny2 - a[2] * mnx1) + gamma2[2] * (mnv1 - mnv2); /* Levine lin true inter */
+      gammaVectorPop1(2) = gammaVectorPop1(1);
+      gammaVectorPop2(2) = gammaVectorPop2(1);
+
+      if (method != EquatingRecipes::Structures::Method::MEAN) {
+        slopes(2) = gammaVectorPop2(2) / gammaVectorPop1(2); /* Levine lin true slope */
+      }
+
+      /* Levine lin true inter */
+      intercepts(2) = (meanYPop2 - slopes(2) * meanXPop1) + gammaVectorPop2(2) * (meanVPop1 - meanVPop2);
 
       /* Chained (Note:  Chained true = Levine true) */
+      gammaVectorPop1(3) = sdXPop1 / sdVPop1;
+      gammaVectorPop2(3) = sdYPop2 / sdVPop2;
 
-      gamma1[3] = sdx1 / sdv1;
-      gamma2[3] = sdy2 / sdv2;
-
-      CI_LinObsEq(mnx1, sdx1, mnv1, sdv1, mny2, sdy2, mnv2, sdv2,
-                  w1, method, gamma1[3], gamma2[3],
-                  &msx[3], &msy[3], &ssx[3], &ssy[3], &a[3], &b[3]);
+      commonItemLinearObservedEquating(meanXPop1,
+                                       sdXPop1,
+                                       meanVPop1,
+                                       sdVPop1,
+                                       meanYPop2,
+                                       sdYPop2,
+                                       meanVPop2,
+                                       sdVPop2,
+                                       population1Weight,
+                                       method,
+                                       gammaVectorPop1(3),
+                                       gammaVectorPop2(3),
+                                       meanVectorXSynPop(3),
+                                       meanVectorYSynPop(3),
+                                       sdVectorXSynPop(3),
+                                       sdVectorYSynPop(3),
+                                       slopes(3),
+                                       intercepts(3));
 
       /* NOTE: The synthetic group means and sd's don't really apply to
-   chained linear equating in the sense that the slope and intercept are
-   invariant with respect to choice of weights.  However, 
-   CI_LinObsEq() is a convenient way to get the slope and intercept */
+      chained linear equating in the sense that the slope and intercept are
+      invariant with respect to choice of weights.  However, 
+      CI_LinObsEq() is a convenient way to get the slope and intercept */
 
       /* get equated raw scores */
+      size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(maximumScore,
+                                                                                 mininumScore,
+                                                                                 scoreIncrement);
 
-      for (i = 0; i <= nm - 1; i++)
-        for (j = 0; j <= loc(max, min, inc); j++)
-          eraw[i][j] = b[i] + a[i] * score(j, min, inc);
+      for (size_t methodIndex = 0; methodIndex < numberOfMethods; methodIndex++) {
+        for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
+          double score = EquatingRecipes::Utilities::getScore(scoreLocation,
+                                                              mininumScore,
+                                                              scoreIncrement);
+          methodByEquatedRawScores(methodIndex, scoreLocation) = intercepts(methodIndex) + slopes(methodIndex) * score;
+        }
+      }
     }
 
     /* 
@@ -689,7 +747,9 @@ namespace EquatingRecipes {
                                           double& sdXSynPop,
                                           double& sdYSynPop,
                                           double& slope,
-                                          double& intercept) {}
+                                          double& intercept) {
+
+    }
   };
 } // namespace EquatingRecipes
 
