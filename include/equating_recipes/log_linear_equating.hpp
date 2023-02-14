@@ -39,7 +39,13 @@ University of Iowa
 #define LOG_LINEAR_EQUATING_HPP
 
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
+#include <string>
+
+#include <Eigen/Dense>
+#include <Eigen/LU>
+#include <fmt/core.h>
 
 #include <equating_recipes/cg_equipercentile_equating.hpp>
 #include <equating_recipes/score_statistics.hpp>
@@ -340,6 +346,168 @@ namespace EquatingRecipes {
           }
         }
       }
+    }
+
+    /*
+      Input:
+        B[][] = design matrix (ns x nc)
+        m[]   = fitted frequencies (ns x 1)
+
+      Output:
+        BtSmB[][] = Bt x Sm x B (nc x nc)
+                  = minus the 2nd derivative of log-likelihood
+                  (Eq. 22 and 32 in Holland & Thayer, 1987)
+
+      Removed From Input:
+        ns    = number of score categories (rows in design matrix)
+        nc    = number of columns in design matrix
+        N     = total of all frequencies
+
+      Function calls other than C or NR utilities: None 
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+    */
+    Eigen::MatrixXd get_BtSmB(const Eigen::MatrixXd& designMatrix,
+                              const Eigen::VectorXd& fittedFrequencies) {
+      Eigen::MatrixXd hessian = Eigen::MatrixXd::Zero(designMatrix.cols(),
+                                                      designMatrix.cols());
+
+      Eigen::VectorXd weightedSumDesignMatrixColumns =
+          designMatrix.cwiseProduct(fittedFrequencies.replicate(designMatrix.cols(), 1)).colwise().sum();
+
+      double fittedFrequencySum = fittedFrequencies.sum();
+
+      for (size_t rowIndex = 0; rowIndex < designMatrix.cols(); rowIndex++) {
+        for (size_t columnIndex = rowIndex; columnIndex < designMatrix.cols(); columnIndex++) {
+          hessian(rowIndex, columnIndex) =
+              (designMatrix.col(rowIndex) * designMatrix.col(columnIndex) * fittedFrequencies).sum();
+
+          hessian(rowIndex, columnIndex) /= fittedFrequencySum;
+          hessian(columnIndex, rowIndex) = hessian(rowIndex, columnIndex);
+        }
+      }
+
+      return hessian;
+    }
+
+    /*
+      Input:
+        B[][] = design matrix (ns x nc)
+        n[]   = actual frequencies (ns x 1)
+        m[]   = fitted frequencies (ns x 1)
+
+      Output:
+        Btnm[] = 1st derivative of log-likelihood (nc x 1)
+                (Eq. 19 and 33 in Holland & Thayer, 1987)
+
+      Removed From Input:
+        ns    = number of score categories (rows in design matrix)
+        nc    = number of columns in design matrix
+
+      Function calls other than C or NR utilities: None 
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+    */
+    Eigen::VectorXd get_Btnm(const Eigen::MatrixXd& designMatrix,
+                             const Eigen::VectorXd& observedFrequencies,
+                             const Eigen::VectorXd& fittedFrequencies) {
+      Eigen::VectorXd gradient(designMatrix.cols());
+
+      for (size_t columnIndex = 0; columnIndex < designMatrix.cols(); columnIndex++) {
+        gradient(columnIndex) = (designMatrix.col(columnIndex) * (observedFrequencies - fittedFrequencies)).sum();
+      }
+
+      return gradient;
+    }
+
+    /*
+      Input:
+        B[][] = zero-offset design matrix (ns x nc) 
+        n[]   = zero-offset actual frequencies (ns x 1)
+        
+        fp    = output file pointer for debugging
+                (NULL --> no output)
+
+      Output:
+        Beta0[] = zero-offset initial values of Beta (nc x 1);
+                  space already allocated;
+                  based on Eq 49 (and next line) of Holland and
+                    Thayer (1987) -- abbreviated H&T below
+
+      Removed From Input:
+        N     = total of frequencies
+        ns    = number of score categories (rows in design matrix)
+        nc    = number of columns in design matrix
+
+      Function calls other than C or NR utilities: 
+        Print_vector()
+        Print_matrix() 
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+    */
+    Eigen::VectorXd getBeta0(const Eigen::MatrixXd& designMatrix,
+                  const Eigen::VectorXd& observedFrequencies,
+                  const bool& debug) {
+      size_t numberOfRows = designMatrix.rows();
+      size_t numberOfColumns = designMatrix.cols();
+      double observedFrequenciesSum = observedFrequencies.sum();
+     
+      /* get a; 0.8 can be changed to any value in (0,1) */
+      double rho = 0.8;
+      
+      Eigen::VectorXd a = (rho * observedFrequencies) + Eigen::VectorXd::Constant(numberOfRows, observedFrequenciesSum / static_cast<double>(numberOfRows));
+      
+      if (debug) {
+        std::cout << fmt::format("a debug:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(a, false));
+      }
+
+      /* get BtSaB -- first term on left side of Eq 49 in H&T */
+      Eigen::MatrixXd BtSaB = get_BtSmB(designMatrix, a);
+
+      if (debug) {
+        std::cout << fmt::format("BtSaB debug:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(BtSaB));
+      }
+
+      /*  get right side of Eq 49 in H&T, which is computed using
+      Equation 38 in Holland and Thayer (2000) with all mu = 0 */
+      double aLogA = a.array().log().sum();
+
+      Eigen::VectorXd BtSaloga(numberOfColumns);
+
+      for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+        double bALogA = (designMatrix.col(columnIndex).array() * a.array() * a.array().log()).sum();
+        double bA = (designMatrix.col(columnIndex) * a).sum();
+
+        BtSaloga(columnIndex) = bALogA - (bA * aLogA / observedFrequenciesSum);
+      }
+
+      /* get Beta0 using NR ludcmp() and lubksb() */
+
+      /* right[] is one-offset B in Ax=B */ 
+      /* left[][] is one-offset A in Ax=B */
+      Eigen::MatrixXd left = Eigen::MatrixXd::Zero(numberOfColumns + 1, numberOfColumns + 1);
+      Eigen::VectorXd right = Eigen::VectorXd::Zero(numberOfColumns + 1);
+      
+
+      right(Eigen::seq(1, numberOfColumns)) = BtSaloga;
+
+      left.block(1, 1, numberOfColumns, numberOfColumns) = BtSaB;
+
+      Eigen::PartialPivLU<Eigen::MatrixXd> luDecomp = left.partialPivLu();
+      Eigen::MatrixXd luMatrix = luDecomp.matrixLU();
+      Eigen::VectorXd solution = luDecomp.solve(right);
+      
+      /* Beta0 is zero-offset solution */
+      Eigen::VectorXd beta0(numberOfColumns + 1);
+      beta0(Eigen::seq(1, numberOfColumns + 1)) = solution;
+
+      return beta0;
     }
   };
 } // namespace EquatingRecipes
