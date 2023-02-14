@@ -69,9 +69,17 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmtlib)
 # Adds fmt::fmt
 
+# json
+FetchContent_Declare(json 
+  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+  DOWNLOAD_EXTRACT_TIMESTAMP ON)
+FetchContent_MakeAvailable(json)
+# adds nlohmann_json::nlohmann_json
+
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${Eigen_SOURCE_DIR})
 include_directories(${fmtlib_SOURCE_DIR}/include)
+include_directories(${json_SOURCE_DIR}/single_include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(EqRCppTest ${CMAKE_CURRENT_SOURCE_DIR}/tests/runner.cpp)
@@ -81,9 +89,11 @@ target_include_directories(EqRCppTest PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${Boost_INCLUDE_DIRS}
                            ${eigen_SOURCE_DIR}
-                           ${fmtlib_SOURCE_DIR}/include)
+                           ${fmtlib_SOURCE_DIR}/include
+                           ${json_SOURCE_DIR}/single_include)
 target_link_libraries(EqRCppTest PRIVATE
                       ${Boost_LIBRARIES}
                       fmt::fmt
+                      nlohmann_json::nlohmann_json
                       pthread
                       dl)

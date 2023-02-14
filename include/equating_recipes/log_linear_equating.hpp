@@ -126,12 +126,6 @@ namespace EquatingRecipes {
       size_t numberOfDesignMatrixColumns = numberOfDegreesOfSmoothingU + numberOfDegreesOfSmoothingV + numberOfCrossProductMoments; /* # columns in design matrix */
       size_t numberOfDesigmMatrixRows = (numberOfScoresV > 0) ? numberOfScoresU * numberOfScoresV : numberOfScoresU;                /* # rows in design mat */
 
-      //   double mn = 0., /* mean for a column of B */
-      //       ss = 0.;    /* sum of squared deviations for a column of B */
-
-      //   double iscore, /* score(i,minu,incu) */
-      //       jscore;    /* score(j,minv,incv) */
-
       /* univariate LL smoothing */
       if (numberOfScoresV == 0) {
         for (size_t scoreLocationU = 0; scoreLocationU < numberOfScoresU; scoreLocationU++) {
@@ -329,7 +323,7 @@ namespace EquatingRecipes {
         size_t cells = 0;
         for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
           for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
-            bivariateFreqDist(scorelocationX, scoreLocationV) = mct(cells++);
+            bivariateFreqDist(scoreLocationX, scoreLocationV) = mct(cells++);
           }
         }
       } else {
@@ -339,14 +333,15 @@ namespace EquatingRecipes {
         for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
           for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
             if (scoreLocationX < scoreLocationV || scoreLocationX > numberOfScoresU - 1 + scoreLocationV) {
-              bivariateFreqDist(scoreLocationX, scoreLocationV) = 0.0
+              bivariateFreqDist(scoreLocationX, scoreLocationV) = 0.0;
             } else {
               bivariateFreqDist(scoreLocationX, scoreLocationV) = mct((scoreLocationX - scoreLocationV) * numberOfScoresV + scoreLocationV);
             }
           }
         }
       }
-    };
-  } // namespace EquatingRecipes
+    }
+  };
+} // namespace EquatingRecipes
 
 #endif

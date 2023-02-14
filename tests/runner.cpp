@@ -16,9 +16,9 @@
 #include <equating_recipes/rg_and_sg_equating.hpp>
 #include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/results_document.hpp>
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
   // Tests::UnivariateStatistics univariateStatisticsTest;  
   // univariateStatisticsTest.run();
 
