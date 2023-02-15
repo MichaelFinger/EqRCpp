@@ -40,6 +40,8 @@ University of Iowa
 
 #include <cmath>
 #include <iostream>
+#include <limits>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -54,6 +56,24 @@ University of Iowa
 namespace EquatingRecipes {
   class LogLinearEquating {
   public:
+    // ctype = comparison type for criterion:
+    //         0 --> absolute; 1 --> relative
+    // Btype = type of design matrix and, hence, type of moments
+    //         for criterion:
+    //         0 --> use B (could be scaled or unscaled as indicated
+    //               in design_matrix()) --- see note below
+    //         1 --> use B_raw and central moments based on it
+
+    enum class CriterionComparisonType {
+      ABSOLUTE,
+      RELATIVE
+    };
+
+    enum class DesignMatrixType {
+      SOLUITON,
+      RAW_SCORE
+    };
+
   private:
     /*
       Create design matrix.  Code and variable names are for a
@@ -369,8 +389,8 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08
     */
-    Eigen::MatrixXd get_BtSmB(const Eigen::MatrixXd& designMatrix,
-                              const Eigen::VectorXd& fittedFrequencies) {
+    Eigen::MatrixXd getBtSmB(const Eigen::MatrixXd& designMatrix,
+                             const Eigen::VectorXd& fittedFrequencies) {
       Eigen::MatrixXd hessian = Eigen::MatrixXd::Zero(designMatrix.cols(),
                                                       designMatrix.cols());
 
@@ -412,9 +432,9 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08
     */
-    Eigen::VectorXd get_Btnm(const Eigen::MatrixXd& designMatrix,
-                             const Eigen::VectorXd& observedFrequencies,
-                             const Eigen::VectorXd& fittedFrequencies) {
+    Eigen::VectorXd getBtnm(const Eigen::MatrixXd& designMatrix,
+                            const Eigen::VectorXd& observedFrequencies,
+                            const Eigen::VectorXd& fittedFrequencies) {
       Eigen::VectorXd gradient(designMatrix.cols());
 
       for (size_t columnIndex = 0; columnIndex < designMatrix.cols(); columnIndex++) {
@@ -452,17 +472,17 @@ namespace EquatingRecipes {
       Date of last revision: 6/30/08
     */
     Eigen::VectorXd getBeta0(const Eigen::MatrixXd& designMatrix,
-                  const Eigen::VectorXd& observedFrequencies,
-                  const bool& debug) {
+                             const Eigen::VectorXd& observedFrequencies,
+                             const bool& debug) {
       size_t numberOfRows = designMatrix.rows();
       size_t numberOfColumns = designMatrix.cols();
       double observedFrequenciesSum = observedFrequencies.sum();
-     
+
       /* get a; 0.8 can be changed to any value in (0,1) */
       double rho = 0.8;
-      
+
       Eigen::VectorXd a = (rho * observedFrequencies) + Eigen::VectorXd::Constant(numberOfRows, observedFrequenciesSum / static_cast<double>(numberOfRows));
-      
+
       if (debug) {
         std::cout << fmt::format("a debug:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(a, false));
       }
@@ -489,25 +509,691 @@ namespace EquatingRecipes {
 
       /* get Beta0 using NR ludcmp() and lubksb() */
 
-      /* right[] is one-offset B in Ax=B */ 
+      /* right[] is one-offset B in Ax=B */
       /* left[][] is one-offset A in Ax=B */
       Eigen::MatrixXd left = Eigen::MatrixXd::Zero(numberOfColumns + 1, numberOfColumns + 1);
       Eigen::VectorXd right = Eigen::VectorXd::Zero(numberOfColumns + 1);
-      
 
       right(Eigen::seq(1, numberOfColumns)) = BtSaloga;
 
       left.block(1, 1, numberOfColumns, numberOfColumns) = BtSaB;
 
-      Eigen::PartialPivLU<Eigen::MatrixXd> luDecomp = left.partialPivLu();
-      Eigen::MatrixXd luMatrix = luDecomp.matrixLU();
-      Eigen::VectorXd solution = luDecomp.solve(right);
-      
+      Eigen::VectorXd solution = left.partialPivLu().solve(right);
+
       /* Beta0 is zero-offset solution */
       Eigen::VectorXd beta0(numberOfColumns + 1);
       beta0(Eigen::seq(1, numberOfColumns + 1)) = solution;
 
       return beta0;
+    }
+
+    /*
+      Get m using Equation 8 in Holland and Thayer (1987)
+
+      Input
+        B[][]  = design matrix (ns x nc)
+        Beta[] = parameter estimates (nc x 1)
+        uin[]  = u constants (ns x 1); if NULL, set elements to 0 
+        N      = total of frequencies
+        ns     = number of rows of design matrix
+        nc     = number of columns of design matrix
+        fp     = output file pointer for debugging
+                (NULL --> no output)
+
+      Output
+        m[]    = estimated frequencies (space already allocated)
+
+      NOTE: DBL_MIN is defined in <float.h>.  It is the minimum normalized 
+          floating point number. For Visual Studio DBL_MIN = 2.225074 E-308
+        log(base e) of DBL_MIN in Visual Studio is -708.3964
+
+      Return ap = alpha' --- see top of p. 3 in H&T
+
+      Function calls other than C or NR utilities: 
+        Print_vector() 
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+    */
+    double getEstimatedFrequences(const Eigen::MatrixXd& designMatrix,
+                                  const Eigen::VectorXd& betaParameterEstimates,
+                                  const std::optional<Eigen::VectorXd>& uConstants,
+                                  const double& sumOfFrequencies,
+                                  const bool& debug,
+                                  Eigen::VectorXd& estimatedFrequencies) {
+      // int i;
+      // double *u = NULL,         /* constant */
+      //     *BBeta,               /* B x Beta (ns x 1) */
+      //     ap = 0.,              /* alpha' */
+      //     ldmin = log(DBL_MIN); /* log of smallest number; see NOTE above */
+
+      size_t numberOfRows = designMatrix.rows();
+
+      Eigen::VectorXd u = uConstants.value_or(Eigen::VectorXd::Zero(numberOfRows));
+      Eigen::VectorXd BBeta = designMatrix * betaParameterEstimates;
+
+      if (debug) {
+        std::cout << fmt::format("BBeta debug:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(BBeta, false));
+      }
+
+      double normalizingConstant = 0.0; // = ap
+      for (size_t rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+        double uPlusBBeta = u(rowIndex) + BBeta(rowIndex);
+
+        normalizingConstant += uPlusBBeta < std::numeric_limits<double>::min() ? 0.0 : std::exp(uPlusBBeta);
+      }
+
+      if (normalizingConstant < std::numeric_limits<double>::min()) {
+        normalizingConstant = std::log(sumOfFrequencies)
+      } else {
+        normalizingConstant = std::log(sumOfFrequencies) - std::log(normalizingConstant);
+      }
+
+      if (debug) {
+        std::cout << fmt::format("\n\nap = {:12.5f}\n", normalizingConstant);
+      }
+
+      estimatedFrequencies.resize(numberOfRows);
+
+      for (size_t rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+        double z = normalizingConstant + u(rowIndex) + BBeta(rowIndex);
+
+        if (z < std::numeric_limits<double>::min()) {
+          estimatedFrequencies[rowIndex] = 0.0;
+        } else {
+          estimatedFrequencies[rowIndex] = std::exp(z);
+        }
+      }
+
+      return normalizingConstant; /* ap is the ; */
+    }
+
+    /* Iterate to a solution for log-linear models under a mutinomial 
+      distribution as discussed in Holland and Thayer (1987), abbreviated
+      H&T here.
+
+      This function is called from Smooth_ULL() and Smooth_BLL()
+
+      Input
+        fp      = file pointer for output
+                  (if fp==NULL) no output written
+        B[][]   = design matrix (ns x nc) where nc = cu + cv + cuv
+                  used for solution
+        B_raw[][]   = design matrix for raw scores;
+                      used to get central moments               
+        nct[]   = frequencies (ns x 1)
+        N       = total of frequencies
+        uin[]   = constant vector (see Eq 8 in H&T);
+                  if NULL, all elements set to 0
+        ns      = number of frequencies (rows in design matrix)
+        cu      = number of degrees of smoothing for u
+        cv      = number of degrees of smoothing for v
+        cuv     = number of cross-product moments
+        cpm[cuv-1][2] = zero-offset matrix designating cross-
+                        product moments.  Example: let cuv = 3,
+                        and the desired cross-product moments be 
+                        (u^1)*(v^1), (u^1)*(v^2), and (u^2)*(v^1). 
+                        Then cpm[0] = {1,1}; cpm[1] = {1,2}; and
+                        cpm[2] = {2,1}. 
+        max_nit = maximum number of iterations
+        ctype = comparison type for criterion:
+                0 --> absolute; 1 --> relative
+        Btype = type of design matrix and, hence, type of moments 
+                for criterion:
+                0 --> use B (could be scaled or unscaled as indicated
+                      in design_matrix()) --- see note below
+                1 --> use B_raw and central moments based on it
+        crit = criterion.  See crit_mts() for discussion 
+        
+      Output
+        Beta[]  = coefficients for variables (columns) of B (nc x 1)
+        mct[]   = fitted frequencies (ns x 1) 
+        n_mts[] = actual moments based on B (nc x 1)
+        m_mts[] = fitted moments based on B (nc x 1)
+        n_mts_raw[] = actual central moments based on B_raw (nc x 1)
+        m_mts_raw[] = fitted central moments based on B_raw (nc x 1)  
+        *lrc        = likelihood-ratio chi-square; see Agresti, 2007, p. 37 
+        *nzero      = number of times that nct[i]/mct[i] involves 
+                      at least one zero frequency; df correction for *lrc  
+      *ap     = alpha (used as normalizing constant in CLL---added by TW)
+
+        NOTE: space already allocated for 
+              Beta[], mct[], n_mts[], m_mts[], n_mts_raw, m_mts_raw;
+              lrc and nzero declared in calling function
+
+        NOTE: if scale==0 for design_matrix(),
+              then n_mts and m_mts are non-central moments;
+              if scale==1 for design_matrix(),
+              then n_mts and m_mts are analogous to central moments
+
+      Return: number of iterations to convergence 
+
+      Function calls other than C or NR utilities: 
+        get_LLmoments()
+        Print_iteration_heading() 
+        get_Beta0()
+        get_mct()
+        crit_mts()
+        get_BtSmB()
+        ludcmp() from NR.c
+      lubksb() from NR.c
+        get_Btnm()
+        mmult_a_v()
+        runerror()
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+
+    */
+    size_t iteration(const Eigen::MatrixXd& solutionDesignMatrix,
+                     const Eigen::MatrixXd& rawScoreDesigmMatrix,
+                     const Eigen::VectorXd& frequencies,
+                     const std::optional<Eigen::VectorXd>& uConstants,
+                     const size_t& numberOfDegreesOfSmoothingU,
+                     const size_t& numberOfDegreesOfSmoothingV,
+                     const size_t& numberOfCrossProductMoments,
+                     const Eigen::MatrixXi& crossProductMomentDesignations,
+                     const size_t& maximumIterations,
+                     const CriterionComparisonType& criterionComparisonType,
+                     const DesignMatrixType& designMatrixType,
+                     const double& criterion,
+                     Eigen::VectorXd& betaParameterEstimates,
+                     Eigen::VectorXd& fittedFrequencies,
+                     Eigen::VectorXd& observedMoments,
+                     Eigen::VectorXd& fittedMoments,
+                     Eigen::VectorXd& observedCentralMoments,
+                     Eigen::VectorXd& fittedCentralMoments,
+                     double& likelihoodRatioChiSquare,
+                     size_t& numberOfZeroFrequencies,
+                     double& normalizingConstant,
+                     const bool& debug) {
+      size_t numberOfRows = solutionDesignMatrix.rows();
+
+      /* number of columns of design matrix */
+      size_t numberOfColumns = numberOfDegreesOfSmoothingU +
+                               numberOfDegreesOfSmoothingV +
+                               numberOfCrossProductMoments;
+
+      size_t iterationNumber;
+      size_t numberOfCellsToPrint = std::min(numberOfRows, 250UL);
+
+      getLogLinearMoments(solutionDesignMatrix,
+                          rawScoreDesigmMatrix,
+                          frequencies,
+                          numberOfDegreesOfSmoothingU,
+                          numberOfDegreesOfSmoothingV,
+                          numberOfCrossProductMoments,
+                          crossProductMomentDesignations,
+                          observedMoments,
+                          observedCentralMoments);
+
+      if (debug) {
+        PrintIterationHeading(numberOfRows,
+                              numberOfColumns,
+                              frequencies,
+                              observedMoments,
+                              observedCentralMoments,
+                              criterionComparisonType,
+                              designMatrixType,
+                              criterion);
+      }
+
+      betaParameterEstimates = getBeta0(solutionDesignMatrix,
+                                        frequencies,
+                                        debug);
+
+      /***** begin iteration loop *****/
+      for (iterationNumber = 0; iterationNumber <= maximumIterations; iterationNumber++) {
+        likelihoodRatioChiSquare = 0.0;
+        numberOfZeroFrequencies = 0;
+
+        /* get ap (the normalizing constant which is needed in CLL) and fitted frequencies (mct) */
+        normalizingConstant = getEstimatedFrequences(solutionDesignMatrix,
+                                                     betaParameterEstimates,
+                                                     uConstants,
+                                                     frequencies.sum(),
+                                                     debug,
+                                                     fittedFrequencies);
+
+        for (size_t rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+          if (frequencies(rowIndex) != 0.0 && fittedFrequencies(rowIndex) != 0.0) {
+            likelihoodRatioChiSquare += frequencies(rowIndex) * std::log(frequencies(rowIndex) / fittedFrequencies(rowIndex));
+          } else {
+            numberOfZeroFrequencies++;
+          }
+        }
+
+        likelihoodRatioChiSquare *= 2.0;
+
+        getLogLinearMoments(solutionDesignMatrix,
+                            rawScoreDesigmMatrix,
+                            fittedFrequencies,
+                            numberOfDegreesOfSmoothingU,
+                            numberOfDegreesOfSmoothingV,
+                            numberOfCrossProductMoments,
+                            fittedMoments,
+                            fittedCentralMoments);
+
+        if (debug) {
+          std::cout << fmt::format("\n        {:2d}    ", iterationNumber);
+          std::cout << fmt::format("  {10.5f}", normalizingConstant);
+          for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+            std::cout << fmt::format("  {10.5f}\n", uConstants.has_value() ? (uConstants.value())(columnIndex) : 0.0);
+          }
+
+          for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+            std::cout << fmt::format("{:12.3f}\n", betaParameterEstimates(columnIndex));
+          }
+
+          for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+            std::cout << fmt::format("{:12.5f}\n", fittedMoments(columnIndex));
+          }
+
+          for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+            std::cout << fmt::format("{:12.5f}\n", fittedCentralMoments);
+          }
+
+          std::cout << fmt::format("{:12.5f}\n", likelihoodRatioChiSquare);
+
+          std::cout << fmt::format("{:7d}\n", numberOfZeroFrequencies);
+
+          for (size_t cellIndex = 0; cellIndex < numberOfCellsToPrint; cellIndex++) {
+            std::cout << fmt::format("{:12.5f}\n", fittedFrequencies(cellIndex));
+          }
+
+          if (numberOfCellsToPrint > 250) {
+            std::cout << "  ...\n";
+          }
+        }
+
+        if (momentsCriterion(numberOfColumns,
+                             numberOfDegreesOfSmoothingU,
+                             criterionComparisonType,
+                             designMatrixType,
+                             (designMatrixType == DesignMatrixType::SOLUITON) ? observedMoments : observedCentralMoments,
+                             (designMatrixType == DesignMatrixType::SOLUITON) ? fittedMoments : fittedCentralMoments)) {
+          break;
+        }
+
+        /* Bt x Sm x B --- see Eq 30 and 32 in H&T */
+        Eigen::MatrixXd BtSmB = getBtSmB(solutionDesignMatrix, fittedFrequencies);
+
+        /* Bt x (n - m) --- see Eq 30 and 33 in H&T */
+        Eigen::VectorXd Btnm = getBtnm(solutionDesignMatrix,
+                                       frequencies,
+                                       fittedFrequencies);
+
+        Eigen::MatrixXd left(numberOfColumns + 1, numberOfColumns + 1); /* left[1...nc][1...nc] set to BtSmB[0...nc-1][0...nc-1] */
+        Eigen::VectorXd right(numberOfColumns + 1);                     /* right[1..nc] set to Btnm[0...nc-1] */
+
+        /* solve for delta^r in ER Equation 10.14 == H&T Equation 30*/
+        left(Eigen::seq(1, numberOfColumns), Eigen::seq(1, numberOfColumns)) = BtSmB; /* left[][] is one-offset A in Ax=B */
+        right(Eigen::seq(1, numberOfColumns)) = Btnm;                                 /* right[] is one-offset B in Ax=B */
+
+        Eigen::VectorXd solution = left.partialPivLu().solve(right);
+
+        Eigen::VectorXd delta(numberOfColumns + 1); /* delta[] is zero-offset version of right[], see Eq 31 in H&T */
+
+        delta = right(Eigen::seq(1, numberOfColumns));
+
+        betaParameterEstimates += delta;
+      }
+
+      if (iterationNumber > maximumIterations) {
+        throw std::runtime_error("Criterion not satisfied after max_nit iterations");
+      }
+
+      return iterationNumber;
+    }
+
+    /*
+      Get moments based on B and B_raw design matrices for log-linear model
+
+      Input
+        B[][] = design matrix (ns x nc)
+                could be based on scale = 0 or scale = 1 as specified
+                in design_matrix()
+        B_raw[][] = design matrix (ns x nc) for raw scores
+                    (e.g., first column is min, min+inc, ...)
+        f[]   = frequencies (ns x 1) (could be nct[] or mct[])
+        ns    = number of frequencies (rows in design matrix)
+        cu    = number of degrees of smoothing for u
+        cv    = number of degrees of smoothing for v
+        cuv   = number of cross-product moments
+        cpm[cuv-1][2] = zero-offset matrix designating cross-
+                        product moments.  Example: let cuv = 3,
+                        and the desired cross-product moments be 
+                        (u^1)*(v^1), (u^1)*(v^2), and (u^2)*(v^1). 
+                        Then cpm[0] = {1,1}; cpm[1] = {1,2}; and
+                        cpm[2] = {2,1}.  
+      Output
+        mts[] = moments (nc x 1) based on B (space already allocated)
+        mts_raw[] = central moments (nc x 1) based on B_raw 
+                    (space already allocated);
+                    e.g., for j = 2,...(cu-1)), the (j+1)th central moment is 
+                          mts_raw[j] = 
+                          sum_i(B_raw[i][j] - xbar)^(j+1)*f[i]/sd^((j+1)),
+                          where xbar = sum_i(B_raw[i][0]*f[i]).
+                          Note that mts_raw[0] = 0 by construction, 
+                          and we replace it with xbar 
+                          (i.e., we set mts_raw[0] = xbar);
+                          simlarly, we set mts_raw[1] = sd
+
+      Function calls other than C or NR utilities: none
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+    */
+    void getLogLinearMoments(const Eigen::MatrixXd& solutionDesignMatrix,
+                             const Eigen::MatrixXd& rawScoreDesigmMatrix,
+                             const Eigen::VectorXd& frequencies,
+                             const size_t& numberOfDegreesOfSmoothingU,
+                             const size_t& numberOfDegreesOfSmoothingV,
+                             const size_t& numberOfCrossProductMoments,
+                             const Eigen::MatrixXi& crossProductMomentDesignations,
+                             Eigen::VectorXd& fittedMoments,
+                             Eigen::VectorXd& fittedCentralMoments) {
+      // int i, j,
+      //     nc = cu + cv + cuv; /* number of columns in design matrix */
+      // double mnu, sdu, mnv, sdv,
+      //     *rf; /* relative frequency */
+
+      // rf = dvector(0, ns - 1);
+      // for (i = 0; i < ns; i++)
+      //   rf[i] = f[i] / N;
+
+      // for (j = 0; j < nc; j++)
+      //   mts[j] = mts_raw[j] = 0.; /* initialization */
+
+      // /*** moments based on B ***/
+
+      // for (j = 0; j < nc; j++)
+      //   for (i = 0; i < ns; i++)
+      //     mts[j] += B[i][j] * rf[i];
+
+      // /*** "typical" central moments based on B_raw ***/
+
+      // /* for cu columns associated with u;  scores are in column 0 */
+
+      // mnu = sdu = 0.;
+      // for (i = 0; i < ns; i++) {
+      //   mnu += B_raw[i][0] * rf[i];
+      //   sdu += B_raw[i][0] * B_raw[i][0] * rf[i];
+      // }
+      // sdu = sqrt(sdu - mnu * mnu);
+
+      // if (cu >= 1)
+      //   mts_raw[0] = mnu;
+      // if (cu >= 2)
+      //   mts_raw[1] = sdu;
+      // for (j = 2; j < cu; j++) { /* start with skew */
+      //   for (i = 0; i < ns; i++)
+      //     mts_raw[j] += pow(B_raw[i][0] - mnu, j + 1) * rf[i];
+      //   mts_raw[j] /= pow(sdu, (j + 1));
+      // }
+
+      // /* for cv columns associated with v; scores are in column cu*/
+
+      // if (cv > 0) {
+      //   mnv = sdv = 0.;
+      //   for (i = 0; i < ns; i++) {
+      //     mnv += B_raw[i][cu] * rf[i];
+      //     sdv += B_raw[i][cu] * B_raw[i][cu] * rf[i];
+      //   }
+      //   sdv = sqrt(sdv - mnv * mnv);
+
+      //   if (cv >= 1)
+      //     mts_raw[cu] = mnv;
+      //   if (cv >= 2)
+      //     mts_raw[cu + 1] = sdv;
+      //   for (j = cu + 2; j < cu + cv; j++) { /* start with skew */
+      //     for (i = 0; i < ns; i++)
+      //       mts_raw[j] += pow(B_raw[i][cu] - mnv, j - cu + 1) * rf[i];
+      //     mts_raw[j] /= pow(sdv, (j - cu + 1));
+      //   }
+      // }
+
+      // /* for cuv columns associated with cross products;
+      //     scores are in columns 0 and cu */
+
+      // if (cuv > 0 && cu >= 2 && cv >= 2) {
+      //   for (j = cu + cv; j < nc; j++) {
+      //     for (i = 0; i < ns; i++)
+      //       mts_raw[j] += pow(B_raw[i][0] - mnu, cpm[j - cu - cv][0]) *
+      //                     pow(B_raw[i][cu] - mnv, cpm[j - cu - cv][1]) * rf[i];
+      //     mts_raw[j] /= pow(sdu, cpm[j - cu - cv][0]) * pow(sdv, cpm[j - cu - cv][1]);
+      //   }
+      // }
+
+      // free_dvector(rf, 0, ns - 1);
+
+      // return;
+    }
+
+    /*
+      Moments criterion for iteration loop
+
+      Input
+        nc = number of cmoments
+        cu = number of moments for u
+        ctype = comparison type for criterion:
+                0 --> absolute; 1 --> relative
+        Btype = type of moments for criterion mathching:
+                0 --> moments based on B 
+                (if scale = 0, design matrix is based on raw scores,
+                which means that the moments are based on raw scores;
+                if scale = 1, design matrix is based on scaled raw scores,
+                which means that the moments are based on scaled raw scores) 
+                1 -->  moments based on B_raw, whether scale is 0 or 1
+          NOTE: see design_matrix() for comments about scale
+        n_mts[] = moments based on actual frequencies
+        m_mts[] = moments based on fitted frequencies
+        crit = criterion  (see notes below)
+
+      return: 0 --> criterion not met ---- continue iteration
+              1 --> criterion met --- end iteration
+
+      NOTES.
+
+      If ctype==0 (absolute comparison), criterion is met if
+      |n_mts[i] - m_mts[i]| <= crit for all nc moments.
+
+      If ctype = 1 (relative comparison), criterion is met if
+      |(n_mts[i] - m_mts[i])/n_mts[i]| <= crit for all nc moments.  
+      An error occurs if n_mts[i] = 0.
+
+      If Btype==1, the first central moment for both u and v
+      is 0 whether the frequencies are actual (n) or fitted (m).
+      These are the moments associated with column 0 and cu in B[][].
+      Further, when Btype==1, these moments are  replaced by u and v 
+      means, respectively, in get LLmoments().Therefore, when Btype==1,
+      no test is made for |n_mts[0] - m_mts[0]| or for
+      |n_mts[cu] - m_mts[cu]|. 
+
+      Function calls other than C or NR utilities:
+        runerror()
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+
+    */
+    bool momentsCriterion(const size_t& numberOfCMoments,
+                          const size_t& numberOfMomentsForU,
+                          const CriterionComparisonType& criterionComparisonType,
+                          const DesignMatrixType& designMatrixType,
+                          const Eigen::VectorXd& observedMoments,
+                          const Eigen::VectorXd& fittedMoments,
+                          const double& criterion) {
+      // int i;
+
+      // if (Btype == 0) { /* Btype == 0 --> based on B matrix */
+      //   for (i = 0; i < nc; i++) {
+      //     if (ctype == 0) { /* absolute comparison */
+      //       if (fabs(n_mts[i] - m_mts[i]) > crit)
+      //         return 0;
+      //     } else { /* relative comparison */
+      //       if (n_mts[i] == 0.)
+      //         runerror("\n\nRelative criterion and n_mts[] = 0");
+      //       if (fabs((n_mts[i] - m_mts[i]) / n_mts[i]) > crit)
+      //         return 0;
+      //     }
+      //   }
+      // } else { /* Btype==1; based on B_raw matrix and central moments */
+      //   for (i = 0; i < nc; i++) {
+      //     if (i == 0 || i == cu)
+      //       continue;
+      //     if (ctype == 0) { /* absolute comparison */
+      //       if (fabs(n_mts[i] - m_mts[i]) > crit)
+      //         return 0;
+      //     } else { /* relative comparison */
+      //       if (n_mts[i] == 0.)
+      //         runerror("\n\nRelative criterion and n_mts[] = 0");
+      //       if (fabs((n_mts[i] - m_mts[i]) / n_mts[i]) > crit)
+      //         return 0;
+      //     }
+      //   }
+      // }
+
+      // return 1; /* criterion met */
+
+      return false;
+    }
+
+    /*
+      For log-linear iterations print (a) actual results based on nct[]
+      and (b) heading for fitted results
+
+      Input
+        fp          = file pointer for output
+        ns          = number of score categories 
+                      (number of rows in design matrix)
+        nc          = number of columns in design matrix
+        nct[]       = actual frequencies
+        n_mts[]     = moments based on nct[] and design matrix B
+        n_mts_raw[] = moments based on nct[] and design matrix B_raw
+        ctype = comparison type for criterion:
+                0 --> absolute; 1 --> relative
+        Btype = type of design matrix and, hence, type of moments 
+                for criterion:
+                0 --> use B (could be scaled or unscaled as indicated
+                      in design_matrix()) 
+                1 --> use B_raw and central moments based on it
+        crit = criterion.  See crit_mts() for discussion 
+
+      Function calls other than C or NR utilities: none
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+
+
+    */
+    void PrintIterationHeading(const size_t& numberOfDesignMarixRows,
+                               const size_t& numberOfDesignMatrixColumns,
+                               const Eigen::VectorXd& observedFrequencies,
+                               const Eigen::VectorXd& observedMomentsSolutionDesignMatrix,
+                               const Eigen::VectorXd& observedMomentsRawScoreDesignMatrix,
+                               const CriterionComparisonType& criterionComparisonType,
+                               const DesignMatrixType& designMatrixType,
+                               const double& criterion) {
+      // int i,
+      //     pcells = (ns > 250) ? 250 : ns;
+
+      // /* print headings */
+
+      // fprintf(fp, "\n\n\nRESULTS FOR ITERATIONS");
+
+      // fprintf(fp, "\n\n              ");
+      // for (i = 1; i <= (12 * (nc + 2)); i++)
+      //   fprintf(fp, " ");
+
+      // for (i = 1; i <= ((12 * nc) - 18) / 2; i++)
+      //   fprintf(fp, " ");
+      // fprintf(fp, "Moments Based on B");
+      // for (i = 1; i <= ((12 * nc) - 18) / 2; i++)
+      //   fprintf(fp, " ");
+
+      // for (i = 1; i <= ((12 * nc) - 30) / 2; i++)
+      //   fprintf(fp, " ");
+      // fprintf(fp, "Central Moments Based on B_raw");
+      // for (i = 1; i <= ((12 * nc) - 30) / 2; i++)
+      //   fprintf(fp, " ");
+
+      // fprintf(fp, "\n              ");
+      // for (i = 1; i <= (12 * (nc + 2)); i++)
+      //   fprintf(fp, " ");
+      // fprintf(fp, " ");
+      // for (i = 1; i <= 12 * nc - 1; i++)
+      //   fprintf(fp, "-");
+      // fprintf(fp, " ");
+      // for (i = 1; i <= 12 * nc - 1; i++)
+      //   fprintf(fp, "-");
+
+      // /* print actual results based on nct[] */
+
+      // fprintf(fp, "\n              ");
+      // for (i = 1; i <= (12 * (nc + 2)); i++)
+      //   fprintf(fp, " ");
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "       n[%2d]", i + 1);
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "   n_raw[%2d]", i + 1);
+      // for (i = 0; i < 19; i++)
+      //   fprintf(fp, " ");
+      // for (i = 0; i < pcells; i++)
+      //   fprintf(fp, "    nct[%3d]", i);
+      // if (ns > 250)
+      //   fprintf(fp, "  ...");
+      // fprintf(fp, "\n\n        Actual");
+      // for (i = 1; i <= (12 * (nc + 2)); i++)
+      //   fprintf(fp, " ");
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "%12.5f", n_mts[i]);
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "%12.5f", n_mts_raw[i]);
+      // for (i = 0; i < 19; i++)
+      //   fprintf(fp, " ");
+      // for (i = 0; i < pcells; i++)
+      //   fprintf(fp, "%12.5f", nct[i]);
+      // if (ns > 250)
+      //   fprintf(fp, "  ...");
+
+      // /* print criterion */
+
+      // fprintf(fp, "\n\n    Criterion:  ");
+      // if (Btype == 0 && ctype == 0)
+      //   fprintf(fp, "|(n[i] - m[i]| <= %15.10f", crit);
+      // else if (Btype == 0 && ctype == 1)
+      //   fprintf(fp, "|n[i] - m[i])/n[i]| <= %15.10f", crit);
+      // else if (Btype == 1 && ctype == 0)
+      //   fprintf(fp, "|(n_raw[i] - m_raw[i]| <= %15.10f", crit);
+      // else
+      //   fprintf(fp, "|n_raw[i] - m_raw[i])/n_raw[i]|",
+      //           " <= %15.10f", crit);
+      // fprintf(fp, "  for i = 1 to %d", nc);
+
+      // /* print fitted-results heading for iterations */
+
+      // fprintf(fp, "\n\n     Iteration");
+      // fprintf(fp, "          ap");
+      // fprintf(fp, "           u");
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "    Beta[%2d]", i + 1);
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "       m[%2d]", i + 1);
+      // for (i = 0; i < nc; i++)
+      //   fprintf(fp, "   m_raw[%2d]", i + 1);
+      // fprintf(fp, "     LR Chi2");
+      // fprintf(fp, "  nzero");
+      // for (i = 0; i < pcells; i++)
+      //   fprintf(fp, "    mct[%3d]", i);
+      // if (ns > 250)
+      //   fprintf(fp, "  ...");
+      // fprintf(fp, "\n");
     }
   };
 } // namespace EquatingRecipes
