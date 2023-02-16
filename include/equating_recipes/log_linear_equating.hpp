@@ -488,7 +488,7 @@ namespace EquatingRecipes {
       }
 
       /* get BtSaB -- first term on left side of Eq 49 in H&T */
-      Eigen::MatrixXd BtSaB = get_BtSmB(designMatrix, a);
+      Eigen::MatrixXd BtSaB = getBtSmB(designMatrix, a);
 
       if (debug) {
         std::cout << fmt::format("BtSaB debug:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(BtSaB));
@@ -562,12 +562,6 @@ namespace EquatingRecipes {
                                   const double& sumOfFrequencies,
                                   const bool& debug,
                                   Eigen::VectorXd& estimatedFrequencies) {
-      // int i;
-      // double *u = NULL,         /* constant */
-      //     *BBeta,               /* B x Beta (ns x 1) */
-      //     ap = 0.,              /* alpha' */
-      //     ldmin = log(DBL_MIN); /* log of smallest number; see NOTE above */
-
       size_t numberOfRows = designMatrix.rows();
 
       Eigen::VectorXd u = uConstants.value_or(Eigen::VectorXd::Zero(numberOfRows));
@@ -897,65 +891,69 @@ namespace EquatingRecipes {
                              Eigen::VectorXd& fittedMoments,
                              Eigen::VectorXd& fittedCentralMoments) {
       // int i, j,
-      //     nc = cu + cv + cuv; /* number of columns in design matrix */
+      //     nc = cu + cv + cuv;
       // double mnu, sdu, mnv, sdv,
       //     *rf; /* relative frequency */
 
-      // rf = dvector(0, ns - 1);
-      // for (i = 0; i < ns; i++)
-      //   rf[i] = f[i] / N;
+      size_t numberOfColumns = numberOfDegreesOfSmoothingU +
+                               numberOfDegreesOfSmoothingV +
+                               numberOfCrossProductMoments; /* number of columns in design matrix */
 
-      // for (j = 0; j < nc; j++)
-      //   mts[j] = mts_raw[j] = 0.; /* initialization */
+      Eigen::VectorXd relativeFrequencies = frequencies / frequencies.sum();
 
-      // /*** moments based on B ***/
+      fittedMoments.setZero(numberOfColumns);
+      fittedCentralMoments.setZero(numberOfColumns);
 
-      // for (j = 0; j < nc; j++)
-      //   for (i = 0; i < ns; i++)
-      //     mts[j] += B[i][j] * rf[i];
+      /*** moments based on B ***/
+      fittedMoments = solutionDesignMatrix * relativeFrequencies;
 
-      // /*** "typical" central moments based on B_raw ***/
+      /*** "typical" central moments based on B_raw ***/
+      /* for cu columns associated with u;  scores are in column 0 */
+      double meanU = rawScoreDesigmMatrix.col(0).cwiseProduct(relativeFrequencies).sum();
 
-      // /* for cu columns associated with u;  scores are in column 0 */
+      double sdU = (rawScoreDesigmMatrix.col(0).array().square()).cwiseProduct(relativeFrequencies.array()).sum();
+      sdU = std::sqrt(sdU - std::pow(meanU, 2));
 
-      // mnu = sdu = 0.;
-      // for (i = 0; i < ns; i++) {
-      //   mnu += B_raw[i][0] * rf[i];
-      //   sdu += B_raw[i][0] * B_raw[i][0] * rf[i];
-      // }
-      // sdu = sqrt(sdu - mnu * mnu);
+      if (numberOfDegreesOfSmoothingU >= 1) {
+        fittedCentralMoments(0) = meanU;
+      }
 
-      // if (cu >= 1)
-      //   mts_raw[0] = mnu;
-      // if (cu >= 2)
-      //   mts_raw[1] = sdu;
-      // for (j = 2; j < cu; j++) { /* start with skew */
-      //   for (i = 0; i < ns; i++)
-      //     mts_raw[j] += pow(B_raw[i][0] - mnu, j + 1) * rf[i];
-      //   mts_raw[j] /= pow(sdu, (j + 1));
-      // }
+      if (numberOfDegreesOfSmoothingU >= 2) {
+        fittedCentralMoments(1) = sdU;
+      }
+
+      Eigen::VectorXd deviation = rawScoreDesigmMatrix.col(0) -
+                                  Eigen::VectorXd::Constant(rawScoreDesigmMatrix.rows(), meanU);
+
+      for (size_t momentIndex = 2; momentIndex < numberOfDegreesOfSmoothingU; momentIndex++) {
+        fittedCentralMoments(momentIndex) += ((deviation.array().pow(momentIndex + 1)) * relativeFrequencies.array()).sum();
+        fittedCentralMoments(momentIndex) /= std::pow(sdU, static_cast<double>(momentIndex + 1));
+      }
 
       // /* for cv columns associated with v; scores are in column cu*/
+      if (numberOfDegreesOfSmoothingV > 0) {
+        double meanV = rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU).cwiseProduct(relativeFrequencies).sum();
+        double sdV = (rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU).array().pow(2)).cwiseProduct(relativeFrequencies.array()).sum();
 
-      // if (cv > 0) {
-      //   mnv = sdv = 0.;
-      //   for (i = 0; i < ns; i++) {
-      //     mnv += B_raw[i][cu] * rf[i];
-      //     sdv += B_raw[i][cu] * B_raw[i][cu] * rf[i];
-      //   }
-      //   sdv = sqrt(sdv - mnv * mnv);
+        sdV = std::sqrt(sdV - std::pow(meanV, static_cast<double>(2)));
 
-      //   if (cv >= 1)
-      //     mts_raw[cu] = mnv;
-      //   if (cv >= 2)
-      //     mts_raw[cu + 1] = sdv;
-      //   for (j = cu + 2; j < cu + cv; j++) { /* start with skew */
-      //     for (i = 0; i < ns; i++)
-      //       mts_raw[j] += pow(B_raw[i][cu] - mnv, j - cu + 1) * rf[i];
-      //     mts_raw[j] /= pow(sdv, (j - cu + 1));
-      //   }
-      // }
+        if (numberOfDegreesOfSmoothingV >= 1) {
+          fittedCentralMoments(numberOfDegreesOfSmoothingU) = meanV;
+        }
 
+        if (numberOfDegreesOfSmoothingV >= 2) {
+          fittedCentralMoments(numberOfDegreesOfSmoothingU + 1) = sdV;
+        }
+
+        Eigen::VectorXd deviations = rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU)
+          - Eigen::VectorXd::Constant(rawScoreDesigmMatrix.rows(), meanV);
+
+        for (size_t momentIndex = numberOfDegreesOfSmoothingU + 2; momentIndex < numberOfDegreesOfSmoothingU + numberOfDegreesOfSmoothingV; momentIndex++) {
+          fittedCentralMoments(momentIndex) = ((deviations.array().pow(momentIndex - numberOfDegreesOfSmoothingU + 1)).cwiseProduct(relativeFrequencies.array())).sum();
+          fittedCentralMoments(momentIndex) /= std::pow(sdV, static_cast<double>(momentIndex - numberOfDegreesOfSmoothingU + 1));
+        }
+      }
+      
       // /* for cuv columns associated with cross products;
       //     scores are in columns 0 and cu */
 
