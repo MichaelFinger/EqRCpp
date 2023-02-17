@@ -579,7 +579,7 @@ namespace EquatingRecipes {
       }
 
       if (normalizingConstant < std::numeric_limits<double>::min()) {
-        normalizingConstant = std::log(sumOfFrequencies)
+        normalizingConstant = std::log(sumOfFrequencies);
       } else {
         normalizingConstant = std::log(sumOfFrequencies) - std::log(normalizingConstant);
       }
@@ -767,6 +767,7 @@ namespace EquatingRecipes {
                             numberOfDegreesOfSmoothingU,
                             numberOfDegreesOfSmoothingV,
                             numberOfCrossProductMoments,
+                            crossProductMomentDesignations,
                             fittedMoments,
                             fittedCentralMoments);
 
@@ -786,7 +787,7 @@ namespace EquatingRecipes {
           }
 
           for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-            std::cout << fmt::format("{:12.5f}\n", fittedCentralMoments);
+            std::cout << fmt::format("{:12.5f}\n", fittedCentralMoments(columnIndex));
           }
 
           std::cout << fmt::format("{:12.5f}\n", likelihoodRatioChiSquare);
@@ -807,7 +808,8 @@ namespace EquatingRecipes {
                              criterionComparisonType,
                              designMatrixType,
                              (designMatrixType == DesignMatrixType::SOLUITON) ? observedMoments : observedCentralMoments,
-                             (designMatrixType == DesignMatrixType::SOLUITON) ? fittedMoments : fittedCentralMoments)) {
+                             (designMatrixType == DesignMatrixType::SOLUITON) ? fittedMoments : fittedCentralMoments,
+                             criterion)) {
           break;
         }
 
@@ -931,9 +933,11 @@ namespace EquatingRecipes {
       }
 
       // /* for cv columns associated with v; scores are in column cu*/
+      double meanV = 0.0;
+      double sdV = 0.0;
       if (numberOfDegreesOfSmoothingV > 0) {
-        double meanV = rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU).cwiseProduct(relativeFrequencies).sum();
-        double sdV = (rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU).array().pow(2)).cwiseProduct(relativeFrequencies.array()).sum();
+        meanV = rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU).cwiseProduct(relativeFrequencies).sum();
+        sdV = (rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU).array().pow(2)).cwiseProduct(relativeFrequencies.array()).sum();
 
         sdV = std::sqrt(sdV - std::pow(meanV, static_cast<double>(2)));
 
@@ -945,30 +949,36 @@ namespace EquatingRecipes {
           fittedCentralMoments(numberOfDegreesOfSmoothingU + 1) = sdV;
         }
 
-        Eigen::VectorXd deviations = rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU)
-          - Eigen::VectorXd::Constant(rawScoreDesigmMatrix.rows(), meanV);
+        Eigen::VectorXd deviations = rawScoreDesigmMatrix.col(numberOfDegreesOfSmoothingU) - Eigen::VectorXd::Constant(rawScoreDesigmMatrix.rows(), meanV);
 
         for (size_t momentIndex = numberOfDegreesOfSmoothingU + 2; momentIndex < numberOfDegreesOfSmoothingU + numberOfDegreesOfSmoothingV; momentIndex++) {
           fittedCentralMoments(momentIndex) = ((deviations.array().pow(momentIndex - numberOfDegreesOfSmoothingU + 1)).cwiseProduct(relativeFrequencies.array())).sum();
           fittedCentralMoments(momentIndex) /= std::pow(sdV, static_cast<double>(momentIndex - numberOfDegreesOfSmoothingU + 1));
         }
       }
-      
-      // /* for cuv columns associated with cross products;
-      //     scores are in columns 0 and cu */
 
-      // if (cuv > 0 && cu >= 2 && cv >= 2) {
-      //   for (j = cu + cv; j < nc; j++) {
-      //     for (i = 0; i < ns; i++)
-      //       mts_raw[j] += pow(B_raw[i][0] - mnu, cpm[j - cu - cv][0]) *
-      //                     pow(B_raw[i][cu] - mnv, cpm[j - cu - cv][1]) * rf[i];
-      //     mts_raw[j] /= pow(sdu, cpm[j - cu - cv][0]) * pow(sdv, cpm[j - cu - cv][1]);
-      //   }
-      // }
+      /* for cuv columns associated with cross products;
+          scores are in columns 0 and cu */
+      if (numberOfCrossProductMoments > 0 &&
+          numberOfDegreesOfSmoothingU >= 2 &&
+          numberOfDegreesOfSmoothingV >= 2) {
+        for (size_t columnIndex = numberOfDegreesOfSmoothingU + numberOfDegreesOfSmoothingV;
+             columnIndex < numberOfColumns;
+             columnIndex++) {
+          for (size_t rowIndex = 0; rowIndex < rawScoreDesigmMatrix.rows(); rowIndex++) {
+            fittedCentralMoments(columnIndex) += std::pow(rawScoreDesigmMatrix(rowIndex, 0) - meanU,
+                                                          static_cast<double>(crossProductMomentDesignations(columnIndex - numberOfDegreesOfSmoothingU - numberOfDegreesOfSmoothingV, 0))) *
+                                                 std::pow(rawScoreDesigmMatrix(rowIndex, numberOfDegreesOfSmoothingU),
+                                                          static_cast<double>(crossProductMomentDesignations(columnIndex - numberOfDegreesOfSmoothingU - numberOfDegreesOfSmoothingV, 1))) *
+                                                 relativeFrequencies(rowIndex);
+          }
 
-      // free_dvector(rf, 0, ns - 1);
-
-      // return;
+          fittedCentralMoments(columnIndex) /= std::pow(sdU,
+                                                        static_cast<double>(crossProductMomentDesignations(columnIndex - numberOfDegreesOfSmoothingU - numberOfDegreesOfSmoothingV, 0))) *
+                                               std::pow(sdV,
+                                                        static_cast<double>(crossProductMomentDesignations(columnIndex - numberOfDegreesOfSmoothingU - numberOfDegreesOfSmoothingV, 1)));
+        }
+      }
     }
 
     /*
@@ -1028,37 +1038,43 @@ namespace EquatingRecipes {
                           const double& criterion) {
       // int i;
 
-      // if (Btype == 0) { /* Btype == 0 --> based on B matrix */
-      //   for (i = 0; i < nc; i++) {
-      //     if (ctype == 0) { /* absolute comparison */
-      //       if (fabs(n_mts[i] - m_mts[i]) > crit)
-      //         return 0;
-      //     } else { /* relative comparison */
-      //       if (n_mts[i] == 0.)
-      //         runerror("\n\nRelative criterion and n_mts[] = 0");
-      //       if (fabs((n_mts[i] - m_mts[i]) / n_mts[i]) > crit)
-      //         return 0;
-      //     }
-      //   }
-      // } else { /* Btype==1; based on B_raw matrix and central moments */
-      //   for (i = 0; i < nc; i++) {
-      //     if (i == 0 || i == cu)
-      //       continue;
-      //     if (ctype == 0) { /* absolute comparison */
-      //       if (fabs(n_mts[i] - m_mts[i]) > crit)
-      //         return 0;
-      //     } else { /* relative comparison */
-      //       if (n_mts[i] == 0.)
-      //         runerror("\n\nRelative criterion and n_mts[] = 0");
-      //       if (fabs((n_mts[i] - m_mts[i]) / n_mts[i]) > crit)
-      //         return 0;
-      //     }
-      //   }
-      // }
+      if (designMatrixType == DesignMatrixType::SOLUITON) {
+        for (size_t momentIndex = 0; momentIndex < numberOfCMoments; momentIndex++) {
+          if (criterionComparisonType == CriterionComparisonType::ABSOLUTE) {
+            if (std::abs(observedMoments(momentIndex) - fittedMoments(momentIndex)) > criterion) {
+              return false;
+            }
+          } else {
+            if (observedMoments(momentIndex) == 0.0) {
+              throw std::runtime_error("\n\nRelative criterion and n_mts[] = 0");
+            }
 
-      // return 1; /* criterion met */
+            if (std::abs((observedMoments(momentIndex) - fittedMoments(momentIndex)) / observedMoments(momentIndex)) > criterion) {
+              return false;
+            }
+          }
+        }
+      } else {
+        for (size_t momentIndex = 0; momentIndex < numberOfCMoments; momentIndex++) {
+          if (momentIndex == 0 || momentIndex == numberOfMomentsForU) {
+            if (criterionComparisonType == CriterionComparisonType::ABSOLUTE) {
+              if (std::abs(observedMoments(momentIndex) - fittedMoments(momentIndex)) > criterion) {
+                return false;
+              }
+            } else {
+              if (observedMoments(momentIndex) == 0.0) {
+                throw std::runtime_error("\n\nRelative criterion and n_mts[] = 0");
+              }
 
-      return false;
+              if (std::abs((observedMoments(momentIndex) - fittedMoments(momentIndex)) / observedMoments(momentIndex)) > criterion) {
+                return false;
+              }
+            }
+          }
+        }
+      }
+
+      return true;
     }
 
     /*

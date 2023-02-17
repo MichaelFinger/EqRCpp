@@ -68,7 +68,7 @@ namespace EquatingRecipes {
           rowObject[columnHeaders[columnIndex]] = value(rowIndex, columnIndex);
         }
 
-        std::string rowHeader = rowHeaders.empty() ? fmt::Format("Row {}", rowIndex + 1) : rowHeaders[rowIndex];
+        std::string rowHeader = rowHeaders.empty() ? fmt::format("Row {}", rowIndex + 1) : rowHeaders[rowIndex];
         eigenObject[rowHeader] = rowObject;
       }
 

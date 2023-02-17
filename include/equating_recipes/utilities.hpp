@@ -78,6 +78,7 @@ University of Iowa
 #include <cmath>
 #include <limits>
 #include <map>
+#include <random>
 #include <stdexcept>
 #include <string>
 
@@ -741,7 +742,7 @@ namespace EquatingRecipes {
 
         } else if (methodCode == "A") {
           return EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED;
-          
+
         } else {
           throw std::runtime_error("Invalid method code for CINEG design.");
         }
@@ -773,6 +774,39 @@ namespace EquatingRecipes {
         default:
           throw std::runtime_error("Invalid method.");
       }
+    }
+
+    static std::mt19937_64 getSeedEngine() {
+      std::random_device rd;  // Will be used to obtain a seed for the random number engine
+      std::mt19937_64 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+
+      return gen;
+    }
+
+    static std::uniform_int_distribution<> getUniformIntegerDistribution(const int& lowerBound,
+                                                                         const int& upperBound) {
+      std::uniform_int_distribution<> distrib(lowerBound,
+                                              upperBound);
+
+      return distrib;
+    }
+
+    static std::uniform_real_distribution<> getUniformRealDistribution() {
+      std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+      return distrib;
+    }
+
+    static int getUniformIntegerRandomNumber(std::uniform_int_distribution<>& distrib,
+                                             std::mt19937_64& gen) {
+      int rndNumber = distrib(gen);
+      return rndNumber;
+    }
+
+    static double getUniformDoubleRandomNumber(std::uniform_real_distribution<>& distrib,
+                                               std::mt19937_64& gen) {
+      double rndNumber = distrib(gen);
+      return rndNumber;
     }
   };
 } // namespace EquatingRecipes
