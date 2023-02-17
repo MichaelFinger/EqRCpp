@@ -53,6 +53,11 @@ University of Iowa
 #include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 
+#include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
+#include <equating_recipes/structures/bivariate_statistics.hpp>
+#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/univariate_statistics.hpp>
+
 namespace EquatingRecipes {
   class LogLinearEquating {
   public:
@@ -74,7 +79,114 @@ namespace EquatingRecipes {
       RAW_SCORE
     };
 
+    void runUnivariateLogLinearSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                                         const size_t& numberOfDegreesSmoothing,
+                                         const bool& useStandardizedScale,
+                                         const DesignMatrixType& designMatrixType,
+                                         const CriterionComparisonType& criterionComparisonType,
+                                         const double& criterion,
+                                         EquatingRecipes::Structures::UnivariateLogLinearSmoothing& smoothingResults) {}
+
+    void runRGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
+                                                 const EquatingRecipes::Structures::Method& method,
+                                                 const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                 const EquatingRecipes::Structures::UnivariateStatistics& x,
+                                                 const EquatingRecipes::Structures::UnivariateStatistics& y,
+                                                 const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
+                                                 const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
+                                                 const size_t& replicationNumber,
+                                                 EquatingRecipes::Structures::PData& pData,
+                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {}
+
+    void runSGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
+                                                 const EquatingRecipes::Structures::Method& method,
+                                                 const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                 const EquatingRecipes::Structures::BivariateStatistics& xy,
+                                                 const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY,
+                                                 const size_t& replicaitonNumber,
+                                                 EquatingRecipes::Structures::PData& pData,
+                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {}
+    
+    void runCGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
+                                                 const EquatingRecipes::Structures::Method& method,
+                                                 const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                 const double& populationWeight1, 
+                                                 const bool& isInternalAnchor, 
+                                                 const double& reliabilityCommonItemsPopulation1, 
+                                                 const double& reliabilityCommonItemsPopulation2,
+                                                 const EquatingRecipes::Structures::BivariateStatistics& xv,
+                                                 const EquatingRecipes::Structures::BivariateStatistics& yv,
+                                                 const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
+                                                 const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
+                                                 const siez_t& replicationNumber,
+                                                 EquatingRecipes::Structures::PData& pData,
+                                                 EquatingRecipes::Structures::EquatedRawScoreBootstrapResults& equatedRawScoreBootstrapResults) {}
+
+    /*    
+      void Print_ULL(FILE *fp, char tt[], struct USTATS *x,
+                    struct ULL_SMOOTH *s, int print_dm, int print_mts);
+      void Print_BLL(FILE *fp, char tt[], struct BSTATS *xv, struct BLL_SMOOTH *s, 
+              int print_dm, int print_mts, int print_freq, int print_bfd);
+      void Print_RL(FILE *fp, char tt[], struct PDATA *inall, struct ERAW_RESULTS *r);
+      void Print_SL(FILE *fp, char tt[], struct PDATA *inall, struct ERAW_RESULTS *r);
+      void Print_CL(FILE *fp, char tt[], struct PDATA *inall, struct ERAW_RESULTS *r);
+    */
+
   private:
+    /*
+      Performs univariate log-linear smoothing in terms of the 
+      multinomial model as described by Holland and Thayer (1987),
+      abbreviated here as H&T.  
+
+      Input
+      
+        n = number of persons
+        ns = number of score categories
+        min = minimum raw score
+        inc = increment in raw scores
+        fd[] = frequency distribution
+        c = number of degrees for polynomial smoothing
+        scale = type of scaling:
+              0 --> no scaling; 
+                1 --> scale such that each column of B has
+                      sum (elements) = 0 and sum (elements^2) = 1
+        Btype = type of moments for criterion mathching:
+                0 --> moments based on B 
+                (if scale = 0, design matrix is based on raw scores,
+                which means that the moments are based on raw scores;
+                if scale = 1, design matrix is based on scaled raw scores,
+                which means that the moments are based on scaled raw scores) 
+                1 -->  moments based on B_raw, whether scale is 0 or 1
+      ctype = comparison type for criterion:
+              0 --> means use absolute criterion; 
+          1 --> means use relative criterion
+      crit = convergence criterion value
+        *fp = pointer to output file
+        
+      Output: populates struct ULL_SMOOTH s 
+
+      Function calls other than C or NR utilities:
+        design_matrix()
+        iteration()
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+
+    */
+    void smoothUnivaraiteLogLinear(const size_t& numberOfExaminees,
+                                   const size_t& numberOfScores,
+                                   const double& minimumScore,
+                                   const double& scoreIncrement,
+                                   const Eigen::VectorXd freqDist,
+                                   const size_t& numberOfDegreesSmoothing,
+                                   const bool& useStandardizedScale,
+                                   const DesignMatrixType& Btype,
+                                   const CriterionComparisonType& ctype,
+                                   const double& criterion,
+                                   EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothing) {
+    }
+
     /*
       Create design matrix.  Code and variable names are for a
       bivariate u*v distribution, where u is rows and v is columns.

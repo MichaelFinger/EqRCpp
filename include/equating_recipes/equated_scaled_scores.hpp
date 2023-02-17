@@ -33,7 +33,7 @@ namespace EquatingRecipes {
              const int& highestObservableRoundedScaledScore,
              const EquatingRecipes::Structures::RawToScaledScoreTable& rawToScaledScoreTable,
              EquatingRecipes::Structures::EquatedScaledScoresResults& results) {
-      size_t numberOfScores = EquatingRecipes::Utilities::numberOfScores(pData.mininumScoreX,
+      size_t numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.mininumScoreX,
                                                                          pData.maximumScoreX,
                                                                          pData.scoreIncrementX);
 

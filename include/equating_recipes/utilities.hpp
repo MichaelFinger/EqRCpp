@@ -138,9 +138,9 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08         
       */
-    static size_t numberOfScores(const double& minimumScore,
-                                 const double& maximumScore,
-                                 const double& scoreIncrement) {
+    static size_t getNumberOfScores(const double& minimumScore,
+                                    const double& maximumScore,
+                                    const double& scoreIncrement) {
       size_t nScores = getScoreLocation(maximumScore, minimumScore, scoreIncrement) + 1;
 
       return nScores;
@@ -481,11 +481,11 @@ namespace EquatingRecipes {
                                        const int highestObservableRoundedScaledScore,
                                        Eigen::VectorXd& unroundedEquatedScaledScores,
                                        Eigen::VectorXd& roundedEquatedScaledScores) {
-      size_t numberOfRawScoresYct = Utilities::numberOfScores(maximumRawScoreYct,
+      size_t numberOfRawScoresYct = Utilities::getNumberOfScores(maximumRawScoreYct,
                                                               minimumRawScoreYct,
                                                               scoreIncrementYct);
 
-      size_t numberOfEquatedRawScores = Utilities::numberOfScores(maximumRawScoreX,
+      size_t numberOfEquatedRawScores = Utilities::getNumberOfScores(maximumRawScoreX,
                                                                   minimumRawScoreX,
                                                                   rawScoreIncrement);
 
@@ -549,7 +549,7 @@ namespace EquatingRecipes {
                                                             const bool& includeRawScoresWithZeroFrequency = true) {
       size_t minimumScoreLocation = Utilities::getScoreLocation(minimumScore, minimumScore, scoreIncrement);
       size_t maximumScoreLocation = Utilities::getScoreLocation(maximumScore, minimumScore, scoreIncrement);
-      size_t numberOfScores = Utilities::numberOfScores(minimumScore, maximumScore, scoreIncrement);
+      size_t numberOfScores = Utilities::getNumberOfScores(minimumScore, maximumScore, scoreIncrement);
 
       Eigen::VectorXd freqDist = Eigen::VectorXd::Zero(numberOfScores);
 
@@ -639,7 +639,7 @@ namespace EquatingRecipes {
                                            const double& maximumScore,
                                            const double& scoreIncrement,
                                            const Eigen::VectorXd& cumulativeRelativeFreqDist) {
-      size_t numberOfScores = Utilities::numberOfScores(minimumScore,
+      size_t numberOfScores = Utilities::getNumberOfScores(minimumScore,
                                                         maximumScore,
                                                         scoreIncrement);
 
@@ -777,7 +777,7 @@ namespace EquatingRecipes {
     }
 
     static std::mt19937_64 getSeedEngine() {
-      std::random_device rd;  // Will be used to obtain a seed for the random number engine
+      std::random_device rd;     // Will be used to obtain a seed for the random number engine
       std::mt19937_64 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
 
       return gen;

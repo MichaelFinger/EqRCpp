@@ -1,18 +1,37 @@
-/* 
-  From Source: BetaBinomial.h, BetaBinomial.c
-  Original Struct: ITEM_SPEC
-  Description: Contains functions used for:
+/* 	
+  BetaBinomial.c  
+  Contains functions used for:
       (a) beta binomial smoothing--there are three types:
             2 parameter beta, binomial errors
             4 parameter beta, binomial errors
             4 parameter bete, compound binomial errorsin computing 
       (b) equating beta-binomial smoothed x to scale of 
           beta-binomial smoothed y
+
+This file, which is part of Equating Recipes, is free softrware.
+You can distribute it and/or modify it under the terms of the
+GNU Lesser General Public License, version 3, as published by 
+the Free Software Foundation.
+
+This file is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF
+MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License, version 3, for more details.
+
+You should have received a copy of the GNU Lesser General Public 
+License, version 3, in a ReadMe file distributed along with this
+file.  If not, see <http://www.gnu.org/licenses/>   
+
+Copyright 2009 
+Center for Advanced Studies in Measurement and Assessment (CASMA)
+University of Iowa
+
 */
 
 #ifndef BETA_BINOMIAL_HPP
 #define BETA_BINOMIAL_HPP
 
+#include <string>
 #include <Eigen/Dense>
 
 #include <equating_recipes/structures/beta_binomial_smoothing.hpp>
@@ -28,6 +47,30 @@
 namespace EquatingRecipes {
   class BetaBinomial {
   public:
+    /*
+      Wrapper to do beta binomial smoothing.  There are three types:
+        2 parameter beta, binomial errors
+        4 parameter beta, binomial errors
+        4 parameter bete, compound binomial errors
+
+      Input
+        x     =  UTATS structure
+        nparm = number of parameters for beta (2 or 4)
+        rel   = reliability (usually KR20); 
+                if rel == 0, binomial errors;
+                otherwise compund binomial errors
+
+      Output
+        populates s, which is a BB_SMOOTH structure
+
+      Function calls other than C or NR utilities:  
+        Smooth_BB
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+
+    */
     EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomialSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& rawScoreUnivariateStatistics,
                                                                              const size_t& numberOfParameters,
                                                                              const double& reliability) {
@@ -43,12 +86,122 @@ namespace EquatingRecipes {
       return results;
     }
 
-    EquatingRecipes::Structures::EquatedRawScoreResults randomGroupsEquipercentileEquating(const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsNewForm,
-                                                                                           const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsOldForm,
-                                                                                           const EquatingRecipes::Structures::BetaBinomialSmoothing& betaBinomialSmoothingNewForm,
-                                                                                           const EquatingRecipes::Structures::BetaBinomialSmoothing& betaBinomialSmoothingOldForm,
-                                                                                           const size_t& bootstrapReplicationNumber) {
+    /*
+      Wrapper for doing equipercentile equating with RG design
+        and beta-binomial smoothing
+        
+      Assumes that equating puts raw scores for x on scale of y
+      
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
+
+      Input
+      
+        design = 'R' (random groups)
+        method = 'E'(equipercentile)
+        smoothing = 'B' (beta-binomial smoothing)  
+        *x = pointer to struct USTATS (new form)
+        *y = pointer to struct USTATS (old form)
+        *bbx = pointer to struct BB_SMOOTH (new form)
+        *bby = pointer to struct BB_SMOOTH (old form)
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating;  
+        
+      Output
+        
+        struct PDATA *inall:   populates selected values of inall 
+        
+        struct ERAW_RESULTS *r: populates            
+
+          **eraw: equated raw scores;          
+                  method (rows) by raw score (columns) matrix
+                  of equated scores. Here there is only one method.
+                  So, memory allocated for eraw[][] is: 
+                  eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
+                                (loc(x->max,x->min,x>-inc)]
+                  because we are getting equated raw scores for x 
+          **mts:  moments for equated raw scores   
+
+      NOTE: With beta-binomial smoothing typically 
+            min = 0, max = #items, and inc = 1        
+          
+      NOTE: If Wrapper_RB() is called in a bootstrap loop,
+            then in the calling function struct ERAW_RESULTS must
+            be different from struct ERAW_RESULTS for the actual
+            equating. 
+
+      Function calls other than C or NR utilities:
+        EquiEquate()
+        MomentsFromFD()  
+                                                    
+      R. L. Brennan
+
+      Date of last revision: 6/30/08       
+    */
+    EquatingRecipes::Structures::EquatedRawScoreResults randomGroupsEquipercentileEquating(const EquatingRecipes::Structures::Design& design,
+                                                                                           const EquatingRecipes::Structures::Method& method,
+                                                                                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                                                           const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                                                                                           const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
+                                                                                           const EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomialSmoothingX,
+                                                                                           const EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomialSmoothingY,
+                                                                                           const size_t& replicationNumber,
+                                                                                           EquatingRecipes::Structures::PData& pData) {
       EquatingRecipes::Structures::EquatedRawScoreResults results;
+
+      /* method name --- 10 characters; right justified */
+      pData.methods.push_back("   y-equiv");
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                            /* counting of replications done in Wrapper_Bootstrap() */
+
+      /* allocation and assignments for struct PDATA inall
+        Note that for every assignment of the form inall->(var) = x->(var)
+        or inall->(var) = y->(var), values vary depending on whether x or y 
+        is for actual equating or a bootstrap sample; all other values are 
+        the same for the actual equating and a bootstrap sample */
+
+      if (pData.bootstrapReplicationNumber == 0) {
+        pData.summaryRawDataX = univariateStatisticsX;
+        pData.summaryRawDataY = univariateStatisticsY;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        pData.mininumScoreX = univariateStatisticsX.minimumScore;
+        pData.maximumScoreX = univariateStatisticsX.maximumScore;
+        pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
+        pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
+        pData.numberOfExaminees = univariateStatisticsX.numberOfExaminees;
+        pData.betaBinomalSmoothingX = betaBinomialSmoothingX;
+        pData.betaBinomalSmoothingY = betaBinomialSmoothingY;
+      }
+
+      /* allocation and assignments for r */
+      if (pData.bootstrapReplicationNumber <= 1) {
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                   pData.mininumScoreX,
+                                                                                   pData.scoreIncrementX);
+        results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
+        results.equatedRawScoreMoments.resize(4);
+      }
+
+      /* Compute equating results */
+      Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
+      univariateStatisticsY.minimumScore,
+      univariateStatisticsY.scoreIncrement,
+      betaBinomialSmoothingY.fittedRawScoreCumulativeRelativeFreqDist,
+      univariateStatisticsX.numberOfScores,
+      betaBinomialSmoothingX.fittedRawScorePercentileRankDist);
+
+      for (size_t index = 0; index < equatedRawScores.size(); index++) {
+        results.equatedRawScores(0, index) = equatedRawScores(index);
+      }
+      
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(
+        equatedRawScores,
+        pData.scoreFrequenciesX
+      );
+
       return results;
     }
 
@@ -91,10 +244,10 @@ namespace EquatingRecipes {
 
     bool fourParameterBetaSmooting(const Eigen::VectorXd& rawScoreFreqDist,
                                    EquatingRecipes::Structures::BetaBinomialSmoothing& betaFitResults) {
-      size_t numberOfExaminees = betaFitResults.numberOfExaminees;                      /* number of persons */
-      size_t numberOfItems = betaFitResults.numberOfItems;                        /* number of items on test */
+      size_t numberOfExaminees = betaFitResults.numberOfExaminees; /* number of persons */
+      size_t numberOfItems = betaFitResults.numberOfItems;         /* number of items on test */
       size_t numberOfScores = numberOfItems + 1;
-      
+
       betaFitResults.fittedRawScoreDensity.setZero(numberOfScores);
       Eigen::VectorXd smoothedFrequencies = Eigen::VectorXd::Zero(numberOfScores);
       Eigen::VectorXd noncentralTrueScoreMoments(4); /* non-central true score moments */
@@ -150,9 +303,9 @@ namespace EquatingRecipes {
 
         /* calculate fitted observed score moments */
         EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(smoothedFrequencies,
-                                                                                                   0,
-                                                                                                   numberOfItems,
-                                                                                                   1.0);
+                                                                                                                     0,
+                                                                                                                     numberOfItems,
+                                                                                                                     1.0);
         betaFitResults.fittedRawScoreMoments = moments.momentValues;
       }
 
@@ -163,10 +316,10 @@ namespace EquatingRecipes {
 
     bool twoParameterBetaSmooting(const Eigen::VectorXd& rawScoreFreqDist,
                                   EquatingRecipes::Structures::BetaBinomialSmoothing& betaFitResults) {
-      size_t numberOfExaminees = betaFitResults.numberOfExaminees;                      /* number of persons */
-      size_t numberOfItems = betaFitResults.numberOfItems;                        /* number of items on test */
+      size_t numberOfExaminees = betaFitResults.numberOfExaminees; /* number of persons */
+      size_t numberOfItems = betaFitResults.numberOfItems;         /* number of items on test */
       size_t numberOfScores = numberOfItems + 1;
-      
+
       betaFitResults.fittedRawScoreDensity.setZero(numberOfScores);
       Eigen::VectorXd smoothedFrequencies = Eigen::VectorXd::Zero(numberOfScores);
       Eigen::VectorXd noncentralTrueScoreMoments(4); /* non-central true score moments */
@@ -211,9 +364,9 @@ namespace EquatingRecipes {
       /* calculate observed score density */
 
       if (!observedDensity(numberOfItems + 1,
-                          numberOfExaminees,
-                          betaFitResults.betaParameters,
-                          smoothedFrequencies)) {
+                           numberOfExaminees,
+                           betaFitResults.betaParameters,
+                           smoothedFrequencies)) {
         /* Assign uniform distribution and exit */
         betaFitResults.fittedRawScoreDensity.setConstant(1.0 / static_cast<double>(numberOfItems + 1));
         betaFitResults.numberOfMomentsFit = 0;
@@ -238,9 +391,9 @@ namespace EquatingRecipes {
 
         /* calculate fitted observed score moments */
         EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
-                                                                                                   0.0,
-                                                                                                   numberOfItems,
-                                                                                                   1.0);
+                                                                                                                     0.0,
+                                                                                                                     numberOfItems,
+                                                                                                                     1.0);
         betaFitResults.fittedRawScoreMoments = moments.momentValues;
       }
 
@@ -251,11 +404,11 @@ namespace EquatingRecipes {
     // void Print_RB(FILE* fp, char tt[], struct PDATA* inall, struct ERAW_RESULTS* r);
 
     size_t calculateBetaParameters(const size_t& numberOfItems,
-                                  const Eigen::VectorXd& trueScoreMoments,
-                                  const Eigen::VectorXd& noncentralTrueScoreMoments,
-                                  Eigen::VectorXd& parameterEstimates) {
+                                   const Eigen::VectorXd& trueScoreMoments,
+                                   const Eigen::VectorXd& noncentralTrueScoreMoments,
+                                   Eigen::VectorXd& parameterEstimates) {
       parameterEstimates.setZero(4);
-      
+
       size_t numberOfMomentsFit = 0;
 
       /* 	Only try to fit more than one moment if the true score

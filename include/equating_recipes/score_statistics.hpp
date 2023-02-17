@@ -195,7 +195,7 @@ namespace EquatingRecipes {
                                                                             const double& minimumScore,
                                                                             const double& maximumScore,
                                                                             const double& scoreIncrement) {
-      size_t numberOfScores = EquatingRecipes::Utilities::numberOfScores(minimumScore,
+      size_t numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(minimumScore,
                                                                          maximumScore,
                                                                          scoreIncrement);
 

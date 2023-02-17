@@ -48,7 +48,7 @@ namespace EquatingRecipes {
         this->minimumScore = minimumScore;
         this->maximumScore = maximumScore;
         this->scoreIncrement = scoreIncrement;
-        this->numberOfScores = EquatingRecipes::Utilities::numberOfScores(minimumScore,
+        this->numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(minimumScore,
                                                                           maximumScore,
                                                                           scoreIncrement);
 
