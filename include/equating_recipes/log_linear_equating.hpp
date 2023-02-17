@@ -87,32 +87,345 @@ namespace EquatingRecipes {
                                          const double& criterion,
                                          EquatingRecipes::Structures::UnivariateLogLinearSmoothing& smoothingResults) {}
 
+    /*
+      Wrapper for doing equipercentile equating with RG design
+        and log-linear smoothing smoothing
+        
+      Assumes that equating puts raw scores for x on scale of y
+      
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
+
+      Input
+      
+        design = 'R'(random groups)
+        method = 'E'(equipercentile)
+        smoothing = 'L' (log-linear smoothing)  
+        *x = pointer to struct USTATS (new form)
+        *y = pointer to struct USTATS (old form)
+        *ullx = pointer to struct BB_SMOOTH (new form)
+        *ully = pointer to struct BB_SMOOTH (old form)
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating;  
+        
+      Output
+        
+        struct PDATA *inall:   populates selected values of inall 
+        
+        struct ERAW_RESULTS *r: populates            
+
+          **eraw: equated raw scores;          
+                  method (rows) by raw score (columns) matrix
+                  of equated scores. Here there is only one method.
+                  So, memory allocated for eraw[][] is: 
+                  eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
+                                (loc(x->max,x->min,x>-inc)]
+                  because we are getting equated raw scores for x 
+          **mts:  moments for equated raw scores           
+          
+      NOTE: If Wrapper_RL() is called in a bootstrap loop,
+            then in the calling function struct ERAW_RESULTS must
+            be different from struct ERAW_RESULTS for the actual
+            equating. 
+
+      Function calls other than C or NR utilities:                   
+        EquiEquate()
+        MomentsFromFD()  
+                                                    
+      R. L. Brennan
+
+      Date of last revision: 6/30/08       
+    */
     void runRGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
                                                  const EquatingRecipes::Structures::Method& method,
                                                  const EquatingRecipes::Structures::Smoothing& smoothing,
-                                                 const EquatingRecipes::Structures::UnivariateStatistics& x,
-                                                 const EquatingRecipes::Structures::UnivariateStatistics& y,
-                                                 const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
-                                                 const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
+                                                 const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                                                 const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
+                                                 const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingX,
+                                                 const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingY,
                                                  const size_t& replicationNumber,
                                                  EquatingRecipes::Structures::PData& pData,
-                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {}
+                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                            /* counting of replications done in Wrapper_Bootstrap() */
 
+      /* allocation and assignments for struct PDATA inall
+        Note that for every assignment of the form inall->(var) = x->(var)
+        or inall->(var) = y->(var), values vary depending on whether x or y 
+        is for actual equating or a bootstrap sample; all other values are 
+        the same for the actual equating and a bootstrap sample */
+
+      if (pData.bootstrapReplicationNumber == 0) {
+        pData.summaryRawDataX = univariateStatisticsX;
+        pData.summaryRawDataY = univariateStatisticsY;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        pData.methods.push_back("   y-equiv");
+        pData.mininumScoreX = univariateStatisticsX.minimumScore;
+        pData.maximumScoreX = univariateStatisticsX.maximumScore;
+        pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
+        pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
+        pData.numberOfExaminees = univariateStatisticsX.numberOfExaminees;
+        pData.univariateLogLinearSmoothingX = univariateLogLinearSmoothingX;
+        pData.univariateLogLinearSmoothingY = univariateLogLinearSmoothingY;
+      }
+
+      if (pData.bootstrapReplicationNumber <= 1) {
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                   pData.mininumScoreX,
+                                                                                   pData.scoreIncrementX);
+        equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
+        equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
+      }
+
+      /* Compute equating results */
+      Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
+                                                                                                  univariateStatisticsY.minimumScore,
+                                                                                                  univariateStatisticsY.scoreIncrement,
+                                                                                                  univariateLogLinearSmoothingY.fittedRawScoreCumulativeRelativeDist,
+                                                                                                  univariateStatisticsX.numberOfScores,
+                                                                                                  univariateLogLinearSmoothingX.fittedRawScorePercentileRankDist);
+      for (size_t index = 0; index < equatedRawScores.size(); index++) {
+        equatedRawScoreResults.equatedRawScores(0, index) = equatedRawScores(index);
+      }
+
+      /* get moments */
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScores,
+                                                                                                                   pData.scoreFrequenciesX);
+
+      for (size_t index = 0; index < moments.momentValues.size(); index++) {
+        equatedRawScoreResults.equatedRawScoreMoments(0, index) = moments.momentValues(index);
+      }
+    }
+
+    /*
+      Wrapper for doing equipercentile equating with SG design
+      and log-linear smoothing.  
+      
+      NOTE: This is for the SG design in which x and y do not share any items in 
+      common, which means that functionally this is the external anchor case.  
+      The bivariate log-linear smoothing procedure needs to know this. So, when
+      Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+      anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+      (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
+      of the smoothing algorithm may be compromised because of dependencies between
+      x and y. (To date my experience does not suggest this is a problem.)
+        
+      Assumes that equating puts raw scores for x on scale of y
+      
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
+
+      Input
+      
+        design = 'S' (single group)
+        method = 'E' (equipercentile)
+        smoothing = 'L' (log-linear smoothing)  
+        xy = struct BSTATS 
+      bllxy = struct BLL_SMOOTH
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating;  
+        
+        NOTE: it is assumed that the first variable
+              in xy is indeed x and the second variable is y.
+          For bllxy, data memebers with '_x' are for x,
+          and data members with '_v' are for y.  This somewhat
+          inconsistent notation arises because BLL_SMOOTH is
+          usually used with the CG design in which the variables
+          are more naturally designated x (or u) and v.
+
+      Output
+        
+        struct PDATA inall   populates selected values of inall  
+
+        struct ERAW_RESULTS *r: populates            
+
+          **eraw: equated raw scores;          
+                  method (rows) by raw score (columns) matrix
+                  of equated scores. Here there is only one method.
+                  So, memory allocated for eraw[][] is: 
+                  eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
+                                (loc(x->max,x->min,x>-inc)]
+                  because we are getting equated raw scores for x 
+          **mts:  moments for equated raw scores            
+          
+      NOTE: If Wrapper_SL() is called in a bootstrap loop,
+            then in the calling function struct ERAW_RESULTS must
+            be different from struct ERAW_RESULTS for the actual
+            equating. 
+                                                
+      Function calls other than C or NR utilities:
+        EquiEquate()
+        MomentsFromFD()  
+                                                    
+      R. L. Brennan
+
+      Date of last revision: 6/30/08   
+    */
     void runSGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
                                                  const EquatingRecipes::Structures::Method& method,
                                                  const EquatingRecipes::Structures::Smoothing& smoothing,
                                                  const EquatingRecipes::Structures::BivariateStatistics& xy,
                                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY,
-                                                 const size_t& replicaitonNumber,
+                                                 const size_t& replicationNumber,
                                                  EquatingRecipes::Structures::PData& pData,
-                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {}
+                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                            /* counting of replications done in Wrapper_Bootstrap() */
+
+      /* Allocation and assignments for struct PDATA inall>
+    Note that for every assignment of the form inall->(var) = x->(var)
+    or inall->(var) = y->(var), values vary depending on whether x or y 
+ 	  is for actual equating or a bootstrap sample; all other values are 
+	  the same for the actual equating and a bootstrap sample */
+
+      if (pData.bootstrapReplicationNumber == 0) {
+        pData.summaryRawDataXY = xy;
+        pData.bivariateLogLinearSmoothingXY = bivariateLogLinearSmoothingXY;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        pData.isInternalAnchor = false; /* implicitly, anchor is external for biv log-linear
+						                        smoothing with the SG design */
+
+        pData.methods.push_back("   y-equiv");
+
+        pData.mininumScoreX = xy.univariateStatisticsRow.minimumScore;
+        pData.maximumScoreX = xy.univariateStatisticsRow.maximumScore;
+        pData.scoreIncrementX = xy.univariateStatisticsRow.scoreIncrement;
+        pData.scoreFrequenciesX = xy.univariateStatisticsRow.freqDistDouble;
+        pData.numberOfExaminees = xy.numberOfExaminees;
+      }
+
+      if (pData.bootstrapReplicationNumber <= 1) {
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                   pData.mininumScoreX,
+                                                                                   pData.scoreIncrementX);
+        equatedRawScoreResults.equatedRawScores(pData.methods.size(), maximumScoreLocation + 1);
+        equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
+      }
+
+
+      /* Compute equating results. Put x on scale of y.
+        Note that in struct xy, '1' designates x and '2' designates y; 
+        in struct bllxy, '_x' designates x and '_v' designates y. So: 
+          xy->ns2 = number of score categories for y
+        xy->min2 = minimum score for y
+        xy->inc2 = increment for y
+        bllxy->crfd_v = log-linear smoothed cum rel fd for y
+        xy->ns1 = number of score categories for x
+          bllxy->prd_x = log-linear smoothed PR dist for x
+        r->eraw[0] = y equivalents for x (output) */
+
+        Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(xy.univariateStatisticsColumn.numberOfScores,
+        xy.univariateStatisticsColumn.minimumScore,
+        xy.univariateStatisticsColumn.scoreIncrement,
+        bivariateLogLinearSmoothingXY.fittedRawScoreCumulativeRelativeFreqDistV,
+        xy.univariateStatisticsRow.numberOfScores,
+        bivariateLogLinearSmoothingXY.fittedRawScorePercentileRankDistX);
+
+      for (size_t index = 0; index < equatedRawScores.size(); index++) {
+        equatedRawScoreResults.equatedRawScores(0, index) = equatedRawScores(index);
+      }
+
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+      pData.scoreFrequenciesX);
+
+      for (size_t index = 0; index < moments.momentValues.size(); index++) {
+        equatedRawScoreResults.equatedRawScoreMoments(0, index) = moments.momentValues(index);
+      }
+    }
+
+    /*
+      Wrapper for equipercentile equating for CG design with log-linear smoothing. 
+      Equipercentile equating includes frequency estimation with 
+      Braun-Holland (linear) results, modified frequency estimation with 
+      Braun-Holland (linear) results, and chained equipercentile equating
+        
+      Assumes that in xv, score 1 is for x and score 2 is for v
+      Assumes that in yv, score 1 is for y and score 2 is for v
+      Assumes that equating puts raw scores for x on scale of y
+      
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
+      
+      Input:
+      
+        design = 'C' (CINEG)
+
+        method:  'E' = Frequency estimation (FE) with Braun-Holland (BH) under FE
+                'F' = Modified freq est (MFE) with Braun-Holland (BH) under MFE
+                'G' = FE + BH-FE + MFE + BH-MFE
+                'C' = Chained
+          'H' = FE + BH-FE + Chained
+                'A' = FE + BH-FE + MFE + BH-MFE + Chained
+                  
+        smoothing = 'L' (log-linear) 
+
+        w1 = weight for pop. 1 (associated with xv)
+            [0,1] except that for any number outside this 
+            range, proportional weights are used -- i.e.,
+            w1 = xv->n/(xv->n + yv->n)
+        anchor = 0 --> external; otherwise internal
+        rv1 = reliability of common items for population 1 
+              (set to 0 for all methods except 'F', 'G, and 'A')
+        rv2 = reliability of common items for population 2
+              (set to 0 for all methods except 'F', 'G, and 'A')
+        xv = struct BSTATS
+        yv = struct BSTATS 
+        bllxv = struct BLL_SMOOTH; uses brfd, prd_x,  and crfd_v 
+      bllyv = struct BLL_SMOOTH; uses brfd, crfd_x, and crfd_v
+              (Note that bllyv->crfd_x is really crfd for y in pop 2)
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating; 
+      
+        NOTE: if rv1 == 0 or rv2 == 0, then MFE cannot be conducted 
+        
+      Output:
+        
+        struct PDATA inall:   populates selected values of inall 
+        
+        struct ERAW_RESULTS r          
     
+          a[] = slopes for Braun-Holland
+          b[] = intercepts for Braun-Holland
+          eraw[][]:  equated raw scores
+          mts[][]:  moments for equated raw scores   
+              
+          NOTE: eraw[][] is a method (rows) by raw score (columns) matrix
+                of equated scores; memory allocated here;
+                eraw[0...(nm-1)][[0...(loc(xv->max1,xv->min1,xv>-inc1)]                                      ]
+                because we are getting equated raw scores for x.
+                eraw[][] stored in this "row"  manner so that 
+                Equated_ss() can be used directly on 
+                eraw[k] where k is the method number  
+              
+      NOTE: Whenever method differs, there must be different structures
+            passed as struct PDATA and struct ERAW_RESULTS 
+        
+      NOTE: If Wrapper_CL() is called in a bootstrap loop, then in
+            the calling function struct ERAW_RESULTS must be different
+            from struct ERAW_RESULTS for the actual equating. 
+                                                
+      Function calls other than C or NR utilities:
+        FEorMFE_EE()
+        Chained_EE()
+        runerror()
+                                                  
+      R. L. Brennan
+
+      Date of last revision: 6/30/08   
+    */
     void runCGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
                                                  const EquatingRecipes::Structures::Method& method,
                                                  const EquatingRecipes::Structures::Smoothing& smoothing,
-                                                 const double& populationWeight1, 
-                                                 const bool& isInternalAnchor, 
-                                                 const double& reliabilityCommonItemsPopulation1, 
+                                                 const double& populationWeight1,
+                                                 const bool& isInternalAnchor,
+                                                 const double& reliabilityCommonItemsPopulation1,
                                                  const double& reliabilityCommonItemsPopulation2,
                                                  const EquatingRecipes::Structures::BivariateStatistics& xv,
                                                  const EquatingRecipes::Structures::BivariateStatistics& yv,
@@ -120,7 +433,143 @@ namespace EquatingRecipes {
                                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
                                                  const siez_t& replicationNumber,
                                                  EquatingRecipes::Structures::PData& pData,
-                                                 EquatingRecipes::Structures::EquatedRawScoreBootstrapResults& equatedRawScoreBootstrapResults) {}
+                                                 EquatingRecipes::Structures::EquatedRawScoreBootstrapResults& equatedRawScoreBootstrapResults) {
+char *names[] ={"        FE", "     BH-FE", "       MFE", "    BH-MFE",
+                  "  ChainedE"};                   
+  
+  inall->rep = rep;               /* should be set to 0 for actual equating. */
+                    /* Counting of replications done in Wrapper_Bootstrap(), 
+             which is why this statement cannot be in the if statement below */ 
+                    
+  /* allocation and assignments for inall
+     Note that for every assignment of the form inall->(var) = xv->(var)
+	 or inall->(var) = yv->(var) values vary depending on whether xv or yv
+	 is for actual equating or a bootstrap sample; all other values are 
+	 the same for the actual equating and a bootstrap sample */
+  
+  if(inall->rep == 0){   /* no assignment or stor alloc for bootstrap reps */
+    strcpy(inall->xfname,xv->fname);
+    strcpy(inall->yfname,yv->fname);
+    inall->xv = xv;
+    inall->yv = yv;
+    inall->bllxv = bllxv;
+	inall->bllyv = bllyv;
+    inall->design = design;
+    inall->method = method;
+    inall->smoothing = smoothing;
+    inall->w1 = (w1<0 || w1>1) ? (double) (xv->n)/(xv->n + yv->n) : w1; 
+                                   /* proportional wts if w1 outside [0,1] */          
+    inall->anchor = anchor;
+    inall->rv1 = rv1;
+    inall->rv2 = rv2;
+
+    if((method == 'F' || method == 'G' || method == 'A') && 
+       (rv1 == 0 || rv2 == 0))
+       runerror("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
+    
+    inall->names = cmatrix(0,4,0,11);             /* maximum of five names */
+ 
+    if(method == 'E'){                                    /* method == 'E' */
+      inall->nm = 2;
+      for(i=0;i<=1;i++) strcpy(inall->names[i],names[i]);
+    }
+    else if(method == 'F'){                               /* method == 'F' */
+      inall->nm = 2;
+      for(i=2;i<=3;i++) strcpy(inall->names[i-2],names[i]);
+    }
+    else if(method == 'G'){                               /* method == 'G' */
+      inall->nm = 4;
+      for(i=0;i<=3;i++) strcpy(inall->names[i],names[i]);
+    }
+    else if(method == 'C'){                               /* method == 'C' */
+      inall->nm = 1;
+      strcpy(inall->names[0],names[4]);
+    }
+	else if(method == 'H'){                               /* method == 'H' */
+      inall->nm = 3;
+	  for(i=0;i<=1;i++) strcpy(inall->names[i],names[i]);
+      strcpy(inall->names[2],names[4]);
+    }
+    else{                                                 /* method == 'A' */
+      inall->nm = 5;
+      for(i=0;i<=4;i++) strcpy(inall->names[i],names[i]);
+    }  
+
+    inall->min = xv->min1;  
+    inall->max = xv->max1;
+    inall->inc = xv->inc1;
+    inall->fdx = xv->fd1;
+    inall->n = xv->n;
+  }
+                                                         
+/* allocation and assignments for r */ 
+
+  if(inall->rep <= 1){         /* no storage allocation for bootstrap reps >1 */
+    r->eraw = dmatrix(0,inall->nm-1,0,loc(xv->max1,xv->min1,xv->inc1)); 
+    r->mts = dmatrix(0,inall->nm-1,0,3);          /* 0,3 is for the 4 moments */
+    r->fxs = dmatrix(0,1,0,loc(xv->max1,xv->min1,xv->inc1));
+    r->gys = dmatrix(0,1,0,loc(yv->max1,yv->min1,yv->inc1));
+  }
+   
+/* Equipercentile results, including Braun-Holland (BH) linear. 
+   Note: For FE syn densities are in fxs[0] and gys[0]
+         For MFE syn densities are in fxs[1] and gys[1] 
+         For BH under FE, slope in a[0] and intercept in b[0]
+         For BH under MFE, slope in a[1] and intercept in b[1] */
+
+                                           /* FE + BH-FE in positions 0 and 1*/
+  if(method == 'E' || method == 'G' || method == 'A' || method == 'H')     
+    FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1, 
+               yv->ns1, yv->min1, yv->max1, yv->inc1,
+               bllxv->brfd, bllyv->brfd, 0, 0, 
+               r->fxs[0], r->gys[0], r->eraw[0],
+               &r->a[0], &r->b[0], r->eraw[1]); 
+
+  if(method == 'F')                     /* MFE + BH-MFE in positions 0 and 1 */
+    FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1, 
+               yv->ns1, yv->min1, yv->max1, yv->inc1,
+               bllxv->brfd, bllyv->brfd, inall->rv1, inall->rv2, 
+               r->fxs[1], r->gys[1], r->eraw[0],
+               &r->a[1], &r->b[1], r->eraw[1]);    
+
+  if(method == 'G' || method == 'A')    /* MFE + BH-MFE in positions 2 and 3 */
+    FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1, 
+               yv->ns1, yv->min1, yv->max1, yv->inc1,
+               bllxv->brfd, bllyv->brfd, inall->rv1, inall->rv2, 
+               r->fxs[1], r->gys[1], r->eraw[2],
+               &r->a[1], &r->b[1], r->eraw[3]); 
+
+  /* Chained equipercentile method. Note that smoothing is bivariate
+     log-linear smoothing, not univariate log-linear smoothing.
+	 if(method == 'C')  Chained in position 0 
+	 if(method == 'A')  Chained in position 4 
+	 if(method == 'H')  Chained in position 2 */
+
+  if(method == 'C') ptr = r->eraw[0];
+  else if(method == 'A') ptr = r->eraw[4];
+  else if(method == 'H') ptr = r->eraw[2];
+  else ptr = NULL;
+
+  if(ptr)
+    Chained_EE(xv->ns1, 
+	             bllxv->prd_x,    /* this is smoothed pr dist for x in pop 1 */ 
+			   xv->min2, 
+			   xv->max2, 
+			   xv->inc2, 
+               xv->ns2, 
+			     bllxv->crfd_v,      /* this is smoothed crfd for v in pop 1 */
+			   yv->min1, 
+			   yv->inc1, 
+			   yv->ns1,   
+                 bllyv->crfd_x,      /* this is smoothed crfd for y in pop 2 */ 
+			     bllyv->crfd_v,      /* this is smoothed crfd for v in pop 2 */
+				 ptr);  
+                        
+/* get moments */
+
+  for(i=0;i<=inall->nm-1;i++) 
+    MomentsFromFD(xv->min1,xv->max1,xv->inc1,r->eraw[i],xv->fd1,r->mts[i]);
+    }
 
     /*    
       void Print_ULL(FILE *fp, char tt[], struct USTATS *x,
