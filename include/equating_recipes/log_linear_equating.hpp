@@ -85,7 +85,9 @@ namespace EquatingRecipes {
                                          const DesignMatrixType& designMatrixType,
                                          const CriterionComparisonType& criterionComparisonType,
                                          const double& criterion,
-                                         EquatingRecipes::Structures::UnivariateLogLinearSmoothing& smoothingResults) {}
+                                         EquatingRecipes::Structures::UnivariateLogLinearSmoothing& smoothingResults) {
+
+    }
 
     /*
       Wrapper for doing equipercentile equating with RG design
@@ -431,21 +433,25 @@ namespace EquatingRecipes {
                                                  const EquatingRecipes::Structures::BivariateStatistics& yv,
                                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
                                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
-                                                 const siez_t& replicationNumber,
+                                                 const size_t& replicationNumber,
                                                  EquatingRecipes::Structures::PData& pData,
                                                  EquatingRecipes::Structures::EquatedRawScoreBootstrapResults& equatedRawScoreBootstrapResults) {
-char *names[] ={"        FE", "     BH-FE", "       MFE", "    BH-MFE",
-                  "  ChainedE"};                   
+      // char *names[] ={"        FE", "     BH-FE", "       MFE", "    BH-MFE",
+      //             "  ChainedE"};                   
   
-  inall->rep = rep;               /* should be set to 0 for actual equating. */
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating. */
                     /* Counting of replications done in Wrapper_Bootstrap(), 
              which is why this statement cannot be in the if statement below */ 
                     
-  /* allocation and assignments for inall
+     /* allocation and assignments for inall
      Note that for every assignment of the form inall->(var) = xv->(var)
-	 or inall->(var) = yv->(var) values vary depending on whether xv or yv
-	 is for actual equating or a bootstrap sample; all other values are 
-	 the same for the actual equating and a bootstrap sample */
+     or inall->(var) = yv->(var) values vary depending on whether xv or yv
+     is for actual equating or a bootstrap sample; all other values are 
+	   the same for the actual equating and a bootstrap sample */
+
+     if (pData.bootstrapReplicationNumber == 0) {
+      
+     }
   
   if(inall->rep == 0){   /* no assignment or stor alloc for bootstrap reps */
     strcpy(inall->xfname,xv->fname);
