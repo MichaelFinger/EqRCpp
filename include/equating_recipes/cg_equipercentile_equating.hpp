@@ -123,6 +123,13 @@ namespace EquatingRecipes {
     //   a[]        slope for Braun-Holland Method
     //   b[]        intercept for Braun-Holland Method
     //   erawBH[]   Braun-Holland linear equated raw scores
+
+    // double w1, int internal, int nsv, 
+    //             int nsx, double minx, double maxx, 
+    //             int nsy, double miny, double maxy, double inc,
+    //             double **bxvin, double **byvin, double rv1, double rv2,
+    //             double *fxs, double *gys, double *eraw,
+    //             double *a, double *b, double *erawBH
     
     EquatingRecipes::Structures::CGEquipercentileEquatingResults feOrMFEEquipEquating(const double& population1Weight,
                                                                                       const bool& isInternalAnchor,
@@ -135,8 +142,8 @@ namespace EquatingRecipes {
                                                                                       const double& maximumScoreY,
                                                                                       const double& scoreIncrement,
                                                                                       const bool& doBraunHollandLinearEquating,
-                                                                                      Eigen::MatrixXd& bivariateProportionsXV,
-                                                                                      Eigen::MatrixXd& bivariateProportionsYV,
+                                                                                      Eigen::MatrixXd& bivariateRelativeFreqDistXV,
+                                                                                      Eigen::MatrixXd& bivariateRelativeFreqDistYV,
                                                                                       const double& reliabilityCommonItemsPopulation1 = 0.0,
                                                                                       const double& reliabilityCommonItemsPopulation2 = 0.0) {
       EquatingRecipes::Structures::CGEquipercentileEquatingResults results;
@@ -152,9 +159,9 @@ namespace EquatingRecipes {
                          isInternalAnchor,
                          numberOfScoresV,
                          numberOfScoresX,
-                         bivariateProportionsXV,
+                         bivariateRelativeFreqDistXV,
                          numberOfScoresY,
-                         bivariateProportionsYV,
+                         bivariateRelativeFreqDistYV,
                          reliabilityCommonItemsPopulation1,
                          reliabilityCommonItemsPopulation2,
                          relFreqDistXSynPop,

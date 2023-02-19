@@ -39,6 +39,10 @@ University of Iowa
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/score_statistics.hpp>
+#include <equating_recipes/structures/design.hpp>
+#include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
+#include <equating_recipes/structures/p_data.hpp>
 
 #include <iostream>
 #include <string>
@@ -182,7 +186,7 @@ namespace EquatingRecipes {
                                                                                    pData.mininumScoreX,
                                                                                    pData.scoreIncrementX);
         results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
-        results.equatedRawScoreMoments.resize(4);
+        results.equatedRawScoreMoments.resize(pData.methods.size(), 4);
       }
 
       /* Compute equating results */

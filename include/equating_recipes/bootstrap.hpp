@@ -121,8 +121,8 @@ namespace EquatingRecipes {
                       const size_t& numberOfReplications,
                       EquatingRecipes::Structures::BootstrapEquatedRawScoreResults& bootstrapEquatedRawScoreResults,
                       std::optional<EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults>& bootstrapEquatedScaledScoresResults) {
-      gen = EquatingRecipes::Utilities::getSeedEngine();
-      distrib = EquatingRecipes::Utilities::getUniformRealDistribution();
+      this->gen = EquatingRecipes::Utilities::getSeedEngine();
+      this->distrib = EquatingRecipes::Utilities::getUniformRealDistribution();
 
       EquatingRecipes::Structures::BivariateStatistics bootstrapXV;                                     /* for bootstrap reps and CI design */
       EquatingRecipes::Structures::BivariateStatistics bootstrapYV;                                     /* for bootstrap reps and CI design */
@@ -251,46 +251,46 @@ namespace EquatingRecipes {
                                                   replicationNumber,
                                                   bootstrapUnivariateLogLinearSmoothingY);
 
-        logLinearEquating.
-
+          
         }
 
-        else if (inall->design == 'R' && inall->smoothing == 'L') {
-          Parametric_boot_univ_ULL(inall->ullx, idum, rep, &bt_ullx);
-          Parametric_boot_univ_ULL(inall->ully, idum, rep, &bt_ully);
-          Wrapper_RL('R', 'E', 'L', inall->x, inall->y, &bt_ullx, &bt_ully,
-                     rep, inall, &br);
-        }
+        //   else if (inall->design == 'R' && inall->smoothing == 'L') {
+        //     Parametric_boot_univ_ULL(inall->ullx, idum, rep, &bt_ullx);
+        //     Parametric_boot_univ_ULL(inall->ully, idum, rep, &bt_ully);
+        //     Wrapper_RL('R', 'E', 'L', inall->x, inall->y, &bt_ullx, &bt_ully,
+        //                rep, inall, &br);
+        //   }
 
-        else if (inall->design == 'S' && inall->smoothing == 'L') {
-          Parametric_boot_biv(inall->bllxy, idum, rep, &bt_bllxy);
-          Wrapper_SL('S', 'E', 'L', inall->xy, &bt_bllxy, rep, inall, &br);
-        }
+        //   else if (inall->design == 'S' && inall->smoothing == 'L') {
+        //     Parametric_boot_biv(inall->bllxy, idum, rep, &bt_bllxy);
+        //     Wrapper_SL('S', 'E', 'L', inall->xy, &bt_bllxy, rep, inall, &br);
+        //   }
 
-        else if (inall->design == 'C' && inall->smoothing == 'L') {
-          Parametric_boot_biv(inall->bllxv, idum, rep, &bt_bllxv);
-          Parametric_boot_biv(inall->bllyv, idum, rep, &bt_bllyv);
-          Wrapper_CL('C', inall->method, 'L', inall->w1, inall->anchor,
-                     inall->rv1, inall->rv2,
-                     inall->xv, inall->yv, &bt_bllxv, &bt_bllyv,
-                     rep, inall, &br);
-        } else
-          ;
+        //   else if (inall->design == 'C' && inall->smoothing == 'L') {
+        //     Parametric_boot_biv(inall->bllxv, idum, rep, &bt_bllxv);
+        //     Parametric_boot_biv(inall->bllyv, idum, rep, &bt_bllyv);
+        //     Wrapper_CL('C', inall->method, 'L', inall->w1, inall->anchor,
+        //                inall->rv1, inall->rv2,
+        //                inall->xv, inall->yv, &bt_bllxv, &bt_bllyv,
+        //                rep, inall, &br);
+        //   } else
+        //     ;
 
-        /***** end for different designs/methods/smoothing *****/
+        //   /***** end for different designs/methods/smoothing *****/
 
-        Boot_accumulate_eraw(inall, &br, t);
-        if (u != NULL) {
-          Wrapper_ESS(inall, &br, inall->minp, inall->maxp, inall->incp, inall->nameyct,
-                      inall->round, inall->lprss, inall->hprss, &bs);
-          Boot_accumulate_ess(inall, &bs, u);
-        }
-      } /* end of rep loop */
+        //   Boot_accumulate_eraw(inall, &br, t);
+        //   if (u != NULL) {
+        //     Wrapper_ESS(inall, &br, inall->minp, inall->maxp, inall->incp, inall->nameyct,
+        //                 inall->round, inall->lprss, inall->hprss, &bs);
+        //     Boot_accumulate_ess(inall, &bs, u);
+        //   }
+        // } /* end of rep loop */
 
-      Boot_se_eraw(inall, t);
-      if (u != NULL)
-        Boot_se_ess(inall, u);
-      inall->rep = 0; /* bootstrap concluded */
+        // Boot_se_eraw(inall, t);
+        // if (u != NULL)
+        //   Boot_se_ess(inall, u);
+        // inall->rep = 0; /* bootstrap concluded */
+      }
     }
 
   private:
@@ -321,7 +321,7 @@ namespace EquatingRecipes {
 
       bootstrapEquatedRawScoreResults.sumAndMeanScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
       bootstrapEquatedRawScoreResults.sumSquareAndSDScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
-      bootstrapEquatedRawScoreResults.bootstrapStandardErrors.setZero(pData.methods.size());
+      bootstrapEquatedRawScoreResults.bootstrapStandardErrors.setZero(pData.methods.size(), maximumScoreLocation + 1);
     }
 
     /*
@@ -740,7 +740,7 @@ namespace EquatingRecipes {
                                                                                  pData.scoreIncrementX);
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-        for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation) {
+        for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
           bootstrapEquatedRawScoreResults.sumAndMeanScores(methodIndex, scoreLocation) +=
               equatedRawScoreResults.equatedRawScores(methodIndex, scoreLocation);
 
@@ -857,11 +857,11 @@ namespace EquatingRecipes {
 
       bootstrapEquatedScaledScoresResults.unroundedScaledScoresSumsAndMeans.setZero(numberOfMethods, numberOfScores);
       bootstrapEquatedScaledScoresResults.unroundedScaledScoresSumSquaresAndSDs.setZero(numberOfMethods, numberOfScores);
-      bootstrapEquatedScaledScoresResults.unroundedScaledScoresBoostrapStandardErrors.setZero(numberOfMethods);
+      bootstrapEquatedScaledScoresResults.unroundedScaledScoresBoostrapStandardErrors.setZero(numberOfScores);
 
       bootstrapEquatedScaledScoresResults.roundedScaledScoresSumsAndMeans.setZero(numberOfMethods, numberOfScores);
       bootstrapEquatedScaledScoresResults.roundedScaledScoresSumSquaresAndSDs.setZero(numberOfMethods, numberOfScores);
-      bootstrapEquatedScaledScoresResults.roundedScaledScoresBoostrapStandardErrors.setZero(numberOfMethods);
+      bootstrapEquatedScaledScoresResults.roundedScaledScoresBoostrapStandardErrors.setZero(numberOfScores);
     }
 
     /*
@@ -909,7 +909,7 @@ namespace EquatingRecipes {
                                                                             pData.mininumScoreX,
                                                                             pData.scoreIncrementX);
 
-      for (size_t methodIndex = 0; methodIndex < pData.methods.size(), methodIndex++) {
+      for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
         for (size_t scoreIndex = 0; scoreIndex < numberOfScores; scoreIndex++) {
           bootstrapEquatedScaledScoresResults.unroundedScaledScoresSumsAndMeans(methodIndex, scoreIndex) +=
               equatedScaledScoresResults.unroundedEquatedScaledScores(methodIndex, scoreIndex);
@@ -1247,7 +1247,7 @@ namespace EquatingRecipes {
       next statements put it in matrix format and store it in btxv->bfd[][] */
       size_t index = 0;
       for (size_t rowIndex = 0; rowIndex < xv.numberOfScoresX; rowIndex++) {
-        for (size_t columnIndex = 0; columnIndex < xv.numberOfScoresV; columnIndex) {
+        for (size_t columnIndex = 0; columnIndex < xv.numberOfScoresV; columnIndex++) {
           bootstrapXV.fittedBivariateFreqDist(rowIndex, columnIndex) = bootstrapXV.cumulativeRelativeFreqDistRowMajorVector(index);
 
           index++;
@@ -1259,7 +1259,7 @@ namespace EquatingRecipes {
       bootstrapXV.fittedFrequencesX.setZero();
       index = 0;
       for (size_t rowIndex = 0; rowIndex < xv.numberOfScoresX; rowIndex++) {
-        for (size_t columnIndex = 0; columnIndex < xv.numberOfScoresV; columnIndex) {
+        for (size_t columnIndex = 0; columnIndex < xv.numberOfScoresV; columnIndex++) {
           bootstrapXV.fittedFrequencesX(rowIndex) += bootstrapXV.fittedBivariateFreqDist(rowIndex, columnIndex);
           bootstrapXV.fittedFrequencesV(columnIndex) += bootstrapXV.fittedBivariateFreqDist(rowIndex, columnIndex);
         }

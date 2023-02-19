@@ -79,6 +79,40 @@ namespace EquatingRecipes {
       RAW_SCORE
     };
 
+    /*
+      Wrapper to do univariate log-linear smoothing.
+
+      Input
+        x   =  UTATS structure
+        c   = number of degrees for polynomial smoothing
+        scale = type of scaling:
+              0 --> no scaling; 
+                1 --> scale such that each column of B has
+                      sum (elements) = 0 and sum (elements^2) = 1
+        Btype = type of moments for criterion mathching:
+                0 --> moments based on B 
+                (if scale = 0, design matrix is based on raw scores,
+                which means that the moments are based on raw scores;
+                if scale = 1, design matrix is based on scaled raw scores,
+                which means that the moments are based on scaled raw scores) 
+                1 -->  moments based on B_raw, whether scale is 0 or 1
+      ctype = comparison type for criterion:
+              0 --> means use absolute criterion; 
+          1 --> means use relative criterion
+      crit = convergence criterion value
+        fp  = pointer to output file (if NULL then no output printed;
+            in particular, results for each iteration step are not printed)
+
+      Output
+        populates s, which is a ULL_SMOOTH structure
+
+      Function calls other than C or NR utilities:  
+        Smooth_ULL()
+
+      R. L. Brennan
+
+      Date of last revision: 6/30/08
+    */
     void runUnivariateLogLinearSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
                                          const size_t& numberOfDegreesSmoothing,
                                          const bool& useStandardizedScale,
@@ -86,7 +120,17 @@ namespace EquatingRecipes {
                                          const CriterionComparisonType& criterionComparisonType,
                                          const double& criterion,
                                          EquatingRecipes::Structures::UnivariateLogLinearSmoothing& smoothingResults) {
-
+      smoothUnivaraiteLogLinear(univariateStatisticsX.numberOfExaminees,
+                                univariateStatisticsX.numberOfScores,
+                                univariateStatisticsX.minimumScore,
+                                univariateStatisticsX.scoreIncrement,
+                                univariateStatisticsX.freqDistDouble,
+                                numberOfDegreesSmoothing,
+                                useStandardizedScale,
+                                designMatrixType,
+                                criterionComparisonType,
+                                criterion,
+                                smoothingResults);
     }
 
     /*
@@ -310,7 +354,6 @@ namespace EquatingRecipes {
         equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
       }
 
-
       /* Compute equating results. Put x on scale of y.
         Note that in struct xy, '1' designates x and '2' designates y; 
         in struct bllxy, '_x' designates x and '_v' designates y. So: 
@@ -322,19 +365,19 @@ namespace EquatingRecipes {
           bllxy->prd_x = log-linear smoothed PR dist for x
         r->eraw[0] = y equivalents for x (output) */
 
-        Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(xy.univariateStatisticsColumn.numberOfScores,
-        xy.univariateStatisticsColumn.minimumScore,
-        xy.univariateStatisticsColumn.scoreIncrement,
-        bivariateLogLinearSmoothingXY.fittedRawScoreCumulativeRelativeFreqDistV,
-        xy.univariateStatisticsRow.numberOfScores,
-        bivariateLogLinearSmoothingXY.fittedRawScorePercentileRankDistX);
+      Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(xy.univariateStatisticsColumn.numberOfScores,
+                                                                                                  xy.univariateStatisticsColumn.minimumScore,
+                                                                                                  xy.univariateStatisticsColumn.scoreIncrement,
+                                                                                                  bivariateLogLinearSmoothingXY.fittedRawScoreCumulativeRelativeFreqDistV,
+                                                                                                  xy.univariateStatisticsRow.numberOfScores,
+                                                                                                  bivariateLogLinearSmoothingXY.fittedRawScorePercentileRankDistX);
 
       for (size_t index = 0; index < equatedRawScores.size(); index++) {
         equatedRawScoreResults.equatedRawScores(0, index) = equatedRawScores(index);
       }
 
       EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
-      pData.scoreFrequenciesX);
+                                                                                                                   pData.scoreFrequenciesX);
 
       for (size_t index = 0; index < moments.momentValues.size(); index++) {
         equatedRawScoreResults.equatedRawScoreMoments(0, index) = moments.momentValues(index);
@@ -431,150 +474,267 @@ namespace EquatingRecipes {
                                                  const double& reliabilityCommonItemsPopulation2,
                                                  const EquatingRecipes::Structures::BivariateStatistics& xv,
                                                  const EquatingRecipes::Structures::BivariateStatistics& yv,
-                                                 const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
-                                                 const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
+                                                 EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
+                                                 EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
                                                  const size_t& replicationNumber,
                                                  EquatingRecipes::Structures::PData& pData,
-                                                 EquatingRecipes::Structures::EquatedRawScoreBootstrapResults& equatedRawScoreBootstrapResults) {
+                                                 EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
       // char *names[] ={"        FE", "     BH-FE", "       MFE", "    BH-MFE",
-      //             "  ChainedE"};                   
-  
+      //             "  ChainedE"};
+      std::vector<std::string> names {"        FE",
+                                      "     BH-FE",
+                                      "       MFE",
+                                      "    BH-MFE",
+                                      "  ChainedE"};
+
+      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(method);
+
       pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating. */
-                    /* Counting of replications done in Wrapper_Bootstrap(), 
-             which is why this statement cannot be in the if statement below */ 
-                    
-     /* allocation and assignments for inall
+                                                            /* Counting of replications done in Wrapper_Bootstrap(), 
+             which is why this statement cannot be in the if statement below */
+
+      /* allocation and assignments for inall
      Note that for every assignment of the form inall->(var) = xv->(var)
      or inall->(var) = yv->(var) values vary depending on whether xv or yv
      is for actual equating or a bootstrap sample; all other values are 
 	   the same for the actual equating and a bootstrap sample */
 
-     if (pData.bootstrapReplicationNumber == 0) {
-      
-     }
-  
-  if(inall->rep == 0){   /* no assignment or stor alloc for bootstrap reps */
-    strcpy(inall->xfname,xv->fname);
-    strcpy(inall->yfname,yv->fname);
-    inall->xv = xv;
-    inall->yv = yv;
-    inall->bllxv = bllxv;
-	inall->bllyv = bllyv;
-    inall->design = design;
-    inall->method = method;
-    inall->smoothing = smoothing;
-    inall->w1 = (w1<0 || w1>1) ? (double) (xv->n)/(xv->n + yv->n) : w1; 
-                                   /* proportional wts if w1 outside [0,1] */          
-    inall->anchor = anchor;
-    inall->rv1 = rv1;
-    inall->rv2 = rv2;
+      if (pData.bootstrapReplicationNumber == 0) {
+        pData.summaryRawDataXV = xv;
+        pData.summaryRawDataXV = xv;
+        pData.bivariateLogLinearSmoothingXV = bivariateLogLinearSmoothingXV;
+        pData.bivariateLogLinearSmoothingYV = bivariateLogLinearSmoothingYV;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        if (populationWeight1 < 0.0 || populationWeight1 > 1.0) {
+          /* proportional wts if w1 outside [0,1] */
+          pData.weightSyntheticPopulation1 = static_cast<double>(xv.numberOfExaminees) /
+                                             static_cast<double>(xv.numberOfExaminees + yv.numberOfExaminees);
+        } else {
+          pData.weightSyntheticPopulation1 = populationWeight1;
+        }
 
-    if((method == 'F' || method == 'G' || method == 'A') && 
-       (rv1 == 0 || rv2 == 0))
-       runerror("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
-    
-    inall->names = cmatrix(0,4,0,11);             /* maximum of five names */
- 
-    if(method == 'E'){                                    /* method == 'E' */
-      inall->nm = 2;
-      for(i=0;i<=1;i++) strcpy(inall->names[i],names[i]);
-    }
-    else if(method == 'F'){                               /* method == 'F' */
-      inall->nm = 2;
-      for(i=2;i<=3;i++) strcpy(inall->names[i-2],names[i]);
-    }
-    else if(method == 'G'){                               /* method == 'G' */
-      inall->nm = 4;
-      for(i=0;i<=3;i++) strcpy(inall->names[i],names[i]);
-    }
-    else if(method == 'C'){                               /* method == 'C' */
-      inall->nm = 1;
-      strcpy(inall->names[0],names[4]);
-    }
-	else if(method == 'H'){                               /* method == 'H' */
-      inall->nm = 3;
-	  for(i=0;i<=1;i++) strcpy(inall->names[i],names[i]);
-      strcpy(inall->names[2],names[4]);
-    }
-    else{                                                 /* method == 'A' */
-      inall->nm = 5;
-      for(i=0;i<=4;i++) strcpy(inall->names[i],names[i]);
-    }  
+        pData.isInternalAnchor = isInternalAnchor;
+        pData.reliabilityCommonItemsPopulation1 = reliabilityCommonItemsPopulation1;
+        pData.reliabilityCommonItemsPopulation2 = reliabilityCommonItemsPopulation2;
 
-    inall->min = xv->min1;  
-    inall->max = xv->max1;
-    inall->inc = xv->inc1;
-    inall->fdx = xv->fd1;
-    inall->n = xv->n;
-  }
-                                                         
-/* allocation and assignments for r */ 
+        if ((methodCode == "F" || methodCode == "G" || methodCode == "A") &&
+            (reliabilityCommonItemsPopulation1 == 0.0 || reliabilityCommonItemsPopulation2 == 0)) {
+          throw std::runtime_error("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
+        }
 
-  if(inall->rep <= 1){         /* no storage allocation for bootstrap reps >1 */
-    r->eraw = dmatrix(0,inall->nm-1,0,loc(xv->max1,xv->min1,xv->inc1)); 
-    r->mts = dmatrix(0,inall->nm-1,0,3);          /* 0,3 is for the 4 moments */
-    r->fxs = dmatrix(0,1,0,loc(xv->max1,xv->min1,xv->inc1));
-    r->gys = dmatrix(0,1,0,loc(yv->max1,yv->min1,yv->inc1));
-  }
-   
-/* Equipercentile results, including Braun-Holland (BH) linear. 
-   Note: For FE syn densities are in fxs[0] and gys[0]
-         For MFE syn densities are in fxs[1] and gys[1] 
-         For BH under FE, slope in a[0] and intercept in b[0]
-         For BH under MFE, slope in a[1] and intercept in b[1] */
+        pData.methods.resize(5, "");
 
-                                           /* FE + BH-FE in positions 0 and 1*/
-  if(method == 'E' || method == 'G' || method == 'A' || method == 'H')     
-    FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1, 
-               yv->ns1, yv->min1, yv->max1, yv->inc1,
-               bllxv->brfd, bllyv->brfd, 0, 0, 
-               r->fxs[0], r->gys[0], r->eraw[0],
-               &r->a[0], &r->b[0], r->eraw[1]); 
+        if (methodCode == "E") {
+          pData.methods[0] = names[0];
+          pData.methods[1] = names[1];
+        } else if (methodCode == "F") {
+          pData.methods[0] = names[2];
+          pData.methods[1] = names[3];
+        } else if (methodCode == "G") {
+          pData.methods[0] = names[0];
+          pData.methods[1] = names[1];
+          pData.methods[0] = names[2];
+          pData.methods[1] = names[3];
+        } else if (methodCode == "C") {
+          pData.methods[0] = names[4];
+        } else if (methodCode == "H") {
+          pData.methods[0] = names[0];
+          pData.methods[1] = names[1];
+          pData.methods[2] = names[4];
+        } else if (methodCode == "A") {
+          pData.methods = names;
+        } else {
+          throw std::runtime_error("Invalid method in log linear equating.");
+        }
 
-  if(method == 'F')                     /* MFE + BH-MFE in positions 0 and 1 */
-    FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1, 
-               yv->ns1, yv->min1, yv->max1, yv->inc1,
-               bllxv->brfd, bllyv->brfd, inall->rv1, inall->rv2, 
-               r->fxs[1], r->gys[1], r->eraw[0],
-               &r->a[1], &r->b[1], r->eraw[1]);    
+        pData.mininumScoreX = xv.univariateStatisticsRow.minimumScore;
+        pData.maximumScoreX = xv.univariateStatisticsRow.maximumScore;
+        pData.scoreIncrementX = xv.univariateStatisticsRow.scoreIncrement;
+        pData.scoreFrequenciesX = xv.univariateStatisticsRow.freqDistDouble;
+        pData.numberOfExaminees = xv.numberOfExaminees;
+      }
 
-  if(method == 'G' || method == 'A')    /* MFE + BH-MFE in positions 2 and 3 */
-    FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1, 
-               yv->ns1, yv->min1, yv->max1, yv->inc1,
-               bllxv->brfd, bllyv->brfd, inall->rv1, inall->rv2, 
-               r->fxs[1], r->gys[1], r->eraw[2],
-               &r->a[1], &r->b[1], r->eraw[3]); 
+      if (pData.bootstrapReplicationNumber <= 1) {
+        size_t maximumScoreLocationXV = EquatingRecipes::Utilities::getScoreLocation(xv.univariateStatisticsRow.maximumScore,
+                                                                                     xv.univariateStatisticsRow.minimumScore,
+                                                                                     xv.univariateStatisticsRow.scoreIncrement);
 
-  /* Chained equipercentile method. Note that smoothing is bivariate
-     log-linear smoothing, not univariate log-linear smoothing.
-	 if(method == 'C')  Chained in position 0 
-	 if(method == 'A')  Chained in position 4 
-	 if(method == 'H')  Chained in position 2 */
+        size_t maximumScoreLocationYV = EquatingRecipes::Utilities::getScoreLocation(yv.univariateStatisticsRow.maximumScore,
+                                                                                     yv.univariateStatisticsRow.minimumScore,
+                                                                                     yv.univariateStatisticsRow.scoreIncrement);
 
-  if(method == 'C') ptr = r->eraw[0];
-  else if(method == 'A') ptr = r->eraw[4];
-  else if(method == 'H') ptr = r->eraw[2];
-  else ptr = NULL;
+        equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(),
+                                                       maximumScoreLocationXV + 1);
+        equatedRawScoreResults.equatedRawScoreMoments.resize(pData.methods.size(),
+                                                             4);
+        equatedRawScoreResults.relativeFreqDistsX.resize(1, maximumScoreLocationXV);
+        equatedRawScoreResults.relativeFreqDistsY.resize(1, maximumScoreLocationYV + 1);
+      }
 
-  if(ptr)
-    Chained_EE(xv->ns1, 
-	             bllxv->prd_x,    /* this is smoothed pr dist for x in pop 1 */ 
-			   xv->min2, 
-			   xv->max2, 
-			   xv->inc2, 
-               xv->ns2, 
-			     bllxv->crfd_v,      /* this is smoothed crfd for v in pop 1 */
-			   yv->min1, 
-			   yv->inc1, 
-			   yv->ns1,   
-                 bllyv->crfd_x,      /* this is smoothed crfd for y in pop 2 */ 
-			     bllyv->crfd_v,      /* this is smoothed crfd for v in pop 2 */
-				 ptr);  
-                        
-/* get moments */
+      /* Equipercentile results, including Braun-Holland (BH) linear. 
+        Note: For FE syn densities are in fxs[0] and gys[0]
+        For MFE syn densities are in fxs[1] and gys[1] 
+        For BH under FE, slope in a[0] and intercept in b[0]
+        For BH under MFE, slope in a[1] and intercept in b[1] */
 
-  for(i=0;i<=inall->nm-1;i++) 
-    MomentsFromFD(xv->min1,xv->max1,xv->inc1,r->eraw[i],xv->fd1,r->mts[i]);
+      /* FE + BH-FE in positions 0 and 1*/
+      EquatingRecipes::CGEquipercentileEquating cgEquipercentileEquating;
+
+      if (methodCode == "E" || methodCode == "G" || methodCode == "A" || methodCode == "H") {
+        EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults = cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
+                                                                                                                               pData.isInternalAnchor,
+                                                                                                                               xv.univariateStatisticsColumn.numberOfScores,
+                                                                                                                               xv.univariateStatisticsRow.numberOfScores,
+                                                                                                                               xv.univariateStatisticsRow.minimumScore,
+                                                                                                                               xv.univariateStatisticsRow.maximumScore,
+                                                                                                                               yv.univariateStatisticsRow.numberOfScores,
+                                                                                                                               yv.univariateStatisticsRow.minimumScore,
+                                                                                                                               yv.univariateStatisticsRow.maximumScore,
+                                                                                                                               yv.univariateStatisticsRow.scoreIncrement,
+                                                                                                                               true,
+                                                                                                                               bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
+                                                                                                                               bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
+                                                                                                                               0,
+                                                                                                                               0);
+        equatedRawScoreResults.relativeFreqDistsX.row(0) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.row(0) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.row(0) = cgResults.equatedRawScores;
+
+        if (cgResults.slope.has_value()) {
+          equatedRawScoreResults.slope(0) = cgResults.slope.value();
+        }
+
+        if (cgResults.intercept.has_value()) {
+          equatedRawScoreResults.intercept(0) = cgResults.intercept.value();
+        }
+
+        if (cgResults.braunHollandEquatedRawScores.has_value()) {
+          equatedRawScoreResults.equatedRawScores.row(1) = cgResults.braunHollandEquatedRawScores.value();
+        }
+      }
+
+      if (methodCode == "F") {
+        EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
+            cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
+                                                          pData.isInternalAnchor,
+                                                          xv.univariateStatisticsColumn.numberOfScores,
+                                                          xv.univariateStatisticsRow.numberOfScores,
+                                                          xv.univariateStatisticsRow.minimumScore,
+                                                          xv.univariateStatisticsRow.maximumScore,
+                                                          yv.univariateStatisticsRow.numberOfScores,
+                                                          yv.univariateStatisticsRow.minimumScore,
+                                                          yv.univariateStatisticsRow.maximumScore,
+                                                          yv.univariateStatisticsRow.scoreIncrement,
+                                                          true,
+                                                          bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
+                                                          bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
+                                                          pData.reliabilityCommonItemsPopulation1,
+                                                          pData.reliabilityCommonItemsPopulation2);
+
+        equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.row(0) = cgResults.equatedRawScores;
+        if (cgResults.slope.has_value()) {
+          equatedRawScoreResults.slope(1) = cgResults.slope.value();
+        }
+
+        if (cgResults.intercept.has_value()) {
+          equatedRawScoreResults.intercept(1) = cgResults.intercept.value();
+        }
+
+        if (cgResults.braunHollandEquatedRawScores.has_value()) {
+          equatedRawScoreResults.equatedRawScores.row(1) = cgResults.braunHollandEquatedRawScores.value();
+        }
+      }
+
+      if (methodCode == "G" || methodCode == "A") {
+        EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
+            cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
+                                                          pData.isInternalAnchor,
+                                                          xv.univariateStatisticsColumn.numberOfScores,
+                                                          xv.univariateStatisticsRow.numberOfScores,
+                                                          xv.univariateStatisticsRow.minimumScore,
+                                                          xv.univariateStatisticsRow.maximumScore,
+                                                          yv.univariateStatisticsRow.numberOfScores,
+                                                          yv.univariateStatisticsRow.minimumScore,
+                                                          yv.univariateStatisticsRow.maximumScore,
+                                                          yv.univariateStatisticsRow.scoreIncrement,
+                                                          true,
+                                                          bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
+                                                          bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
+                                                          pData.reliabilityCommonItemsPopulation1,
+                                                          pData.reliabilityCommonItemsPopulation2);
+
+        // if (method == 'G' || method == 'A') /* MFE + BH-MFE in positions 2 and 3 */
+        //   FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1,
+        //              yv->ns1, yv->min1, yv->max1, yv->inc1,
+        //              bllxv->brfd, bllyv->brfd, inall->rv1, inall->rv2,
+        //              r->fxs[1], r->gys[1], r->eraw[2],
+        //              &r->a[1], &r->b[1], r->eraw[3]);
+
+        equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.row(2) = cgResults.equatedRawScores;
+        if (cgResults.slope.has_value()) {
+          equatedRawScoreResults.slope(1) = cgResults.slope.value();
+        }
+
+        if (cgResults.intercept.has_value()) {
+          equatedRawScoreResults.intercept(1) = cgResults.intercept.value();
+        }
+
+        if (cgResults.braunHollandEquatedRawScores.has_value()) {
+          equatedRawScoreResults.equatedRawScores.row(3) = cgResults.braunHollandEquatedRawScores.value();
+        }
+      }
+
+      /* Chained equipercentile method. Note that smoothing is bivariate
+      log-linear smoothing, not univariate log-linear smoothing.
+      if(method == 'C')  Chained in position 0 
+      if(method == 'A')  Chained in position 4 
+      if(method == 'H')  Chained in position 2 */
+
+      size_t equatedRawScoresRowIndex;
+      bool isChainedEquipercentileMethod = true;
+
+      if (methodCode == "C") {
+        equatedRawScoresRowIndex = 0;
+      } else if (methodCode == "A") {
+        equatedRawScoresRowIndex = 4;
+      } else if (methodCode == "H") {
+        equatedRawScoresRowIndex = 2;
+      } else {
+        isChainedEquipercentileMethod = false;
+      }
+
+      if (isChainedEquipercentileMethod) {
+        Eigen::VectorXd equatedRawScores = cgEquipercentileEquating.chainedEquipercentileEquating(xv.univariateStatisticsRow.numberOfScores,
+                                                                                                  bivariateLogLinearSmoothingXV.fittedRawScorePercentileRankDistX,
+                                                                                                  xv.univariateStatisticsColumn.minimumScore,
+                                                                                                  xv.univariateStatisticsColumn.maximumScore,
+                                                                                                  xv.univariateStatisticsColumn.scoreIncrement,
+                                                                                                  xv.univariateStatisticsColumn.numberOfScores,
+                                                                                                  bivariateLogLinearSmoothingXV.fittedRawScoreCumulativeRelativeFreqDistV,
+                                                                                                  yv.univariateStatisticsRow.minimumScore,
+                                                                                                  yv.univariateStatisticsRow.scoreIncrement,
+                                                                                                  yv.univariateStatisticsRow.numberOfScores,
+                                                                                                  bivariateLogLinearSmoothingYV.fittedRawScoreCumulativeRelativeFreqDistX,
+                                                                                                  bivariateLogLinearSmoothingXV.fittedRawScoreCumulativeRelativeFreqDistV);
+
+        equatedRawScoreResults.equatedRawScores.row(equatedRawScoresRowIndex) = equatedRawScores;
+      }
+
+      /* get moments */
+
+      for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
+        EquatingRecipes::Structures::Moments moments =
+            EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
+                                                                          xv.univariateStatisticsRow.freqDistDouble);
+
+        equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
+      }
     }
 
     /*    
@@ -633,13 +793,101 @@ namespace EquatingRecipes {
                                    const size_t& numberOfScores,
                                    const double& minimumScore,
                                    const double& scoreIncrement,
-                                   const Eigen::VectorXd freqDist,
+                                   const Eigen::VectorXd frequencyDistribution,
                                    const size_t& numberOfDegreesSmoothing,
                                    const bool& useStandardizedScale,
                                    const DesignMatrixType& Btype,
                                    const CriterionComparisonType& ctype,
                                    const double& criterion,
                                    EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothing) {
+      size_t maximumNumberOfIterations = 40; /* maximum number of iterations */
+
+      univariateLogLinearSmoothing.numberOfExaminees = numberOfExaminees;
+      univariateLogLinearSmoothing.numberOfScores = numberOfScores;
+      univariateLogLinearSmoothing.mininumRawScore = minimumScore;
+      univariateLogLinearSmoothing.rawScoreIncrement = scoreIncrement;
+      univariateLogLinearSmoothing.degreesOfSmoothing = numberOfDegreesSmoothing;
+      univariateLogLinearSmoothing.observedFrequencies = frequencyDistribution;
+      univariateLogLinearSmoothing.useScalingForBDesignMatrix = useStandardizedScale;
+      univariateLogLinearSmoothing.useBRawAndCentralMoments = (Btype == DesignMatrixType::RAW_SCORE);
+      univariateLogLinearSmoothing.useRelativeCriterionComparison = (ctype == CriterionComparisonType::RELATIVE);
+      univariateLogLinearSmoothing.convergenceCriterion = criterion;
+      univariateLogLinearSmoothing.rawScoreDesignMatrix.resize(univariateLogLinearSmoothing.numberOfScores,
+                                                               univariateLogLinearSmoothing.degreesOfSmoothing);
+      univariateLogLinearSmoothing.solutionDesignMatrix.resize(univariateLogLinearSmoothing.numberOfScores,
+                                                               univariateLogLinearSmoothing.degreesOfSmoothing);
+      univariateLogLinearSmoothing.fittedFrequencies.resize(univariateLogLinearSmoothing.numberOfScores);
+      univariateLogLinearSmoothing.betaCoefficients.resize(univariateLogLinearSmoothing.degreesOfSmoothing);
+      univariateLogLinearSmoothing.bObservedMoments.resize(univariateLogLinearSmoothing.degreesOfSmoothing);
+      univariateLogLinearSmoothing.bFittedMoments.resize(univariateLogLinearSmoothing.degreesOfSmoothing);
+      univariateLogLinearSmoothing.observedCentralMoments.resize(univariateLogLinearSmoothing.degreesOfSmoothing);
+      univariateLogLinearSmoothing.fittedCentralMoments.resize(univariateLogLinearSmoothing.degreesOfSmoothing);
+
+      univariateLogLinearSmoothing.likelihoodRatioChiSquare = 0.0;
+      univariateLogLinearSmoothing.numberOfZeros = 0;
+
+      univariateLogLinearSmoothing.fittedRawScoreDist.resize(univariateLogLinearSmoothing.numberOfScores);
+      univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist.resize(univariateLogLinearSmoothing.numberOfScores);
+      univariateLogLinearSmoothing.fittedRawScorePercentileRankDist.resize(univariateLogLinearSmoothing.numberOfScores);
+
+      Eigen::MatrixXi crossProductMomentDesignations;
+
+      designMatrix(univariateLogLinearSmoothing.numberOfScores,
+                   univariateLogLinearSmoothing.mininumRawScore,
+                   univariateLogLinearSmoothing.rawScoreIncrement,
+                   0,
+                   0,
+                   0,
+                   univariateLogLinearSmoothing.degreesOfSmoothing,
+                   0,
+                   0,
+                   crossProductMomentDesignations,
+                   univariateLogLinearSmoothing.useScalingForBDesignMatrix,
+                   univariateLogLinearSmoothing.rawScoreDesignMatrix,
+                   univariateLogLinearSmoothing.solutionDesignMatrix);
+
+      /* iteration-step results not printed if first parameter is NULL;
+      results are printed if first parameter is fp!=NULL. Note that fp
+	    can be set to NULL in Wrapper_Smooth_ULL() */
+
+      std::optional<Eigen::VectorXd> uConstants;
+
+      univariateLogLinearSmoothing.numberOfIterations = iteration(
+          univariateLogLinearSmoothing.solutionDesignMatrix,
+          univariateLogLinearSmoothing.rawScoreDesignMatrix,
+          frequencyDistribution,
+          uConstants,
+          numberOfDegreesSmoothing,
+          0,
+          0,
+          crossProductMomentDesignations,
+          maximumNumberOfIterations,
+          ctype,
+          Btype,
+          criterion,
+          univariateLogLinearSmoothing.betaCoefficients,
+          univariateLogLinearSmoothing.fittedFrequencies,
+          univariateLogLinearSmoothing.bObservedMoments,
+          univariateLogLinearSmoothing.bFittedMoments,
+          univariateLogLinearSmoothing.observedCentralMoments,
+          univariateLogLinearSmoothing.fittedCentralMoments,
+          univariateLogLinearSmoothing.likelihoodRatioChiSquare,
+          univariateLogLinearSmoothing.numberOfZeros,
+          univariateLogLinearSmoothing.cllNormalizingConstant,
+          false);
+
+      univariateLogLinearSmoothing.fittedRawScoreDist = univariateLogLinearSmoothing.fittedFrequencies /
+                                                        static_cast<double>(univariateLogLinearSmoothing.numberOfExaminees);
+
+      univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(0,
+                                                                                                                                 univariateLogLinearSmoothing.numberOfScores - 1,
+                                                                                                                                 1,
+                                                                                                                                 univariateLogLinearSmoothing.fittedRawScoreDist);
+
+      univariateLogLinearSmoothing.fittedRawScorePercentileRankDist = EquatingRecipes::Utilities::percentileRanks(0,
+                                                                                                                  univariateLogLinearSmoothing.numberOfScores - 1,
+                                                                                                                  1,
+                                                                                                                  univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist);
     }
 
     /*
