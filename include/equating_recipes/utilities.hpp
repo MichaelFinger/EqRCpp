@@ -482,12 +482,12 @@ namespace EquatingRecipes {
                                        Eigen::VectorXd& unroundedEquatedScaledScores,
                                        Eigen::VectorXd& roundedEquatedScaledScores) {
       size_t numberOfRawScoresYct = Utilities::getNumberOfScores(maximumRawScoreYct,
-                                                              minimumRawScoreYct,
-                                                              scoreIncrementYct);
+                                                                 minimumRawScoreYct,
+                                                                 scoreIncrementYct);
 
       size_t numberOfEquatedRawScores = Utilities::getNumberOfScores(maximumRawScoreX,
-                                                                  minimumRawScoreX,
-                                                                  rawScoreIncrement);
+                                                                     minimumRawScoreX,
+                                                                     rawScoreIncrement);
 
       EquatingRecipes::Structures::RawToScaledScoreTable::Entry firstRawToScaledScoreEntry = rawToScaledScoreTable.getFirstEntry();
       EquatingRecipes::Structures::RawToScaledScoreTable::Entry lastRawToScaledScoreEntry = rawToScaledScoreTable.getLastEntry();
@@ -537,6 +537,124 @@ namespace EquatingRecipes {
           roundedEquatedScaledScores(scoreLocation) = unroundedEquatedScaledScores(scoreLocation);
         }
       }
+    }
+
+    /*
+      Wrapper used for getting equated scale scores essu[][] and essr[][]
+      Assigns or computes values for all variables in struct ESS_RESULTS s
+      Can be used for any design or methodology 
+      
+        Input:
+        
+          uses the following from struct PDATA inall
+            nm        = number of methods 
+            names[][] = names of methods
+            min       = min raw score for x 
+            max       = max raw score for x
+            inc       = increment for x         
+            fdx[]     = fd for new form x 
+            rep       = replication number for bootstrap; = 0 if no bootstrap
+            
+          uses the following from struct ERAW_RESULTS r
+            eraw[][] = equated raw scores
+            
+          minp    = minimum raw score for base form y conversion yct
+          maxp    = maximum raw score for base form y conversion yct
+        incp    = increment in raw scores in base form y conversion yct
+          nameyct = name of file with raw-to-scale score conversion for Y
+          round: if round=i --> round to i-th decimal place
+          lprss = lowest possible rounded scale score
+          hprss = highest possible rounded scale score
+          
+        Output: 
+          
+          s = struct ESS_RESULTS:
+                essu[][] = unrounded equated scale scores
+                essr[][] = rounded equated scale scores  
+                mtsu[][] = moments for equated unrounded scale scores 
+                mtsr[][] = moments for equated rounded scale scores 
+            
+          NOTE: The following are added to struct PDATA inall: minp, maxp, nameyct,
+                round, lprss, hprss, and **yct
+            
+          NOTE: struct ESS_RESULTS must be different struct's for actual 
+                equating and bootstrap use of Wrapper_ESS()
+            
+          NOTE:       
+          yct[][] = conversion table for Y; first dimension ranges from
+                  0 to (nscores(maxp,minp,inc)+1
+            (see comments for ReadSSConvTableForY() for details)
+
+      Function calls other than C or NR utilities: 
+        nscores()
+        ReadSSConvTableForY()
+        Equated_ss()
+        MomentsFromFD()
+                                                  
+      R. L. Brennan
+
+      Date of last revision: 6/30/08                                     
+    */
+    void runEquatedScaledScores(EquatingRecipes::Structures::PData& pData,
+                                EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults,
+                                const double& minimumScoreYct,
+                                const double& maximumScoreYct,
+                                const double& scoreIncrementYct,
+                                const EquatingRecipes::Structures::RawToScaledScoreTable& rawToScaledScoreTable,
+                                const size_t& roundToNumberOfDecimalPlaces,
+                                const int& lowestObservableScaledScore,
+                                const int& highestObservableScaledScore,
+                                EquatingRecipes::Structures::EquatedScaledScoresResults& equatedScaledScoresResults) {
+      int numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.mininumScoreX,
+                                                                         pData.maximumScoreX,
+                                                                         pData.scoreIncrementX);
+
+      pData.minimumRawScoreYct = minimumScoreYct;
+      pData.maximumRawScoreYct = maximumScoreYct;
+      pData.scoreIncrementYct = scoreIncrementYct;
+      pData.roundToNumberOfDecimalPlaces = roundToNumberOfDecimalPlaces;
+      pData.lowestObservableRoundedScaledScore = lowestObservableScaledScore;
+      pData.highestObservableRoundedScaledScore = highestObservableScaledScore;
+
+      if (pData.bootstrapReplicationNumber == 0) {
+        pData.rawToScaledScoreTable = rawToScaledScoreTable;
+      }
+
+      if (pData.bootstrapReplicationNumber <= 1) {
+        equatedScaledScoresResults.unroundedEquatedScaledScores.resize(pData.methods.size(),
+                                                                       numberOfScores);
+        equatedScaledScoresResults.roundedEquatedScaledScores.resize(pData.methods.size(),
+                                                                       numberOfScores);
+equatedScaledScoresResults.unroundedEquatedScaledScoreMoments.resize(pData.methods.size(),
+                                                                       4);
+equatedScaledScoresResults.roundedEquatedScaledScores.resize(pData.methods.size(),
+                                                                       4);
+      }
+
+     for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
+      
+     }
+
+      //     for (i = 0; i <= inall->nm - 1; i++)
+      //       Equated_ss(inall->min, inall->max, inall->inc, minp, maxp, incp, r->eraw[i],
+      //                  inall->yct, inall->round, inall->lprss, inall->hprss, s->essu[i], s->essr[i]);
+
+      //     /* compute moments:  Note that when inc==1, essu[*][min-minp+1] is the
+      //    unrounded scale score associated with fdx[0], where fdx[0]
+      //    is associated with scores ranging from min to max.
+      //    Recall that essu[*][0] is the unrounded scale score
+      //    associated with minp-inc/2 = minp-.5 when inc = 1.  In this example,
+      //    min-minp+1 = loc(min,minp,inc) + 1
+
+      // */
+      //     if (inall->fdx != NULL) {
+      //       for (i = 0; i <= inall->nm - 1; i++) {
+      //         MomentsFromFD(inall->min, inall->max, inall->inc,
+      //                       s->essu[i], inall->fdx, s->mtsu[i]);
+      //         MomentsFromFD(inall->min, inall->max, inall->inc,
+      //                       s->essr[i], inall->fdx, s->mtsr[i]);
+      //       }
+      //     }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -640,8 +758,8 @@ namespace EquatingRecipes {
                                            const double& scoreIncrement,
                                            const Eigen::VectorXd& cumulativeRelativeFreqDist) {
       size_t numberOfScores = Utilities::getNumberOfScores(minimumScore,
-                                                        maximumScore,
-                                                        scoreIncrement);
+                                                           maximumScore,
+                                                           scoreIncrement);
 
       Eigen::VectorXd percRanks = Eigen::VectorXd::Zero(numberOfScores);
 

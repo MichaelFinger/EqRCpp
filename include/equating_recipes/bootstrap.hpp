@@ -182,9 +182,9 @@ namespace EquatingRecipes {
                                         replicationNumber,
                                         bootstrapY);
 
-          rgSgEquating.randomGroupEquating(pData.design,
+          rgSgEquating.randomGroupEquating(EquatingRecipes::Structures::Design::RandomGroups,
                                            pData.method,
-                                           pData.smoothing,
+                                           EquatingRecipes::Structures::Smoothing::NO,
                                            bootstrapX,
                                            bootstrapY,
                                            replicationNumber,
@@ -194,9 +194,9 @@ namespace EquatingRecipes {
                    pData.smoothing == EquatingRecipes::Structures::Smoothing::NO) {
           bootstrapBivariateStatistics(pData.summaryRawDataXY, replicationNumber, bootstrapXY);
 
-          rgSgEquating.singleGroupEquating(pData.design,
+          rgSgEquating.singleGroupEquating(EquatingRecipes::Structures::Design::RandomGroups,
                                            pData.method,
-                                           pData.smoothing,
+                                           EquatingRecipes::Structures::Smoothing::NO,
                                            bootstrapXY,
                                            replicationNumber,
                                            pData,
@@ -206,9 +206,9 @@ namespace EquatingRecipes {
           bootstrapBivariateStatistics(pData.summaryRawDataXV, replicationNumber, bootstrapXV);
           bootstrapBivariateStatistics(pData.summaryRawDataYV, replicationNumber, bootstrapYV);
 
-          cgEquatingNoSmoothing.run(pData.design,
+          cgEquatingNoSmoothing.run(EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups,
                                     pData.method,
-                                    pData.smoothing,
+                                    EquatingRecipes::Structures::Smoothing::NO,
                                     pData.weightSyntheticPopulation1,
                                     pData.isInternalAnchor,
                                     pData.reliabilityCommonItemsPopulation1,
@@ -232,9 +232,9 @@ namespace EquatingRecipes {
                                                      replicationNumber,
                                                      bootstrapBetaBinomialSmoothingY);
 
-          equatedRawScoreResults = betaBinomial.randomGroupsEquipercentileEquating(pData.design,
-                                                                                   pData.method,
-                                                                                   pData.smoothing,
+          equatedRawScoreResults = betaBinomial.randomGroupsEquipercentileEquating(EquatingRecipes::Structures::Design::RandomGroups,
+                                                                                   EquatingRecipes::Structures::Method::EQUIPERCENTILE,
+                                                                                   EquatingRecipes::Structures::Smoothing::BETA_BINOMIAL,
                                                                                    pData.summaryRawDataX,
                                                                                    pData.summaryRawDataY,
                                                                                    bootstrapBetaBinomialSmoothingX,
@@ -251,32 +251,69 @@ namespace EquatingRecipes {
                                                   replicationNumber,
                                                   bootstrapUnivariateLogLinearSmoothingY);
 
-          
+          logLinearEquating.runRGEquiEquatingWithLoglinearSmoothing(EquatingRecipes::Structures::Design::RandomGroups,
+                                                                    EquatingRecipes::Structures::Method::EQUIPERCENTILE,
+                                                                    EquatingRecipes::Structures::Smoothing::LOG_LINEAR,
+                                                                    pData.summaryRawDataX,
+                                                                    pData.summaryRawDataY,
+                                                                    bootstrapUnivariateLogLinearSmoothingX,
+                                                                    bootstrapUnivariateLogLinearSmoothingY,
+                                                                    replicationNumber,
+                                                                    pData,
+                                                                    equatedRawScoreResults);
+
+        } else if (pData.design == EquatingRecipes::Structures::Design::SingleGroup &&
+                   pData.smoothing == EquatingRecipes::Structures::Smoothing::LOG_LINEAR) {
+          parametricBootstraptBivariate(pData.bivariateLogLinearSmoothingXY,
+                                        replicationNumber,
+                                        bootstrapBivariateLogLinearSmoothingXY);
+
+          logLinearEquating.runSGEquiEquatingWithLoglinearSmoothing(EquatingRecipes::Structures::Design::SingleGroup,
+                                                                    pData.method,
+                                                                    EquatingRecipes::Structures::Smoothing::LOG_LINEAR,
+                                                                    pData.summaryRawDataXY,
+                                                                    bootstrapBivariateLogLinearSmoothingXY,
+                                                                    replicationNumber,
+                                                                    pData,
+                                                                    equatedRawScoreResults);
+        } else if (pData.design == EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups &&
+                   pData.smoothing == EquatingRecipes::Structures::Smoothing::LOG_LINEAR) {
+          parametricBootstraptBivariate(pData.bivariateLogLinearSmoothingXV,
+                                        replicationNumber,
+                                        bootstrapBivariateLogLinearSmoothingXV);
+
+          parametricBootstraptBivariate(pData.bivariateLogLinearSmoothingYV,
+                                        replicationNumber,
+                                        bootstrapBivariateLogLinearSmoothingYV);
+
+          logLinearEquating.runCGEquiEquatingWithLoglinearSmoothing(EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups,
+                                                                    pData.method,
+                                                                    EquatingRecipes::Structures::Smoothing::LOG_LINEAR,
+                                                                    pData.weightSyntheticPopulation1,
+                                                                    pData.isInternalAnchor,
+                                                                    pData.reliabilityCommonItemsPopulation1,
+                                                                    pData.reliabilityCommonItemsPopulation2,
+                                                                    pData.summaryRawDataXV,
+                                                                    pData.summaryRawDataYV,
+                                                                    bootstrapBivariateLogLinearSmoothingXV,
+                                                                    bootstrapBivariateLogLinearSmoothingYV,
+                                                                    replicationNumber,
+                                                                    pData,
+                                                                    equatedRawScoreResults);
+        } else {
         }
 
-        //   else if (inall->design == 'R' && inall->smoothing == 'L') {
-        //     Parametric_boot_univ_ULL(inall->ullx, idum, rep, &bt_ullx);
-        //     Parametric_boot_univ_ULL(inall->ully, idum, rep, &bt_ully);
-        //     Wrapper_RL('R', 'E', 'L', inall->x, inall->y, &bt_ullx, &bt_ully,
-        //                rep, inall, &br);
-        //   }
-
-        //   else if (inall->design == 'S' && inall->smoothing == 'L') {
-        //     Parametric_boot_biv(inall->bllxy, idum, rep, &bt_bllxy);
-        //     Wrapper_SL('S', 'E', 'L', inall->xy, &bt_bllxy, rep, inall, &br);
-        //   }
-
-        //   else if (inall->design == 'C' && inall->smoothing == 'L') {
-        //     Parametric_boot_biv(inall->bllxv, idum, rep, &bt_bllxv);
-        //     Parametric_boot_biv(inall->bllyv, idum, rep, &bt_bllyv);
-        //     Wrapper_CL('C', inall->method, 'L', inall->w1, inall->anchor,
-        //                inall->rv1, inall->rv2,
-        //                inall->xv, inall->yv, &bt_bllxv, &bt_bllyv,
-        //                rep, inall, &br);
-        //   } else
-        //     ;
-
         //   /***** end for different designs/methods/smoothing *****/
+
+        bootstrapAccumulateEquatedRawScores(pData,
+                                            equatedRawScoreResults,
+                                            bootstrapEquatedRawScoreResults);
+
+        if (bootstrapEquatedScaledScoresResults.has_value()) {
+          EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults btEqScaledScoreResults;
+
+          EquatingRecipes::Utilities::getEquatedScaledScores()
+        }
 
         //   Boot_accumulate_eraw(inall, &br, t);
         //   if (u != NULL) {
