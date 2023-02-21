@@ -14,13 +14,13 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct CubicSplinePostsmoothing {
-      int numberOfScoreCategories;                           /* number of score categories */
+      size_t numberOfScores;                                 /* number of score categories */
       double smoothingParameter;                             /* smoothing or "flexibility" parameter */
-      double lowestSmoothedScorePercentileRank;              /* percentile rank for lowest score that is smoothed */
-      double highestSmoothedScorePercentileRank;             /* percentile rank for highest score that is smoothed */
-      int lowestSmoothedPseudoRawScorePercentileRank;        /* lowest (pseudo raw) score that is smoothed */
-      int higestSmoothedPseudoRawScorePercentileRank;        /* highest (pseudo raw) score that is smoothed */
-      int numberOfSmoothedPseudoRawScoreCategories;          /* high-low+1 = number of score categories in [low,high] */
+      double percentileRankLowestScore;                      /* percentile rank for lowest score that is smoothed */
+      double percentileRankHighestScore;                     /* percentile rank for highest score that is smoothed */
+      double lowestSmoothedPseudoRawScorePercentileRank;     /* lowest (pseudo raw) score that is smoothed */
+      double higestSmoothedPseudoRawScorePercentileRank;     /* highest (pseudo raw) score that is smoothed */
+      size_t boundedNumberOfScores;                          /* high-low+1 = number of score categories in [low,high] */
       Eigen::VectorXd equipercentileEquivalents;             /* equipercentile equivalents: eeq[ns] */
       Eigen::VectorXd standardErrors;                        /* standard errors: se[ns] */
       Eigen::VectorXd coefficients;                          /* vector containing a, b, c, d coeffs: cmat[4*ns]; Note--dimensioned for maximum */

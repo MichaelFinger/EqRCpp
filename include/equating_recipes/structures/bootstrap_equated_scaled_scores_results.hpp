@@ -7,9 +7,7 @@
 #ifndef STRUCTURES_BOOTSTRAP_EQUATED_SCALED_SCORES_RESULTS_HPP
 #define STRUCTURES_BOOTSTRAP_EQUATED_SCALED_SCORES_RESULTS_HPP
 
-#include <string>
 #include <Eigen/Core>
-#include <fmt/core.h>
 
 namespace EquatingRecipes {
   namespace Structures {

@@ -484,7 +484,7 @@ namespace EquatingRecipes {
 
       /* get moments */
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.col(methodIndex),
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.col(methodIndex),
                                                                                                                      bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble);
 
         equatedRawScoreResults.equatedRawScoreMoments.col(methodIndex) = moments.momentValues;

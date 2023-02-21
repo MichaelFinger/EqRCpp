@@ -50,7 +50,6 @@ University of Iowa
 #include <equating_recipes/cg_no_smoothing.hpp>
 #include <equating_recipes/log_linear_equating.hpp>
 #include <equating_recipes/rg_and_sg_equating.hpp>
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/structures/beta_binomial_smoothing.hpp>
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
@@ -300,33 +299,46 @@ namespace EquatingRecipes {
                                                                     replicationNumber,
                                                                     pData,
                                                                     equatedRawScoreResults);
-        } else {
         }
 
-        //   /***** end for different designs/methods/smoothing *****/
+        /***** end for different designs/methods/smoothing *****/
 
         bootstrapAccumulateEquatedRawScores(pData,
                                             equatedRawScoreResults,
                                             bootstrapEquatedRawScoreResults);
 
         if (bootstrapEquatedScaledScoresResults.has_value()) {
-          EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults btEqScaledScoreResults;
+          EquatingRecipes::Utilities::runEquatedScaledScores(pData,
+                                                             equatedRawScoreResults,
+                                                             pData.minimumRawScoreYct,
+                                                             pData.maximumRawScoreYct,
+                                                             pData.scoreIncrementYct,
+                                                             pData.rawToScaledScoreTable,
+                                                             pData.roundToNumberOfDecimalPlaces,
+                                                             pData.lowestObservableRoundedScaledScore,
+                                                             pData.highestObservableRoundedScaledScore,
+                                                             equatedScaledScoreResults);
 
-          EquatingRecipes::Utilities::getEquatedScaledScores()
+          EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults btEqScaledScoreResults;
+          bootstrapAccumulateEquatedScaledScores(pData,
+                                                 equatedScaledScoreResults,
+                                                 btEqScaledScoreResults);
+
+          bootstrapEquatedScaledScoresResults = btEqScaledScoreResults;
         }
 
-        //   Boot_accumulate_eraw(inall, &br, t);
-        //   if (u != NULL) {
-        //     Wrapper_ESS(inall, &br, inall->minp, inall->maxp, inall->incp, inall->nameyct,
-        //                 inall->round, inall->lprss, inall->hprss, &bs);
-        //     Boot_accumulate_ess(inall, &bs, u);
-        //   }
-        // } /* end of rep loop */
+        bootstrapStandardErrorsEquatedRawScores(pData,
+                                                bootstrapEquatedRawScoreResults);
 
-        // Boot_se_eraw(inall, t);
-        // if (u != NULL)
-        //   Boot_se_ess(inall, u);
-        // inall->rep = 0; /* bootstrap concluded */
+        if (bootstrapEquatedScaledScoresResults.has_value()) {
+          EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults btEquatedScaledScoresResults;
+          bootstrapStandardErrorsEquatedScaledScores(pData,
+                                                     btEquatedScaledScoresResults);
+
+          bootstrapEquatedScaledScoresResults = btEquatedScaledScoresResults;
+        }
+
+        pData.bootstrapReplicationNumber = 0; /* bootstrap concluded */
       }
     }
 
@@ -490,7 +502,7 @@ namespace EquatingRecipes {
 
       /*  get moments */
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(bootstrapX.freqDistDouble,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(bootstrapX.freqDistDouble,
                                                                                                                    bootstrapX.minimumScore,
                                                                                                                    bootstrapX.maximumScore,
                                                                                                                    bootstrapX.scoreIncrement);
@@ -709,14 +721,14 @@ namespace EquatingRecipes {
                                                                                                               bootstrapXV.univariateStatisticsColumn.cumulativeRelativeFreqDist);
 
       /*  get moments, cov, and corr in bootstrap data */
-      EquatingRecipes::Structures::Moments rowMoments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(bootstrapXV.univariateStatisticsRow.freqDistDouble,
+      EquatingRecipes::Structures::Moments rowMoments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(bootstrapXV.univariateStatisticsRow.freqDistDouble,
                                                                                                                       bootstrapXV.univariateStatisticsRow.minimumScore,
                                                                                                                       bootstrapXV.univariateStatisticsRow.maximumScore,
                                                                                                                       bootstrapXV.univariateStatisticsRow.scoreIncrement);
 
       bootstrapXV.univariateStatisticsRow.momentValues = rowMoments.momentValues;
 
-      EquatingRecipes::Structures::Moments columnMoments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(bootstrapXV.univariateStatisticsColumn.freqDistDouble,
+      EquatingRecipes::Structures::Moments columnMoments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(bootstrapXV.univariateStatisticsColumn.freqDistDouble,
                                                                                                                          bootstrapXV.univariateStatisticsColumn.minimumScore,
                                                                                                                          bootstrapXV.univariateStatisticsColumn.maximumScore,
                                                                                                                          bootstrapXV.univariateStatisticsColumn.scoreIncrement);

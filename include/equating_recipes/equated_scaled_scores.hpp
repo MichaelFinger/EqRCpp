@@ -15,7 +15,6 @@
 #include <string>
 #include <Eigen/Core>
 
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/equated_scaled_scores_results.hpp>
@@ -84,12 +83,12 @@ namespace EquatingRecipes {
         EquatingRecipes::Structures::Moments moments;
 
         for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-          moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(results.unroundedEquatedScaledScores.col(methodIndex),
+          moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(results.unroundedEquatedScaledScores.col(methodIndex),
                                                                                   pData.scoreFrequenciesX);
 
           results.unroundedEquatedScaledScoreMoments.col(methodIndex) = moments.momentValues;
 
-          moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(results.roundedEquatedScaledScores.col(methodIndex),
+          moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(results.roundedEquatedScaledScores.col(methodIndex),
                                                                                   pData.scoreFrequenciesX);
 
           results.roundedEquatedScaledScoreMoments.col(methodIndex) = moments.momentValues;

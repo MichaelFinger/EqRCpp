@@ -9,7 +9,6 @@
 #include "fixtures/actmathfreq.hpp"
 #include <equating_recipes/structures/all_structures.hpp>
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/rg_and_sg_equating.hpp>
 #include <equating_recipes/cg_equipercentile_equating.hpp>
 
@@ -23,13 +22,13 @@ namespace Tests {
       //           << EquatingRecipes::Utilities::vectorXdToString(actMathFreqData.freqX, false) << "\n"
       //           << EquatingRecipes::Utilities::vectorXdToString(actMathFreqData.freqY, false) << "\n";
 
-      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = EquatingRecipes::ScoreStatistics::univariateFromScoreFrequencies(actMathFreqData.freqX,
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = EquatingRecipes::Utilities::univariateFromScoreFrequencies(actMathFreqData.freqX,
                                                                                                                                                  0,
                                                                                                                                                  maximumScore,
                                                                                                                                                  1,
                                                                                                                                                  "X");
 
-      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY = EquatingRecipes::ScoreStatistics::univariateFromScoreFrequencies(actMathFreqData.freqY,
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY = EquatingRecipes::Utilities::univariateFromScoreFrequencies(actMathFreqData.freqY,
                                                                                                                                                  0,
                                                                                                                                                  maximumScore,
                                                                                                                                                  1,

@@ -35,7 +35,6 @@ University of Iowa
 #include <vector>
 #include <Eigen/Core>
 
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/all_structures.hpp>
 
@@ -499,13 +498,13 @@ namespace EquatingRecipes {
                                double& slope,
                                double& intercept) {
       /* moments for x in syn pop */
-      EquatingRecipes::Structures::Moments momentsXSynPop = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(syntheticDensityX,
+      EquatingRecipes::Structures::Moments momentsXSynPop = EquatingRecipes::Utilities::momentsFromScoreFrequencies(syntheticDensityX,
                                                                                                                           minimumScoreX,
                                                                                                                           maximumScoreX,
                                                                                                                           scoreIncrement);
 
       /* moments for y in syn pop */
-      EquatingRecipes::Structures::Moments momentsYSynPop = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(syntheticDensityY,
+      EquatingRecipes::Structures::Moments momentsYSynPop = EquatingRecipes::Utilities::momentsFromScoreFrequencies(syntheticDensityY,
                                                                                                                           minimumScoreY,
                                                                                                                           maximumScoreY,
                                                                                                                           scoreIncrement);

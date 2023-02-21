@@ -21,8 +21,6 @@
 #include <Eigen/Core>
 #include <fmt/core.h>
 
-#include <equating_recipes/utilities.hpp>
-
 namespace EquatingRecipes {
   namespace Structures {
     struct UnivariateStatistics {
@@ -44,13 +42,12 @@ namespace EquatingRecipes {
 
       void configure(const double& minimumScore,
                      const double& maximumScore,
-                     const double& scoreIncrement) {
+                     const double& scoreIncrement,
+                     const size_t& numberOfScores) {
         this->minimumScore = minimumScore;
         this->maximumScore = maximumScore;
         this->scoreIncrement = scoreIncrement;
-        this->numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(minimumScore,
-                                                                          maximumScore,
-                                                                          scoreIncrement);
+        this->numberOfScores = numberOfScores;
 
         this->freqDist.setZero(this->numberOfScores);
         this->freqDistDouble.setZero(this->numberOfScores);
@@ -60,27 +57,27 @@ namespace EquatingRecipes {
         this->percentileRankDist.setZero(this->numberOfScores);
       }
 
-      std::string toString() {
-        std::string msg = "";
+      // std::string toString() {
+      //   std::string msg = "";
 
-        msg.append(fmt::format("Score Variable ID: {}\n", this->id));
-        msg.append(fmt::format("Number of examinees: {}\n", this->numberOfExaminees));
-        msg.append(fmt::format("min score in data: {}\n", minimumScore));
-        msg.append(fmt::format("max score in data: {}\n", maximumScore));
-        msg.append(fmt::format("min score for fd[]: {}\n", freqDistMinimumScore));
-        msg.append(fmt::format("max score for fd[]: {}\n", freqDistMaximumScore));
-        msg.append(fmt::format("increment between adjacent scores: {}\n", scoreIncrement));
-        msg.append(fmt::format("number of scores (or categories): {}\n", numberOfScores));
-        msg.append(fmt::format("freq dist fd[0]...fd[ns-1]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDist, false)));
-        msg.append(fmt::format("double version of fd[]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDistDouble, false)));
-        msg.append(fmt::format("cum freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeFreqDist, false)));
-        msg.append(fmt::format("relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(relativeFreqDist, false)));
-        msg.append(fmt::format("cum relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeRelativeFreqDist, false)));
-        msg.append(fmt::format("percentile rank dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(percentileRankDist, false)));
-        msg.append(fmt::format("moments: mean, sd, skew, kurt: {}\n", EquatingRecipes::Utilities::vectorXdToString(momentValues, false)));
+      //   msg.append(fmt::format("Score Variable ID: {}\n", this->id));
+      //   msg.append(fmt::format("Number of examinees: {}\n", this->numberOfExaminees));
+      //   msg.append(fmt::format("min score in data: {}\n", minimumScore));
+      //   msg.append(fmt::format("max score in data: {}\n", maximumScore));
+      //   msg.append(fmt::format("min score for fd[]: {}\n", freqDistMinimumScore));
+      //   msg.append(fmt::format("max score for fd[]: {}\n", freqDistMaximumScore));
+      //   msg.append(fmt::format("increment between adjacent scores: {}\n", scoreIncrement));
+      //   msg.append(fmt::format("number of scores (or categories): {}\n", numberOfScores));
+      //   msg.append(fmt::format("freq dist fd[0]...fd[ns-1]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDist, false)));
+      //   msg.append(fmt::format("double version of fd[]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDistDouble, false)));
+      //   msg.append(fmt::format("cum freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeFreqDist, false)));
+      //   msg.append(fmt::format("relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(relativeFreqDist, false)));
+      //   msg.append(fmt::format("cum relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeRelativeFreqDist, false)));
+      //   msg.append(fmt::format("percentile rank dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(percentileRankDist, false)));
+      //   msg.append(fmt::format("moments: mean, sd, skew, kurt: {}\n", EquatingRecipes::Utilities::vectorXdToString(momentValues, false)));
 
-        return msg;
-      }
+      //   return msg;
+      // }
     };
   } // namespace Structures
 } // namespace EquatingRecipes

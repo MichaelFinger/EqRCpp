@@ -11,15 +11,15 @@
 #include <equating_recipes/bootstrap.hpp>
 #include <equating_recipes/cg_equipercentile_equating.hpp>
 #include <equating_recipes/cg_no_smoothing.hpp>
+#include <equating_recipes/cubic_spline.hpp>
 #include <equating_recipes/equated_scaled_scores.hpp>
 #include <equating_recipes/log_linear_equating.hpp>
 #include <equating_recipes/results_document.hpp>
 #include <equating_recipes/rg_and_sg_equating.hpp>
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 
 #include <iostream>
-#include <Eigen/Core>
+#include <Eigen/Dense>
 
 int main(int argc, char const *argv[]) {
   // Tests::UnivariateStatistics univariateStatisticsTest;  
@@ -43,23 +43,7 @@ int main(int argc, char const *argv[]) {
   // Tests::RGAndSG rgAndSG;
   // rgAndSG.run();
 
-  Eigen::MatrixXd mat(1, 10);
-  Eigen::VectorXd vec(10);
-
-  vec(0) = 0;
-  vec(1) = 1;
-  vec(2) = 2;
-  vec(3) = 3;
-  vec(4) = 4;
-  vec(5) = 5;
-  vec(6) = 6;
-  vec(7) = 7;
-  vec(8) = 8;
-  vec(9) = 9;
-
-  mat.row(0) = vec;
-
-  std::cout << EquatingRecipes::Utilities::matrixXdToString(mat) << "\n";
+  
 
   return 0;
 }

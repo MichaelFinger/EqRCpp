@@ -28,11 +28,11 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct PData {
-      EquatingRecipes::Structures::UnivariateStatistics summaryRawDataX;     /* structure for summary raw data for x and v */
-      EquatingRecipes::Structures::UnivariateStatistics summaryRawDataY;     /* structure for summary raw data for y and v */
-      EquatingRecipes::Structures::BivariateStatistics summaryRawDataXV;     /* structure for summary raw data for x and v */
-      EquatingRecipes::Structures::BivariateStatistics summaryRawDataYV;     /* structure for summary raw data for y and v */
-      EquatingRecipes::Structures::BivariateStatistics summaryRawDataXY;     /* structure for summary raw data for x and y */
+      EquatingRecipes::Structures::UnivariateStatistics summaryRawDataX; /* structure for summary raw data for x and v */
+      EquatingRecipes::Structures::UnivariateStatistics summaryRawDataY; /* structure for summary raw data for y and v */
+      EquatingRecipes::Structures::BivariateStatistics summaryRawDataXV; /* structure for summary raw data for x and v */
+      EquatingRecipes::Structures::BivariateStatistics summaryRawDataYV; /* structure for summary raw data for y and v */
+      EquatingRecipes::Structures::BivariateStatistics summaryRawDataXY; /* structure for summary raw data for x and y */
       EquatingRecipes::Structures::Design design;
       EquatingRecipes::Structures::Method method;
       EquatingRecipes::Structures::Smoothing smoothing;
@@ -40,33 +40,33 @@ namespace EquatingRecipes {
       double minimumRawScoreYct;
       double maximumRawScoreYct;
       double scoreIncrementYct;
-      int lowestObservableRoundedScaledScore;                                       /* lowest possible rounded scale score */
-      int highestObservableRoundedScaledScore;                                     /* highest possible rounded scale score */
-      double weightSyntheticPopulation1;                                                     /* weight for synthetic pop 1 */
-      bool isInternalAnchor;                                                      /* = false (external); = true (internal) */
-      double reliabilityCommonItemsPopulation1;                                   /* reliability of common items in pop 1 */
-      double reliabilityCommonItemsPopulation2;                                   /* reliability of common items in pop 2 */
+      int lowestObservableRoundedScaledScore;   /* lowest possible rounded scale score */
+      int highestObservableRoundedScaledScore;  /* highest possible rounded scale score */
+      double weightSyntheticPopulation1;        /* weight for synthetic pop 1 */
+      bool isInternalAnchor;                    /* = false (external); = true (internal) */
+      double reliabilityCommonItemsPopulation1; /* reliability of common items in pop 1 */
+      double reliabilityCommonItemsPopulation2; /* reliability of common items in pop 2 */
       std::vector<std::string> methods;
-      double mininumScoreX;                                                                             /* min score for x */
-      double maximumScoreX;                                                                             /* max score for x */
-      double scoreIncrementX;                                                   /* increment between adjacent scores for x */
-      Eigen::VectorXd scoreFrequenciesX;                                                              /* fd for new form x */
+      double mininumScoreX;              /* min score for x */
+      double maximumScoreX;              /* max score for x */
+      double scoreIncrementX;            /* increment between adjacent scores for x */
+      Eigen::VectorXd scoreFrequenciesX; /* fd for new form x */
       size_t numberOfExaminees;
-      EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;                                               /* conversion table for Y */
-      size_t numberOfBootstrapReplications;                                        /* number of replications for bootstrap */
-      size_t bootstrapReplicationNumber = 0;                     /* rep number for bootstrap; set to 0 for actual equating */
+      EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable; /* conversion table for Y */
+      size_t numberOfBootstrapReplications;                                     /* number of replications for bootstrap */
+      size_t bootstrapReplicationNumber = 0;                                    /* rep number for bootstrap; set to 0 for actual equating */
       size_t roundToNumberOfDecimalPlaces = 0;
-      EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomalSmoothingX;                           /* structure for beta binomial smoothing for x */
-      EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomalSmoothingY;                           /* structure for beta binomial smoothing for y */ 
-      EquatingRecipes::Structures::UnivariateLogLinearSmoothing univariateLogLinearSmoothingX;           /* structure for univ log-lin smoothing for x */ 
-      EquatingRecipes::Structures::UnivariateLogLinearSmoothing univariateLogLinearSmoothingY;           /* structure for univ log-lin smoothing for y */
-      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingXV;            /* struc for biv log-lin smoothing for x & v */ 
-      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingYV;            /* struc for biv log-lin smoothing for y & v */
-      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingXY;            /* struc for biv log-lin smoothing for x & y */
-      EquatingRecipes::Structures::CubicSplinePostsmoothing cubicSplinePostsmoothing;                    /* structure for cubic-spline postsmoothing */
-      EquatingRecipes::Structures::IRTInput *IRT_Input;                                          /* structure for IRT input */
+      EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomalSmoothingX;                /* structure for beta binomial smoothing for x */
+      EquatingRecipes::Structures::BetaBinomialSmoothing betaBinomalSmoothingY;                /* structure for beta binomial smoothing for y */
+      EquatingRecipes::Structures::UnivariateLogLinearSmoothing univariateLogLinearSmoothingX; /* structure for univ log-lin smoothing for x */
+      EquatingRecipes::Structures::UnivariateLogLinearSmoothing univariateLogLinearSmoothingY; /* structure for univ log-lin smoothing for y */
+      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingXV;  /* struc for biv log-lin smoothing for x & v */
+      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingYV;  /* struc for biv log-lin smoothing for y & v */
+      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingXY;  /* struc for biv log-lin smoothing for x & y */
+      EquatingRecipes::Structures::CubicSplinePostsmoothing cubicSplinePostsmoothing;          /* structure for cubic-spline postsmoothing */
+      EquatingRecipes::Structures::IRTInput* IRT_Input;                                        /* structure for IRT input */
     };
-  }
-}
+  } // namespace Structures
+} // namespace EquatingRecipes
 
 #endif

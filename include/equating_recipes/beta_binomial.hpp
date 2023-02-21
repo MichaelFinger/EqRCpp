@@ -38,7 +38,6 @@ University of Iowa
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
@@ -201,7 +200,7 @@ namespace EquatingRecipes {
         results.equatedRawScores(0, index) = equatedRawScores(index);
       }
       
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(
         equatedRawScores,
         pData.scoreFrequenciesX
       );
@@ -306,7 +305,7 @@ namespace EquatingRecipes {
                                                        numberOfCategoriesPearsonChiSquare);
 
         /* calculate fitted observed score moments */
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(smoothedFrequencies,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(smoothedFrequencies,
                                                                                                                      0,
                                                                                                                      numberOfItems,
                                                                                                                      1.0);
@@ -394,7 +393,7 @@ namespace EquatingRecipes {
                                                        numberOfCategoriesPearsonChiSquare);
 
         /* calculate fitted observed score moments */
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
                                                                                                                      0.0,
                                                                                                                      numberOfItems,
                                                                                                                      1.0);

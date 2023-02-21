@@ -50,7 +50,6 @@ University of Iowa
 #include <fmt/core.h>
 
 #include <equating_recipes/cg_equipercentile_equating.hpp>
-#include <equating_recipes/score_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
@@ -238,7 +237,7 @@ namespace EquatingRecipes {
       }
 
       /* get moments */
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
       for (size_t index = 0; index < moments.momentValues.size(); index++) {
@@ -376,7 +375,7 @@ namespace EquatingRecipes {
         equatedRawScoreResults.equatedRawScores(0, index) = equatedRawScores(index);
       }
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
       for (size_t index = 0; index < moments.momentValues.size(); index++) {
@@ -730,7 +729,7 @@ namespace EquatingRecipes {
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
         EquatingRecipes::Structures::Moments moments =
-            EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
+            EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
                                                                           xv.univariateStatisticsRow.freqDistDouble);
 
         equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;

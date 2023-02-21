@@ -173,7 +173,7 @@ namespace EquatingRecipes {
       equatedRawScoreResults.equatedRawScores.row(0) = equatedRawScores;
 
       /* get moments */
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
                                                                                                                    pData.scoreFrequenciesX);
 
       equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
@@ -312,7 +312,7 @@ namespace EquatingRecipes {
 
       /* get moments */
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::ScoreStatistics::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
       equatedRawScoreResults.equatedRawScoreMoments = moments.momentValues;

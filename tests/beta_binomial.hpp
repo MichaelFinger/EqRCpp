@@ -10,7 +10,6 @@
 #include <equating_recipes/structures/all_structures.hpp>
 #include <equating_recipes/beta_binomial.hpp>
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/score_statistics.hpp>
 
 namespace Tests {
   struct BetaBinomial {
@@ -21,7 +20,7 @@ namespace Tests {
 
       EquatingRecipes::BetaBinomial betaBinomial;
 
-      EquatingRecipes::ScoreStatistics scoreStatistics;
+      EquatingRecipes::Utilities scoreStatistics;
       EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = scoreStatistics.univariateFromScoreFrequencies(actMathFreqData.freqX,
                                                                                                                                0,
                                                                                                                                40,
