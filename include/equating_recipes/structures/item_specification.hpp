@@ -15,7 +15,7 @@ namespace EquatingRecipes {
   namespace Structures {
     struct ItemSpecification {
       int itemID;
-      int numberOfCategories;
+      size_t numberOfCategories;
       double scalingConstant;
       Eigen::VectorXd scoringFunctionValues;
       Eigen::VectorXd a;

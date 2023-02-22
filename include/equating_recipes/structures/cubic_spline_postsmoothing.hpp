@@ -21,11 +21,11 @@ namespace EquatingRecipes {
       double lowestSmoothedPseudoRawScorePercentileRank;     /* lowest (pseudo raw) score that is smoothed */
       double higestSmoothedPseudoRawScorePercentileRank;     /* highest (pseudo raw) score that is smoothed */
       size_t boundedNumberOfScores;                          /* high-low+1 = number of score categories in [low,high] */
-      Eigen::VectorXd equipercentileEquivalents;             /* equipercentile equivalents: eeq[ns] */
-      Eigen::VectorXd standardErrors;                        /* standard errors: se[ns] */
-      Eigen::VectorXd coefficients;                          /* vector containing a, b, c, d coeffs: cmat[4*ns]; Note--dimensioned for maximum */
-      Eigen::VectorXd cubicSplineSmoothedEquivalents;        /* cubic-spline smoothed equivalents including interpolated values: eeqs[ns] */
-      Eigen::VectorXd inverseCubicSplineSmoothedEquivalents; /* inverse of eeqs[]; computed only for Y to X; number of score categories is ns for X, NOT ns for Y: inv[ns for X] */
+      Eigen::MatrixXd equipercentileEquivalents;             /* equipercentile equivalents: eeq[ns] */
+      Eigen::MatrixXd standardErrors;                        /* standard errors: se[ns] */
+      Eigen::MatrixXd coefficients;                          /* vector containing a, b, c, d coeffs: cmat[4*ns]; Note--dimensioned for maximum */
+      Eigen::MatrixXd cubicSplineSmoothedEquivalents;        /* cubic-spline smoothed equivalents including interpolated values: eeqs[ns] */
+      Eigen::MatrixXd inverseCubicSplineSmoothedEquivalents; /* inverse of eeqs[]; computed only for Y to X; number of score categories is ns for X, NOT ns for Y: inv[ns for X] */
     };
   } // namespace Structures
 } // namespace EquatingRecipes

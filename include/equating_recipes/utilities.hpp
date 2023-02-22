@@ -78,6 +78,7 @@ University of Iowa
 #include <cmath>
 #include <limits>
 #include <map>
+#include <memory>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -94,6 +95,7 @@ University of Iowa
 #include <equating_recipes/structures/moments.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
+#include <equating_recipes/structures/functor.hpp>
 
 namespace EquatingRecipes {
   struct Utilities {
@@ -893,6 +895,69 @@ namespace EquatingRecipes {
       scoreMoments.momentValues(3) /= std::pow(scoreMoments.momentValues(1), 4);
 
       return scoreMoments;
+    }
+
+    /*
+      Purpose:  
+          This function implements bisection method to find x such that
+
+              f(x)==0.0.
+
+      Input:             
+          funcd   function pointer whose root we are trying to find.
+        x0      left end of the function domain 
+        x1      right end of the function domain
+
+      Output:                
+          x that satisfies f(x)==0.0
+      
+      Precondition:                                                     
+        f(x) is defined on [x0,x1] with f(x0)*f(x1) < = 0.
+    
+      Author: Jaehoon Seol
+      Date: August 20, 2009
+      Version: 1.0
+      References : 
+          J. Stoer & R. Bulirsch, Introduction to Numerical analysis, 2nd edition 
+        David S. Watkins, Fundamentals of Matrix Computations,2002
+      Comments:
+    */
+    double er_rtsafe(std::shared_ptr<EquatingRecipes::Structures::Functor> functor, double x0, double x1, double error) {
+      // double diff,
+      //     left,
+      //     right,
+      //     side1,
+      //     side2,
+      //     mid,
+      //     temp;
+
+      
+
+      // (*funcd)(x0, &left, &temp);
+      // (*funcd)(x1, &right, &temp);
+      // /* assert that there is a root between x1 and x2 */
+      // if (left * right > 0) /* function values have the same sign */
+      // {
+      //   fprintf(stderr, "Equating Recipes error occured\n");
+      //   fprintf(stderr, "Source: %s, Error: %s\n", "er_find_root",
+      //           "no root found exists on the interval");
+      //   fprintf(stderr, "Exiting the system. Good bye!\n");
+      //   exit(EXIT_FAILURE);
+      // }
+
+      // diff = fabs(right - left); /* difference of the interval         */
+      // while (diff > error) {
+      //   mid = (left + right) / 2.0;
+      //   (*funcd)(mid, &side1, &temp);
+      //   (*funcd)(right, &side2, &temp);
+      //   if (side1 * side2 <= 0)
+      //     left = mid;
+      //   else
+      //     right = mid;
+      //   diff = fabs(right - left);
+      // }
+      // return mid;
+      return 0;
     }
 
     //----------------------------------------------------------------------------------------------------

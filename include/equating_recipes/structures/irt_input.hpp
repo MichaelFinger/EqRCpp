@@ -21,7 +21,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct IRTInput {
-      IRTMethod method;                                                     /* 'T' for true score; 'O' for observed score; 'A' for both */
+      EquatingRecipes::Structures::IRTMethod method;                                                     /* 'T' for true score; 'O' for observed score; 'A' for both */
       Eigen::VectorXd newFormFrequencyDistribution;                                       /* Actual frequency distribution for new form */
       std::vector<EquatingRecipes::Structures::ItemSpecification> newItems;
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
