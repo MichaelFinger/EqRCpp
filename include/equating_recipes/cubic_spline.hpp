@@ -32,7 +32,9 @@ University of Iowa
 #include <string>
 #include <vector>
 
-#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Cholesky>
+#include <Eigen/Eigenvalues>
 #include <fmt/core.h>
 
 #include <equating_recipes/structures/design.hpp>
@@ -774,7 +776,7 @@ namespace EquatingRecipes {
     void setupT(const bool& edist,
                 Eigen::MatrixXd& mt,
                 size_t& n,
-                Eigen::VectorXd& h) {
+                Eigen::MatrixXd& h) {
       mt.setZero(n - 1, n - 1);
 
       double h0 = h(0); /* will be used if h is equi-distance */
@@ -782,42 +784,20 @@ namespace EquatingRecipes {
       for (size_t index = 0; index < mt.rows(); index++) {
         if (edist) {
           if (index >= 1) {
-            mt(index - 1, index) = h0 / 3.0;  
-            mt(index, index - 1) = h0 / 3.0;
+            mt(index - 1, index) = h0 / 3.0;
+            mt(index + 1, index) = h0 / 3.0;
           }
 
           mt(index, index) = 4.0 * h0 / 3.0;
         } else {
           if (index >= 1) {
-            mt(index - 1, index) = h(index) / 3.0;
-            mt(index, index - 1) = h(index) / 3.0;
+            mt(index - 1, index) = h(index - 1, 0) / 3.0;
+            mt(index + 1, index) = h(index, 0) / 3.0;
           }
-          
+
           if (index < mt.rows() - 1) {
-            double x = h(index) + h(index + 1);
+            double x = h(index) + h(index + 1, 0);
             mt(index, index) = x * 2.0 / 3.0;
-          }
-        }
-
-
-        
-
-        for (size_t columnIndex = left; columnIndex <= right; columnIndex++) {
-          if (edist) {
-            if (rowIndex == columnIndex) {
-              mt((n - 1) * rowIndex + columnIndex) = 4.0 * h0 / 3.0;
-            } else {
-              mt((n - 1) * rowIndex + columnIndex) = h0 / 3.0;
-            }
-          } else {
-            if (rowIndex == columnIndex) {
-              double x = h(rowIndex) + h(rowIndex + 1);
-              mt((n - 1) * rowIndex + columnIndex) = x * 2.0 / 3.0;
-            } else if (columnIndex == rowIndex + 1) {
-              mt((n - 1) * rowIndex + columnIndex) = h(rowIndex + 1) / 3.0;
-            } else if (columnIndex == rowIndex - 1) {
-              mt((n - 1) * rowIndex + columnIndex) = h(rowIndex) / 3.0;
-            }
           }
         }
       }
@@ -981,8 +961,8 @@ namespace EquatingRecipes {
       // size_t j;             /* loop index */
       // size_t ii = 0;        /* main loop index */
       // double e = 0.0;       /* e=v^t v */
-      // double np = 0.0;      /* new, updated p */
-      // double p = 1.0;       /* p<-p+(e-(Se)^(.5))/(f-p*g) */
+      double np = 0.0;      /* new, updated p */
+      double p = 1.0;       /* p<-p+(e-(Se)^(.5))/(f-p*g) */
       // double g = 0.0;       /* g = w^t w */
       // double f = 0.0;       /* f = u^t T u */
 
@@ -1034,47 +1014,63 @@ namespace EquatingRecipes {
 
       mq = mqt.transpose(); /* setup matrix Q */
 
-      setupT(FALSE, mt, n, vh); /* setup matrix T */
-      memset(mtmp, 0, (n - 1) * (n + 1) * sizeof(double));
-      for (i = 0; i < n + 1; i++) /* compute  D^2 Q */
-        for (j = 0; j < n - 1; j++)
-          mtmp[(i) * (n - 1) + (j)] = dyi[i] * dyi[i] * mq[(i) * (n - 1) + (j)];
-      dtdmm(mpt1, mqt, mtmp, n - 1, n + 1, n - 1); /* mpt1 = Q^t D^2 Q */
-      free(mtmp);
-      dtdmv(vy2, mqt, y, n - 1, n + 1); /* compute y2 = Q^t y */
-      ii = 0;
-      while (fabs(np - p) > pow(10.0, 3.0) * DBL_EPSILON && ii++ < 35) {
-        /* cholesky decomposition R^t R	of	*
-		 *      (mpt2=) Q^t D^2 Q + p*T		*/
-        p = np;
-        dtdsm(mpt, p, mt, n - 1, n - 1);
-        dtdma(mpt2, mpt1, mpt, n - 1, n - 1);
-        chsol(vu, vy2, mpt2, n - 1);     /* R^t R u = Q^t y	 */
-        dtdmv(vv, mq, vu, n + 1, n - 1); /* compute v=D Q u	 */
-        for (i = 0; i < n + 1; i++)
-          vv[i] = dyi[i] * vv[i];
-        e = 0.0;
-        for (i = 0; i < n + 1; i++)
-          e += vv[i] * vv[i];
-        dtdmv(vtu, mt, vu, n - 1, n - 1);
-        /* compute w in R^t R w = T u */
-        memcpy(vw, vtu, (n - 1) * sizeof(double));
-        subfd(vw, mpt2, n - 1); /* vw has w  */
-        subbk(vw, mpt2, n - 1); /* vw has w  */
-        dtdmv(vtw, mt, vw, n - 1, n - 1);
-        /* compute f, g, and p		  */
-        f = 0.0;
-        for (i = 0; i < n - 1; i++)
-          f += vu[i] * vtu[i];
-        g = 0.0;
-        for (i = 0; i < n - 1; i++)
-          g += vu[i] * vtw[i];
-        if (s != 0.0)
-          np = p + sqrt(e / s) * (e - sqrt(s * e)) / (f - p * g);
-        else
-          np = p + (e - sqrt(s * e)) / (f - p * g);
-        if (e <= s)
+      setupT(false,
+             mt,
+             n,
+             vh); /* setup matrix T */
+
+      mpt1 = mq.transpose() * dyi.asDiagonal() * dyi.asDiagonal() * mq; /* mpt1 = Q^t D^2 Q */
+
+      vy2 = mq.transpose() * y; /* compute y2 = Q^t y */
+
+      for (size_t iteration = 0; iteration < 35; iteration++) {
+        if (std::abs(np - p) <= std::pow(10.0, 3.0) * std::numeric_limits<double>::epsilon()) {
           break;
+        }
+
+        p = np;
+        mpt = mt * p;
+        mpt2 = mpt1 + mpt;
+
+        /* cholesky decomposition R^t R	of (mpt2=) Q^t D^2 Q + p*T		*/
+        Eigen::LLT<Eigen::MatrixXd> llt(mpt2);
+        vu = llt.solve(vy2); /* R^t R u = Q^t y	 */  
+
+        vv = dyi.asDiagonal() * mq * vu; /* compute v=D Q u	 */
+
+        double e = vv.dot(vv);
+
+        vtu = mt * vu;
+
+        /* compute w in R^t R w = T u */
+        
+      }
+      
+      while (fabs(np - p) > pow(10.0, 3.0) * DBL_EPSILON && ii++ < 35) {
+        // /* cholesky decomposition R^t R	of	*
+        // *      (mpt2=) Q^t D^2 Q + p*T		*/     
+        // p=np;
+        // dtdsm(mpt,p,mt,n-1,n-1);   
+        // dtdma(mpt2,mpt1,mpt,n-1,n-1);      
+        // chsol(vu,vy2,mpt2,n-1);		                 
+        // dtdmv(vv,mq,vu,n+1,n-1);	                 
+        // for(i=0; i<n+1 ; i++)	vv[i] = dyi[i]*vv[i]; 
+        // e=0.0 ; 
+        // for(i=0; i<n+1; i++)	e += vv[i]*vv[i];  
+        dtdmv(vtu,mt,vu,n-1,n-1); 
+        /* compute w in R^t R w = T u */
+        memcpy(vw,vtu,(n-1)*sizeof(double));
+        subfd(vw,mpt2,n-1);                                 /* vw has w  */ 
+        subbk(vw,mpt2,n-1);                                 /* vw has w  */ 
+        dtdmv(vtw,mt,vw,n-1,n-1); 
+        /* compute f, g, and p		  */   
+        f = 0.0; for(i=0; i<n-1; i++)	f += vu[i]*vtu[i];
+        g = 0.0; for(i=0; i<n-1; i++)	g += vu[i]*vtw[i];
+        if (s != 0.0 )
+          np = p + sqrt(e/s)*(e-sqrt(s*e))/(f-p*g);
+        else
+          np = p + (e-sqrt(s*e))/(f-p*g);   
+        if (e<=s) break;
       }
       /* printf("p-value = %f ii = %d\n",np, ii); */
       /* return matrix mc:						* 
