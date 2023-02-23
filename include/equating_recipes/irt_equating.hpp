@@ -1,4 +1,4 @@
-/* 	
+/*
   IRT True Score Equating for Mixed-Format Tests
 
 This file, which is part of Equating Recipes, is free softrware.
@@ -48,6 +48,8 @@ University of Iowa
 #include <equating_recipes/structures/irt_model.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_control.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
+#include <equating_recipes/structures/irt_fitted_distribution.hpp>
+#include <equating_recipes/structures/irt_equating_results.hpp>
 
 namespace EquatingRecipes {
   class IRTEquating {
@@ -80,13 +82,13 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    short trueScoreEquating(EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
-                            std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                            std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
+    short trueScoreEquating(const EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
+                            const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
+                            const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
                             const size_t& numberOfScores,
                             const Eigen::VectorXd& newScores,
                             Eigen::VectorXd& oldFormEquivalents,
-                            Eigen::VectorXd& thetaValues,
+                            Eigen::VectorXd& theta,
                             double& lowestObservableScoreNewForm,
                             double& lowestObservableScoreOldForm) {
       double trueMinNew = 0.0;
@@ -94,18 +96,6 @@ namespace EquatingRecipes {
       double oldScoreMax = 0.0; /* Maximum old form score */
       double newTestMin = 0;    /* Minimum new form test score */
       double oldTestMin = 0;    /* Minimum old form test score */
-
-      // int j, r, CatMax;
-      // long chance;
-      // double slope;
-      // double intercept;
-      // double xh;
-      // double xl;
-      // double x1;
-      // double x2;
-
-      // double newScoreMin;       /* minimum new form score */
-      // double newScoreInc;       /* Increment between consecutive new form scores */
 
       this->controlHandle = handle;
       this->controlNewItems = newItems;
@@ -138,7 +128,8 @@ namespace EquatingRecipes {
                     });
 
       /* Find index of largest score below sum of c's */
-      for (size_t chance = 0; chance < numberOfScores - 1; chance++) {
+      size_t chance;
+      for (chance = 0; chance < numberOfScores - 1; chance++) {
         if (newScores(chance) > trueMinNew) {
           break;
         }
@@ -164,7 +155,7 @@ namespace EquatingRecipes {
 
       /* Assign score equivalents */
       for (size_t scoreLocation = 0; scoreLocation <= chance; scoreLocation++) {
-        eqvOld(scoreLocation) = intercept + newScores(scoreLocation) * slope;
+        oldFormEquivalents(scoreLocation) = intercept + newScores(scoreLocation) * slope;
         theta(scoreLocation) = xl;
       }
 
@@ -175,19 +166,32 @@ namespace EquatingRecipes {
         this->trueS = newScores(scoreLocation);
 
         for (size_t r = 0; r <= 10; r++) {
-          theta[j] = er_rtsafe(funcd, x1, x2, 0.00001);
-          /* ===== End of version 1.0 update ===== */
-          if (theta[j] == -9999.0)
-            theta[j] = -99.0; /* tianyou added this line 7/18/08 */
-          if (theta[j] != -9999.0 && theta[j] != -99.0 && theta[j] != 99.0)
+          theta(scoreLocation) = er_rtsafe(x1, x2, 0.00001);
+
+          if (theta(scoreLocation) == -9999.0) {
+            theta(scoreLocation) = -99.0; /* tianyou added this line 7/18/08 */
+          }
+
+          if (theta(scoreLocation) != -9999.0 &&
+              theta(scoreLocation) != -99.0 &&
+              theta(scoreLocation) != 99.0) {
             break;
-          else {
-            x1 = -pow(2.0, (double)r);
-            x2 = pow(2.0, (double)r);
+          } else {
+            x1 = -1.0 * std::pow(2.0, static_cast<double>(r));
+            x2 = std::pow(2.0, static_cast<double>(r));
           }
         }
-        eqvOld[j] = trueScore(OldItems, Handle->OldItemNum, theta[j]);
+
+        oldFormEquivalents(scoreLocation) = trueScore(oldItems,
+                                                      theta(scoreLocation));
       }
+
+      /* Convert maximum score on new form to maximum score on old form */
+      oldFormEquivalents(numberOfScores - 1) = oldScoreMax;
+      theta(numberOfScores - 1) = xh;
+
+      lowestObservableScoreNewForm = trueMinNew;
+      lowestObservableScoreOldForm = trueMinOld;
 
       return 0;
     }
@@ -201,61 +205,137 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     */
-    double testResponseFunction(const double& theta,
-                                const std::vector<EquatingRecipes::Structures::ItemSpecification>& items) {
-      double testResponseFunctionValue = 0.0;
+    double trueScore(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                     const double& theta) {
+      double expectedRawScore = 0.0;
 
       std::for_each(items.begin(),
                     items.end(),
                     [&](const EquatingRecipes::Structures::ItemSpecification& item) {
-                      for (size_t categoryIndex = 0; categoryIndex < item.numberOfCategories; categoryIndex++) {
-                        double probResponse = probabilityItemResponse(item, categoryIndex, theta);
-                        testResponseFunctionValue += item.scoringFunctionValues(categoryIndex) * probResponse;
+                      for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
+                        double probResponse = itemResponseFunction(item,
+                                                                   categoryIndex,
+                                                                   theta);
+
+                        expectedRawScore += probResponse * item.scoringFunctionValues(categoryIndex);
                       }
                     });
 
-      return (this->trueS - testResponseFunctionValue);
+      return expectedRawScore;
     }
 
-    double probabilityItemResponse(const EquatingRecipes::Structures::ItemSpecification& item,
-                                   const size_t& categoryIndex,
-                                   const double& theta) {
-      return -1;
+    short IRTmixObsEq(const EquatingRecipes::Structures::IRTScaleTransformationControl& handle, 
+    const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
+		const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems, 
+    const double& wNew, 
+    const double& wOld,
+    EquatingRecipes::Structures::IRTFittedDistribution& newForm,
+    EquatingRecipes::Structures::IRTFittedDistribution& oldForm,
+		EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults) {
+      return 0;
     }
 
     /*
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     */
-    double testResponseFunctionDerivative(const double& theta) {
+    double f_mix(const double& theta) {
+      double expectedRawScore = trueScore(this->controlNewItems,
+                                          theta);
+
+      return (this->trueS - expectedRawScore);
+    }
+
+    /*
+      Author: Seonghoon Kim
+      Date of last revision 9/25/08
+    */
+    double f_mixDer(const double& theta) {
       // int j, k;
       // double pd, Wjk, v;
 
-      // v = 0.0;
-      // for (j = 1; j <= ContHandle->NewItemNum; j++) {
-      //   for (k = 1; k <= ContNewItems[j].CatNum; k++) {
-      //     pd = PdCCCoverTheta(&ContNewItems[j], k, theta);
-      //     Wjk = ContNewItems[j].ScoreFunc[k];
-      //     v += Wjk * pd;
-      //   }
-      // }
+      double v = 0.0;
+      std::for_each(this->controlNewItems.begin(),
+                    this->controlNewItems.end(),
+                    [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                      for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
+                        double pd = PdCCCoverTheta(item, categoryIndex, theta);
 
-      // return -v;
+                        v += pd * item.scoringFunctionValues(categoryIndex);
+                      }
+                    });
 
+      v *= -1.0;
+
+      return v;
+    }
+
+    double PdCCCoverTheta(const EquatingRecipes::Structures::ItemSpecification& item,
+                          const size_t& categoryIndex,
+                          const double& theta) {
       return 0;
     }
 
-//     void funcd(double x, double* f, double* fd)
-//     /*
-//   Author: Seonghoon Kim
-//   Date of last revision 9/25/08
-// */
-//     {
-//       *f = f_mix(x);
-//       *fd = f_mixDer(x);
+    double itemResponseFunction(const EquatingRecipes::Structures::ItemSpecification& item,
+                                const size_t& categoryIndex,
+                                const double& theta) {
+      return -1;
+    }
 
-//       return;
-//     }
+    /*
+      Purpose:  
+          This function implements bisection method to find x such that
+
+              f(x)==0.0.
+
+      Input:             
+          funcd   function pointer whose root we are trying to find.
+        x0      left end of the function domain 
+        x1      right end of the function domain
+
+      Output:                
+          x that satisfies f(x)==0.0
+      
+      Precondition:                                                     
+        f(x) is defined on [x0,x1] with f(x0)*f(x1) < = 0.
+    
+      Author: Jaehoon Seol
+      Date: August 20, 2009
+      Version: 1.0
+      References : 
+          J. Stoer & R. Bulirsch, Introduction to Numerical analysis, 2nd edition 
+        David S. Watkins, Fundamentals of Matrix Computations,2002
+      Comments:
+    */
+    double er_rtsafe(double x0, double x1, double error) {
+      double left = testResponseFunction(x0);
+      double right = testResponseFunction(x1);
+
+      /* assert that there is a root between x1 and x2 */
+      if (left * right > 0) { /* function values have the same sign */
+        std::string msg = "Equating Recipes error occured\n";
+        msg.append("Source: er_find_root, Error: no root found exists on the interval\n");
+        throw std::runtime_error(msg);
+      }
+
+      double diff = std::abs(right - left);
+
+      while (diff > error) {
+        double mid = (left + right) / 2.0;
+        double side1 = testResponseFunction(mid);
+        double side2 = testResponseFunction(right);
+
+        if (side1 * side2 <= 0) {
+          left = mid;
+        } else {
+          right = mid;
+        }
+
+        diff = std::abs(right - left);
+      }
+
+      return mid;
+    }
   };
 } // namespace EquatingRecipes
 
