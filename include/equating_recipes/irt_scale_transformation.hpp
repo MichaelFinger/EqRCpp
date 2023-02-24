@@ -26,6 +26,7 @@
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/irt_model_functions.hpp>
 
 namespace EquatingRecipes {
   class IRTScaleTransformation {
@@ -110,7 +111,7 @@ namespace EquatingRecipes {
       Functionality:
         Calculate the value of the characteristic curve on the old scale by model.
 
-    For details about partial derivatives, refer to the following report:
+      For details about partial derivatives, refer to the following report:
 
       Kim, S., & Kolen, M.J. (2005). Methods for obtaining a common scale under
           unidimensional IRT models: A technical review and further extensions
@@ -145,94 +146,96 @@ namespace EquatingRecipes {
                    const double& I) {
       double prob;
 
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
       switch (commonItem.irtModel) {
         case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
           if (original) {
-            prob = irtScaleTransformation.itemResponseFunction3PL(categoryIndex,
-                                                                  theta,
-                                                                  commonItem.scaleConstant,
-                                                                  commonItem.oldA(1),
-                                                                  commonItem.oldB(1),
-                                                                  commonItem.oldC(1),
-                                                                  "old",
-                                                                  1,
-                                                                  0);
+            prob = irtModelFunctions.itemResponseFunction3PL(categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.oldA(1),
+                                                             commonItem.oldB(1),
+                                                             commonItem.oldC(1),
+                                                             "old",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunction3PL(categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB(1),
-                                           commonItem.newC(1),
-                                           "old",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunction3PL(categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.newA(1),
+                                                             commonItem.newB(1),
+                                                             commonItem.newC(1),
+                                                             "old",
+                                                             S,
+                                                             I);
           }
           break;
         case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
           if (original) {
-            prob = itemResponseFunctionLGR(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB,
-                                           "old",
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunctionLGR(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.oldA(1),
+                                                             commonItem.oldB,
+                                                             "old",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunctionLGR(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB,
-                                           "old",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunctionLGR(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.newA(1),
+                                                             commonItem.newB,
+                                                             "old",
+                                                             S,
+                                                             I);
           }
           break;
         case pc:
           if (original) {
-            prob = itemResponseFunctionGPC(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB,
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunctionGPC(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.oldA(1),
+                                                             commonItem.oldB,
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunctionGPC(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB,
-                                           "old",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunctionGPC(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.newA(1),
+                                                             commonItem.newB,
+                                                             "old",
+                                                             S,
+                                                             I);
           }
           break;
         case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
           if (original) {
-            prob = itemResponseFunctionNRM(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.oldA,
-                                           commonItem.oldC,
-                                           "old",
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunctionNRM(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.oldA,
+                                                             commonItem.oldC,
+                                                             "old",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunctionNRM(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.newA,
-                                           commonItem.newC,
-                                           "old",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunctionNRM(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.newA,
+                                                             commonItem.newC,
+                                                             "old",
+                                                             S,
+                                                             I);
           }
           break;
         default:
@@ -273,98 +276,100 @@ namespace EquatingRecipes {
                    const double& I) {
       double prob;
 
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
       switch (commonItem.irtModel) {
         case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
           if (original) {
-            prob = itemResponseFunction3PL(categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB(1),
-                                           commonItem.newC(1),
-                                           "new",
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunction3PL(categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.newA(1),
+                                                             commonItem.newB(1),
+                                                             commonItem.newC(1),
+                                                             "new",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunction3PL(categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB(1),
-                                           commonItem.oldC(1),
-                                           "new",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunction3PL(categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.oldA(1),
+                                                             commonItem.oldB(1),
+                                                             commonItem.oldC(1),
+                                                             "new",
+                                                             S,
+                                                             I);
           }
           break;
 
         case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
           if (original) {
-            prob = itemResponseFunctionLGR(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB,
-                                           "new",
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunctionLGR(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.newA(1),
+                                                             commonItem.newB,
+                                                             "new",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunctionLGR(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB,
-                                           "new",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunctionLGR(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.oldA(1),
+                                                             commonItem.oldB,
+                                                             "new",
+                                                             S,
+                                                             I);
           }
           break;
 
         case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
           if (original) {
-            prob = itemResponseFunctionGPC(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB,
-                                           "new",
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunctionGPC(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.newA(1),
+                                                             commonItem.newB,
+                                                             "new",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunctionGPC(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.scaleConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB,
-                                           "new",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunctionGPC(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.scaleConstant,
+                                                             commonItem.oldA(1),
+                                                             commonItem.oldB,
+                                                             "new",
+                                                             S,
+                                                             I);
           }
           break;
 
         case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
           if (original) {
-            prob = itemResponseFunctionNRM(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.newA,
-                                           commonItem.newC,
-                                           "new",
-                                           1,
-                                           0);
+            prob = irtModelFunctions.itemResponseFunctionNRM(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.newA,
+                                                             commonItem.newC,
+                                                             "new",
+                                                             1,
+                                                             0);
           } else {
-            prob = itemResponseFunctionNRM(commonItem.numberOfCategories,
-                                           categoryIndex,
-                                           theta,
-                                           commonItem.oldA,
-                                           commonItem.oldC,
-                                           "new",
-                                           S,
-                                           I);
+            prob = irtModelFunctions.itemResponseFunctionNRM(commonItem.numberOfCategories,
+                                                             categoryIndex,
+                                                             theta,
+                                                             commonItem.oldA,
+                                                             commonItem.oldC,
+                                                             "new",
+                                                             S,
+                                                             I);
           }
           break;
 
@@ -387,264 +392,259 @@ namespace EquatingRecipes {
                                                   const double& theta,
                                                   const double& S,
                                                   const double& I) {
-	double derivative;
+      double derivative;
 
-	switch(Item->model)
-	{
-		case l3:
-			pd = Pd3PLOldOverS(CatID, theta, Item->ScaleConst,
-				Item->Na[2], Item->Nb[2], Item->Nc[2], S, I);
-			break;
-		case gr:
-			pd = PdLGROldOverS(Item->CatNum, CatID, theta, Item->ScaleConst,
-                                Item->Na[2], Item->Nb, S, I);
-			break;
-		case pc:
-			pd = PdGPCOldOverS(Item->CatNum, CatID, theta, Item->ScaleConst,
-                                Item->Na[2], Item->Nb, S, I);
-			break;
-		case nr:
-			pd = PdNRMOldOverS(Item->CatNum, CatID, theta,
-				Item->Na, Item->Nc, S, I);
-			break;
-		default:
-			break;
-	}
-	return pd;
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
+      switch (commonItem.irtModel) {
+        case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
+          derivative = irtModelFunctions.itemResponseFunctionDerivative3PLOldOverS(categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.newA(1),
+                                                                                   commonItem.newB(1),
+                                                                                   commonItem.newC(1),
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeLGROldOverS(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.newA(1),
+                                                                                   commonItem.newB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeGPCOldOverS(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.newA(1),
+                                                                                   commonItem.newB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeNRMOldOverS(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.newA,
+                                                                                   commonItem.newC,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+        default:
+          break;
+      }
+
+      return derivative;
     }
-    double itemResponseFunctionDerivativeOldOverI(const std::vector<EquatingRecipes::Structures::CommonItemSpecification>& commonItem,
+
+    /*------------------------------------------------------------------------------
+      Functionality:
+        By model, calculate partial derivative of P* (from new-to-old
+        transformation) with respect to I.
+
+      Author: Seonghoon Kim
+      Date of last revision 9/25/08
+    ------------------------------------------------------------------------------*/
+    double itemResponseFunctionDerivativeOldOverI(const EquatingRecipes::Structures::CommonItemSpecification& commonItem,
                                                   const size_t& categoryIndex,
                                                   const double& theta,
                                                   const double& S,
                                                   const double& I) {
-      return 0;
+      double derivative;
+
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
+      switch (commonItem.irtModel) {
+        case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
+          derivative = irtModelFunctions.itemResponseFunctionDerivative3PLOldOverI(categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.newA(1),
+                                                                                   commonItem.newB(1),
+                                                                                   commonItem.newC(1),
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeLGROldOverI(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.newA(1),
+                                                                                   commonItem.newB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeGPCOldOverI(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.newA(1),
+                                                                                   commonItem.newB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeNRMOldOverI(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.newA,
+                                                                                   commonItem.newC,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+        default:
+          break;
+      }
+
+      return derivative;
     }
-    double itemResponseFunctionDerivativeNewOverS(const std::vector<EquatingRecipes::Structures::CommonItemSpecification>& commonItem,
+
+    double itemResponseFunctionDerivativeNewOverS(const EquatingRecipes::Structures::CommonItemSpecification& commonItem,
                                                   const size_t& categoryIndex,
                                                   const double& theta,
                                                   const double& S,
                                                   const double& I) {
-      return 0;
+      double derivative;
+
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
+      switch (commonItem.irtModel) {
+        case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
+          derivative = irtModelFunctions.itemResponseFunctionDerivative3PLNewOverS(categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.oldA(1),
+                                                                                   commonItem.oldB(1),
+                                                                                   commonItem.oldC(1),
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeLGRNewOverS(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.oldA(1),
+                                                                                   commonItem.oldB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeGPCNewOverS(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.oldwA(1),
+                                                                                   commonItem.oldwB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeNRMNewOverS(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.oldA,
+                                                                                   commonItem.oldC,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+        default:
+          break;
+      }
+
+      return derivative;
     }
-    double itemResponseFunctionDerivativeNewOverI(const std::vector<EquatingRecipes::Structures::CommonItemSpecification>& commonItem,
+
+    double itemResponseFunctionDerivativeNewOverI(const EquatingRecipes::Structures::CommonItemSpecification& commonItem,
                                                   const size_t& categoryIndex,
                                                   const double& theta,
                                                   const double& S,
                                                   const double& I) {
-      return 0;
-    }
+      double derivative;
 
-    double itemResponseFunction3PL(const size_t& categoryIndex,
-                                   const double& theta,
-                                   const double& D,
-                                   const double& a,
-                                   const double& b,
-                                   const double& c,
-                                   const std::string& scale,
-                                   const double& S,
-                                   const double& I) {
-      return 0;
-    }
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
 
-    double itemResponseFunctionDerivative3PLOldOverS(const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& na,
-                                                     const double& nb,
-                                                     const double& nc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivative3PLOldOverI(const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& na,
-                                                     const double& nb,
-                                                     const double& nc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivative3PLNewOverS(const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& oa,
-                                                     const double& ob,
-                                                     const double& oc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivative3PLNewOverI(const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& oa,
-                                                     const double& ob,
-                                                     const double& oc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double cumulativeResponseProbabilityLGR(const size_t& categoryIndex,
-                                            const double& theta,
-                                            const double& D,
-                                            const double& a,
-                                            const double& b,
-                                            const std::string& scale,
-                                            const double& S,
-                                            const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionLGR(const size_t& numberOfCategories,
-                                   const size_t categoryIndex,
-                                   const double& theta,
-                                   const double& D,
-                                   const double& a,
-                                   const Eigen::VectorXd& b,
-                                   const std::string& scale,
-                                   const double& S,
-                                   const double& I) {
-      return 0;
-    }
+      switch (commonItem.irtModel) {
+        case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
+          derivative = irtModelFunctions.itemResponseFunctionDerivative3PLNewOverI(categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.oldA(1),
+                                                                                   commonItem.oldB(1),
+                                                                                   commonItem.oldC(1),
+                                                                                   S,
+                                                                                   I);
 
-    double itemResponseFunctionDerivativeLGROldOverS(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& na,
-                                                     const Eigen::VectorXd& nb,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeLGROldOverI(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& na,
-                                                     const Eigen::VectorXd& nb,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeLGRNewOverS(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& oa,
-                                                     const Eigen::VectorXd& ob,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeLGRNewOverI(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& oa,
-                                                     const Eigen::VectorXd& ob,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionGPC(const size_t& numberOfCategories,
-                                   const size_t categoryIndex,
-                                   const double& theta,
-                                   const double& D,
-                                   const double& a,
-                                   const Eigen::VectorXd& b,
-                                   const std::string& scale,
-                                   const double& S,
-                                   const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeGPCOldOverS(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& na,
-                                                     const Eigen::VectorXd& nb,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeGPCOldOverI(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& na,
-                                                     const Eigen::VectorXd& nb,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeGPCNewOverS(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& oa,
-                                                     const Eigen::VectorXd& ob,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeGPCNewOverI(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const double& D,
-                                                     const double& oa,
-                                                     const Eigen::VectorXd& ob,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionNRM(const size_t& numberOfCategories,
-                                   const size_t& categoryIndex,
-                                   const double& theta,
-                                   const Eigen::VectorXd& a,
-                                   const Eigen::VectorXd& c,
-                                   const std::string& scale,
-                                   const double& S,
-                                   const double& I) {
-      return 0;
-    }
+          break;
 
-    double itemResponseFunctionDerivativeNRMOldOverS(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const Eigen::VectorXd& na,
-                                                     const Eigen::VectorXd& nc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeNRMOldOverI(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const Eigen::VectorXd& na,
-                                                     const Eigen::VectorXd& nc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeNRMNewOverS(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const Eigen::VectorXd& oa,
-                                                     const Eigen::VectorXd& oc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
-    }
-    double itemResponseFunctionDerivativeNRMNewOverI(const size_t& numberOfCategories,
-                                                     const size_t& categoryIndex,
-                                                     const double& theta,
-                                                     const Eigen::VectorXd& oa,
-                                                     const Eigen::VectorXd& oc,
-                                                     const double& S,
-                                                     const double& I) {
-      return 0;
+        case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeLGRNewOverI(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.oldA(1),
+                                                                                   commonItem.oldB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeGPCNewOverI(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.scaleConstant,
+                                                                                   commonItem.oldA(1),
+                                                                                   commonItem.oldB,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+
+        case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
+          derivative = irtModelFunctions.itemResponseFunctionDerivativeNRMNewOverI(commonItem.numberOfCategories,
+                                                                                   categoryIndex,
+                                                                                   theta,
+                                                                                   commonItem.oldA,
+                                                                                   commonItem.oldC,
+                                                                                   S,
+                                                                                   I);
+
+          break;
+        default:
+          break;
+      }
+
+      return derivative;
     }
 
     void StHaebara(const EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
