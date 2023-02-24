@@ -14,7 +14,7 @@ namespace EquatingRecipes {
     struct IRTEquatingResults {
       size_t numberOfRawScoreCategoriesNewForm;                                       /* Number of new form raw score categories */
       double minimumTrueScoreNewForm;                                          /* lower limit of true test score on the new form */
-      double minimumTrueScoreOldFolm;                                          /* lower limit of true test score on the old form */
+      double minimumTrueScoreOldForm;                                          /* lower limit of true test score on the old form */
       Eigen::VectorXd thetaEquivalentFormXScore;                                             /* Theta-equivalent of Form X score */
       Eigen::VectorXd unroundedEquatedTrueScore;                  /* Unrounded raw-to-raw conversion for IRT true score equating */
       Eigen::VectorXd roundedEquatedTrueScore;                      /* Rounded raw-to-raw conversion for IRT true score equating */

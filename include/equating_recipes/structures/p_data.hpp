@@ -64,7 +64,7 @@ namespace EquatingRecipes {
       EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingYV;  /* struc for biv log-lin smoothing for y & v */
       EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingXY;  /* struc for biv log-lin smoothing for x & y */
       EquatingRecipes::Structures::CubicSplinePostsmoothing cubicSplinePostsmoothing;          /* structure for cubic-spline postsmoothing */
-      EquatingRecipes::Structures::IRTInput* IRT_Input;                                        /* structure for IRT input */
+      EquatingRecipes::Structures::IRTInput irtInput;                                          /* structure for IRT input */
     };
   } // namespace Structures
 } // namespace EquatingRecipes
