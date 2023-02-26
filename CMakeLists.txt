@@ -11,36 +11,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CheckCXXCompilerFlag)
-# include(GNUInstallDirs)
-        
-# set(EQR_CPP_ARCHIVE_INSTALL_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR} CACHE PATH "" FORCE)
-# set(EQR_CPP_LIBRARY_INSTALL_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR} CACHE PATH "" FORCE)
-# set(EQR_CPP_RUNTIME_INSTALL_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR} CACHE PATH "" FORCE)
-# set(EQR_CPP_INCLUDE_INSTALL_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "" FORCE)
-# if(WIN32 AND NOT CYGWIN)
-#   set(DEF_INSTALL_CMAKEDIR CMake)
-# else()
-#   set(DEF_INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME})
-# endif()
-# set(EQR_CPP_INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files" FORCE)
-
-# if (CMAKE_GENERATOR MATCHES "Visual Studio")
-#   # If Microsoft SDK is installed create script run-msbuild.bat that
-#   # calls SetEnv.cmd to set up build environment and runs msbuild.
-#   # It is useful when building Visual Studio projects with the SDK
-#   # toolchain rather than Visual Studio.
-#   include(FindSetEnv)
-  
-#   if (WINSDK_SETENV)
-#     set(MSBUILD_SETUP "call \"${WINSDK_SETENV}\"")
-#   endif()
-#   # Set FrameworkPathOverride to get rid of MSB3644 warnings.
-#   set(netfxpath
-#        "C:\\Program Files\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0")
-#   file(WRITE run-msbuild.bat "
-#     ${MSBUILD_SETUP}
-#     ${CMAKE_MAKE_PROGRAM} -p:FrameworkPathOverride=\"${netfxpath}\" %*")
-# endif()
 
 include(FetchContent)
 
@@ -76,6 +46,23 @@ FetchContent_Declare(json
 FetchContent_MakeAvailable(json)
 # adds nlohmann_json::nlohmann_json
 
+# nlopt
+set(NLOPT_CXX ON CACHE BOOL "enable cxx routines" FORCE)
+set(NLOPT_FORTRAN OFF CACHE BOOL "enable fortran tests" FORCE)
+set(NLOPT_PYTHON OFF CACHE BOOL "build python bindings" FORCE)
+set(NLOPT_OCTAVE OFF CACHE BOOL "build octave bindings" FORCE)
+set(NLOPT_MATLAB OFF CACHE BOOL "build matlab bindings" FORCE)
+set(NLOPT_GUILE OFF CACHE BOOL "build guile bindings" FORCE)
+set(NLOPT_SWIG OFF CACHE BOOL "use SWIG to build bindings" FORCE)
+
+FetchContent_Declare(
+  nlopt
+  GIT_REPOSITORY https://github.com/stevengj/nlopt.git
+  GIT_TAG        v2.7.1
+  DOWNLOAD_EXTRACT_TIMESTAMP ON)
+FetchContent_MakeAvailable(nlopt)
+# adds nlopt
+
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${Eigen_SOURCE_DIR})
 include_directories(${fmtlib_SOURCE_DIR}/include)
@@ -95,5 +82,6 @@ target_link_libraries(EqRCppTest PRIVATE
                       ${Boost_LIBRARIES}
                       fmt::fmt
                       nlohmann_json::nlohmann_json
+                      nlopt
                       pthread
                       dl)

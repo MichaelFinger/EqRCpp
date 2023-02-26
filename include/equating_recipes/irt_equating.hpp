@@ -485,6 +485,8 @@ namespace EquatingRecipes {
   private:
     EquatingRecipes::Structures::IRTScaleTransformationControl controlHandle;
     std::vector<EquatingRecipes::Structures::ItemSpecification> controlNewItems;
+    EquatingRecipes::Structures::Symmetry controlSymmetry;
+    bool controlFunctionStandardization;
     double trueS;
 
     /* IRT observed score equating functions */
@@ -731,9 +733,11 @@ namespace EquatingRecipes {
       Eigen::VectorXd xitem(maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
       Eigen::VectorXd xold(maximumScorePoint);         /* zero-offset */
 
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
       /* calculates probabilities for Item 1 */
       for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
-        xitem(categoryIndex) = itemResponseFunction(items[0], categoryIndex, theta);
+        xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[0], categoryIndex, theta);
       }
 
       double mino = items[0].scoringFunctionValues(0);
@@ -765,9 +769,9 @@ namespace EquatingRecipes {
       /* updates distribution for items 2 through nitems */
       for (size_t itemIndex = 1; itemIndex < numberOfItemsOnForm; itemIndex++) {
         for (size_t categoryIndex = 0; categoryIndex < items[itemIndex].numberOfCategories; categoryIndex++) {
-          xitem(categoryIndex) = itemResponseFunction(items[itemIndex],
-                                                      categoryIndex,
-                                                      theta);
+          xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[itemIndex],
+                                                                        categoryIndex,
+                                                                        theta);
         }
 
         recurs(mino,
@@ -906,8 +910,6 @@ namespace EquatingRecipes {
       return mid;
     }
 
-    /* memory Allocation functions */
-
     /*------------------------------------------------------------------------------
       Functionality:
         Allocate memory to the pointer members of the RawFitDist structure.
@@ -994,8 +996,6 @@ namespace EquatingRecipes {
       irtEquatingResults.roundedEquatedObservedScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
     }
 
-    /* IRT true score equating functions */
-
     /*
       Author: Seonghoon Kim
       Date of last revision 9/25/08
@@ -1012,15 +1012,14 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
     */
     double f_mixDer(const double& theta) {
-      // int j, k;
-      // double pd, Wjk, v;
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
 
       double v = 0.0;
       std::for_each(this->controlNewItems.begin(),
                     this->controlNewItems.end(),
                     [&](const EquatingRecipes::Structures::ItemSpecification& item) {
                       for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
-                        double pd = itemResponseFunctionDerivative(item, categoryIndex, theta);
+                        double pd = irtModelFunctions.itemResponseFunctionDerivative(item, categoryIndex, theta);
 
                         v += pd * item.scoringFunctionValues(categoryIndex);
                       }
@@ -1039,11 +1038,13 @@ namespace EquatingRecipes {
                      const double& theta) {
       double expectedRawScore = 0.0;
 
+      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+
       std::for_each(items.begin(),
                     items.end(),
                     [&](const EquatingRecipes::Structures::ItemSpecification& item) {
                       for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
-                        double probResponse = itemResponseFunction(item,
+                        double probResponse = irtModelFunctions.itemResponseFunction(item,
                                                                    categoryIndex,
                                                                    theta);
 

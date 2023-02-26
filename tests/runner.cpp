@@ -21,6 +21,8 @@
 #include <equating_recipes/results_document.hpp>
 #include <equating_recipes/rg_and_sg_equating.hpp>
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/haebara_function.hpp>
+#include <equating_recipes/stocking_lord_function.hpp>
 
 #include <iostream>
 #include <Eigen/Dense>

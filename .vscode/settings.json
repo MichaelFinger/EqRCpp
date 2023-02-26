@@ -108,6 +108,8 @@
     "variant": "cpp",
     "vector": "cpp",
     "algorithm": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "functional": "cpp",
+    "hash_map": "cpp"
   }
 }
