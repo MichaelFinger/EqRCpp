@@ -1,12 +1,12 @@
 {
   "files.associations": {
-    "*.ejs": "html",
     "*.json.liquid": "json",
     "*.yaml.liquid": "yaml",
     "*.md.liquid": "markdown",
     "*.js.liquid": "liquid-javascript",
     "*.css.liquid": "liquid-css",
     "*.scss.liquid": "liquid-scss",
+    "*.ejs": "html",
     "__locale": "cpp",
     "core": "cpp",
     "superlusupport": "cpp",
@@ -110,6 +110,18 @@
     "algorithm": "cpp",
     "numbers": "cpp",
     "functional": "cpp",
-    "hash_map": "cpp"
+    "hash_map": "cpp",
+    "cinttypes": "cpp",
+    "codecvt": "cpp",
+    "csignal": "cpp",
+    "semaphore": "cpp",
+    "shared_mutex": "cpp",
+    "format": "cpp",
+    "*.tcc": "cpp",
+    "charconv": "cpp",
+    "iterator": "cpp",
+    "memory_resource": "cpp",
+    "utility": "cpp",
+    "stop_token": "cpp"
   }
 }

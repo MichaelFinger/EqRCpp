@@ -129,7 +129,7 @@ namespace EquatingRecipes {
                         EquatingRecipes::Structures::IRTFittedDistribution& newForm,
                         EquatingRecipes::Structures::IRTFittedDistribution& oldForm,
                         EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults,
-                        EquatingRecipes::Structures::IRTScaleTransformationControl& stInfo,
+                        EquatingRecipes::Structures::IRTScaleTransformationData& stInfo,
                         const Eigen::VectorXd& newFormFrequencyDistribution,
                         EquatingRecipes::Structures::IRTInput& irtall,
                         EquatingRecipes::Structures::PData& pData,
@@ -162,7 +162,7 @@ namespace EquatingRecipes {
                           newForm);
 
       irtall.method = irtMethod;
-      irtall.irtScaleTransformationControl = stInfo;
+      irtall.irtScaleTransformationData = stInfo;
       irtall.newItems = newItems;
       irtall.oldItems = oldItems;
       irtall.irtEquatingResults = irtEquatingResults;
@@ -543,8 +543,8 @@ namespace EquatingRecipes {
       irtMixObsDist(newItems,
                     handle.numberOfItemsNewForm,
                     newFormMaximumScore,
-                    handle.thetaValuesNewForm,
-                    handle.thetaWeightsNewForm,
+                    handle.quadratureNewForm.thetaValues,
+                    handle.quadratureNewForm.thetaWeights,
                     newForm.numberOfRawScoreCategories,
                     newForm.rawScores,
                     newForm.fittedDistributionNewGroup);
@@ -553,8 +553,8 @@ namespace EquatingRecipes {
       irtMixObsDist(newItems,
                     handle.numberOfItemsNewForm,
                     newFormMaximumScore,
-                    handle.thetaValuesOldForm,
-                    handle.thetaWeightsOldForm,
+                    handle.quadratureOldForm.thetaValues,
+                    handle.quadratureOldForm.thetaWeights,
                     newForm.numberOfRawScoreCategories,
                     newForm.rawScores,
                     newForm.fittedDistributionOldGroup);
@@ -569,8 +569,8 @@ namespace EquatingRecipes {
       irtMixObsDist(oldItems,
                     handle.numberOfItemsOldForm,
                     oldFormMaximumScore,
-                    handle.thetaValuesNewForm,
-                    handle.thetaWeightsNewForm,
+                    handle.quadratureNewForm.thetaValues,
+                    handle.quadratureNewForm.thetaWeights,
                     oldForm.numberOfRawScoreCategories,
                     oldForm.rawScores,
                     oldForm.fittedDistributionNewGroup);
@@ -583,8 +583,8 @@ namespace EquatingRecipes {
       irtMixObsDist(oldItems,
                     handle.numberOfItemsOldForm,
                     oldFormMaximumScore,
-                    handle.thetaValuesOldForm,
-                    handle.thetaWeightsOldForm,
+                    handle.quadratureOldForm.thetaValues,
+                    handle.quadratureOldForm.thetaWeights,
                     oldForm.numberOfRawScoreCategories,
                     oldForm.rawScores,
                     oldForm.fittedDistributionOldGroup);

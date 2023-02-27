@@ -9,6 +9,7 @@
 #include <equating_recipes/optimization_function.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_control.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
+#include <equating_recipes/structures/quadrature.hpp>
 
 namespace EquatingRecipes {
   class OptimizationFunction {
@@ -16,10 +17,10 @@ namespace EquatingRecipes {
     void configure(const EquatingRecipes::Structures::IRTScaleTransformationControl& controlHandle,
                    const EquatingRecipes::Structures::Symmetry symmetry,
                    bool functionStandardization) {
-      this->oldThetaValues = controlHandle.thetaValuesOldForm;
-      this->oldThetaWeights = controlHandle.thetaWeightsOldForm;
-      this->newThetaValues = controlHandle.thetaValuesNewForm;
-      this->newThetaWeights = controlHandle.thetaWeightsNewForm;
+      this->oldThetaValues = controlHandle.quadratureOldForm.thetaValues;
+      this->oldThetaWeights = controlHandle.quadratureOldForm.thetaWeights;
+      this->newThetaValues = controlHandle.quadratureNewForm.thetaValues;
+      this->newThetaWeights = controlHandle.quadratureNewForm.thetaWeights;
       this->symmetry = symmetry;
       this->functionStandardization = functionStandardization;
     }

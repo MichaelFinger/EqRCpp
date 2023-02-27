@@ -27,36 +27,23 @@
 #include <equating_recipes/structures/irt_fitted_distribution.hpp>
 #include <equating_recipes/structures/irt_input.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_control.hpp>
+#include <equating_recipes/structures/irt_scale_tranformation_method.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/quadrature.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   class IRTScaleTransformation {
   public:
-    void runIRTScaleTransformation(FILE& outf,
-                                   std::string& tt,
-                                   std::string& ItemNewFile,
-                                   std::string& ItemOldFile,
-                                   std::string& ItemCommonFile,
-                                   std::string& DistNewFile,
-                                   std::string& DistOldFile,
-                                   int HA,
-                                   EquatingRecipes::Structures::Symmetry HAsym,
-                                   bool HAfs,
-                                   double HAs,
-                                   double HAi,
-                                   int SL,
-                                   EquatingRecipes::Structures::Symmetry SLsym,
-                                   bool SLfs,
-                                   double SLs,
-                                   double SLi,
-                                   std::string ST,
-                                   int PrintFiles) {}
+    void runIRTScaleTransformation(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+      
+    }
 
+  private:
     /*--------------------------------------------------------------------------------------
       Functionality:
         Use the values of the slope and intercept of the new-to-old transformation
@@ -88,12 +75,87 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     --------------------------------------------------------------------------------------*/
-    void ScaleTransform(const std::string& ItemOutF,
-                        const std::string& DistOutF,
-                        const double& slope,
-                        const double& intercept,
-                        const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                        const EquatingRecipes::Structures::IRTScaleTransformationControl& handle) {
+    void getScaleTransformResults(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData,
+                                  const EquatingRecipes::Structures::IRTScaleTranformationMethod& irtScaleTranformationMethod) {
+      double slope = std::numeric_limits<double>::quiet_NaN();
+      double intercept = std::numeric_limits<double>::quiet_NaN();
+
+      switch (irtScaleTranformationMethod) {
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::HAEBARA:
+          slope = irtScaleTransformationData.haebaraSlope.value_or(std::numeric_limits<double>::quiet_NaN());
+          intercept = irtScaleTransformationData.haebaraIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
+          break;
+
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::MEAN_MEAN:
+          slope = irtScaleTransformationData.meanMeanSlope;
+          intercept = irtScaleTransformationData.meanMeanIntercept;
+          break;
+
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::MEAN_SIGMA:
+          slope = irtScaleTransformationData.meanSigmaSlope;
+          intercept = irtScaleTransformationData.meanSigmaIntercept;
+          break;
+
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::STOCKING_LORD:
+          slope = irtScaleTransformationData.stockingLordSlope.value_or(std::numeric_limits<double>::quiet_NaN());
+          intercept = irtScaleTransformationData.stockingLordIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
+          break;
+
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::NONE:
+        default:
+          break;
+      }
+
+      if (slope == std::numeric_limits<double>::quiet_NaN() ||
+          intercept == std::numeric_limits<double>::quiet_NaN()) {
+        return;
+      }
+
+      std::for_each(irtScaleTransformationData.newItems.begin(),
+                    irtScaleTransformationData.newItems.end(),
+                    [&](const EquatingRecipes::Structures::ItemSpecification& newItem) {
+                      EquatingRecipes::Structures::IRTScaleTransformationItemResults newItemResult;
+                      newItemResult.configure(newItem);
+
+                      switch (newItem.irtModel) {
+                        case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
+                          newItemResult.transformedA(1) = newItem.a(1) / slope;
+                          newItemResult.transformedB(1) = newItem.b(1) * slope + intercept;
+                          newItemResult.transformedC(1) = newItem.c(1);
+
+                          break;
+                        case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
+                          newItemResult.transformedA(1) = newItem.a(1) / slope;
+                          newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories - 1)) =
+                              newItem.b(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope +
+                              Eigen::VectorXd::Constant(newItem.numberOfCategories - 2, intercept);
+
+                          break;
+                        case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
+                          newItemResult.transformedA(1) = newItem.a(1) / slope;
+                          newItemResult.transformedB(0) = newItem.b(0) * slope + intercept;
+                          newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories)) =
+                              newItem.d(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope;
+
+                          break;
+                        case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
+                          newItemResult.transformedA(Eigen::seq(0, newItem.numberOfCategories - 1)) =
+                              newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1)) / slope;
+
+                          newItemResult.transformedC(Eigen::seq(0, newItem.numberOfCategories - 1)) =
+                              newItem.c(Eigen::seq(0, newItem.numberOfCategories - 1)) -
+                              (intercept / slope) * newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1));
+                          break;
+                        default:
+                          break;
+                      }
+
+                      irtScaleTransformationData.itemResultsNewForm.push_back(newItemResult);
+                    });
+
+      irtScaleTransformationData.transformedQuadratureNewForm.thetaValues = (irtScaleTransformationData.quadratureNewForm.thetaValues * slope) +
+                                                                            Eigen::VectorXd::Constant(irtScaleTransformationData.quadratureNewForm.thetaValues.size(), intercept);
+      irtScaleTransformationData.transformedQuadratureNewForm.thetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
     }
 
     /*------------------------------------------------------------------------------

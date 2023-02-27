@@ -25,7 +25,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd newFormFrequencyDistribution;                                       /* Actual frequency distribution for new form */
       std::vector<EquatingRecipes::Structures::ItemSpecification> newItems;
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
-      EquatingRecipes::Structures::IRTScaleTransformationControl irtScaleTransformationControl;
+      EquatingRecipes::Structures::IRTScaleTransformationData irtScaleTransformationData;
   
       IRTFittedDistribution newFormIRTFittedDistribution;
       IRTFittedDistribution oldFormIRTFittedDistribution;
