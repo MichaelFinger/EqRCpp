@@ -70,25 +70,7 @@ namespace EquatingRecipes {
       EquatingRecipes::Structures::Quadrature transformedQuadratureNewForm;
       std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults> itemResultsNewForm;
 
-
-
-
-      const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                                   const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
-                                   const std::vector<EquatingRecipes::Structures::CommonItemSpecification>& commonItems,
-                                   const EquatingRecipes::Structures::Quadrature& quadratureNewForm,
-                                   const EquatingRecipes::Structures::Quadrature& quadratureOldForm,
-                                   const bool& runHaebara,
-                                   const EquatingRecipes::Structures::Symmetry& haebaraSymmetryOption,
-                                   bool haebaraFunctionStandardization,
-                                   double haebaraSlopeStartingValue,
-                                   double haebaraInterceptStartingValue,
-                                   const bool& runStockingLord,
-                                   EquatingRecipes::Structures::Symmetry stockingLordSymmetryOption,
-                                   bool stockingLordFunctionStandardization,
-                                   double stockingLordSlopeStartingValue,
-                                   double stockingLordInterceptStartingValue,
-                                   const EquatingRecipes::Structures::IRTScaleTranformationMethod& irtScaleTranformationMethod
+      EquatingRecipes::Structures::IRTScaleTranformationMethod irtScaleTranformationMethod;
     };
   } // namespace Structures
 } // namespace EquatingRecipes

@@ -5,9 +5,11 @@
 
 */
 
-#include "ERutilities.h"
+
 #ifndef _IRTST_H_
 #define _IRTST_H_
+
+#include "ERutilities.h"
 
 enum OnOff {off=0, on};
 enum symmetry {old_scale, new_scale, symmetric};

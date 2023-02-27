@@ -7,22 +7,33 @@
 #include <equating_recipes/structures/common_item_specification.hpp>
 #include <equating_recipes/irt_model_functions.hpp>
 #include <equating_recipes/optimization_function.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_control.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/structures/quadrature.hpp>
 
 namespace EquatingRecipes {
   class OptimizationFunction {
   public:
-    void configure(const EquatingRecipes::Structures::IRTScaleTransformationControl& controlHandle,
-                   const EquatingRecipes::Structures::Symmetry symmetry,
-                   bool functionStandardization) {
+    void configure(const EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       this->oldThetaValues = controlHandle.quadratureOldForm.thetaValues;
       this->oldThetaWeights = controlHandle.quadratureOldForm.thetaWeights;
       this->newThetaValues = controlHandle.quadratureNewForm.thetaValues;
       this->newThetaWeights = controlHandle.quadratureNewForm.thetaWeights;
-      this->symmetry = symmetry;
-      this->functionStandardization = functionStandardization;
+
+      switch (irtScaleTransformationData.irtScaleTranformationMethod) {
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::HAEBARA:
+          this->symmetry = irtScaleTransformationData.haebaraSymmetryOption;
+          this->functionStandardization = irtScaleTransformationData.haebaraFunctionStandardization;
+          break;
+        case EquatingRecipes::Structures::IRTScaleTranformationMethod::STOCKING_LORD:
+          this->symmetry = irtScaleTransformationData.stockingLordSymmetryOption;
+          this->functionStandardization = irtScaleTransformationData.stockingLordFunctionStandardization;
+           break;
+        default:
+          break;
+      }
+
+      this->commonItems = irtScaleTransformationData.commonItems;
     }
 
     double operator()(const std::vector<double>& x,
@@ -47,9 +58,10 @@ namespace EquatingRecipes {
     Eigen::VectorXd newThetaValues;
     Eigen::VectorXd newThetaWeights;
     std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems;
-    EquatingRecipes::IRTModelFunctions irtModelFunctions;
     EquatingRecipes::Structures::Symmetry symmetry;
     bool functionStandardization;
+
+    EquatingRecipes::IRTModelFunctions irtModelFunctions;
   };
 } // namespace EquatingRecipes
 

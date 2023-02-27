@@ -30,10 +30,8 @@ University of Iowa
 
 */
 
+
 #include "IRTeq.h"
-#include "IRTst.h"
-#include "NRutilities.h" 
-#include "ERutilities.h"
 
 static struct IRTstControl *ContHandle; /* global setting to control method */
 static struct ItemSpec *ContNewItems;

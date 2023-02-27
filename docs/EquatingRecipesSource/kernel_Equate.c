@@ -26,7 +26,7 @@ University of Iowa
 #include "NRutilities.h"
 #include "LogLinear.h"
 #include "CG_EquiEquate.h"
-#include "kernel_EQuate.h"
+#include "Kernel_Equate.h"
 #include "ERutilities.h"
 
 /*--------------------------------------------------------------------------

@@ -7,13 +7,14 @@
   Date of last revision: September 24, 2008   
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "IRTst.h"
-
 #ifndef _IRTEQUATE_H_
 #define _IRTEQUATE_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "ERutilities.h"
+#include "NRutilities.h"
+#include "IRTst.h"
 
 struct RawFitDist {
     /*
@@ -118,7 +119,7 @@ double PdNRMoverTheta(int CatNum, int CatID, double theta, double a[], double c[
      struct ItemSpec *NewItems, struct ItemSpec *OldItems, 
      struct RawFitDist *NewForm, struct RawFitDist *OldForm,
      struct RawTruObsEquiv *RawEq, struct IRTstControl *StInfo, int *NewFD, 
-     struct IRT_INPUT *irtall, struct PDATA *pinall, struct ERAW_RESULTS *r);  
+     struct IRT_INPUT *irtall, struct PDATA *pinall, struct ERAW_RESULTS *r); 
 
 void Print_IRTeq(FILE *fp, char tt[], struct PDATA *pinall, 
                  struct ERAW_RESULTS *r, int PrintFiles);
