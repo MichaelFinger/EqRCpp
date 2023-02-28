@@ -32,7 +32,6 @@ University of Iowa
 #include <Eigen/Core>
 
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/structures/all_structures.hpp>
 
 namespace EquatingRecipes {
   struct RandomAndSingleGroupEquating {

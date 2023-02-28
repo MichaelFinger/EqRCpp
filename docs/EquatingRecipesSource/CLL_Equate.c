@@ -24,8 +24,6 @@ University of Iowa
 
 #include <math.h>
 #include <stdlib.h>
-#include <math.h>
-#include <stdlib.h>
 #include "ERutilities.h"
 #include "NRutilities.h" 
 #include "LogLinear.h"

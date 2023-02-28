@@ -15,10 +15,10 @@ namespace EquatingRecipes {
   class OptimizationFunction {
   public:
     void configure(const EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
-      this->oldThetaValues = controlHandle.quadratureOldForm.thetaValues;
-      this->oldThetaWeights = controlHandle.quadratureOldForm.thetaWeights;
-      this->newThetaValues = controlHandle.quadratureNewForm.thetaValues;
-      this->newThetaWeights = controlHandle.quadratureNewForm.thetaWeights;
+      this->oldThetaValues = irtScaleTransformationData.quadratureOldForm.thetaValues;
+      this->oldThetaWeights = irtScaleTransformationData.quadratureOldForm.thetaWeights;
+      this->newThetaValues = irtScaleTransformationData.quadratureNewForm.thetaValues;
+      this->newThetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
 
       switch (irtScaleTransformationData.irtScaleTranformationMethod) {
         case EquatingRecipes::Structures::IRTScaleTranformationMethod::HAEBARA:

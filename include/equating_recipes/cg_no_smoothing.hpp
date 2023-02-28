@@ -30,7 +30,6 @@
 #include <cmath>
 #include <string>
 
-#include <equating_recipes/structures/all_structures.hpp>
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/cg_equipercentile_equating.hpp>
 

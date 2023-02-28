@@ -14,24 +14,24 @@
 
 #include <equating_recipes/structures/irt_method.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_control.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/irt_fitted_distribution.hpp>
 #include <equating_recipes/structures/irt_equating_results.hpp>
 
 namespace EquatingRecipes {
   namespace Structures {
     struct IRTInput {
-      EquatingRecipes::Structures::IRTMethod method;                                                     /* 'T' for true score; 'O' for observed score; 'A' for both */
-      Eigen::VectorXd newFormFrequencyDistribution;                                       /* Actual frequency distribution for new form */
+      EquatingRecipes::Structures::IRTMethod method; /* 'T' for true score; 'O' for observed score; 'A' for both */
+      Eigen::VectorXd newFormFrequencyDistribution;  /* Actual frequency distribution for new form */
       std::vector<EquatingRecipes::Structures::ItemSpecification> newItems;
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
       EquatingRecipes::Structures::IRTScaleTransformationData irtScaleTransformationData;
-  
+
       IRTFittedDistribution newFormIRTFittedDistribution;
       IRTFittedDistribution oldFormIRTFittedDistribution;
       IRTEquatingResults irtEquatingResults;
     };
-  }
-}
+  } // namespace Structures
+} // namespace EquatingRecipes
 
 #endif

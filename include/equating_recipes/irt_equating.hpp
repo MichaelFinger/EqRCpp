@@ -52,7 +52,7 @@ University of Iowa
 #include <equating_recipes/structures/irt_input.hpp>
 #include <equating_recipes/structures/irt_method.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_control.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>

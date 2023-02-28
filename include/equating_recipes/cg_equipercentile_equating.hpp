@@ -36,7 +36,7 @@ University of Iowa
 #include <Eigen/Core>
 
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/structures/all_structures.hpp>
+#include <equating_recipes/structures/cg_equipercentile_equating_results.hpp>
 
 namespace EquatingRecipes {
   struct CGEquipercentileEquating {

@@ -23,6 +23,8 @@
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/haebara_function.hpp>
 #include <equating_recipes/stocking_lord_function.hpp>
+#include <equating_recipes/continuized_log_linear_equating.hpp>
+#include <equating_recipes/kernel_equating.hpp>
 
 #include <iostream>
 #include <Eigen/Dense>
