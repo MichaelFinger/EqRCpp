@@ -41,9 +41,9 @@ namespace EquatingRecipes {
   public:
     void runIRTScaleTransformation(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       bool missingQuadrature = irtScaleTransformationData.quadratureNewForm.thetaValues.size() == 0 ||
-                                 irtScaleTransformationData.quadratureNewForm.thetaWeights.size() == 0 ||
-                                 irtScaleTransformationData.quadratureOldForm.thetaValues.size() == 0 ||
-                                 irtScaleTransformationData.quadratureOldForm.thetaWeights.size() == 0;
+                               irtScaleTransformationData.quadratureNewForm.thetaWeights.size() == 0 ||
+                               irtScaleTransformationData.quadratureOldForm.thetaValues.size() == 0 ||
+                               irtScaleTransformationData.quadratureOldForm.thetaWeights.size() == 0;
 
       if (missingQuadrature) {
         throw std::runtime_error("Haebara or Stocking-Lord results cannot be computed because at least\none of the ability distributions is not present");
@@ -55,7 +55,7 @@ namespace EquatingRecipes {
       if (irtScaleTransformationData.runHaebara) {
         StHaebara(irtScaleTransformationData);
       }
-      
+
       if (irtScaleTransformationData.runStockingLord) {
         StStockingLord(irtScaleTransformationData);
       }
@@ -200,8 +200,8 @@ namespace EquatingRecipes {
     void StHaebara(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       double ftol = 0.0000000001;
 
-      std::vector<double> x {irtScaleTransformationData.haebaraSlopeStartingValue,
-                             irtScaleTransformationData.haebaraInterceptStartingValue};
+      std::vector<double> x {irtScaleTransformationData.haebaraSlopeStartingValue.value(),
+                             irtScaleTransformationData.haebaraInterceptStartingValue.value()};
 
       std::shared_ptr<EquatingRecipes::HaebaraFunction> optimizationFunction =
           std::make_shared<EquatingRecipes::HaebaraFunction>();
@@ -316,8 +316,8 @@ namespace EquatingRecipes {
         intercept = 0.0;
       }
 
-      irtTScaleTransformationData.meanMeanSlope = slope;
-      irtTScaleTransformationData.meanMeanIntercept = intercept;
+      irtScaleTransformationData.meanMeanSlope = slope;
+      irtScaleTransformationData.meanMeanIntercept = intercept;
     }
 
     /*------------------------------------------------------------------------------
@@ -335,7 +335,7 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    void StMeanSigma(const EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+    void StMeanSigma(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       int j, k, b_num = 0, index = 0;
       double new_mu_b = 0.0, old_mu_b = 0.0;
       double new_si_b = 0.0, old_si_b = 0.0;
@@ -343,8 +343,8 @@ namespace EquatingRecipes {
       Eigen::VectorXd ob_vec;
 
       /* counting valid b-parameters by model */
-      for (size_t itemIndex = 0; itemIndex < handle.numberOfCommonItems; itemIndex++) {
-        EquatingRecipes::Structures::CommonItemSpecification commonItem = commonItems[itemIndex];
+      for (size_t itemIndex = 0; itemIndex < irtScaleTransformationData.commonItems.size(); itemIndex++) {
+        EquatingRecipes::Structures::CommonItemSpecification commonItem = irtScaleTransformationData.commonItems[itemIndex];
         EquatingRecipes::Structures::IRTModel irtModel = commonItem.irtModel;
 
         if (irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC ||
@@ -360,8 +360,8 @@ namespace EquatingRecipes {
       ob_vec.resize(b_num + 1);
 
       /* copying valid b-parameters by model into nb_vec and ob_vec */
-      for (size_t itemIndex = 0; itemIndex < handle.numberOfCommonItems; itemIndex++) {
-        EquatingRecipes::Structures::CommonItemSpecification commonItem = commonItems[itemIndex];
+      for (size_t itemIndex = 0; itemIndex < irtScaleTransformationData.commonItems.size(); itemIndex++) {
+        EquatingRecipes::Structures::CommonItemSpecification commonItem = irtScaleTransformationData.commonItems[itemIndex];
         EquatingRecipes::Structures::IRTModel irtModel = commonItem.irtModel;
 
         if (irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC ||
@@ -426,7 +426,8 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
 ------------------------------------------------------------------------------*/
     void StStockingLord(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
-      std::vector<double> x {S0, I0};
+      std::vector<double> x {irtScaleTransformationData.stockingLordSlopeStartingValue.value(),
+                             irtScaleTransformationData.stockingLordInterceptStartingValue.value()};
       double ftol = 0.0000000001;
 
       std::shared_ptr<EquatingRecipes::StockingLordFunction> optimizationFunction =

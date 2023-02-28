@@ -368,7 +368,7 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    bool trueScoreEquating(const EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
+    bool trueScoreEquating(const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
                            const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
                            const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
                            const size_t& numberOfScores,
@@ -483,7 +483,7 @@ namespace EquatingRecipes {
     }
 
   private:
-    EquatingRecipes::Structures::IRTScaleTransformationControl controlHandle;
+    EquatingRecipes::Structures::IRTScaleTransformationData controlHandle;
     std::vector<EquatingRecipes::Structures::ItemSpecification> controlNewItems;
     EquatingRecipes::Structures::Symmetry controlSymmetry;
     bool controlFunctionStandardization;
@@ -522,7 +522,7 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
 
     ------------------------------------------------------------------------------*/
-    void irtMixObsEq(const EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
+    void irtMixObsEq(const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
                      const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
                      const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
                      const double& wNew,
@@ -541,7 +541,7 @@ namespace EquatingRecipes {
 
       /* fitted distribution for the new form with the new group */
       irtMixObsDist(newItems,
-                    handle.numberOfItemsNewForm,
+                    handle.newItems.size(),
                     newFormMaximumScore,
                     handle.quadratureNewForm.thetaValues,
                     handle.quadratureNewForm.thetaWeights,
@@ -551,7 +551,7 @@ namespace EquatingRecipes {
 
       /* fitted distribution for the new form with the old group */
       irtMixObsDist(newItems,
-                    handle.numberOfItemsNewForm,
+                    handle.newItems.size(),
                     newFormMaximumScore,
                     handle.quadratureOldForm.thetaValues,
                     handle.quadratureOldForm.thetaWeights,
@@ -567,7 +567,7 @@ namespace EquatingRecipes {
 
       /* fitted distribution for the old form with the new group */
       irtMixObsDist(oldItems,
-                    handle.numberOfItemsOldForm,
+                    handle.oldItems.size(),
                     oldFormMaximumScore,
                     handle.quadratureNewForm.thetaValues,
                     handle.quadratureNewForm.thetaWeights,
@@ -581,7 +581,7 @@ namespace EquatingRecipes {
 
       /* fitted distribution for the old form with the old group */
       irtMixObsDist(oldItems,
-                    handle.numberOfItemsOldForm,
+                    handle.oldItems.size(),
                     oldFormMaximumScore,
                     handle.quadratureOldForm.thetaValues,
                     handle.quadratureOldForm.thetaWeights,
@@ -926,7 +926,7 @@ namespace EquatingRecipes {
     ------------------------------------------------------------------------------*/
     void initializeRawFitMem(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
                              const bool& isNewForm,
-                             EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
+                             EquatingRecipes::Structures::IRTScaleTransformationData& handle,
                              EquatingRecipes::Structures::IRTFittedDistribution& irtFittedDistribution) {
       int minimumNumberOfScoreCategories;
       int maximumNumberOfScoreCategories;
@@ -975,7 +975,7 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
     void initializeRawEqResults(const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                                const EquatingRecipes::Structures::IRTScaleTransformationControl& handle,
+                                const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
                                 EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults) {
       int minimumNumberOfScoreCategories;
       int maximumNumberOfScoreCategories;

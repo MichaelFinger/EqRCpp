@@ -27,14 +27,22 @@ University of Iowa
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 #include <Eigen/Dense>
 
-#include <equating_recipes/utilities.hpp>
-#include <equating_recipes/log_linear_equating.hpp>
 #include <equating_recipes/cg_equipercentile_equating.hpp>
+#include <equating_recipes/log_linear_equating.hpp>
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
+#include <equating_recipes/structures/design.hpp>
+#include <equating_recipes/structures/equated_raw_score_results.hpp>
+#include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
+#include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
+#include <equating_recipes/structures/univariate_statistics.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   class ContinuizedLogLinearEquating {
@@ -89,533 +97,598 @@ namespace EquatingRecipes {
 
     Date of last revision: 6/30/08       
   */
-    void Wrapper_RC(char design, char method, char smoothing,
-                    struct USTATS* x, struct USTATS* y,
-                    struct ULL_SMOOTH* ullx, struct ULL_SMOOTH* ully, int rep,
-                    struct PDATA* inall, struct ERAW_RESULTS* r) {
+    void Wrapper_RC(const EquatingRecipes::Structures::Design& design,
+                    const EquatingRecipes::Structures::Method& method,
+                    const EquatingRecipes::Structures::Smoothing& smoothing,
+                    const EquatingRecipes::Structures::UnivariateStatistics& x,
+                    const EquatingRecipes::Structures::UnivariateStatistics& y,
+                    const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
+                    const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
+                    const size_t& replicationNumber,
+                    EquatingRecipes::Structures::PData& pData,
+                    EquatingRecipes::Structures::EquatedRawScoreResults& results) {
       /* method name --- 10 characters; right justified */
-      char* names[] = {"   y-equiv"};
-      double maxx, maxy, *scoresx, *scoresy;
-      int i;
-      double *parax, *paray;
+      std::vector<std::string> names {"   y-equiv"};
+      // double maxx, maxy, *scoresx, *scoresy;
+      // int i;
+      // double *parax, *paray;
 
-      parax = dvector(0, ullx->c);
-      paray = dvector(0, ully->c);
-      parax[0] = ullx->ap;
-      for (i = 0; i < ullx->c; i++)
-        parax[i + 1] = ullx->Beta[i];
-      paray[0] = ully->ap;
-      for (i = 0; i < ully->c; i++)
-        paray[i + 1] = ully->Beta[i];
-      scoresx = dvector(0, ullx->ns);
-      scoresy = dvector(0, ully->ns);
-      maxx = ullx->min + (ullx->ns - 1) * ullx->inc;
-      maxy = ully->min + (ully->ns - 1) * ully->inc;
-      for (i = 0; i < ullx->ns; i++)
-        scoresx[i] = i;
-      for (i = 0; i < ully->ns; i++)
-        scoresy[i] = i;
+      std::vector<double> parax;
+      std::vector<double> paray;
 
-      inall->rep = rep; /* should be set to 0 for actual equating */
-                        /* counting of replications done in Wrapper_Bootstrap() */
+      parax.resize(ullx.degreesOfSmoothing + 1);
+      paray.resize(ully.degreesOfSmoothing + 1);
 
-      /* allocation and assignments for struct PDATA inall
-     Note that for every assignment of the form inall->(var) = x->(var)
-     or inall->(var) = y->(var), values vary depending on whether x or y 
-	 is for actual equating or a bootstrap sample; all other values are 
-	 the same for the actual equating and a bootstrap sample */
-
-      if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        strcpy(inall->xfname, x->fname);
-        strcpy(inall->yfname, y->fname);
-        inall->x = x;
-        inall->y = y;
-        inall->design = design;
-        inall->method = method;
-        inall->smoothing = smoothing;
-
-        inall->nm = 1;
-        inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-        strcpy(inall->names[0], names[0]);
-
-        inall->min = x->min;
-        inall->max = x->max;
-        inall->inc = x->inc;
-        inall->fdx = x->fd;
-        inall->n = x->n;
-
-        inall->ullx = ullx;
-        inall->ully = ully;
+      parax[0] = ullx.cllNormalizingConstant;
+      for (size_t i = 0; i < ullx.degreesOfSmoothing; i++) {
+        parax[i + 1] = ullx.betaCoefficients(i);
       }
 
-      /* allocation and assignments for r */
+      paray[0] = ully.cllNormalizingConstant;
+      for (size_t i = 0; i < ully.degreesOfSmoothing; i++) {
+        paray[i + 1] = ully.betaCoefficients(i);
+      }
 
-      if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-        r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
+      std::vector<double> scoresx; // = dvector(0, ullx->ns);
+      std::vector<double> scoresy; // = dvector(0, ully->ns);
+
+      scoresx.resize(ullx.numberOfScores + 1);
+      scoresy.resize(ully.numberOfScores + 1);
+
+      double maxx = ullx.mininumRawScore + static_cast<double>(ullx.numberOfScores - 1) * ullx.rawScoreIncrement;
+      double maxy = ully.mininumRawScore + static_cast<double>(ully.numberOfScores - 1) * ully.rawScoreIncrement;
+      for (size_t i = 0; i < ullx.numberOfScores; i++) {
+        scoresx[i] = static_cast<double>(i);
+      }
+
+      for (size_t i = 0; i < ully.numberOfScores; i++) {
+        scoresy[i] = static_cast<double>(i);
+      }
+
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                            /* counting of replications done in Wrapper_Bootstrap() */
+
+      /* allocation and assignments for struct PDATA inall
+        Note that for every assignment of the form inall->(var) = x->(var)
+        or inall->(var) = y->(var), values vary depending on whether x or y 
+        is for actual equating or a bootstrap sample; all other values are 
+        the same for the actual equating and a bootstrap sample */
+
+      if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
+        pData.summaryRawDataX = x;
+        pData.summaryRawDataY = y;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+
+        pData.methods.push_back(names[0]); /* only one row/method, 0 */
+
+        pData.mininumScoreX = x.minimumScore;
+        pData.maximumScoreX = x.maximumScore;
+        pData.scoreIncrementX = x.scoreIncrement;
+        pData.scoreFrequenciesX = x.freqDistDouble;
+        pData.numberOfExaminees = x.numberOfExaminees;
+
+        pData.univariateLogLinearSmoothingX = ullx;
+        pData.univariateLogLinearSmoothingY = ullx;
+      }
+
+      /* allocation and assignments for results */
+
+      if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                   pData.mininumScoreX,
+                                                                                   pData.scoreIncrementX);
+
+        results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
+        results.equatedRawScoreMoments.resize(pData.methods.size(), 4);
       }
 
       /* Compute equating results */
-      CLLEquateEG(ullx->min, maxx, ullx->c + 1, parax,
-                  ully->min, maxy, ully->c + 1, paray,
-                  ullx->ns, scoresx, r->eraw[0]);
-      /*  CLLSEEEG(ullx->num_persons, ullx->c, ullx->Beta, ullx->ns, scoresx, 
-	       ully->num_persons, ully->c, ully->Beta, ully->ns, scoresy, SEE); */
-      /* get moments */
+      Eigen::VectorXd equatedRawScores = cllEquateEG(ullx.mininumRawScore,
+                                                     maxx,
+                                                     parax,
+                                                     ully.mininumRawScore,
+                                                     maxy,
+                                                     paray,
+                                                     scoresx);
 
-      MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+      results.equatedRawScores.row(0) = equatedRawScores;
+
+      /* get moments */
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(results.equatedRawScores.row(0),
+                                                                                                             pData.scoreFrequenciesX);
+
+      results.equatedRawScoreMoments.row(0) = moments.momentValues;
     }
 
     /*
-    Wrapper for doing CLL equating with SG design
-    and log-linear smoothing.  
-    
-    NOTE: This is for the SG design in which x and y do not share any items in 
-    common, which means that functionally this is the external anchor case.  
-    The bivariate log-linear smoothing procedure needs to know this. So, when
-    Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
-    anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
-    (with anchor set to 0) and Wrapper_SC() can still be used, but convergence 
-    of the smoothing algorithm may be compromised because of dependencies between
-    x and y.
+      Wrapper for doing CLL equating with SG design
+      and log-linear smoothing.  
       
-    Assumes that equating puts raw scores for x on scale of y
-    
-    NOTE: This function is used (unaltered) for both actual equating and 
-          equating done in Wrapper_Bootstrap().  Distinguishing between the
-          two is the purpose of the variable rep
-
-    Input
-    
-      design = 'S' (single group)
-      method = 'E' (equipercentile)
-      smoothing = 'Z' (CLL 'smoothing')  
-      xy = struct BSTATS 
-    bllxy = struct BLL_SMOOTH
-      rep = replication number for bootstrap; should be set to 0
-            for actual equating;  
-      
-      NOTE: it is assumed that the first variable
-            in xy is indeed x and the second variable is y.
-        For bllxy, data memebers with '_x' are for x,
-        and data members with '_v' are for y.  This somewhat
-        inconsistent notation arises because BLL_SMOOTH is
-        usually used with the CG design in which the variables
-        are more naturally designated x (or u) and v.
-
-    Output
-      
-      struct PDATA inall   populates selected values of inall  
-
-      struct ERAW_RESULTS *r: populates            
-
-        **eraw: equated raw scores;          
-                method (rows) by raw score (columns) matrix
-                of equated scores. Here there is only one method.
-                So, memory allocated for eraw[][] is: 
-                eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
-                              (loc(x->max,x->min,x>-inc)]
-                because we are getting equated raw scores for x 
-        **mts:  moments for equated raw scores            
+      NOTE: This is for the SG design in which x and y do not share any items in 
+      common, which means that functionally this is the external anchor case.  
+      The bivariate log-linear smoothing procedure needs to know this. So, when
+      Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+      anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+      (with anchor set to 0) and Wrapper_SC() can still be used, but convergence 
+      of the smoothing algorithm may be compromised because of dependencies between
+      x and y.
         
-    NOTE: If Wrapper_SC() is called in a bootstrap loop,
-          then in the calling function struct ERAW_RESULTS must
-          be different from struct ERAW_RESULTS for the actual
-          equating. 
-                                              
-    Function calls other than C or NR utilities:
-      CLLEquateSG()
-      MomentsFromFD()  
-                                                  
-    Tianyou Wang
+      Assumes that equating puts raw scores for x on scale of y
+      
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
 
-    Date of last revision: 6/30/08   
-  */
-    void Wrapper_SC(char design, char method, char smoothing, struct BSTATS* xy,
-                    struct BLL_SMOOTH* bllxy, int rep, struct PDATA* inall,
-                    struct ERAW_RESULTS* r) {
+      Input
+      
+        design = 'S' (single group)
+        method = 'E' (equipercentile)
+        smoothing = 'Z' (CLL 'smoothing')  
+        xy = struct BSTATS 
+      bllxy = struct BLL_SMOOTH
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating;  
+        
+        NOTE: it is assumed that the first variable
+              in xy is indeed x and the second variable is y.
+          For bllxy, data memebers with '_x' are for x,
+          and data members with '_v' are for y.  This somewhat
+          inconsistent notation arises because BLL_SMOOTH is
+          usually used with the CG design in which the variables
+          are more naturally designated x (or u) and v.
+
+      Output
+        
+        struct PDATA inall   populates selected values of inall  
+
+        struct ERAW_RESULTS *r: populates            
+
+          **eraw: equated raw scores;          
+                  method (rows) by raw score (columns) matrix
+                  of equated scores. Here there is only one method.
+                  So, memory allocated for eraw[][] is: 
+                  eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
+                                (loc(x->max,x->min,x>-inc)]
+                  because we are getting equated raw scores for x 
+          **mts:  moments for equated raw scores            
+          
+      NOTE: If Wrapper_SC() is called in a bootstrap loop,
+            then in the calling function struct ERAW_RESULTS must
+            be different from struct ERAW_RESULTS for the actual
+            equating. 
+                                                
+      Function calls other than C or NR utilities:
+        CLLEquateSG()
+        MomentsFromFD()  
+                                                    
+      Tianyou Wang
+
+      Date of last revision: 6/30/08   
+    */
+    void Wrapper_SC(const EquatingRecipes::Structures::Design& design,
+                    const EquatingRecipes::Structures::Method& method,
+                    const EquatingRecipes::Structures::Smoothing& smoothing,
+                    const EquatingRecipes::Structures::BivariateStatistics& xy,
+                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy,
+                    const size_t& replicationNumber,
+                    EquatingRecipes::Structures::PData& pData,
+                    EquatingRecipes::Structures::EquatedRawScoreResults& results) {
       /* method names --- 10 characters; right justified */
-      char* names[] = {"   y-equiv"};
+      std::vector<std::string> names {"   y-equiv"};
 
-      inall->rep = rep; /* should be set to 0 for actual equating */
-                        /* counting of replications done in Wrapper_Bootstrap() */
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                            /* counting of replications done in Wrapper_Bootstrap() */
 
       /* Allocation and assignments for struct PDATA inall>
-    Note that for every assignment of the form inall->(var) = x->(var)
-    or inall->(var) = y->(var), values vary depending on whether x or y 
-	is for actual equating or a bootstrap sample; all other values are 
-	the same for the actual equating and a bootstrap sample */
-
-      if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        strcpy(inall->xyfname, xy->fname);
-        inall->xy = xy;
-        inall->bllxy = bllxy;
-        inall->design = design;
-        inall->method = method;
-        inall->smoothing = smoothing;
-        inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
+      Note that for every assignment of the form inall->(var) = x->(var)
+      or inall->(var) = y->(var), values vary depending on whether x or y 
+      is for actual equating or a bootstrap sample; all other values are 
+      the same for the actual equating and a bootstrap sample */
+      if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
+        pData.summaryRawDataXY = xy;
+        pData.bivariateLogLinearSmoothingXY = bllxy;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        pData.isInternalAnchor = false; /* implicitly, anchor is external for biv log-linear
 						                        smoothing with the SG design */
-
-        inall->nm = 1;
-        inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-        strcpy(inall->names[0], names[0]);
-
-        inall->min = xy->min1;
-        inall->max = xy->max1;
-        inall->inc = xy->inc1;
-        inall->fdx = xy->fd1;
-        inall->n = xy->n;
+        pData.methods.push_back(names[0]);
+        pData.mininumScoreX = xy.univariateStatisticsRow.minimumScore;
+        pData.maximumScoreX = xy.univariateStatisticsRow.maximumScore;
+        pData.scoreIncrementX = xy.univariateStatisticsRow.scoreIncrement;
+        pData.scoreFrequenciesX = xy.univariateStatisticsRow.freqDistDouble;
+        pData.numberOfExaminees = xy.numberOfExaminees;
       }
 
       /* allocation and assignments for r */
 
-      if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-        r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
+      if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                   pData.mininumScoreX,
+                                                                                   pData.scoreIncrementX);
+
+        results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
+        results.equatedRawScoreMoments.resize(pData.methods.size(), 4);
       }
 
       /* Compute equating results. Put x on scale of y.
-   Note that in struct xy, '1' designates x and '2' designates y; 
-   in struct bllxy, '_x' designates x and '_v' designates y. So: 
-     xy->ns2 = number of score categories for y
-	 xy->min2 = minimum score for y
-	 xy->inc2 = increment for y
-	 bllxy->crfd_v = log-linear smoothed cum rel fd for y
-	 xy->ns1 = number of score categories for x
-     bllxy->prd_x = log-linear smoothed PR dist for x
-	 r->eraw[0] = y equivalents for x (output) */
+        Note that in struct xy, '1' designates x and '2' designates y; 
+        in struct bllxy, '_x' designates x and '_v' designates y. So: 
+          xy->ns2 = number of score categories for y
+        xy->min2 = minimum score for y
+        xy->inc2 = increment for y
+        bllxy->crfd_v = log-linear smoothed cum rel fd for y
+        xy->ns1 = number of score categories for x
+          bllxy->prd_x = log-linear smoothed PR dist for x
+        r->eraw[0] = y equivalents for x (output) */
 
-      CLLEquateSG(bllxy, r->eraw[0]);
+      Eigen::VectorXd equatedRawScores = cllEquateSG(bllxy);
+
+      results.equatedRawScores.row(0) = equatedRawScores;
 
       /* get moments */
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(results.equatedRawScores.row(0),
+                                                                                                             pData.scoreFrequenciesX);
 
-      MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+      results.equatedRawScoreMoments.row(0) = moments.momentValues;
 
       return;
     }
 
     /*
-  Wrapper for doing CLL equating for SG with counter-balance design 
-  and log-linear smoothing.  
-  
-  NOTE: This is for the SG with counter balance design in which x and y 
-  in both group 1 and group 2 do not share any items in 
-  common, which means that functionally this is the external anchor case.  
-  The bivariate log-linear smoothing procedure needs to know this. So, when
-  Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
-  anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
-  (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
-  of the smoothing algorithm may be compromised because of dependencies between
-  x and y. 
-    
-  Assumes that equating puts raw scores for x on scale of y
-  
-  NOTE: This function is used (unaltered) for both actual equating and 
-        equating done in Wrapper_Bootstrap().  Distinguishing between the
-        two is the purpose of the variable rep
-
-  Input
-  
-    design = 'B' (single group)
-    method = 'E' (equipercentile)
-    smoothing = 'Z' (CLL 'smoothing')  
-	wtsx = weight of x for population 1
-	wtsy = weight of y for population 2
-    xy1 = struct BSTATS for group 1
-    xy2 = struct BSTATS for group 2
-	bllxy1 = struct BLL_SMOOTH for group 1
- 	bllxy2 = struct BLL_SMOOTH for group 2
-    rep = replication number for bootstrap; should be set to 0
-          for actual equating;  
-    
-    NOTE: it is assumed that the first variable
-          in xy is indeed x and the second variable is y.
-		  For bllxy, data memebers with '_x' are for x,
-		  and data members with '_v' are for y.  This somewhat
-		  inconsistent notation arises because BLL_SMOOTH is
-		  usually used with the CG design in which the variables
-		  are more naturally designated x (or u) and v.
-
-  Output
-    
-    struct PDATA inall   populates selected values of inall  
-
-    struct ERAW_RESULTS *r: populates            
-
-      **eraw: equated raw scores;          
-              method (rows) by raw score (columns) matrix
-              of equated scores. Here there is only one method.
-              So, memory allocated for eraw[][] is: 
-              eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
-                             (loc(x->max,x->min,x>-inc)]
-              because we are getting equated raw scores for x 
-      **mts:  moments for equated raw scores            
+      Wrapper for doing CLL equating for SG with counter-balance design 
+      and log-linear smoothing.  
       
-  NOTE: If Wrapper_BC() is called in a bootstrap loop,
-        then in the calling function struct ERAW_RESULTS must
-        be different from struct ERAW_RESULTS for the actual
-        equating. 
-                                            
-  Function calls other than C or NR utilities:
-    CLLEquateCB()
-    MomentsFromFD()  
+      NOTE: This is for the SG with counter balance design in which x and y 
+      in both group 1 and group 2 do not share any items in 
+      common, which means that functionally this is the external anchor case.  
+      The bivariate log-linear smoothing procedure needs to know this. So, when
+      Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+      anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+      (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
+      of the smoothing algorithm may be compromised because of dependencies between
+      x and y. 
+        
+      Assumes that equating puts raw scores for x on scale of y
+      
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
+
+      Input
+      
+        design = 'B' (single group)
+        method = 'E' (equipercentile)
+        smoothing = 'Z' (CLL 'smoothing')  
+      wtsx = weight of x for population 1
+      wtsy = weight of y for population 2
+        xy1 = struct BSTATS for group 1
+        xy2 = struct BSTATS for group 2
+      bllxy1 = struct BLL_SMOOTH for group 1
+      bllxy2 = struct BLL_SMOOTH for group 2
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating;  
+        
+        NOTE: it is assumed that the first variable
+              in xy is indeed x and the second variable is y.
+          For bllxy, data memebers with '_x' are for x,
+          and data members with '_v' are for y.  This somewhat
+          inconsistent notation arises because BLL_SMOOTH is
+          usually used with the CG design in which the variables
+          are more naturally designated x (or u) and v.
+
+      Output
+        
+        struct PDATA inall   populates selected values of inall  
+
+        struct ERAW_RESULTS *r: populates            
+
+          **eraw: equated raw scores;          
+                  method (rows) by raw score (columns) matrix
+                  of equated scores. Here there is only one method.
+                  So, memory allocated for eraw[][] is: 
+                  eraw[0][[0 ... (nscores(x->max,x->min,x>-inc)-1) =
+                                (loc(x->max,x->min,x>-inc)]
+                  because we are getting equated raw scores for x 
+          **mts:  moments for equated raw scores            
+          
+      NOTE: If Wrapper_BC() is called in a bootstrap loop,
+            then in the calling function struct ERAW_RESULTS must
+            be different from struct ERAW_RESULTS for the actual
+            equating. 
                                                 
-  Tianyou Wang
+      Function calls other than C or NR utilities:
+        CLLEquateCB()
+        MomentsFromFD()  
+                                                    
+      Tianyou Wang
 
-  Date of last revision: 6/30/08   
-*/
-    void Wrapper_BC(char design, char method, char smoothing, double wtsx,
-                    double wtsy, struct BSTATS* xy1, struct BSTATS* xy2,
-                    struct BLL_SMOOTH* bllxy1, struct BLL_SMOOTH* bllxy2,
-                    int rep, struct PDATA* inall, struct ERAW_RESULTS* r) {
+      Date of last revision: 6/30/08   
+    */
+    void Wrapper_BC(const EquatingRecipes::Structures::Design& design,
+                    const EquatingRecipes::Structures::Method& method,
+                    const EquatingRecipes::Structures::Smoothing& smoothing,
+                    const double& wtsx,
+                    const double& wtsy,
+                    const EquatingRecipes::Structures::BivariateStatistics& xy1,
+                    const EquatingRecipes::Structures::BivariateStatistics& xy2,
+                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy1,
+                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy2,
+                    const size_t& replicationNumber,
+                    EquatingRecipes::Structures::PData& pData,
+                    EquatingRecipes::Structures::EquatedRawScoreResults& results) {
       /* method names --- 10 characters; right justified */
-      char* names[] = {"   y-equiv"};
+      std::vector<std::string> names {"   y-equiv"};
 
-      inall->rep = rep; /* should be set to 0 for actual equating */
-                        /* counting of replications done in Wrapper_Bootstrap() */
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                            /* counting of replications done in Wrapper_Bootstrap() */
 
       /* Allocation and assignments for struct PDATA inall>
-    Note that for every assignment of the form inall->(var) = x->(var)
-    or inall->(var) = y->(var), values vary depending on whether x or y 
-	is for actual equating or a bootstrap sample; all other values are 
-	the same for the actual equating and a bootstrap sample */
+        Note that for every assignment of the form inall->(var) = x->(var)
+        or inall->(var) = y->(var), values vary depending on whether x or y 
+        is for actual equating or a bootstrap sample; all other values are 
+        the same for the actual equating and a bootstrap sample */
 
-      if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-                             /*    strcpy(inall->xyfname,xy->fname);
-    inall->xy = xy;
-	inall->bllxy = bllxy; */
-        inall->design = design;
-        inall->method = method;
-        inall->smoothing = smoothing;
-        inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
+      if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
+
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        pData.isInternalAnchor = false; /* implicitly, anchor is external for biv log-linear
 						                        smoothing with the CB design */
 
-        inall->nm = 1;
-        inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-        strcpy(inall->names[0], names[0]);
-
-        /*   inall->min = xy->min1;  
-    inall->max = xy->max1;
-    inall->inc = xy->inc1;
-    inall->fdx = xy->fd1;
-    inall->n = xy->n; */
+        pData.methods.push_back(names[0]); /* only one row/method, 0 */
       }
 
       /* allocation and assignments for r */
 
-      if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-        r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
+      if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                   pData.mininumScoreX,
+                                                                                   pData.scoreIncrementX);
+        results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
+        results.equatedRawScoreMoments.resize(pData.methods.size(), 4);
       }
 
       /* Compute equating results. Put x on scale of y.
-   Note that in struct xy, '1' designates x and '2' designates y; 
-   in struct bllxy, '_x' designates x and '_v' designates y. So: 
-     xy->ns2 = number of score categories for y
-	 xy->min2 = minimum score for y
-	 xy->inc2 = increment for y
-	 bllxy->crfd_v = log-linear smoothed cum rel fd for y
-	 xy->ns1 = number of score categories for x
-     bllxy->prd_x = log-linear smoothed PR dist for x
-	 r->eraw[0] = y equivalents for x (output) */
+        Note that in struct xy, '1' designates x and '2' designates y; 
+        in struct bllxy, '_x' designates x and '_v' designates y. So: 
+          xy->ns2 = number of score categories for y
+        xy->min2 = minimum score for y
+        xy->inc2 = increment for y
+        bllxy->crfd_v = log-linear smoothed cum rel fd for y
+        xy->ns1 = number of score categories for x
+          bllxy->prd_x = log-linear smoothed PR dist for x
+        r->eraw[0] = y equivalents for x (output) */
 
-      CLLEquateCB(bllxy1, bllxy2, wtsx, wtsy, r->eraw[0]);
-      /* get moments */
+      Eigen::VectorXd equatedRawScores = cllEquateCB(bllxy1, bllxy2, wtsx, wtsy);
 
-      MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+      results.equatedRawScores.row(0) = equatedRawScores;
 
-      return;
+      EquatingRecipes::Structures::Moments moments =
+          EquatingRecipes::Utilities::momentsFromScoreFrequencies(results.equatedRawScores.row(0),
+                                                                  pData.scoreFrequenciesX);
+
+      results.equatedRawScoreMoments.row(0) = moments.momentValues;
     }
 
     /*
-    Wrapper for CLL equating for CG design with log-linear smoothing. 
-    Equipercentile equating includes frequency estimation with 
-    Braun-Holland (linear) results, modified frequency estimation with 
-    Braun-Holland (linear) results, and chained equipercentile equating
+      Wrapper for CLL equating for CG design with log-linear smoothing. 
+      Equipercentile equating includes frequency estimation with 
+      Braun-Holland (linear) results, modified frequency estimation with 
+      Braun-Holland (linear) results, and chained equipercentile equating
+        
+      Assumes that in xv, score 1 is for x and score 2 is for v
+      Assumes that in yv, score 1 is for y and score 2 is for v
+      Assumes that equating puts raw scores for x on scale of y
       
-    Assumes that in xv, score 1 is for x and score 2 is for v
-    Assumes that in yv, score 1 is for y and score 2 is for v
-    Assumes that equating puts raw scores for x on scale of y
-    
-    NOTE: This function is used (unaltered) for both actual equating and 
-          equating done in Wrapper_Bootstrap().  Distinguishing between the
-          two is the purpose of the variable rep
-    
-    Input:
-    
-      design = 'C' (CINEG)
+      NOTE: This function is used (unaltered) for both actual equating and 
+            equating done in Wrapper_Bootstrap().  Distinguishing between the
+            two is the purpose of the variable rep
+      
+      Input:
+      
+        design = 'C' (CINEG)
 
-      method:  'E' = Frequency estimation (FE)
-              'F' = Modified freq est (MFE) 
-              'G' = FE +  MFE
-              'C' = Chained
-        'H' = FE +  Chained
-              'A' = FE + MFE + Chained
-                
-      smoothing = 'Z' (CLL 'smoothing') 
+        method:  'E' = Frequency estimation (FE)
+                'F' = Modified freq est (MFE) 
+                'G' = FE +  MFE
+                'C' = Chained
+          'H' = FE +  Chained
+                'A' = FE + MFE + Chained
+                  
+        smoothing = 'Z' (CLL 'smoothing') 
 
-      w1 = weight for pop. 1 (associated with xv)
-          [0,1] except that for any number outside this 
-          range, proportional weights are used -- i.e.,
-          w1 = xv->n/(xv->n + yv->n)
-      anchor = 0 --> external; 1 --> internal
-      rv1 = reliability of common items for population 1 
-            (set to 0 for all methods except 'F', 'G, and 'A')
-      rv2 = reliability of common items for population 2
-            (set to 0 for all methods except 'F', 'G, and 'A')
-      xv = struct BSTATS
-      yv = struct BSTATS 
-      bllxv = struct BLL_SMOOTH; uses brfd, prd_x,  and crfd_v 
-    bllyv = struct BLL_SMOOTH; uses brfd, crfd_x, and crfd_v
-            (Note that bllyv->crfd_x is really crfd for y in pop 2)
-      rep = replication number for bootstrap; should be set to 0
-            for actual equating; 
+        w1 = weight for pop. 1 (associated with xv)
+            [0,1] except that for any number outside this 
+            range, proportional weights are used -- i.e.,
+            w1 = xv->n/(xv->n + yv->n)
+        anchor = 0 --> external; 1 --> internal
+        rv1 = reliability of common items for population 1 
+              (set to 0 for all methods except 'F', 'G, and 'A')
+        rv2 = reliability of common items for population 2
+              (set to 0 for all methods except 'F', 'G, and 'A')
+        xv = struct BSTATS
+        yv = struct BSTATS 
+        bllxv = struct BLL_SMOOTH; uses brfd, prd_x,  and crfd_v 
+      bllyv = struct BLL_SMOOTH; uses brfd, crfd_x, and crfd_v
+              (Note that bllyv->crfd_x is really crfd for y in pop 2)
+        rep = replication number for bootstrap; should be set to 0
+              for actual equating; 
+      
+        NOTE: if rv1 == 0 or rv2 == 0, then MFE cannot be conducted 
+        
+      Output:
+        
+        struct PDATA inall:   populates selected values of inall 
+        
+        struct ERAW_RESULTS r          
     
-      NOTE: if rv1 == 0 or rv2 == 0, then MFE cannot be conducted 
-      
-    Output:
-      
-      struct PDATA inall:   populates selected values of inall 
-      
-      struct ERAW_RESULTS r          
-  
-        a[] = slopes for Braun-Holland
-        b[] = intercepts for Braun-Holland
-        eraw[][]:  equated raw scores
-        mts[][]:  moments for equated raw scores   
-            
-        NOTE: eraw[][] is a method (rows) by raw score (columns) matrix
-              of equated scores; memory allocated here;
-              eraw[0...(nm-1)][[0...(loc(xv->max1,xv->min1,xv>-inc1)]                                      ]
-              because we are getting equated raw scores for x.
-              eraw[][] stored in this "row"  manner so that 
-              Equated_ss() can be used directly on 
-              eraw[k] where k is the method number  
-            
-    NOTE: Whenever method differs, there must be different structures
-          passed as struct PDATA and struct ERAW_RESULTS 
-      
-    NOTE: If Wrapper_CC() is called in a bootstrap loop, then in
-          the calling function struct ERAW_RESULTS must be different
-          from struct ERAW_RESULTS for the actual equating. 
-                                              
-    Function calls other than C or NR utilities:
-      CLLEquateNEATPS()
-      CLLEquateNEATChn()
-      runerror()
+          a[] = slopes for Braun-Holland
+          b[] = intercepts for Braun-Holland
+          eraw[][]:  equated raw scores
+          mts[][]:  moments for equated raw scores   
+              
+          NOTE: eraw[][] is a method (rows) by raw score (columns) matrix
+                of equated scores; memory allocated here;
+                eraw[0...(nm-1)][[0...(loc(xv->max1,xv->min1,xv>-inc1)]                                      ]
+                because we are getting equated raw scores for x.
+                eraw[][] stored in this "row"  manner so that 
+                Equated_ss() can be used directly on 
+                eraw[k] where k is the method number  
+              
+      NOTE: Whenever method differs, there must be different structures
+            passed as struct PDATA and struct ERAW_RESULTS 
+        
+      NOTE: If Wrapper_CC() is called in a bootstrap loop, then in
+            the calling function struct ERAW_RESULTS must be different
+            from struct ERAW_RESULTS for the actual equating. 
                                                 
-    T. D. Wang
+      Function calls other than C or NR utilities:
+        CLLEquateNEATPS()
+        CLLEquateNEATChn()
+        runerror()
+                                                  
+      T. D. Wang
 
-    Date of last revision: 6/30/08   
-  */
-    void Wrapper_CC(char design, char method, char smoothing,
-                    double w1, int anchor, double rv1, double rv2,
-                    struct BSTATS* xv, struct BSTATS* yv,
-                    struct BLL_SMOOTH* bllxv, struct BLL_SMOOTH* bllyv,
-                    int rep, struct PDATA* inall, struct ERAW_RESULTS* r) {
-      int i;
-      double* ptr; /* pointer for eraw[] */
-                   /* method names --- 10 characters; right justified */
-      char* names[] = {"        FE", "       MFE", "  ChainedE"};
+      Date of last revision: 6/30/08   
+    */
+    void Wrapper_CC(const EquatingRecipes::Structures::Design& design,
+                    const EquatingRecipes::Structures::Method& method,
+                    const EquatingRecipes::Structures::Smoothing& smoothing,
+                    const double& w1,
+                    const bool& isInternalAnchor,
+                    const double& reliabilityCommonItemsPopulation1,
+                    const double& reliabilityCommonItemsPopulation2,
+                    const EquatingRecipes::Structures::BivariateStatistics& xv,
+                    const EquatingRecipes::Structures::BivariateStatistics& yv,
+                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
+                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllyv,
+                    const size_t& replicationNumber,
+                    EquatingRecipes::Structures::PData& pData,
+                    EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+      std::vector<std::string> names {"        FE", "       MFE", "  ChainedE"};
+      
+      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(method);
 
-      inall->rep = rep; /* should be set to 0 for actual equating. */
-                        /* Counting of replications done in Wrapper_Bootstrap(), 
-             which is why this statement cannot be in the if statement below */
+      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating. */
+                                                            /* Counting of replications done in Wrapper_Bootstrap(), 
+                                                               which is why this statement cannot be in the if statement below */
 
       /* allocation and assignments for inall
-     Note that for every assignment of the form inall->(var) = xv->(var)
-	 or inall->(var) = yv->(var) values vary depending on whether xv or yv
-	 is for actual equating or a bootstrap sample; all other values are 
-	 the same for the actual equating and a bootstrap sample */
+        Note that for every assignment of the form inall->(var) = xv->(var)
+        or inall->(var) = yv->(var) values vary depending on whether xv or yv
+        is for actual equating or a bootstrap sample; all other values are 
+        the same for the actual equating and a bootstrap sample */
 
-      if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        strcpy(inall->xfname, xv->fname);
-        strcpy(inall->yfname, yv->fname);
-        inall->xv = xv;
-        inall->yv = yv;
-        inall->bllxv = bllxv;
-        inall->bllyv = bllyv;
-        inall->design = design;
-        inall->method = method;
-        inall->smoothing = smoothing;
-        inall->w1 = (w1 < 0 || w1 > 1) ? (double)(xv->n) / (xv->n + yv->n) : w1;
-        /* proportional wts if w1 outside [0,1] */
-        inall->anchor = anchor;
-        inall->rv1 = rv1;
-        inall->rv2 = rv2;
-
-        if ((method == 'F' || method == 'G' || method == 'A') &&
-            (rv1 == 0 || rv2 == 0))
-          runerror("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
-
-        inall->names = cmatrix(0, 4, 0, 11); /* maximum of five names */
-
-        if (method == 'E') { /* method == 'E' */
-          inall->nm = 1;
-          strcpy(inall->names[0], names[0]);
-        } else if (method == 'F') { /* method == 'F' */
-          inall->nm = 1;
-          strcpy(inall->names[0], names[1]);
-        } else if (method == 'G') { /* method == 'G' */
-          inall->nm = 2;
-          for (i = 0; i <= 1; i++)
-            strcpy(inall->names[i], names[i]);
-        } else if (method == 'C') { /* method == 'C' */
-          inall->nm = 1;
-          strcpy(inall->names[0], names[2]);
-        } else if (method == 'H') { /* method == 'H' */
-          inall->nm = 2;
-          strcpy(inall->names[0], names[0]);
-          strcpy(inall->names[1], names[2]);
-        } else { /* method == 'A' */
-          inall->nm = 3;
-          for (i = 0; i <= 2; i++)
-            strcpy(inall->names[i], names[i]);
+      if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
+        pData.summaryRawDataXV = xv;
+        pData.summaryRawDataYV = yv;
+        pData.bivariateLogLinearSmoothingXV = bllxv;
+        pData.bivariateLogLinearSmoothingYV = bllyv;
+        pData.design = design;
+        pData.method = method;
+        pData.smoothing = smoothing;
+        if (w1 < 0 || w1 > 1) {
+          /* proportional wts if w1 outside [0,1] */
+          pData.weightSyntheticPopulation1 = static_cast<double>(xv.numberOfExaminees) /
+                                             static_cast<double>(xv.numberOfExaminees + yv.numberOfExaminees);
+        } else {
+          pData.weightSyntheticPopulation1 = w1;
         }
 
-        inall->min = xv->min1;
-        inall->max = xv->max1;
-        inall->inc = xv->inc1;
-        inall->fdx = xv->fd1;
-        inall->n = xv->n;
+        pData.isInternalAnchor = isInternalAnchor;
+        pData.reliabilityCommonItemsPopulation1 = reliabilityCommonItemsPopulation1;
+        pData.reliabilityCommonItemsPopulation2 = reliabilityCommonItemsPopulation2;
+
+        if ((methodCode == "F" || methodCode == "G" || methodCode == "A") &&
+            (reliabilityCommonItemsPopulation1 == 0 || reliabilityCommonItemsPopulation2 == 0)) {
+          throw std::runtime_error("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
+        }
+
+        pData.methods.clear();
+
+        if (methodCode == "E") { /* method == "E" */
+          pData.methods.push_back(names[0]);
+
+        } else if (methodCode == "F") { /* method == "F" */
+          pData.methods.push_back(names[1]);
+
+        } else if (methodCode == "G") { /* method == "G" */
+          pData.methods.push_back(names[0]);
+          pData.methods.push_back(names[1]);
+
+        } else if (methodCode == "C") { /* method == "C" */
+          pData.methods.push_back(names[2]);
+
+        } else if (methodCode == "H") { /* method == "H" */
+          pData.methods.push_back(names[0]);
+          pData.methods.push_back(names[2]);
+
+        } else { /* method == "A" */
+          pData.methods = names;
+        }
+
+        pData.mininumScoreX = xv.univariateStatisticsRow.minimumScore;
+        pData.maximumScoreX = xv.univariateStatisticsRow.maximumScore;
+        pData.scoreIncrementX = xv.univariateStatisticsRow.scoreIncrement;
+        pData.scoreFrequenciesX = xv.univariateStatisticsRow.freqDistDouble;
+        pData.numberOfExaminees = xv.numberOfExaminees;
       }
 
       /* allocation and assignments for r */
 
-      if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        r->eraw = dmatrix(0, inall->nm - 1, 0, loc(xv->max1, xv->min1, xv->inc1));
-        r->mts = dmatrix(0, inall->nm - 1, 0, 3); /* 0,3 is for the 4 moments */
-        r->fxs = dmatrix(0, 1, 0, loc(xv->max1, xv->min1, xv->inc1));
-        r->gys = dmatrix(0, 1, 0, loc(yv->max1, yv->min1, yv->inc1));
+      if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(xv.univariateStatisticsRow.maximumScore,
+                                                                                   xv.univariateStatisticsRow.minimumScore,
+                                                                                   xv.univariateStatisticsRow.scoreIncrement);
+        results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
+        results.equatedRawScoreMoments.resize(pData.methods.size(), maximumScoreLocation + 1);
+        results.relativeFreqDistsX.resize(1, maximumScoreLocation + 1);
+
+        maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(yv.univariateStatisticsRow.maximumScore,
+                                                                            yv.univariateStatisticsRow.minimumScore,
+                                                                            yv.univariateStatisticsRow.scoreIncrement);
+
+        results.relativeFreqDistsY.resize(1, maximumScoreLocation + 1);
       }
 
       /* Equipercentile results, including Braun-Holland (BH) linear. 
-   Note: For FE syn densities are in fxs[0] and gys[0]
-         For MFE syn densities are in fxs[1] and gys[1] 
-*/
+         Note: For FE syn densities are in fxs[0] and gys[0]
+         For MFE syn densities are in fxs[1] and gys[1] */
 
       /* FE + BH-FE in positions 0 and 1*/
-      if (method == 'E' || method == 'G' || method == 'A' || method == 'H')
-        i = CLLEquateNEATPS(bllxv, bllyv, inall->w1, r->eraw[0]);
 
-      if (method == 'C')
-        ptr = r->eraw[0];
-      else if (method == 'A')
-        ptr = r->eraw[2];
-      else if (method == 'H')
-        ptr = r->eraw[1];
-      else
-        ptr = NULL;
+      if (methodCode == "E" || methodCode == "G" || methodCode == "A" || methodCode == "H") {
+        Eigen::VectorXd equatedRawScores = cllEquateNEATPS(bllxv, bllyv, pData.weightSyntheticPopulation1);
+        results.equatedRawScores.row(0) = equatedRawScores;
+      }
 
-      if (ptr)
-        CLLEquateNEATChn(bllxv, bllyv, ptr);
+      if (methodCode == "C" || methodCode == "A" || methodCode == "H") {
+        Eigen::VectorXd equatedRawScores = cllEquateNEATChn(bllxv, bllyv);
+
+        size_t methodIndex;
+        if (methodCode == "C") {
+          methodIndex = 0;
+        } else if (methodCode == "A") {
+          methodIndex = 2;
+        } else {
+          methodIndex = 1;
+        }
+        
+        results.equatedRawScores.row(methodIndex) = equatedRawScores;
+      }        
 
       /* get moments */
 
-      for (i = 0; i <= inall->nm - 1; i++)
-        MomentsFromFD(xv->min1, xv->max1, xv->inc1, r->eraw[i], xv->fd1, r->mts[i]);
+      for (size_t i = 0; i < pData.methods.size(); i++) {
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(results.equatedRawScores.row(i),
+          xv.univariateStatisticsRow.freqDistDouble);
 
-      return;
+        results.equatedRawScoreMoments.row(i) = moments.momentValues;
+      }
     }
 
   private:
@@ -1063,16 +1136,18 @@ namespace EquatingRecipes {
       output:
         Equatedx   a vector containing the equated score 
     --------------------------------------------------------------------------*/
-    std::vector<double> cllEquateEG(const double& minx,
-                                    const double& maxx,
-                                    const std::vector<double>& parax,
-                                    const double& miny,
-                                    const double& maxy,
-                                    const std::vector<double>& paray,
-                                    const std::vector<double>& scoresx) {
+    Eigen::VectorXd cllEquateEG(const double& minx,
+                                const double& maxx,
+                                const std::vector<double>& parax,
+                                const double& miny,
+                                const double& maxy,
+                                const std::vector<double>& paray,
+                                const std::vector<double>& scoresx) {
       double ncx = gaussianQuadrature64(minx, maxx, parax);
       double ncy = gaussianQuadrature64(miny, maxy, paray);
-      std::vector<double> equatedx;
+      Eigen::VectorXd equatedx;
+
+      equatedx.resize(scoresx.size());
 
       std::for_each(scoresx.begin(),
                     scoresx.end(),
@@ -1080,8 +1155,10 @@ namespace EquatingRecipes {
                       double cdfx = cllEGCdf(minx, maxx, parax, x, ncx);
                       double eqautedScore = cllInverseCdf(miny, maxy, paray, cdfx, ncy);
 
-                      equatedx.push_back(eqautedScore);
+                      equatedx(eqautedScore);
                     });
+
+      return equatedx;
     }
 
     /*--------------------------------------------------------------------------
@@ -1385,11 +1462,11 @@ namespace EquatingRecipes {
         s += bivar.betaCoefficients(j - 1) * std::pow(xValue, static_cast<double>(j));
       }
 
-      for (j = 1; j <= ny; j++) {
+      for (size_t j = 1; j <= ny; j++) {
         s += bivar.betaCoefficients(nx + j - 1) * std::pow(yValue, static_cast<double>(j));
       }
 
-      for (j = 1; j <= nxbyy; j++) {
+      for (size_t j = 1; j <= nxbyy; j++) {
         s += bivar.betaCoefficients(nx + ny + j - 1) *
              std::pow(x, bivar.crossProductMoments(j - 1, 0)) *
              std::pow(y, bivar.crossProductMoments(j - 1, 1));
@@ -1460,9 +1537,9 @@ namespace EquatingRecipes {
         for (size_t j = 0; j < 32; j++) {
           double dy = yr * x[j];
           sj1 += yr * w[j] * (bivExpPolynomial(bivar, (xm + dx), (ym + dy)) + bivExpPolynomial(bivar, (xm + dx), (ym - dy)));
-        }
-        for (j = 0; j < 32; j++) {
-          dy = yr * x[j];
+        // }
+        // for (size_t j = 0; j < 32; j++) {
+        //   double dy = yr * x[j];
           sj2 += yr * w[j] * (bivExpPolynomial(bivar, (xm - dx), (ym + dy)) + bivExpPolynomial(bivar, (xm - dx), (ym - dy)));
         }
         si += w[i] * (sj1 + sj2);
@@ -1531,7 +1608,7 @@ namespace EquatingRecipes {
           sj1 += yr * w[j] * (bivExpPolynomial(bivar, (xm + dx), (ym + dy)) + bivExpPolynomial(bivar, (xm + dx), (ym - dy)));
           // }
           // for (size_t j = 0; j < 16; j++) {
-          double dy = yr * x[j];
+          // double dy = yr * x[j];
           sj2 += yr * w[j] * (bivExpPolynomial(bivar, (xm - dx), (ym + dy)) + bivExpPolynomial(bivar, (xm - dx), (ym - dy)));
         }
         si += w[i] * (sj1 + sj2);
@@ -1781,23 +1858,17 @@ namespace EquatingRecipes {
         Equatedx    The equating function 
     --------------------------------------------------------------------------*/
     // int
-    void cllEquateNEATPS(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar1,
-                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar2,
-                         const double& wts,
-                         std::vector<double>& equatedx) {
-      // int i, nDistCatx;
-      // static double integ;
-
-      // double cdfx;
-
-      equatedx.resize(bivar1.numberOfScoresX);
+    Eigen::VectorXd cllEquateNEATPS(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar1,
+                                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar2,
+                                    const double& wts) {
+      Eigen::VectorXd equatedx(bivar1.numberOfScoresX);
 
       for (size_t i = 0; i < bivar1.numberOfScoresX; i++) {
         double cdfx = cllNEATPSMargCdf(bivar1, bivar2, wts, bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(i));
-        equatedx[i] = cllNEATPSInverseCdf(bivar2, bivar1, 1.0 - wts, cdfx);
+        equatedx(i) = cllNEATPSInverseCdf(bivar2, bivar1, 1.0 - wts, cdfx);
       }
 
-      // return i;
+      return equatedx;
     }
 
     /*--------------------------------------------------------------------------
@@ -2007,9 +2078,8 @@ namespace EquatingRecipes {
  		Equatedx    The equating function 
 --------------------------------------------------------------------------*/
     // int
-    void cllEquateNEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar1,
-                          const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar2,
-                          std::vector<double>& equatedx) {
+    Eigen::VectorXd cllEquateNEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar1,
+                          const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar2) {
       double minx = bivar1.minimumRawScoreX - 0.5;
       double maxx = bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(bivar1.numberOfScoresX - 1) + 0.5;
       double miny = bivar2.minimumRawScoreX - 0.5;
@@ -2018,20 +2088,21 @@ namespace EquatingRecipes {
       double maxv = bivar1.minimumRawScoreV + bivar1.scoreIncrementV * static_cast<double>(bivar1.numberOfScoresV - 1) + 0.5;
       double nc1 = bivGaussianQuadrature64(bivar1, minx, maxx, minv, maxv);
       double nc2 = bivGaussianQuadrature64(bivar2, miny, maxy, minv, maxv);
-      double maxv = bivar1.minimumRawScoreV + bivar1.scoreIncrementV * static_cast<double>(bivar1.numberOfScoresV - 1) + 0.5;
-      double maxx = bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(bivar1.numberOfScoresX - 1) + 0.5;
-      double maxy = bivar2.minimumRawScoreX + bivar2.scoreIncrementX * static_cast<double>(bivar2.numberOfScoresX - 1) + 0.5;
+      
+      maxv = bivar1.minimumRawScoreV + bivar1.scoreIncrementV * static_cast<double>(bivar1.numberOfScoresV - 1) + 0.5;
+      maxx = bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(bivar1.numberOfScoresX - 1) + 0.5;
+      maxy = bivar2.minimumRawScoreX + bivar2.scoreIncrementX * static_cast<double>(bivar2.numberOfScoresX - 1) + 0.5;
 
-      equatedx.resize(bivar1.numberOfScoresX);
+      Eigen::VectorXd equatedx(bivar1.numberOfScoresX);
 
       for (size_t i = 0; i < bivar1.numberOfScoresX; i++) {
         double cdfx = cllBivCdf(bivar1, bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(i), maxv, nc1);
         double eqtempv = cllMargInverseYCdf(bivar1, cdfx, nc1);
         double cdfv = cllBivCdf(bivar2, maxx, eqtempv, nc2);
-        equatedx[i] = cllMargInverseXCdf(bivar2, cdfv, nc2);
+        equatedx(i) = cllMargInverseXCdf(bivar2, cdfv, nc2);
       }
 
-      // return i;
+      return equatedx;
     }
 
     /*--------------------------------------------------------------------------
@@ -2052,22 +2123,21 @@ namespace EquatingRecipes {
         Equatedx    The equating function 
     --------------------------------------------------------------------------*/
     // int
-    void cllEquateSG(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar,
-                     std::vector<double>& equatedx) {
+    Eigen::VectorXd cllEquateSG(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar) {
       double minx = bivar.minimumRawScoreX;
       double miny = bivar.minimumRawScoreV;
       double maxx = minx + static_cast<double>(bivar.numberOfScoresX - 1) * bivar.scoreIncrementX + 0.5;
       double maxy = miny + static_cast<double>(bivar.numberOfScoresV - 1) * bivar.scoreIncrementV + 0.5;
       double nc = bivGaussianQuadrature64(bivar, minx, maxx, miny, maxy);
 
-      equatedx.resize(bivar.numberOfScoresX);
+      Eigen::VectorXd equatedx(bivar.numberOfScoresX);
 
       for (size_t i = 0; i < bivar.numberOfScoresX; i++) {
         double cdfx = cllBivCdf(bivar, bivar.minimumRawScoreX + bivar.scoreIncrementX * static_cast<double>(i), maxy, nc);
-        equatedx[i] = cllMargInverseYCdf(bivar, cdfx, nc);
+        equatedx(i) = cllMargInverseYCdf(bivar, cdfx, nc);
       }
 
-      // return i;
+      return equatedx;
     }
 
     /*--------------------------------------------------------------------------
@@ -2092,11 +2162,10 @@ namespace EquatingRecipes {
         Equatedx    The equating function 
     --------------------------------------------------------------------------*/
     // int
-    void cllEquateCB(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar1,
-                     const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar2,
-                     const double& wtsx,
-                     const double& wtsy,
-                     std::vector<double>& equatedx) {
+    Eigen::VectorXd cllEquateCB(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar1,
+                                const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar2,
+                                const double& wtsx,
+                                const double& wtsy) {
       // int i, nDistCatx;
       // double maxx, maxy;
       // double cdfx, nc1, nc2;
@@ -2107,15 +2176,15 @@ namespace EquatingRecipes {
       double nc1 = bivGaussianQuadrature32(bivar1, bivar1.minimumRawScoreU, maxx, bivar1.minimumRawScoreV, maxy);
       double nc2 = bivGaussianQuadrature32(bivar2, bivar1.minimumRawScoreX, maxx, bivar1.minimumRawScoreV, maxy);
 
-      equatedx.resize(bivar1.numberOfScoresX);
+      Eigen::VectorXd equatedx(bivar1.numberOfScoresX);
 
       for (size_t i = 0; i < bivar1.numberOfScoresX; i++) {
         double cdfx = wtsx * cllBivCdf(bivar1, bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(i), maxy, nc1) +
                       (1 - wtsx) * cllBivCdf(bivar2, bivar1.minimumRawScoreX + bivar1.scoreIncrementX * static_cast<double>(i), maxy, nc2);
-        equatedx[i] = cllMargInverseCBYCdf(bivar1, bivar2, wtsy, cdfx, nc1, nc2);
+        equatedx(i) = cllMargInverseCBYCdf(bivar1, bivar2, wtsy, cdfx, nc1, nc2);
       }
 
-      // return i;
+      return equatedx;
     }
 
     /*--------------------------------------------------------------------------
@@ -2142,13 +2211,12 @@ namespace EquatingRecipes {
       output:
         SEE        a vector containing the standard error of equating
     --------------------------------------------------------------------------*/
-    void cllSEEEG(const long& npx,
-                  const std::vector<double>& parax,
-                  const std::vector<double>& scoresx,
-                  const long& npy,
-                  const std::vector<double>& paray,
-                  const std::vector<double>& scoresy,
-                  std::vector<double>& SEE) {
+    Eigen::VectorXd cllSEEEG(const long& npx,
+                             const std::vector<double>& parax,
+                             const std::vector<double>& scoresx,
+                             const long& npy,
+                             const std::vector<double>& paray,
+                             const std::vector<double>& scoresy) {
       // int i, j;
       // double cdfx, pdfy;
       // double **Sigmamx, **Sigmamy, *px, *py, **Sigmabetax, **Sigmabetay, **Bx, **By;
@@ -2165,6 +2233,7 @@ namespace EquatingRecipes {
       Eigen::MatrixXd py(scoresy.size(), 1);                   // py = dvector(0, nCaty - 1);
       Eigen::MatrixXd eYbetax(parax.size(), 1);                // eYbetax = dvector(0, nparax - 1);
       Eigen::MatrixXd eYbetay(paray.size(), 1);                // eYbetay = dvector(0, nparay - 1);
+      Eigen::VectorXd SEE(scoresx.size());
 
       for (size_t i = 0; i < parax.size(); i++) {
         for (size_t j = 0; j < scoresx.size(); j++) {
@@ -2190,18 +2259,18 @@ namespace EquatingRecipes {
 
       for (size_t i = 0; i < scoresx.size(); i++) {
         for (size_t j = 0; j < scoresx.size(); j++) {
-          Sigmamx(i, j) = -1.0 * px[i] * px[j] / npx;
+          Sigmamx(i, j) = -1.0 * px(i) * px(j) / npx;
           if (i == j) {
-            Sigmamx(i, j) += px[i];
+            Sigmamx(i, j) += px(i);
           }
         }
       }
 
       for (size_t i = 0; i < scoresy.size(); i++) {
         for (size_t j = 0; j < scoresy.size(); j++) {
-          Sigmamy(i, j) = -1.0 * py[i] * py[j] / npy;
+          Sigmamy(i, j) = -1.0 * py(i) * py(j) / npy;
           if (i == j) {
-            Sigmamy(i, j) += py[i];
+            Sigmamy(i, j) += py(i);
           }
         }
       }
@@ -2231,24 +2300,26 @@ namespace EquatingRecipes {
         for (size_t j = 0; j < parax.size(); j++) {
           double integ1 = gaussianQuadrature64i(minx, scoresx[i], parax, j);
           double integ3 = gaussianQuadrature64i(minx, maxx, parax, j);
-          eYbetax[j] = integ1 * integx - integ2 * integ3;
-          eYbetax[j] /= integx2;
-          eYbetax[j] /= pdfy;
+          eYbetax(j) = integ1 * integx - integ2 * integ3;
+          eYbetax(j) /= integx2;
+          eYbetax(j) /= pdfy;
         }
 
         integ2 = gaussianQuadrature64(miny, equatedx, paray);
         for (size_t j = 0; j < paray.size(); j++) {
           double integ1 = gaussianQuadrature64i(miny, equatedx, paray, j);
           double integ3 = gaussianQuadrature64i(miny, maxy, paray, j);
-          eYbetay[j] = integ2 * integ3 - integ1 * integy;
-          eYbetay[j] /= integy2;
-          eYbetay[j] /= pdfy;
+          eYbetay(j) = integ2 * integ3 - integ1 * integy;
+          eYbetay(j) /= integy2;
+          eYbetay(j) /= pdfy;
         }
 
-        SEE[i] = (eYbetax.transpose() * Sigmabetax * eYbetax).coeff(0, 0);  // vtAv0(nparax, eYbetax, Sigmabetax);
-        SEE[i] += (eYbetay.transpose() * Sigmabetay * eYbetay).coeff(0, 0); // vtAv0(nparay, eYbetay, Sigmabetay);
-        SEE[i] = sqrt(SEE[i]);
+        SEE(i) = (eYbetax.transpose() * Sigmabetax * eYbetax).coeff(0, 0);  // vtAv0(nparax, eYbetax, Sigmabetax);
+        SEE(i) += (eYbetay.transpose() * Sigmabetay * eYbetay).coeff(0, 0); // vtAv0(nparay, eYbetay, Sigmabetay);
+        SEE(i) = sqrt(SEE(i));
       }
+
+      return SEE;
     }
   };
 } // namespace EquatingRecipes
