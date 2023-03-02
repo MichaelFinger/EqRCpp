@@ -18,7 +18,7 @@
 #include <equating_recipes/structures/irt_fitted_distribution.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_item_results.hpp>
-#include <equating_recipes/structures/irt_scale_tranformation_method.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
@@ -70,7 +70,7 @@ namespace EquatingRecipes {
       EquatingRecipes::Structures::Quadrature transformedQuadratureNewForm;
       std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults> itemResultsNewForm;
 
-      EquatingRecipes::Structures::IRTScaleTranformationMethod irtScaleTranformationMethod;
+      EquatingRecipes::Structures::IRTScaleTransformationMethod irtScaleTranformationMethod;
     };
   } // namespace Structures
 } // namespace EquatingRecipes

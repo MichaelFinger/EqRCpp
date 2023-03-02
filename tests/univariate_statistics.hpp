@@ -4,10 +4,14 @@
 #include <iostream>
 
 #include <Eigen/Core>
+#include <nlohmann/json.hpp>
 
 #include "fixtures/lsat6.hpp"
-#include <equating_recipes/structures/univariate_statistics.hpp>
+
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/structures/all_structures.hpp>
+#include <equating_recipes/json/structures.hpp>
+#include <equating_recipes/json/json_document.hpp>
 
 namespace Tests {
   struct UnivariateStatistics {
@@ -57,13 +61,17 @@ namespace Tests {
                                                                                  scoreIncrement);
 
       EquatingRecipes::Structures::UnivariateStatistics univariateStatistics =
-          EquatingRecipes::Structures::UnivariateStatistics::buildFromScoreFrequencies(lsat6FreqDist,
+          EquatingRecipes::Utilities::univariateFromScoreFrequencies(lsat6FreqDist,
                                                                     0,
                                                                     5,
                                                                     1,
                                                                     "X");
 
-      std::cout << univariateStatistics.toString() << "\n";
+      nlohmann::json j = univariateStatistics;
+
+      EquatingRecipes::JSON::JsonDocument jsonDoc;
+      jsonDoc.setJson(j);
+      jsonDoc.toTextFile("tmp.json");
     }
   };
 } // namespace Tests

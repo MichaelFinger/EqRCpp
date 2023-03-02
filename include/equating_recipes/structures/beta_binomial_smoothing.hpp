@@ -12,6 +12,7 @@
 #include <Eigen/Core>
 #include <fmt/core.h>
 #include <fmt/format.h>
+
 #include <equating_recipes/structures/univariate_statistics.hpp>
 
 namespace EquatingRecipes {

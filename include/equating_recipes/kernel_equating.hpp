@@ -1701,12 +1701,6 @@ namespace EquatingRecipes {
                            const Eigen::VectorXd& fdy,
                            Eigen::VectorXd& Equatedx,
                            Eigen::VectorXd& SEE) {
-      // int i, j, nparax, nparay;
-      // double **Crx, **Cry, **Bx, **By;
-      // double *Fr, *Gs, Gp;
-      // double SqNormx, SqNormy;
-      // double hx, hy;
-
       size_t nparax = degreex;
       size_t nparay = degreey;
       Eigen::MatrixXd Crx(ncatx, ncatx);
@@ -1764,51 +1758,58 @@ namespace EquatingRecipes {
         Equatedx    a vector containing the equated score 
         SEE         a vector containing standard error of equating 
     --------------------------------------------------------------------------*/
-    void KernelEquateSEESG(struct BLL_SMOOTH* bivar,
+    void KernelEquateSEESG(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar,
                            const Eigen::VectorXd& Equatedx,
-                           const Eigen::VectorXd& SEE) {
-      int i, j, k, ncat, ncatx, ncaty, npara, cu, cv, cuv;
-      long np;
-      double** fitbdist;
-      double *vP, *vPP, **M, **N, *r, *s, **U, **V;
-      double hx, hy;
-      double **Cr, **B;
-      double *Fr, *Gs, Gp, *FrU, *GsV;
-      double *scoresx, *scoresy;
-      int *interx, *intery;
-      int** cpm;
+                           Eigen::VectorXd& SEE) {
+      // int i, j, k, ncat, ncatx, ncaty, npara, cu, cv, cuv;
+      // long np;
+      // double** fitbdist;
+      // double *vP, *vPP, **M, **N, *r, *s, **U, **V;
+      // double hx, hy;
+      // double **Cr, **B;
+      // double *Fr, *Gs, Gp, *FrU, *GsV;
+      // double *scoresx, *scoresy;
+      // int *interx, *intery;
+      // int** cpm;
 
-      cuv = bivar->cuv;
-      cu = bivar->cu;
-      cv = bivar->cv;
-      cpm = imatrix(0, 1, 0, cuv);
-      for (i = 0; i < cuv; i++)
-        for (j = 0; j < 2; j++)
-          cpm[j][i] = bivar->cpm[i][j];
+      size_t cuv = bivar.numberOfCrossProductMoments;
+      size_t cu = bivar.numberOfDegreesOfSmoothingU;
+      size_t cv = bivar.numberOfDegreesOfSmoothingV;
 
-      ncatx = bivar->nsx;
-      ncaty = bivar->nsv;
-      npara = bivar->cu + bivar->cv + bivar->cuv;
-      interx = cpm[0];
-      intery = cpm[1];
-      np = bivar->num_persons;
-      scoresx = dvector(0, ncatx);
-      for (i = 0; i < ncatx; i++)
-        scoresx[i] = bivar->minx + i * bivar->incx;
-      scoresy = dvector(0, ncaty);
-      for (i = 0; i < ncaty; i++)
-        scoresy[i] = bivar->minv + i * bivar->incv;
-      ncat = ncatx * ncaty;
+      Eigen::MatrixXd cpm = bivar.crossProductMoments(Eigen::seq(0, 1), Eigen::seq(0, cuv));
 
-      Cr = dmatrix(0, ncat - 1, 0, npara - 1);
-      B = dmatrix(0, npara - 1, 0, ncat - 1); /*be aware B transpose(!!) as same dimension as Cr.  */
-      U = dmatrix(0, ncatx - 1, 0, npara - 1);
-      V = dmatrix(0, ncaty - 1, 0, npara - 1);
-      Fr = dvector(0, ncatx - 1);
-      Gs = dvector(0, ncaty - 1);
-      FrU = dvector(0, npara - 1);
-      GsV = dvector(0, npara - 1);
-      fitbdist = dmatrix(0, ncatx - 1, 0, ncaty - 1);
+      size_t ncatx = bivar.numberOfScoresX;
+      size_t ncaty = bivar.numberOfScoresV;
+      size_t npara = bivar.numberOfDegreesOfSmoothingU +
+                     bivar.numberOfDegreesOfSmoothingV +
+                     bivar.numberOfCrossProductMoments;
+
+      Eigen::MatrixXd interx = cpm.row(0);
+      Eigen::MatrixXd intery = cpm.row(1);
+      size_t numberOfExaminees = bivar.numberOfExaminees;
+
+      Eigen::VectorXd scoresx(ncatx);
+
+      for (size_t i = 0; i < ncatx; i++) {
+        scoresx(i) = bivar.minimumRawScoreX + static_cast<double>(i) * bivar.scoreIncrementX;
+      }
+        
+      Eigen::VectorXd scoresy(ncaty);
+      for (size_t i = 0; i < ncaty; i++) {
+        scoresy(i) = bivar.minimumRawScoreV + static_cast<double>(i) * bivar.scoreIncrementV;
+      }
+        
+      size_t ncat = ncatx * ncaty;
+
+      Cr = // dmatrix(0, ncat - 1, 0, npara - 1);
+      B = dm// atrix(0, npara - 1, 0, ncat - 1); /*be aware B transpose(!!) as same dimension as Cr.  */
+      U = dm// atrix(0, ncatx - 1, 0, npara - 1);
+      V = dm// atrix(0, ncaty - 1, 0, npara - 1);
+      Fr = // dvector(0, ncatx - 1);
+      Gs = // dvector(0, ncaty - 1);
+      FrU = // dvector(0, npara - 1);
+      GsV = // dvector(0, npara - 1);
+      fitbdist = // dmatrix(0, ncatx - 1, 0, ncaty - 1);
 
       for (i = 0; i < ncatx; i++)
         for (j = 0; j < ncaty; j++)

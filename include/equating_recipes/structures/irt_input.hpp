@@ -14,9 +14,9 @@
 
 #include <equating_recipes/structures/irt_method.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/irt_fitted_distribution.hpp>
 #include <equating_recipes/structures/irt_equating_results.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 
 namespace EquatingRecipes {
   namespace Structures {
@@ -27,9 +27,9 @@ namespace EquatingRecipes {
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
       EquatingRecipes::Structures::IRTScaleTransformationData irtScaleTransformationData;
 
-      IRTFittedDistribution newFormIRTFittedDistribution;
-      IRTFittedDistribution oldFormIRTFittedDistribution;
-      IRTEquatingResults irtEquatingResults;
+      EquatingRecipes::Structures::IRTFittedDistribution newFormIRTFittedDistribution;
+      EquatingRecipes::Structures::IRTFittedDistribution oldFormIRTFittedDistribution;
+      EquatingRecipes::Structures::IRTEquatingResults irtEquatingResults;
     };
   } // namespace Structures
 } // namespace EquatingRecipes
