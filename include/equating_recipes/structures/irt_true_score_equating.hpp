@@ -11,7 +11,7 @@
 
 namespace EquatingRecipes {
   namespace Structures {
-    struct IrtTrueScoreEquating {
+    struct IRTTrueScoreEquating {
       int numberOfItems;                           /* number of items on test */
       int numberOfTestScoreCategories;             /* number of test score categories */
       Eigen::VectorXi numberOfItemScoreCategories; /* pointer to numbers of item score categories */

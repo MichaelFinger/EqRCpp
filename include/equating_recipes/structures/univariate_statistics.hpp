@@ -24,21 +24,21 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct UnivariateStatistics {
-      std::string id;                                          // single character id
-      int numberOfExaminees;                                   // number of examinees
-      double minimumScore;                                     // min score in data
-      double maximumScore;                                     // max score in data
-      double freqDistMinimumScore;                             // min score for fd[]
-      double freqDistMaximumScore;                             // max score for fd[]
-      double scoreIncrement;                                   // increment between adjacent scores
-      int numberOfScores;                                      // number of scores (or categories)
-      Eigen::VectorXd freqDist;                                // freq dist fd[0]...fd[ns-1]
-      Eigen::VectorXd freqDistDouble;                          // double version of fd[]
-      Eigen::VectorXd cumulativeFreqDist;                      // cum freq dist
-      Eigen::VectorXd relativeFreqDist;                        // relative freq dist
-      Eigen::VectorXd cumulativeRelativeFreqDist;              // cum relative freq dist
-      Eigen::VectorXd percentileRankDist;                      // percentile rank dist
-      Eigen::VectorXd momentValues = Eigen::VectorXd::Zero(4); // moments: mean, sd, skew, kurt
+      std::string id;                             // single character id
+      int numberOfExaminees;                      // number of examinees
+      double minimumScore;                        // min score in data
+      double maximumScore;                        // max score in data
+      double freqDistMinimumScore;                // min score for fd[]
+      double freqDistMaximumScore;                // max score for fd[]
+      double scoreIncrement;                      // increment between adjacent scores
+      int numberOfScores;                         // number of scores (or categories)
+      Eigen::VectorXd freqDist;                   // freq dist fd[0]...fd[ns-1]
+      Eigen::VectorXd freqDistDouble;             // double version of fd[]
+      Eigen::VectorXd cumulativeFreqDist;         // cum freq dist
+      Eigen::VectorXd relativeFreqDist;           // relative freq dist
+      Eigen::VectorXd cumulativeRelativeFreqDist; // cum relative freq dist
+      Eigen::VectorXd percentileRankDist;         // percentile rank dist
+      Eigen::VectorXd momentValues;               // moments: mean, sd, skew, kurt
 
       void configure(const double& minimumScore,
                      const double& maximumScore,
@@ -55,6 +55,7 @@ namespace EquatingRecipes {
         this->cumulativeFreqDist.setZero(this->numberOfScores);
         this->cumulativeRelativeFreqDist.setZero(this->numberOfScores);
         this->percentileRankDist.setZero(this->numberOfScores);
+        this->momentValues.setZero(0);
       }
 
       // std::string toString() {

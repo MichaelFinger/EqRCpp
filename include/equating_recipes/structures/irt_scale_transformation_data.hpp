@@ -11,19 +11,11 @@
 #include <Eigen/Core>
 
 #include <equating_recipes/structures/common_item_specification.hpp>
-#include <equating_recipes/structures/design.hpp>
-#include <equating_recipes/structures/equated_raw_score_results.hpp>
-#include <equating_recipes/structures/form_type.hpp>
-#include <equating_recipes/structures/irt_equating_results.hpp>
-#include <equating_recipes/structures/irt_fitted_distribution.hpp>
-#include <equating_recipes/structures/irt_model.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_item_results.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
-#include <equating_recipes/structures/method.hpp>
-#include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/quadrature.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_item_results.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 
 namespace EquatingRecipes {
   namespace Structures {

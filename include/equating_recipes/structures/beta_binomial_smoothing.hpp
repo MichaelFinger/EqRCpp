@@ -33,7 +33,6 @@ namespace EquatingRecipes {
       Eigen::VectorXd fittedRawScoreDensity;                               /* fitted raw score dist (proportions, density) */
       Eigen::VectorXd fittedRawScoreCumulativeRelativeFreqDist;            /* cum rel freq dist for fitted dist */
       Eigen::VectorXd fittedRawScorePercentileRankDist;                    /* percentile rank dist for fitted dist */
-
       EquatingRecipes::Structures::UnivariateStatistics rawScoreUnivariateStatistics;
 
       std::string toString() {
