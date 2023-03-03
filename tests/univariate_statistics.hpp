@@ -1,12 +1,14 @@
 #ifndef TESTS_UNIVARIATE_STATISTICS_HPP
 #define TESTS_UNIVARIATE_STATISTICS_HPP
 
+#include <filesystem>
 #include <iostream>
 
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
 
 #include "fixtures/lsat6.hpp"
+#include "fixtures/actmathfreq.hpp"
 
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/all_structures.hpp>
@@ -15,8 +17,8 @@
 
 namespace Tests {
   struct UnivariateStatistics {
-    void run() {
-      Eigen::VectorXd lsat6FreqDist = Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
+    void runLSAT6() {
+      Eigen::VectorXd lsat6FreqDist = EquatingRecipes::Tests::Fixtures::LSAT6::rawScoreFrequencyDistribution();
 
       std::for_each(lsat6FreqDist.begin(),
                     lsat6FreqDist.end(),
@@ -24,7 +26,7 @@ namespace Tests {
                       std::cout << scoreFreq << "\n";
                     });
 
-      Eigen::VectorXd lsat6RelFreqDist = Tests::Fixtures::LSAT6::rawScoreRelativeFrequencyDistribution();
+      Eigen::VectorXd lsat6RelFreqDist = EquatingRecipes::Tests::Fixtures::LSAT6::rawScoreRelativeFrequencyDistribution();
 
       std::for_each(lsat6RelFreqDist.begin(),
                     lsat6RelFreqDist.end(),
@@ -72,6 +74,18 @@ namespace Tests {
       EquatingRecipes::JSON::JsonDocument jsonDoc;
       jsonDoc.setJson(j);
       jsonDoc.toTextFile("tmp.json");
+    }
+
+    void runACTMath() {
+      std::filesystem::path datasetFolder = std::filesystem::relative("../../ER for distribution 9-10-09/Examples/");
+
+      EquatingRecipes::Tests::Fixtures::ACTMathFreq actMathFreq;
+      // actMathFreq.import(datasetFolder.string());
+      actMathFreq.import("/Users/michaelfinger/Developer/EquatingRecipes/ER for distribution 9-10-09/Examples/");
+
+      std::cout << actMathFreq.data.rawScores << "\n";
+      std::cout << actMathFreq.data.freqX << "\n";
+      std::cout << actMathFreq.data.freqY << "\n";
     }
   };
 } // namespace Tests

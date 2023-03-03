@@ -11,9 +11,19 @@
 #include <equating_recipes/structures/all_structures.hpp>
 
 namespace Eigen {
-  template<typename Derived>
-  void to_json(nlohmann::json& j, const MatrixBase<Derived>& matrix) {
-    j = const_cast<Eigen::MatrixBase<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>&>(matrix);
+  template <typename Derived>
+  void to_json(nlohmann::json& j, const Eigen::DenseBase<Derived>& matrix) {
+    j = nlohmann::json::array();
+
+    for (size_t rowIndex = 0; rowIndex < matrix.rows(); rowIndex++) {
+      nlohmann::json row = nlohmann::json::array();
+
+      for (size_t columnIndex = 0; columnIndex < matrix.cols(); columnIndex++) {
+        row.push_back(matrix(rowIndex, columnIndex));
+      }
+
+      j.push_back(row);
+    }
   }
 } // namespace Eigen
 
@@ -151,10 +161,19 @@ namespace EquatingRecipes {
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::CGEquipercentileEquatingResults& rec) {
       j = nlohmann::json {{"syntheticPopulationRelativeFreqDistX", rec.syntheticPopulationRelativeFreqDistX},
                           {"syntheticPopulationRelativeFreqDistY", rec.syntheticPopulationRelativeFreqDistY},
-                          {"equatedRawScores", rec.equatedRawScores},
-                          {"slope", rec.slope},
-                          {"intercept", rec.intercept},
-                          {"braunHollandEquatedRawScores", rec.braunHollandEquatedRawScores}};
+                          {"equatedRawScores", rec.equatedRawScores}};
+
+      if (rec.slope.has_value()) {
+        j["slope"] = rec.slope.value();
+      }
+
+      if (rec.intercept.has_value()) {
+        j["intercept"] = rec.intercept.value();
+      }
+
+      if (rec.braunHollandEquatedRawScores.has_value()) {
+        j["braunHollandEquatedRawScores"] = rec.braunHollandEquatedRawScores.value();
+      }
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::CubicSplinePostsmoothing& rec) {

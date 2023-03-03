@@ -5,47 +5,49 @@
 #include <string>
 #include <Eigen/Core>
 
-namespace Tests {
-  namespace Fixtures {
-    struct MondatX {
-      static Eigen::MatrixXd jointRawScores() {
-        std::string filename = "mondatx.dat";
+namespace EquatingRecipes {
+  namespace Tests {
+    namespace Fixtures {
+      struct MondatX {
+        static Eigen::MatrixXd jointRawScores() {
+          std::string filename = "mondatx.dat";
 
-        std::ifstream ifs(filename);
+          std::ifstream ifs(filename);
 
-        std::string lineRead;
-        size_t numberOfRows = 0;
+          std::string lineRead;
+          size_t numberOfRows = 0;
 
-        while (ifs) {
-          std::getline(ifs, lineRead);
+          while (ifs) {
+            std::getline(ifs, lineRead);
 
-          numberOfRows++;
-        }
-
-        ifs.close();
-
-        ifs.open(filename);
-
-        Eigen::MatrixXd rawScores(numberOfRows, 2);
-
-        size_t rowIndex = 0;
-        while (ifs) {
-          std::getline(ifs, lineRead);
-
-          if (lineRead.empty()) {
-            break;
+            numberOfRows++;
           }
 
-          rawScores(rowIndex, 0) = std::stod(lineRead.substr(36, 2));
-          rawScores(rowIndex, 1) = std::stod(lineRead.substr(38, 2));
+          ifs.close();
 
-          rowIndex++;
+          ifs.open(filename);
+
+          Eigen::MatrixXd rawScores(numberOfRows, 2);
+
+          size_t rowIndex = 0;
+          while (ifs) {
+            std::getline(ifs, lineRead);
+
+            if (lineRead.empty()) {
+              break;
+            }
+
+            rawScores(rowIndex, 0) = std::stod(lineRead.substr(36, 2));
+            rawScores(rowIndex, 1) = std::stod(lineRead.substr(38, 2));
+
+            rowIndex++;
+          }
+
+          return rawScores;
         }
-
-        return rawScores;
-      }
-    };
-  } // namespace Fixtures
-} // namespace Tests
+      };
+    } // namespace Fixtures
+  }   // namespace Tests
+} // namespace EquatingRecipes
 
 #endif

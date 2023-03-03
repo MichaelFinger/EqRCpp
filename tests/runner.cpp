@@ -32,7 +32,8 @@
 
 int main(int argc, char const *argv[]) {
   Tests::UnivariateStatistics univariateStatisticsTest;  
-  univariateStatisticsTest.run();
+  // univariateStatisticsTest.runLSAT6();
+  univariateStatisticsTest.runACTMath();
 
   // Tests::BivariateStatistics bivariateStatisticsTest;
   // bivariateStatisticsTest.run();

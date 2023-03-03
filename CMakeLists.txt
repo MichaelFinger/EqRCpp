@@ -15,7 +15,7 @@ include(CheckCXXCompilerFlag)
 include(FetchContent)
 
 # Boost library
-find_package(Boost REQUIRED COMPONENTS date_time)
+find_package(Boost REQUIRED)
 # Adds Boost::boost
 
 # Eigen math library
