@@ -18,7 +18,6 @@ namespace EquatingRecipes {
     struct BivariateStatistics {
       EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsRow;
       EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsColumn;
-
       int numberOfExaminees;
       Eigen::MatrixXi bivariateFreqDist;
       Eigen::MatrixXd bivariateFreqDistDouble;

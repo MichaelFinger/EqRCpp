@@ -14,8 +14,8 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct CommonItemSpecification {
-      int NewID;
-      int OldID;
+      int newID;
+      int oldID;
       size_t numberOfCategories;
       double scalingConstant;
       Eigen::VectorXd scoringFunctionValues;

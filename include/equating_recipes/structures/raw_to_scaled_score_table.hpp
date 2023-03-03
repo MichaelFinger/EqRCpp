@@ -25,6 +25,8 @@ namespace EquatingRecipes {
         double scaledScore;
       };
 
+      std::map<size_t, Entry> lookup;
+
       Entry getEntry(const size_t& scoreLocation) const {
         Entry entry = lookup.at(scoreLocation);
         return entry;
@@ -63,9 +65,6 @@ namespace EquatingRecipes {
 
         return msg;
       }
-
-    private:
-      std::map<size_t, Entry> lookup;
     };
   } // namespace Structures
 } // namespace EquatingRecipes
