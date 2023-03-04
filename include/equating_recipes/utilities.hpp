@@ -488,13 +488,13 @@ namespace EquatingRecipes {
                                        const int highestObservableRoundedScaledScore,
                                        Eigen::VectorXd& unroundedEquatedScaledScores,
                                        Eigen::VectorXd& roundedEquatedScaledScores) {
-      size_t numberOfRawScoresYct = Utilities::getNumberOfScores(maximumRawScoreYct,
-                                                                 minimumRawScoreYct,
-                                                                 scoreIncrementYct);
+      size_t numberOfRawScoresYct = EquatingRecipes::Utilities::getNumberOfScores(minimumRawScoreYct,
+                                                                                  maximumRawScoreYct,
+                                                                                  scoreIncrementYct);
 
-      size_t numberOfEquatedRawScores = Utilities::getNumberOfScores(maximumRawScoreX,
-                                                                     minimumRawScoreX,
-                                                                     rawScoreIncrement);
+      size_t numberOfEquatedRawScores = EquatingRecipes::Utilities::getNumberOfScores(minimumRawScoreX,
+                                                                                      maximumRawScoreX,
+                                                                                      rawScoreIncrement);
 
       EquatingRecipes::Structures::RawToScaledScoreTable::Entry firstRawToScaledScoreEntry = rawToScaledScoreTable.getFirstEntry();
       EquatingRecipes::Structures::RawToScaledScoreTable::Entry lastRawToScaledScoreEntry = rawToScaledScoreTable.getLastEntry();
@@ -533,13 +533,13 @@ namespace EquatingRecipes {
       for (size_t scoreLocation = 0; scoreLocation < numberOfEquatedRawScores; scoreLocation++) {
         if (roundToNumberOfDecimalPlaces >= 1) {
           roundedEquatedScaledScores(scoreLocation) = std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) *
-                                                      std::trunc(unroundedEquatedScaledScores(scoreLocation) /
-                                                                     std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) +
-                                                                 0.5);
+                                                      static_cast<double>(static_cast<int>(unroundedEquatedScaledScores(scoreLocation) /
+                                                                                               std::pow(static_cast<double>(10.0), static_cast<double>(roundToNumberOfDecimalPlaces - 1)) +
+                                                                                           0.5));
 
-          std::clamp(roundedEquatedScaledScores(scoreLocation),
-                     static_cast<double>(lowestObservableRoundedScaledScore),
-                     static_cast<double>(highestObservableRoundedScaledScore));
+          roundedEquatedScaledScores(scoreLocation) = std::clamp(roundedEquatedScaledScores(scoreLocation),
+                                                                 static_cast<double>(lowestObservableRoundedScaledScore),
+                                                                 static_cast<double>(highestObservableRoundedScaledScore));
         } else {
           roundedEquatedScaledScores(scoreLocation) = unroundedEquatedScaledScores(scoreLocation);
         }
@@ -634,8 +634,8 @@ namespace EquatingRecipes {
                                                                      numberOfScores);
         equatedScaledScoresResults.unroundedEquatedScaledScoreMoments.resize(pData.methods.size(),
                                                                              4);
-        equatedScaledScoresResults.roundedEquatedScaledScores.resize(pData.methods.size(),
-                                                                     4);
+        equatedScaledScoresResults.roundedEquatedScaledScoreMoments.resize(pData.methods.size(),
+                                                                           4);
       }
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
@@ -649,15 +649,15 @@ namespace EquatingRecipes {
                                                            maximumScoreYct,
                                                            scoreIncrementYct,
                                                            equatedRawScoreResults.equatedRawScores.row(methodIndex),
-                                                           pData.rawToScaledScoreTable,
+                                                           pData.rawToScaledScoreTable.value(),
                                                            pData.roundToNumberOfDecimalPlaces,
                                                            pData.lowestObservableRoundedScaledScore,
                                                            pData.highestObservableRoundedScaledScore,
                                                            unroundedEquatedScaledScores,
                                                            roundedEquatedScaledScores);
 
-        equatedScaledScoresResults.unroundedEquatedScaledScores = unroundedEquatedScaledScores;
-        equatedScaledScoresResults.roundedEquatedScaledScores = roundedEquatedScaledScores;
+        equatedScaledScoresResults.unroundedEquatedScaledScores.row(methodIndex) = unroundedEquatedScaledScores;
+        equatedScaledScoresResults.roundedEquatedScaledScores.row(methodIndex) = roundedEquatedScaledScores;
       }
 
       /* compute moments:  Note that when inc==1, essu[*][min-minp+1] is the
@@ -1078,10 +1078,10 @@ namespace EquatingRecipes {
         return EquatingRecipes::Structures::Method::LINEAR;
 
       } else if (methodCode == "E" &&
-                 design == EquatingRecipes::Structures::Design::RandomGroups) {
+                 design == EquatingRecipes::Structures::Design::RANDOM_GROUPS) {
         return EquatingRecipes::Structures::Method::EQUIPERCENTILE;
 
-      } else if (design == EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups) {
+      } else if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS) {
         if (methodCode == "E") {
           return EquatingRecipes::Structures::Method::FE_BH;
 
@@ -1099,7 +1099,6 @@ namespace EquatingRecipes {
 
         } else if (methodCode == "A") {
           return EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED;
-
         } else {
           throw std::runtime_error("Invalid method code for CINEG design.");
         }

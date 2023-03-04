@@ -12,6 +12,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class IRTMethod {
+      NOT_SPECIFIED,
       TRUE_SCORE,
       OBSERVED_SCORE,
       TRUE_AND_OBSERVED_SCORE

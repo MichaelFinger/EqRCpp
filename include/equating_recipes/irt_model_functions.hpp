@@ -5,6 +5,7 @@
 
 #include <Eigen/Dense>
 
+#include <equating_recipes/structures/common_item_specification.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/form_type.hpp>

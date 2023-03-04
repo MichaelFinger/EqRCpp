@@ -10,6 +10,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class IRTModel {
+      NOT_SPECIFIED,
       THREE_PARAMETER_LOGISTIC,
       GRADED_RESPONSE,
       PARTIAL_CREDIT,

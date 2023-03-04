@@ -20,7 +20,6 @@
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_item_results.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_method.hpp>
-#include <equating_recipes/structures/irt_true_score_equating.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/loss_spec.hpp>
 #include <equating_recipes/structures/method.hpp>

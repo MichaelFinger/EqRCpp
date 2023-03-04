@@ -9,9 +9,10 @@
 #include <nlohmann/json.hpp>
 
 #include <equating_recipes/structures/all_structures.hpp>
+#include <equating_recipes/log_linear_equating.hpp>
 
 namespace Eigen {
-  template <typename Derived>
+  template<typename Derived>
   void to_json(nlohmann::json& j, const Eigen::DenseBase<Derived>& matrix) {
     j = nlohmann::json::array();
 
@@ -44,33 +45,38 @@ namespace Eigen {
 
 namespace EquatingRecipes {
   namespace Structures {
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Design, {{EquatingRecipes::Structures::Design::RandomGroups, "random groups"},
-                                                                       {EquatingRecipes::Structures::Design::SingleGroup, "single group"},
-                                                                       {EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups, "common iten non-equivalent groups"},
-                                                                       {EquatingRecipes::Structures::Design::SingleGroupCounterBalance, "single group counter-balance"}})
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Design, {{EquatingRecipes::Structures::Design::NOT_SPECIFIED, ""},
+                                                                       {EquatingRecipes::Structures::Design::RANDOM_GROUPS, "random groups"},
+                                                                       {EquatingRecipes::Structures::Design::SINGLE_GROUP, "single group"},
+                                                                       {EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS, "common iten non-equivalent groups"},
+                                                                       {EquatingRecipes::Structures::Design::SINGLE_GROUP_COUNTER_BALANCE, "single group counter-balance"}})
 
     NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::FormType, {{EquatingRecipes::Structures::FormType::NEW, "new"},
                                                                          {EquatingRecipes::Structures::FormType::OLD, "old"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::IRTMethod, {{EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE, "observed score"},
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::IRTMethod, {{EquatingRecipes::Structures::IRTMethod::NOT_SPECIFIED, ""},
+                                                                          {EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE, "observed score"},
                                                                           {EquatingRecipes::Structures::IRTMethod::TRUE_SCORE, "true score"},
                                                                           {EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE, "true and observed score"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::IRTModel, {{EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC, "3-parameter logistic"},
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::IRTModel, {{EquatingRecipes::Structures::IRTModel::NOT_SPECIFIED, ""},
+                                                                         {EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC, "3-parameter logistic"},
                                                                          {EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE, "graded response"},
                                                                          {EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT, "generaized partial credit"},
                                                                          {EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE, "nominal response"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::IRTScaleTransformationMethod, {{EquatingRecipes::Structures::IRTScaleTransformationMethod::NONE, "none"},
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::IRTScaleTransformationMethod, {{EquatingRecipes::Structures::IRTScaleTransformationMethod::NOT_SPECIFIED, ""},
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA, "Haebara"},
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN, "mean mean"},
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA, "mean sigma"},
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD, "Stocking Lord"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::LossSpec, {{EquatingRecipes::Structures::LossSpec::MIX_HA, "Haebara"},
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::LossSpec, {{EquatingRecipes::Structures::LossSpec::NOT_SPECIFIED, ""},
+                                                                         {EquatingRecipes::Structures::LossSpec::MIX_HA, "Haebara"},
                                                                          {EquatingRecipes::Structures::LossSpec::MIX_SL, "Stocking-Lord"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Method, {{EquatingRecipes::Structures::Method::MEAN, "mean"},
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Method, {{EquatingRecipes::Structures::Method::NOT_SPECIFIED, ""},
+                                                                       {EquatingRecipes::Structures::Method::MEAN, "mean"},
                                                                        {EquatingRecipes::Structures::Method::LINEAR, "linear"},
                                                                        {EquatingRecipes::Structures::Method::EQUIPERCENTILE, "equipercentile"},
                                                                        {EquatingRecipes::Structures::Method::FE_BH, "frequency estimation with Braun-Holland"},
@@ -80,16 +86,23 @@ namespace EquatingRecipes {
                                                                        {EquatingRecipes::Structures::Method::FE_BH_CHAINED, "chained frequency estimation with Braun-Holland"},
                                                                        {EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED, "chained frequency estimation with Braun-Holland & modified estimation with Braun-Holland"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Smoothing, {{EquatingRecipes::Structures::Smoothing::NO, ""},
-                                                                          {EquatingRecipes::Structures::Smoothing::LOG_LINEAR, ""},
-                                                                          {EquatingRecipes::Structures::Smoothing::BETA_BINOMIAL, ""},
-                                                                          {EquatingRecipes::Structures::Smoothing::CUBIC_SPLINE, ""},
-                                                                          {EquatingRecipes::Structures::Smoothing::KERNAL, ""},
-                                                                          {EquatingRecipes::Structures::Smoothing::CONTINUIZED_LOG_LINEAR_EQUATING, ""}})
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Smoothing, {{EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED, ""},
+                                                                          {EquatingRecipes::Structures::Smoothing::LOG_LINEAR, "log linear"},
+                                                                          {EquatingRecipes::Structures::Smoothing::BETA_BINOMIAL, "beta binomial"},
+                                                                          {EquatingRecipes::Structures::Smoothing::CUBIC_SPLINE, "cubic spline"},
+                                                                          {EquatingRecipes::Structures::Smoothing::KERNAL, "kernal"},
+                                                                          {EquatingRecipes::Structures::Smoothing::CONTINUIZED_LOG_LINEAR_EQUATING, "continuized log linear equating"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Symmetry, {{EquatingRecipes::Structures::Symmetry::NEW_SCALE, "new scale"},
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Symmetry, {{EquatingRecipes::Structures::Symmetry::NOT_SPECIFIED, ""},
+                                                                         {EquatingRecipes::Structures::Symmetry::NEW_SCALE, "new scale"},
                                                                          {EquatingRecipes::Structures::Symmetry::OLD_SCALE, "old scale"},
                                                                          {EquatingRecipes::Structures::Symmetry::SYMMETRIC, "symmetric"}})
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::LogLinearEquating::CriterionComparisonType, {{EquatingRecipes::LogLinearEquating::CriterionComparisonType::ABSOLUTE, "absolute"},
+                                                                                               {EquatingRecipes::LogLinearEquating::CriterionComparisonType::RELATIVE, "relative"}})
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::LogLinearEquating::DesignMatrixType, {{EquatingRecipes::LogLinearEquating::DesignMatrixType::SOLUTION, "solution"},
+    {EquatingRecipes::LogLinearEquating::DesignMatrixType::RAW_SCORE, "raw score"}})
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::UnivariateStatistics& rec) {
       j = nlohmann::json {{"id", rec.id},
@@ -265,25 +278,6 @@ namespace EquatingRecipes {
                           {"momentsFittedDistributionNewGroup", rec.momentsFittedDistributionNewGroup},
                           {"momentsFittedDistributionOldGroup", rec.momentsFittedDistributionOldGroup},
                           {"momentsFittedDistributionSyntheticGroup", rec.momentsFittedDistributionSyntheticGroup}};
-    }
-
-    void to_json(nlohmann::json& j, const EquatingRecipes::Structures::IRTTrueScoreEquating& rec) {
-      j = nlohmann::json {{"numberOfItems", rec.numberOfItems},
-                          {"numberOfTestScoreCategories", rec.numberOfTestScoreCategories},
-                          {"numberOfItemScoreCategories", rec.numberOfItemScoreCategories},
-                          {"numberOfMCItemChoices", rec.numberOfMCItemChoices},
-                          {"correctItemScores", rec.correctItemScores},
-                          {"incorrectItemScores", rec.incorrectItemScores},
-                          {"a", rec.a},
-                          {"b", rec.b},
-                          {"c", rec.c},
-                          {"d", rec.d},
-                          {"testScores", rec.testScores},
-                          {"theta", rec.theta},
-                          {"minimumObservableTestScore", rec.minimumObservableTestScore},
-                          {"maximumObservableTestScore", rec.maximumObservableTestScore},
-                          {"scoreIncrement", rec.scoreIncrement},
-                          {"chanceLevelTestScore", rec.chanceLevelTestScore}};
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::Moments& rec) {
@@ -472,12 +466,7 @@ namespace EquatingRecipes {
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::PData& rec) {
-      j = nlohmann::json {{"summaryRawDataX", rec.summaryRawDataX},
-                          {"summaryRawDataY", rec.summaryRawDataY},
-                          {"summaryRawDataXV", rec.summaryRawDataXV},
-                          {"summaryRawDataYV", rec.summaryRawDataYV},
-                          {"summaryRawDataXY", rec.summaryRawDataXY},
-                          {"design", rec.design},
+      j = nlohmann::json {{"design", rec.design},
                           {"method", rec.method},
                           {"smoothing", rec.smoothing},
                           {"methodCode", rec.methodCode},
@@ -496,19 +485,55 @@ namespace EquatingRecipes {
                           {"scoreIncrementX", rec.scoreIncrementX},
                           {"scoreFrequenciesX", rec.scoreFrequenciesX},
                           {"numberOfExaminees", rec.numberOfExaminees},
-                          {"rawToScaledScoreTable", rec.rawToScaledScoreTable},
                           {"numberOfBootstrapReplications", rec.numberOfBootstrapReplications},
                           {"bootstrapReplicationNumber", rec.bootstrapReplicationNumber},
-                          {"roundToNumberOfDecimalPlaces", rec.roundToNumberOfDecimalPlaces},
-                          {"betaBinomalSmoothingX", rec.betaBinomalSmoothingX},
-                          {"betaBinomalSmoothingY", rec.betaBinomalSmoothingY},
-                          {"univariateLogLinearSmoothingX", rec.univariateLogLinearSmoothingX},
-                          {"univariateLogLinearSmoothingY", rec.univariateLogLinearSmoothingY},
-                          {"bivariateLogLinearSmoothingXV", rec.bivariateLogLinearSmoothingXV},
-                          {"bivariateLogLinearSmoothingYV", rec.bivariateLogLinearSmoothingYV},
-                          {"bivariateLogLinearSmoothingXY", rec.bivariateLogLinearSmoothingXY},
-                          {"cubicSplinePostsmoothing", rec.cubicSplinePostsmoothing},
-                          {"irtInput", rec.irtInput}};
+                          {"roundToNumberOfDecimalPlaces", rec.roundToNumberOfDecimalPlaces}};
+
+      if (rec.summaryRawDataX.has_value()) {
+        j["summaryRawDataX"] = rec.summaryRawDataX.value();
+      }
+      if (rec.summaryRawDataY.has_value()) {
+        j["summaryRawDataY"] = rec.summaryRawDataY.value();
+      }
+      if (rec.summaryRawDataXV.has_value()) {
+        j["summaryRawDataXV"] = rec.summaryRawDataXV.value();
+      }
+      if (rec.summaryRawDataYV.has_value()) {
+        j["summaryRawDataYV"] = rec.summaryRawDataYV.value();
+      }
+      if (rec.summaryRawDataXY.has_value()) {
+        j["summaryRawDataXY"] = rec.summaryRawDataXY.value();
+      }
+      if (rec.rawToScaledScoreTable.has_value()) {
+        j["rawToScaledScoreTable"] = rec.rawToScaledScoreTable.value();
+      }
+      if (rec.betaBinomalSmoothingX.has_value()) {
+        j["betaBinomalSmoothingX"] = rec.betaBinomalSmoothingX.value();
+      }
+      if (rec.betaBinomalSmoothingY.has_value()) {
+        j["betaBinomalSmoothingY"] = rec.betaBinomalSmoothingY.value();
+      }
+      if (rec.univariateLogLinearSmoothingX.has_value()) {
+        j["univariateLogLinearSmoothingX"] = rec.univariateLogLinearSmoothingX.value();
+      }
+      if (rec.univariateLogLinearSmoothingY.has_value()) {
+        j["univariateLogLinearSmoothingY"] = rec.univariateLogLinearSmoothingY.value();
+      }
+      if (rec.bivariateLogLinearSmoothingXV.has_value()) {
+        j["bivariateLogLinearSmoothingXV"] = rec.bivariateLogLinearSmoothingXV.value();
+      }
+      if (rec.bivariateLogLinearSmoothingYV.has_value()) {
+        j["bivariateLogLinearSmoothingYV"] = rec.bivariateLogLinearSmoothingYV.value();
+      }
+      if (rec.bivariateLogLinearSmoothingXY.has_value()) {
+        j["bivariateLogLinearSmoothingXY"] = rec.bivariateLogLinearSmoothingXY.value();
+      }
+      if (rec.cubicSplinePostsmoothing.has_value()) {
+        j["cubicSplinePostsmoothing"] = rec.cubicSplinePostsmoothing.value();
+      }
+      if (rec.irtInput.has_value()) {
+        j["irtInput"] = rec.irtInput.value();
+      }
     }
   } // namespace Structures
 } // namespace EquatingRecipes

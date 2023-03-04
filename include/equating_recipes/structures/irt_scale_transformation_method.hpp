@@ -8,7 +8,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class IRTScaleTransformationMethod {
-      NONE,
+      NOT_SPECIFIED,
       HAEBARA,
       MEAN_MEAN,
       MEAN_SIGMA,

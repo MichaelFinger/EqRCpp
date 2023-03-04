@@ -1,0 +1,102 @@
+void Wrapper_Smooth_BB(struct USTATS *x, int nparm, double rel,
+                      struct BB_SMOOTH *s);
+
+void Wrapper_RB(char design, char method, char smoothing,  
+               struct USTATS *x, struct USTATS *y, 
+               struct BB_SMOOTH *bbx, struct BB_SMOOTH *bby, int rep,
+               struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_Bootstrap(struct PDATA *inall, int nrep, long *idum, 
+      struct BOOT_ERAW_RESULTS *t, struct BOOT_ESS_RESULTS *u);
+
+void Wrapper_CN(char design, char method, char smoothing, 
+               double w1, int anchor, double rv1, double rv2,
+               struct BSTATS *xv, struct BSTATS *yv, int rep,
+               struct PDATA *inall, struct ERAW_RESULTS *r);  
+
+void Wrapper_RC(char design, char method, char smoothing,  
+               struct USTATS *x, struct USTATS *y, 
+               struct ULL_SMOOTH *ullx, struct ULL_SMOOTH *ully, int rep,
+               struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_SC(char design, char method, char smoothing,  struct BSTATS *xy, 
+               struct BLL_SMOOTH *bllxy, int rep, struct PDATA *inall, 
+			   struct ERAW_RESULTS *r);
+
+void Wrapper_CC(char design, char method, char smoothing, 
+                double w1, int anchor, double rv1, double rv2,
+                struct BSTATS *xv, struct BSTATS *yv, 
+				struct BLL_SMOOTH *bllxv, struct BLL_SMOOTH *bllyv,
+			    int rep, struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_Smooth_CubSpl(char design, 
+                           struct PDATA *xtoy, struct ERAW_RESULTS *r_xtoy, 
+						   double *se_xtoy, struct CS_SMOOTH *cs_xtoy,
+                           struct PDATA *ytox, struct ERAW_RESULTS *r_ytox, 
+						   double *se_ytox, struct CS_SMOOTH *cs_ytox, 
+                           double prlow, double prhigh, double s, int rep, 
+                           struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_ESS(struct PDATA *inall, struct ERAW_RESULTS *r, double minp, 
+                double maxp, double incp, char *nameyct, int round, 
+                int lprss, int hprss, struct ESS_RESULTS *s);
+
+ void Wrapper_IRTeq(char design, char method, double w1, 
+     char ItemNewFile[], char ItemOldFile[], char DistNewFile[], char DistOldFile[], 
+     struct ItemSpec *NewItems, struct ItemSpec *OldItems, 
+     struct RawFitDist *NewForm, struct RawFitDist *OldForm,
+     struct RawTruObsEquiv *RawEq, struct IRTstControl *StInfo, int *NewFD, 
+     struct IRT_INPUT *irtall, struct PDATA *pinall, struct ERAW_RESULTS *r);  
+
+void Wrapper_IRTst(FILE *outf, char tt[],
+     char ItemNewFile[], char ItemOldFile[], char ItemCommonFile[], 
+     char DistNewFile[], char DistOldFile[], 
+     int HA, enum symmetry HAsym, enum OnOff HAfs, double HAs, double HAi,
+     int SL, enum symmetry SLsym, enum OnOff SLfs, double SLs, double SLi,
+     char ST[], int PrintFiles);
+
+void Wrapper_RK(char design, char method, char smoothing,  
+               struct USTATS *x, struct USTATS *y, 
+               struct ULL_SMOOTH *ullx, struct ULL_SMOOTH *ully, int rep,
+               struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_SK(char design, char method, char smoothing,  struct BSTATS *xy, 
+               struct BLL_SMOOTH *bllxy, int rep, struct PDATA *inall, 
+			   struct ERAW_RESULTS *r);
+
+void Wrapper_CK(char design, char method, char smoothing, 
+                double w1, int anchor, double rv1, double rv2,
+                struct BSTATS *xv, struct BSTATS *yv, 
+				struct BLL_SMOOTH *bllxv, struct BLL_SMOOTH *bllyv,
+			    int rep, struct PDATA *inall, struct ERAW_RESULTS *r);           
+
+void Wrapper_Smooth_ULL(struct USTATS *x, int c,
+						int scale, int Btype, int ctype, double crit,
+						FILE *fp, struct ULL_SMOOTH *s);
+
+void Wrapper_Smooth_BLL(struct BSTATS *xv, int anchor,
+                        int cu, int cv, int cuv, int cpm[][2],
+						int scale, int Btype, int ctype, double crit,
+                        FILE *fp, struct BLL_SMOOTH *s);
+
+void Wrapper_RL(char design, char method, char smoothing,  
+               struct USTATS *x, struct USTATS *y, 
+               struct ULL_SMOOTH *ullx, struct ULL_SMOOTH *ully, int rep,
+               struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_SL(char design, char method, char smoothing,  struct BSTATS *xy, 
+               struct BLL_SMOOTH *bllxy, int rep, struct PDATA *inall, 
+			   struct ERAW_RESULTS *r);
+
+void Wrapper_CL(char design, char method, char smoothing, 
+                double w1, int anchor, double rv1, double rv2,
+                struct BSTATS *xv, struct BSTATS *yv, 
+				struct BLL_SMOOTH *bllxv, struct BLL_SMOOTH *bllyv,
+			    int rep, struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_RN(char design, char method, char smoothing,  
+               struct USTATS *x, struct USTATS *y, int rep,
+               struct PDATA *inall, struct ERAW_RESULTS *r);
+
+void Wrapper_SN(char design, char method, char smoothing,  struct BSTATS *xy, 
+               int rep, struct PDATA *inall, struct ERAW_RESULTS *r);

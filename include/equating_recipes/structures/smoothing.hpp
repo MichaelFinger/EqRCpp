@@ -6,7 +6,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class Smoothing {
-       NO,
+       NOT_SPECIFIED,
        LOG_LINEAR,
        BETA_BINOMIAL,
        CUBIC_SPLINE,

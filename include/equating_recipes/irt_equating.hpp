@@ -44,7 +44,6 @@ University of Iowa
 #include <Eigen/LU>
 #include <fmt/core.h>
 
-#include <equating_recipes/irt_scale_transformation.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/irt_equating_results.hpp>
@@ -53,10 +52,13 @@ University of Iowa
 #include <equating_recipes/structures/irt_method.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_item_results.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/utilities.hpp>
+
+#include <equating_recipes/irt_scale_transformation.hpp>
 
 namespace EquatingRecipes {
   class IRTEquating {

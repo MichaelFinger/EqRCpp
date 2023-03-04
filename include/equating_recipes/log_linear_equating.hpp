@@ -39,7 +39,6 @@ University of Iowa
 #define LOG_LINEAR_EQUATING_HPP
 
 #include <cmath>
-#include <iostream>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -47,15 +46,18 @@ University of Iowa
 
 #include <Eigen/Dense>
 #include <Eigen/LU>
-#include <fmt/core.h>
-
-#include <equating_recipes/cg_equipercentile_equating.hpp>
-#include <equating_recipes/utilities.hpp>
 
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
+#include <equating_recipes/structures/design.hpp>
+#include <equating_recipes/structures/equated_raw_score_results.hpp>
+#include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
+#include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
+#include <equating_recipes/cg_equipercentile_equating.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   class LogLinearEquating {
@@ -74,7 +76,7 @@ namespace EquatingRecipes {
     };
 
     enum class DesignMatrixType {
-      SOLUITON,
+      SOLUTION,
       RAW_SCORE
     };
 
@@ -1621,8 +1623,8 @@ namespace EquatingRecipes {
                              numberOfDegreesOfSmoothingU,
                              criterionComparisonType,
                              designMatrixType,
-                             (designMatrixType == DesignMatrixType::SOLUITON) ? observedMoments : observedCentralMoments,
-                             (designMatrixType == DesignMatrixType::SOLUITON) ? fittedMoments : fittedCentralMoments,
+                             (designMatrixType == DesignMatrixType::SOLUTION) ? observedMoments : observedCentralMoments,
+                             (designMatrixType == DesignMatrixType::SOLUTION) ? fittedMoments : fittedCentralMoments,
                              criterion)) {
           break;
         }
@@ -1852,7 +1854,7 @@ namespace EquatingRecipes {
                           const double& criterion) {
       // int i;
 
-      if (designMatrixType == DesignMatrixType::SOLUITON) {
+      if (designMatrixType == DesignMatrixType::SOLUTION) {
         for (size_t momentIndex = 0; momentIndex < numberOfCMoments; momentIndex++) {
           if (criterionComparisonType == CriterionComparisonType::ABSOLUTE) {
             if (std::abs(observedMoments(momentIndex) - fittedMoments(momentIndex)) > criterion) {

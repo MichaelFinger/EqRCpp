@@ -4,6 +4,7 @@
 #include <vector>
 #include <Eigen/Core>
 
+#include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/optimization_function.hpp>
 
 namespace EquatingRecipes {

@@ -6,10 +6,11 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class Design {
-       RandomGroups,
-       SingleGroup,
-       CommonItenNonEquivalentGroups,
-       SingleGroupCounterBalance      
+      NOT_SPECIFIED,
+      RANDOM_GROUPS,
+      SINGLE_GROUP,
+      COMMON_ITEN_NON_EQUIVALENT_GROUPS,
+      SINGLE_GROUP_COUNTER_BALANCE      
     };
   }
 }

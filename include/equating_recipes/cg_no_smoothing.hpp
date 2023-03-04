@@ -30,11 +30,20 @@
 #include <cmath>
 #include <string>
 
+#include <equating_recipes/structures/bivariate_statistics.hpp>
+#include <equating_recipes/structures/design.hpp>
+#include <equating_recipes/structures/equated_raw_score_results.hpp>
+#include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/moments.hpp>
+#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
+#include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/cg_equipercentile_equating.hpp>
 
 namespace EquatingRecipes {
-  struct CGEquatingNoSmoothing {
+  class CGEquatingNoSmoothing {
+  public:
     /*
       Wrapper for getting mean, linear, or equipercentile equating for CINEG design
       with no smoothing. Equipercentile equating includes frequency estimation with 
@@ -256,10 +265,10 @@ namespace EquatingRecipes {
 
         equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), scoreLocationX + 1);
         equatedRawScoreResults.equatedRawScoreMoments.resize(pData.methods.size(), 4);
-        equatedRawScoreResults.relativeFreqDistsX(1, scoreLocationX + 1);
-        equatedRawScoreResults.relativeFreqDistsY(1, scoreLocationY + 1);
-        equatedRawScoreResults.slope(pData.methods.size());
-        equatedRawScoreResults.intercept(pData.methods.size());
+        equatedRawScoreResults.relativeFreqDistsX.resize(1, scoreLocationX + 1);
+        equatedRawScoreResults.relativeFreqDistsY.resize(1, scoreLocationY + 1);
+        equatedRawScoreResults.slope.resize(pData.methods.size());
+        equatedRawScoreResults.intercept.resize(pData.methods.size());
       }
 
       /* Mean and Linear equating results:
@@ -374,9 +383,9 @@ namespace EquatingRecipes {
                                                           pData.reliabilityCommonItemsPopulation1,
                                                           pData.reliabilityCommonItemsPopulation2);
 
-        equatedRawScoreResults.relativeFreqDistsX.col(1) = cgResults.syntheticPopulationRelativeFreqDistX;
-        equatedRawScoreResults.relativeFreqDistsY.col(1) = cgResults.syntheticPopulationRelativeFreqDistY;
-        equatedRawScoreResults.equatedRawScores.col(0) = cgResults.equatedRawScores;
+        equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.row(0) = cgResults.equatedRawScores;
 
         if (cgResults.slope.has_value()) {
           equatedRawScoreResults.slope(1) = cgResults.slope.value();
@@ -387,7 +396,7 @@ namespace EquatingRecipes {
         }
 
         if (cgResults.braunHollandEquatedRawScores.has_value()) {
-          equatedRawScoreResults.equatedRawScores.col(1) = cgResults.braunHollandEquatedRawScores.value();
+          equatedRawScoreResults.equatedRawScores.row(1) = cgResults.braunHollandEquatedRawScores.value();
         }
       }
 
@@ -410,9 +419,9 @@ namespace EquatingRecipes {
                                                           pData.reliabilityCommonItemsPopulation1,
                                                           pData.reliabilityCommonItemsPopulation2);
 
-        equatedRawScoreResults.relativeFreqDistsX.col(1) = cgResults.syntheticPopulationRelativeFreqDistX;
-        equatedRawScoreResults.relativeFreqDistsY.col(1) = cgResults.syntheticPopulationRelativeFreqDistY;
-        equatedRawScoreResults.equatedRawScores.col(2) = cgResults.equatedRawScores;
+        equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
+        equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
+        equatedRawScoreResults.equatedRawScores.row(2) = cgResults.equatedRawScores;
 
         if (cgResults.slope.has_value()) {
           equatedRawScoreResults.slope(1) = cgResults.slope.value();
@@ -423,14 +432,14 @@ namespace EquatingRecipes {
         }
 
         if (cgResults.braunHollandEquatedRawScores.has_value()) {
-          equatedRawScoreResults.equatedRawScores.col(3) = cgResults.braunHollandEquatedRawScores.value();
+          equatedRawScoreResults.equatedRawScores.row(3) = cgResults.braunHollandEquatedRawScores.value();
         }
       }
 
       /* Chained equipercentile method */
       if (methodCode == "C") {
         /* Chained in position 0 */
-        equatedRawScoreResults.equatedRawScores.col(0) =
+        equatedRawScoreResults.equatedRawScores.row(0) =
             cgEquipercentileEquating.chainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
                                                                    bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
                                                                    bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
@@ -448,7 +457,7 @@ namespace EquatingRecipes {
       /* All methods: FE, BF under FE, MFE, BH under MFE, Chained */
       if (methodCode == "A") {
         /* Chained in position 4 */
-        equatedRawScoreResults.equatedRawScores.col(4) =
+        equatedRawScoreResults.equatedRawScores.row(4) =
             cgEquipercentileEquating.chainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
                                                                    bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
                                                                    bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
@@ -466,7 +475,7 @@ namespace EquatingRecipes {
       //  /* FE, BF under FE, Chained */
       if (methodCode == "H") {
         /* Chained in position 2 */
-        equatedRawScoreResults.equatedRawScores.col(2) =
+        equatedRawScoreResults.equatedRawScores.row(2) =
             cgEquipercentileEquating.chainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
                                                                    bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
                                                                    bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
@@ -483,13 +492,14 @@ namespace EquatingRecipes {
 
       /* get moments */
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.col(methodIndex),
-                                                                                                                     bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble);
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
+                                                                                                               bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble);
 
-        equatedRawScoreResults.equatedRawScoreMoments.col(methodIndex) = moments.momentValues;
+        equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
       }
     }
 
+  private:
     /*
       computes results for common-item linear equating
       of x to scale of y for methods:

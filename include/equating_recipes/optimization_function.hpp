@@ -10,6 +10,7 @@
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/structures/quadrature.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 
 namespace EquatingRecipes {
   class OptimizationFunction {
@@ -21,11 +22,11 @@ namespace EquatingRecipes {
       this->newThetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
 
       switch (irtScaleTransformationData.irtScaleTranformationMethod) {
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::HAEBARA:
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:
           this->symmetry = irtScaleTransformationData.haebaraSymmetryOption;
           this->functionStandardization = irtScaleTransformationData.haebaraFunctionStandardization;
           break;
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::STOCKING_LORD:
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
           this->symmetry = irtScaleTransformationData.stockingLordSymmetryOption;
           this->functionStandardization = irtScaleTransformationData.stockingLordFunctionStandardization;
            break;

@@ -38,10 +38,12 @@ University of Iowa
 #include <Eigen/Eigenvalues>
 #include <fmt/core.h>
 
-#include <equating_recipes/structures/design.hpp>
-#include <equating_recipes/structures/p_data.hpp>
-#include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/cubic_spline_postsmoothing.hpp>
+#include <equating_recipes/structures/design.hpp>
+#include <equating_recipes/structures/equated_raw_score_results.hpp>
+#include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
@@ -137,8 +139,8 @@ namespace EquatingRecipes {
                         EquatingRecipes::Structures::EquatedRawScoreResults& equaredRawScoreResultsXToY,
                         Eigen::VectorXd& standardErrorXToY,
                         EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingXToY,
-                        EquatingRecipes::Structures::PData pDataYToX,
-                        EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResultsYToX,
+                        EquatingRecipes::Structures::PData& pDataYToX,
+                        EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResultsYToX,
                         Eigen::VectorXd& standardErrorYToX,
                         EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingYToX,
                         double& percentileRankLow,
@@ -157,7 +159,7 @@ namespace EquatingRecipes {
 
       std::string methodCode = EquatingRecipes::Utilities::getMethodCode(pDataXToY.method);
 
-      if (design == EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups &&
+      if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS &&
           methodCode != "E" &&
           methodCode != "F" &&
           methodCode != "C") {
@@ -222,8 +224,8 @@ namespace EquatingRecipes {
                            true); /* inv of cub spl for y to x */
 
       for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
-        equatedRawScoreResults.equatedRawScores(0, scoreLocation) = (pDataXToY.cubicSplinePostsmoothing.cubicSplineSmoothedEquivalents(scoreLocation) +
-                                                                     pDataYToX.cubicSplinePostsmoothing.cubicSplineSmoothedEquivalents(scoreLocation)) /
+        equatedRawScoreResults.equatedRawScores(0, scoreLocation) = (pDataXToY.cubicSplinePostsmoothing.value().cubicSplineSmoothedEquivalents(scoreLocation) +
+                                                                     pDataYToX.cubicSplinePostsmoothing.value().cubicSplineSmoothedEquivalents(scoreLocation)) /
                                                                     2.0;
       }
 
@@ -300,13 +302,13 @@ namespace EquatingRecipes {
            percentile ranks of prlow and prhigh, respectively,
            for various designs (R, S, or G) */
 
-      if (design == EquatingRecipes::Structures::Design::RandomGroups) {
-        numberOfScores = pDataZ.summaryRawDataX.numberOfScores;
+      if (design == EquatingRecipes::Structures::Design::RANDOM_GROUPS) {
+        numberOfScores = pDataZ.summaryRawDataX.value().numberOfScores;
 
         size_t scoreLocation;
 
         for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-          if (percentileRankLow <= pDataZ.summaryRawDataX.percentileRankDist(scoreLocation)) {
+          if (percentileRankLow <= pDataZ.summaryRawDataX.value().percentileRankDist(scoreLocation)) {
             break;
           }
         }
@@ -314,20 +316,20 @@ namespace EquatingRecipes {
         percentileRankLowestScore = static_cast<double>(scoreLocation);
 
         for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-          if (percentileRankHigh >= pDataZ.summaryRawDataX.percentileRankDist(scoreLocation)) {
+          if (percentileRankHigh >= pDataZ.summaryRawDataX.value().percentileRankDist(scoreLocation)) {
             break;
           }
         }
 
         percentileRankHighestScore = static_cast<double>(scoreLocation);
 
-      } else if (design == EquatingRecipes::Structures::Design::SingleGroup) {
-        numberOfScores = pDataZ.summaryRawDataXY.univariateStatisticsRow.numberOfScores;
+      } else if (design == EquatingRecipes::Structures::Design::SINGLE_GROUP) {
+        numberOfScores = pDataZ.summaryRawDataXY.value().univariateStatisticsRow.numberOfScores;
 
         size_t scoreLocation;
 
         for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-          if (percentileRankLow <= pDataZ.summaryRawDataXY.univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+          if (percentileRankLow <= pDataZ.summaryRawDataXY.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
             break;
           }
         }
@@ -335,15 +337,15 @@ namespace EquatingRecipes {
         percentileRankLowestScore = static_cast<double>(scoreLocation);
 
         for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-          if (percentileRankHigh >= pDataZ.summaryRawDataXY.univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+          if (percentileRankHigh >= pDataZ.summaryRawDataXY.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
             break;
           }
         }
 
         percentileRankHighestScore = static_cast<double>(scoreLocation);
 
-      } else if (design == EquatingRecipes::Structures::Design::CommonItenNonEquivalentGroups) {
-        numberOfScores = pDataZ.summaryRawDataXV.univariateStatisticsRow.numberOfScores;
+      } else if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS) {
+        numberOfScores = pDataZ.summaryRawDataXV.value().univariateStatisticsRow.numberOfScores;
 
         /* In next section of code, low and high are determined using
            actual raw score distribtuion for chained (C), synthetic raw score
@@ -358,7 +360,7 @@ namespace EquatingRecipes {
           size_t scoreLocation;
 
           for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-            if (percentileRankLow <= pDataZ.summaryRawDataXV.univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+            if (percentileRankLow <= pDataZ.summaryRawDataXV.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
               break;
             }
           }
@@ -366,7 +368,7 @@ namespace EquatingRecipes {
           percentileRankLowestScore = static_cast<double>(scoreLocation);
 
           for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-            if (percentileRankHigh >= pDataZ.summaryRawDataXV.univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+            if (percentileRankHigh >= pDataZ.summaryRawDataXV.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
               break;
             }
           }

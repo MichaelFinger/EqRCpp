@@ -17,6 +17,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class Method {
+      NOT_SPECIFIED,
       MEAN,
       LINEAR,
       EQUIPERCENTILE,

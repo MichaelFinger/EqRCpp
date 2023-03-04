@@ -32,17 +32,20 @@ University of Iowa
 
 #include <Eigen/Dense>
 
-#include <equating_recipes/cg_equipercentile_equating.hpp>
-#include <equating_recipes/log_linear_equating.hpp>
+#include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/moments.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/cg_equipercentile_equating.hpp>
+#include <equating_recipes/log_linear_equating.hpp>
+
 
 namespace EquatingRecipes {
   class ContinuizedLogLinearEquating {

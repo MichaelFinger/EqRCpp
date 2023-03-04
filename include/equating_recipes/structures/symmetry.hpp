@@ -7,6 +7,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class Symmetry {
+      NOT_SPECIFIED,
       OLD_SCALE, 
       NEW_SCALE, 
       SYMMETRIC

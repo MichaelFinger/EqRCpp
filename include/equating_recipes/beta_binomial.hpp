@@ -31,21 +31,21 @@ University of Iowa
 #ifndef BETA_BINOMIAL_HPP
 #define BETA_BINOMIAL_HPP
 
+#include <cmath>
+#include <limits>
 #include <string>
+
 #include <Eigen/Dense>
 
 #include <equating_recipes/structures/beta_binomial_smoothing.hpp>
+#include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
+#include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/moments.hpp>
+#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/utilities.hpp>
-#include <equating_recipes/structures/design.hpp>
-#include <equating_recipes/structures/method.hpp>
-#include <equating_recipes/structures/smoothing.hpp>
-#include <equating_recipes/structures/p_data.hpp>
-
-#include <iostream>
-#include <string>
-#include <fmt/core.h>
 
 namespace EquatingRecipes {
   class BetaBinomial {
@@ -190,20 +190,19 @@ namespace EquatingRecipes {
 
       /* Compute equating results */
       Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
-      univariateStatisticsY.minimumScore,
-      univariateStatisticsY.scoreIncrement,
-      betaBinomialSmoothingY.fittedRawScoreCumulativeRelativeFreqDist,
-      univariateStatisticsX.numberOfScores,
-      betaBinomialSmoothingX.fittedRawScorePercentileRankDist);
+                                                                                                  univariateStatisticsY.minimumScore,
+                                                                                                  univariateStatisticsY.scoreIncrement,
+                                                                                                  betaBinomialSmoothingY.fittedRawScoreCumulativeRelativeFreqDist,
+                                                                                                  univariateStatisticsX.numberOfScores,
+                                                                                                  betaBinomialSmoothingX.fittedRawScorePercentileRankDist);
 
       for (size_t index = 0; index < equatedRawScores.size(); index++) {
         results.equatedRawScores(0, index) = equatedRawScores(index);
       }
-      
+
       EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(
-        equatedRawScores,
-        pData.scoreFrequenciesX
-      );
+          equatedRawScores,
+          pData.scoreFrequenciesX);
 
       return results;
     }
@@ -306,9 +305,9 @@ namespace EquatingRecipes {
 
         /* calculate fitted observed score moments */
         EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(smoothedFrequencies,
-                                                                                                                     0,
-                                                                                                                     numberOfItems,
-                                                                                                                     1.0);
+                                                                                                               0,
+                                                                                                               numberOfItems,
+                                                                                                               1.0);
         betaFitResults.fittedRawScoreMoments = moments.momentValues;
       }
 
@@ -394,9 +393,9 @@ namespace EquatingRecipes {
 
         /* calculate fitted observed score moments */
         EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(betaFitResults.fittedRawScoreDensity,
-                                                                                                                     0.0,
-                                                                                                                     numberOfItems,
-                                                                                                                     1.0);
+                                                                                                               0.0,
+                                                                                                               numberOfItems,
+                                                                                                               1.0);
         betaFitResults.fittedRawScoreMoments = moments.momentValues;
       }
 

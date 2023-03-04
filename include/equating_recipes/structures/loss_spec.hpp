@@ -7,6 +7,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     enum class LossSpec {
+      NOT_SPECIFIED,
       MIX_HA,
       MIX_SL
     };

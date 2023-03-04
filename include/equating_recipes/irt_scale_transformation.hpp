@@ -27,7 +27,7 @@
 #include <equating_recipes/structures/irt_fitted_distribution.hpp>
 #include <equating_recipes/structures/irt_input.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
-#include <equating_recipes/structures/irt_scale_tranformation_method.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
@@ -101,27 +101,26 @@ namespace EquatingRecipes {
       double intercept = std::numeric_limits<double>::quiet_NaN();
 
       switch (irtScaleTransformationData.irtScaleTranformationMethod) {
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::HAEBARA:
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:
           slope = irtScaleTransformationData.haebaraSlope.value_or(std::numeric_limits<double>::quiet_NaN());
           intercept = irtScaleTransformationData.haebaraIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
           break;
 
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::MEAN_MEAN:
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN:
           slope = irtScaleTransformationData.meanMeanSlope;
           intercept = irtScaleTransformationData.meanMeanIntercept;
           break;
 
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::MEAN_SIGMA:
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA:
           slope = irtScaleTransformationData.meanSigmaSlope;
           intercept = irtScaleTransformationData.meanSigmaIntercept;
           break;
 
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::STOCKING_LORD:
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
           slope = irtScaleTransformationData.stockingLordSlope.value_or(std::numeric_limits<double>::quiet_NaN());
           intercept = irtScaleTransformationData.stockingLordIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
           break;
 
-        case EquatingRecipes::Structures::IRTScaleTranformationMethod::NONE:
         default:
           break;
       }
