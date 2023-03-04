@@ -77,15 +77,11 @@ namespace Tests {
     }
 
     void runACTMath() {
-      std::filesystem::path datasetFolder = std::filesystem::relative("../../ER for distribution 9-10-09/Examples/");
+      EquatingRecipes::JSON::JsonDocument jsonDoc;
+      jsonDoc.fromTextFile("../docs/EquatingRecipesExamples/actmathfreq.dat.json");
 
       EquatingRecipes::Tests::Fixtures::ACTMathFreq actMathFreq;
-      // actMathFreq.import(datasetFolder.string());
-      actMathFreq.import("/Users/michaelfinger/Developer/EquatingRecipes/ER for distribution 9-10-09/Examples/");
-
-      std::cout << actMathFreq.data.rawScores << "\n";
-      std::cout << actMathFreq.data.freqX << "\n";
-      std::cout << actMathFreq.data.freqY << "\n";
+      actMathFreq.configure(jsonDoc.json);
     }
   };
 } // namespace Tests

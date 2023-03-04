@@ -25,6 +25,21 @@ namespace Eigen {
       j.push_back(row);
     }
   }
+
+  void from_json(const nlohmann::json& j, Eigen::MatrixXd& matrix) {
+    size_t numberOfRows = j.size();
+    size_t numberOfColumns = j[0].size();
+
+    matrix.resize(numberOfRows, numberOfColumns);
+
+    for (size_t rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+      nlohmann::json jsonRow = j[rowIndex];
+
+      for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+        matrix(rowIndex, columnIndex) = jsonRow[columnIndex];
+      }
+    }
+  }
 } // namespace Eigen
 
 namespace EquatingRecipes {

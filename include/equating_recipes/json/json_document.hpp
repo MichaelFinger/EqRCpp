@@ -8,8 +8,11 @@
 
 namespace EquatingRecipes {
   namespace JSON {
-    class JsonDocument {
-    public:
+    struct JsonDocument {
+      std::string dump() {
+        return this->json.dump(2);
+      }
+
       void setJson(const nlohmann::json& json) {
         this->json = json;
       }
@@ -24,8 +27,15 @@ namespace EquatingRecipes {
         ofs.close();
       }
 
-    private:
-      nlohmann::json json;
+      void fromTextFile(const std::string& filename) {
+        std::ifstream ifs(filename);
+
+        this->json = nlohmann::json::parse(ifs);
+
+        ifs.close();
+      }
+
+      nlohmann::json json;      
     };
   } // namespace JSON
 } // namespace EquatingRecipes

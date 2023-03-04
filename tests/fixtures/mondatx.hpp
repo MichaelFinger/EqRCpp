@@ -1,49 +1,23 @@
 #ifndef FIXTURES_MONDATX_HPP
 #define FIXTURES_MONDATX_HPP
 
-#include <fstream>
-#include <string>
 #include <Eigen/Core>
+#include <nlohmann/json.hpp>
+#include <equating_recipes/json/structures.hpp>
 
 namespace EquatingRecipes {
   namespace Tests {
     namespace Fixtures {
       struct MondatX {
-        static Eigen::MatrixXd jointRawScores() {
-          std::string filename = "mondatx.dat";
+        Eigen::MatrixXd itemResponseMatrix;
+        Eigen::MatrixXd rawScores;
 
-          std::ifstream ifs(filename);
+        void configure(const nlohmann::json& j) {
+          Eigen::MatrixXd matrix;
+          j.get_to(matrix);
 
-          std::string lineRead;
-          size_t numberOfRows = 0;
-
-          while (ifs) {
-            std::getline(ifs, lineRead);
-
-            numberOfRows++;
-          }
-
-          ifs.close();
-
-          ifs.open(filename);
-
-          Eigen::MatrixXd rawScores(numberOfRows, 2);
-
-          size_t rowIndex = 0;
-          while (ifs) {
-            std::getline(ifs, lineRead);
-
-            if (lineRead.empty()) {
-              break;
-            }
-
-            rawScores(rowIndex, 0) = std::stod(lineRead.substr(36, 2));
-            rawScores(rowIndex, 1) = std::stod(lineRead.substr(38, 2));
-
-            rowIndex++;
-          }
-
-          return rawScores;
+          this->itemResponseMatrix = matrix(Eigen::seq(0, matrix.rows() - 1), Eigen::seq(0, matrix.cols() - 3));
+          this->rawScores = matrix(Eigen::seq(0, matrix.rows() - 1), Eigen::seq(matrix.cols() - 2, matrix.cols() - 1));
         }
       };
     } // namespace Fixtures

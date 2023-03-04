@@ -684,15 +684,15 @@ namespace EquatingRecipes {
       }
     }
 
-    static EquatingRecipes::Structures::BivariateStatistics bivariate(const Eigen::MatrixXd& scores,
-                                                                      const double& minimumRowScore,
-                                                                      const double& maximumRowScore,
-                                                                      const double& rowScoreIncrement,
-                                                                      const double& minimumColumnScore,
-                                                                      const double& maximumColumnScore,
-                                                                      const double& columnScoreIncrement,
-                                                                      const std::string& rowScoreId,
-                                                                      const std::string& columnScoreId) {
+    static EquatingRecipes::Structures::BivariateStatistics bivariateFromScores(const Eigen::MatrixXd& scores,
+                                                                                const double& minimumRowScore,
+                                                                                const double& maximumRowScore,
+                                                                                const double& rowScoreIncrement,
+                                                                                const double& minimumColumnScore,
+                                                                                const double& maximumColumnScore,
+                                                                                const double& columnScoreIncrement,
+                                                                                const std::string& rowScoreId,
+                                                                                const std::string& columnScoreId) {
       EquatingRecipes::Structures::BivariateStatistics bivariateStatistics;
 
       size_t rowScoreColumnIndex = 0;
