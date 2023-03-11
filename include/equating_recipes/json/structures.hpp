@@ -102,7 +102,7 @@ namespace EquatingRecipes {
                                                                                                {EquatingRecipes::LogLinearEquating::CriterionComparisonType::RELATIVE, "relative"}})
 
     NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::LogLinearEquating::DesignMatrixType, {{EquatingRecipes::LogLinearEquating::DesignMatrixType::SOLUTION, "solution"},
-    {EquatingRecipes::LogLinearEquating::DesignMatrixType::RAW_SCORE, "raw score"}})
+                                                                                        {EquatingRecipes::LogLinearEquating::DesignMatrixType::RAW_SCORE, "raw score"}})
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::UnivariateStatistics& rec) {
       j = nlohmann::json {{"id", rec.id},
