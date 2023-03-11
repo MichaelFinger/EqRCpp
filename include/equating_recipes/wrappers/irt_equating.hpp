@@ -56,9 +56,9 @@ University of Iowa
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/wrappers/utilities.hpp>
 
-#include <equating_recipes/irt_scale_transformation.hpp>
+#include <equating_recipes/wrappers/irt_scale_transformation.hpp>
 
 namespace EquatingRecipes {
   class IRTEquating {

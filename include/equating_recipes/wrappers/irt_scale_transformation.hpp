@@ -14,11 +14,6 @@
 #include <Eigen/LU>
 #include <fmt/core.h>
 
-#include <equating_recipes/haebara_function.hpp>
-#include <equating_recipes/irt_model_functions.hpp>
-#include <equating_recipes/lbfgs_optimizer.hpp>
-#include <equating_recipes/optimization_function.hpp>
-#include <equating_recipes/stocking_lord_function.hpp>
 #include <equating_recipes/structures/common_item_specification.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
@@ -27,14 +22,19 @@
 #include <equating_recipes/structures/irt_fitted_distribution.hpp>
 #include <equating_recipes/structures/irt_input.hpp>
 #include <equating_recipes/structures/irt_model.hpp>
-#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
+#include <equating_recipes/structures/irt_scale_transformation_method.hpp>
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/quadrature.hpp>
 #include <equating_recipes/structures/symmetry.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/wrappers/haebara_function.hpp>
+#include <equating_recipes/wrappers/irt_model_functions.hpp>
+#include <equating_recipes/wrappers/lbfgs_optimizer.hpp>
+#include <equating_recipes/wrappers/optimization_function.hpp>
+#include <equating_recipes/wrappers/stocking_lord_function.hpp>
+#include <equating_recipes/wrappers/utilities.hpp>
 
 namespace EquatingRecipes {
   class IRTScaleTransformation {

@@ -44,7 +44,7 @@ University of Iowa
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/wrappers/utilities.hpp>
 
 namespace EquatingRecipes {
   class CubicSpline {

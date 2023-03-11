@@ -11,8 +11,8 @@
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/cg_no_smoothing.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/wrappers/cg_no_smoothing.hpp>
+#include <equating_recipes/wrappers/utilities.hpp>
 
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/json/json_document.hpp>

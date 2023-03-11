@@ -5,7 +5,7 @@
 #include <Eigen/Core>
 
 #include <equating_recipes/structures/symmetry.hpp>
-#include <equating_recipes/optimization_function.hpp>
+#include <equating_recipes/wrappers/optimization_function.hpp>
 
 namespace EquatingRecipes {
   class StockingLordFunction : public EquatingRecipes::OptimizationFunction {
