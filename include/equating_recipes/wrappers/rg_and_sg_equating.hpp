@@ -130,7 +130,7 @@ namespace EquatingRecipes {
         pData.smoothing = smoothing;
         pData.methods = methodNames;
 
-        pData.mininumScoreX = univariateStatisticsX.minimumScore;
+        pData.minimumScoreX = univariateStatisticsX.minimumScore;
         pData.maximumScoreX = univariateStatisticsX.maximumScore;
         pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
         pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
@@ -141,7 +141,7 @@ namespace EquatingRecipes {
 
       if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
         size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.mininumScoreX,
+                                                                                   pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
 
         equatedRawScoreResults.equatedRawScores.setZero(1, maximumScoreLocation + 1);
@@ -162,7 +162,7 @@ namespace EquatingRecipes {
                                           univariateStatisticsY.momentValues(0),
                                           univariateStatisticsY.momentValues(1),
                                           method,
-                                          pData.mininumScoreX,
+                                          pData.minimumScoreX,
                                           pData.maximumScoreX,
                                           pData.scoreIncrementX,
                                           equatedRawScoreResults.slope(0),
@@ -276,7 +276,7 @@ namespace EquatingRecipes {
         pData.method = method;
         pData.smoothing = smoothing;
 
-        pData.mininumScoreX = bivariateStatisticsXY.univariateStatisticsRow.minimumScore;
+        pData.minimumScoreX = bivariateStatisticsXY.univariateStatisticsRow.minimumScore;
         pData.maximumScoreX = bivariateStatisticsXY.univariateStatisticsRow.maximumScore;
         pData.scoreIncrementX = bivariateStatisticsXY.univariateStatisticsRow.scoreIncrement;
         pData.scoreFrequenciesX = bivariateStatisticsXY.univariateStatisticsRow.freqDistDouble;
@@ -287,7 +287,7 @@ namespace EquatingRecipes {
       /* no storage allocation for bootstrap reps >1 */
       if (pData.bootstrapReplicationNumber <= 1) {
         size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.mininumScoreX,
+                                                                                   pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
 
         equatedRawScoreResults.equatedRawScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
@@ -310,7 +310,7 @@ namespace EquatingRecipes {
                                                                  bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
                                                                  bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
                                                                  method,
-                                                                 pData.mininumScoreX,
+                                                                 pData.minimumScoreX,
                                                                  pData.maximumScoreX,
                                                                  pData.scoreIncrementX,
                                                                  equatedRawScoreResults.slope(0),

@@ -14,7 +14,7 @@ namespace EquatingRecipes {
     struct UnivariateLogLinearSmoothing {
       size_t numberOfExaminees;   /* number of persons */
       size_t numberOfScores;            /* number of score categories */
-      double mininumRawScore;        /* minimum raw score */
+      double minimumRawScore;        /* minimum raw score */
       double rawScoreIncrement;        /* increment in raw scores */
       size_t degreesOfSmoothing;             /* number of degrees of smoothing */
       Eigen::MatrixXd rawScoreDesignMatrix;    /* design matrix for raw scores */

@@ -612,7 +612,7 @@ namespace EquatingRecipes {
                                        const int& lowestObservableScaledScore,
                                        const int& highestObservableScaledScore,
                                        EquatingRecipes::Structures::EquatedScaledScoresResults& equatedScaledScoresResults) {
-      int numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.mininumScoreX,
+      int numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.minimumScoreX,
                                                                          pData.maximumScoreX,
                                                                          pData.scoreIncrementX);
 
@@ -642,7 +642,7 @@ namespace EquatingRecipes {
         Eigen::VectorXd unroundedEquatedScaledScores(numberOfScores);
         Eigen::VectorXd roundedEquatedScaledScores(numberOfScores);
 
-        EquatingRecipes::Utilities::getEquatedScaledScores(pData.mininumScoreX,
+        EquatingRecipes::Utilities::getEquatedScaledScores(pData.minimumScoreX,
                                                            pData.maximumScoreX,
                                                            pData.scoreIncrementX,
                                                            minimumScoreYct,

@@ -170,7 +170,7 @@ namespace EquatingRecipes {
         pData.design = design;
         pData.method = method;
         pData.smoothing = smoothing;
-        pData.mininumScoreX = univariateStatisticsX.minimumScore;
+        pData.minimumScoreX = univariateStatisticsX.minimumScore;
         pData.maximumScoreX = univariateStatisticsX.maximumScore;
         pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
         pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
@@ -182,7 +182,7 @@ namespace EquatingRecipes {
       /* allocation and assignments for r */
       if (pData.bootstrapReplicationNumber <= 1) {
         size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.mininumScoreX,
+                                                                                   pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
         results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
         results.equatedRawScoreMoments.resize(pData.methods.size(), 4);

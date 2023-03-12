@@ -174,7 +174,7 @@ namespace EquatingRecipes {
       pData.bootstrapReplicationNumber = 0;
       pData.design = design;
       pData.weightSyntheticPopulation1 = w1;
-      pData.mininumScoreX = stInfo.minimumRawScoreNewForm;
+      pData.minimumScoreX = stInfo.minimumRawScoreNewForm;
       pData.maximumScoreX = stInfo.maximumRawScoreNewForm;
       pData.scoreIncrementX = stInfo.rawScoreIncrementNewForm;
 

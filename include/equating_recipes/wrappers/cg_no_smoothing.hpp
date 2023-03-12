@@ -245,7 +245,7 @@ namespace EquatingRecipes {
           pData.methods.push_back(methodNames[8]);
         }
 
-        pData.mininumScoreX = bivariateStatisticsXV.univariateStatisticsRow.minimumScore;
+        pData.minimumScoreX = bivariateStatisticsXV.univariateStatisticsRow.minimumScore;
         pData.maximumScoreX = bivariateStatisticsXV.univariateStatisticsRow.maximumScore;
         pData.scoreIncrementX = bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement;
         pData.scoreFrequenciesX = bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble;
@@ -568,7 +568,7 @@ namespace EquatingRecipes {
                                   const double& population1Weight,
                                   const bool& isInternalAnchor,
                                   const EquatingRecipes::Structures::Method& method,
-                                  const double& mininumScore,
+                                  const double& minimumScore,
                                   const double& maximumScore,
                                   const double& scoreIncrement,
                                   const size_t& numberOfMethods,
@@ -689,13 +689,13 @@ namespace EquatingRecipes {
 
       /* get equated raw scores */
       size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(maximumScore,
-                                                                                 mininumScore,
+                                                                                 minimumScore,
                                                                                  scoreIncrement);
 
       for (size_t methodIndex = 0; methodIndex < numberOfMethods; methodIndex++) {
         for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
           double score = EquatingRecipes::Utilities::getScore(scoreLocation,
-                                                              mininumScore,
+                                                              minimumScore,
                                                               scoreIncrement);
           methodByEquatedRawScores(methodIndex, scoreLocation) = intercepts(methodIndex) + slopes(methodIndex) * score;
         }

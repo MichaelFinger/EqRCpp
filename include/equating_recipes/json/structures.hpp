@@ -325,7 +325,7 @@ namespace EquatingRecipes {
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& rec) {
       j = nlohmann::json {{"numberOfExaminees", rec.numberOfExaminees},
                           {"numberOfScores", rec.numberOfScores},
-                          {"mininumRawScore", rec.mininumRawScore},
+                          {"minimumRawScore", rec.minimumRawScore},
                           {"rawScoreIncrement", rec.rawScoreIncrement},
                           {"degreesOfSmoothing", rec.degreesOfSmoothing},
                           {"rawScoreDesignMatrix", rec.rawScoreDesignMatrix},
@@ -513,7 +513,7 @@ namespace EquatingRecipes {
                           {"reliabilityCommonItemsPopulation1", rec.reliabilityCommonItemsPopulation1},
                           {"reliabilityCommonItemsPopulation2", rec.reliabilityCommonItemsPopulation2},
                           {"methods", rec.methods},
-                          {"mininumScoreX", rec.mininumScoreX},
+                          {"minimumScoreX", rec.minimumScoreX},
                           {"maximumScoreX", rec.maximumScoreX},
                           {"scoreIncrementX", rec.scoreIncrementX},
                           {"scoreFrequenciesX", rec.scoreFrequenciesX},

@@ -134,10 +134,10 @@ namespace EquatingRecipes {
                                                                                       const bool& isInternalAnchor,
                                                                                       const size_t& numberOfScoresV,
                                                                                       const size_t& numberOfScoresX,
-                                                                                      const double& mininumScoreX,
+                                                                                      const double& minimumScoreX,
                                                                                       const double& maximumScoreX,
                                                                                       const size_t& numberOfScoresY,
-                                                                                      const double& mininumScoreY,
+                                                                                      const double& minimumScoreY,
                                                                                       const double& maximumScoreY,
                                                                                       const double& scoreIncrement,
                                                                                       const bool& doBraunHollandLinearEquating,
@@ -167,12 +167,12 @@ namespace EquatingRecipes {
                          relFreqDistYSynPop);
 
       /* Fxs, Gys, and prxs */
-      Eigen::VectorXd cumRelFreqDistXSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(mininumScoreX,
+      Eigen::VectorXd cumRelFreqDistXSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(minimumScoreX,
                                                                                                      maximumScoreX,
                                                                                                      scoreIncrement,
                                                                                                      relFreqDistXSynPop);
 
-      Eigen::VectorXd cumRelFreqDistYSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(mininumScoreY,
+      Eigen::VectorXd cumRelFreqDistYSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(minimumScoreY,
                                                                                                      maximumScoreY,
                                                                                                      scoreIncrement,
                                                                                                      relFreqDistYSynPop);
@@ -180,10 +180,10 @@ namespace EquatingRecipes {
       Eigen::VectorXd percentileRanksXSynPop(numberOfScoresX);
       for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
         double score = EquatingRecipes::Utilities::getScore(scoreLocation,
-                                                            mininumScoreX,
+                                                            minimumScoreX,
                                                             scoreIncrement);
 
-        percentileRanksXSynPop(scoreLocation) = EquatingRecipes::Utilities::getPercentileRank(mininumScoreX,
+        percentileRanksXSynPop(scoreLocation) = EquatingRecipes::Utilities::getPercentileRank(minimumScoreX,
                                                                                               maximumScoreX,
                                                                                               scoreIncrement,
                                                                                               cumRelFreqDistXSynPop,
@@ -192,7 +192,7 @@ namespace EquatingRecipes {
 
       /* Equipercentile equating */
       results.equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(numberOfScoresY,
-                                                                                          mininumScoreY,
+                                                                                          minimumScoreY,
                                                                                           scoreIncrement,
                                                                                           cumRelFreqDistYSynPop,
                                                                                           numberOfScoresX,
@@ -203,9 +203,9 @@ namespace EquatingRecipes {
         double slope;
         double intercept;
 
-        braunHollandLinearEquating(mininumScoreX,
+        braunHollandLinearEquating(minimumScoreX,
                                    maximumScoreX,
-                                   mininumScoreY,
+                                   minimumScoreY,
                                    maximumScoreY,
                                    scoreIncrement,
                                    relFreqDistXSynPop,
@@ -219,7 +219,7 @@ namespace EquatingRecipes {
 
         for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
           double score = EquatingRecipes::Utilities::getScore(scoreLocation,
-                                                              mininumScoreX,
+                                                              minimumScoreX,
                                                               scoreIncrement);
 
           braunHollandEquatedRawScores(scoreLocation) = slope * score + intercept;

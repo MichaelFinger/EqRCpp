@@ -210,7 +210,7 @@ namespace EquatingRecipes {
         pData.method = method;
         pData.smoothing = smoothing;
         pData.methods.push_back("   y-equiv");
-        pData.mininumScoreX = univariateStatisticsX.minimumScore;
+        pData.minimumScoreX = univariateStatisticsX.minimumScore;
         pData.maximumScoreX = univariateStatisticsX.maximumScore;
         pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
         pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
@@ -221,7 +221,7 @@ namespace EquatingRecipes {
 
       if (pData.bootstrapReplicationNumber <= 1) {
         size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.mininumScoreX,
+                                                                                   pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
         equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
         equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
@@ -340,7 +340,7 @@ namespace EquatingRecipes {
 
         pData.methods.push_back("   y-equiv");
 
-        pData.mininumScoreX = xy.univariateStatisticsRow.minimumScore;
+        pData.minimumScoreX = xy.univariateStatisticsRow.minimumScore;
         pData.maximumScoreX = xy.univariateStatisticsRow.maximumScore;
         pData.scoreIncrementX = xy.univariateStatisticsRow.scoreIncrement;
         pData.scoreFrequenciesX = xy.univariateStatisticsRow.freqDistDouble;
@@ -349,7 +349,7 @@ namespace EquatingRecipes {
 
       if (pData.bootstrapReplicationNumber <= 1) {
         size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.mininumScoreX,
+                                                                                   pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
         equatedRawScoreResults.equatedRawScores(pData.methods.size(), maximumScoreLocation + 1);
         equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
@@ -550,7 +550,7 @@ namespace EquatingRecipes {
           throw std::runtime_error("Invalid method in log linear equating.");
         }
 
-        pData.mininumScoreX = xv.univariateStatisticsRow.minimumScore;
+        pData.minimumScoreX = xv.univariateStatisticsRow.minimumScore;
         pData.maximumScoreX = xv.univariateStatisticsRow.maximumScore;
         pData.scoreIncrementX = xv.univariateStatisticsRow.scoreIncrement;
         pData.scoreFrequenciesX = xv.univariateStatisticsRow.freqDistDouble;
@@ -805,7 +805,7 @@ namespace EquatingRecipes {
 
       univariateLogLinearSmoothing.numberOfExaminees = numberOfExaminees;
       univariateLogLinearSmoothing.numberOfScores = numberOfScores;
-      univariateLogLinearSmoothing.mininumRawScore = minimumScore;
+      univariateLogLinearSmoothing.minimumRawScore = minimumScore;
       univariateLogLinearSmoothing.rawScoreIncrement = scoreIncrement;
       univariateLogLinearSmoothing.degreesOfSmoothing = numberOfDegreesSmoothing;
       univariateLogLinearSmoothing.observedFrequencies = frequencyDistribution;
@@ -834,7 +834,7 @@ namespace EquatingRecipes {
       Eigen::MatrixXi crossProductMomentDesignations;
 
       designMatrix(univariateLogLinearSmoothing.numberOfScores,
-                   univariateLogLinearSmoothing.mininumRawScore,
+                   univariateLogLinearSmoothing.minimumRawScore,
                    univariateLogLinearSmoothing.rawScoreIncrement,
                    0,
                    0,

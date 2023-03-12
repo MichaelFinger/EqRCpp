@@ -391,7 +391,7 @@ namespace EquatingRecipes {
     void bootstrapInitializeEquatedRawScoreResults(EquatingRecipes::Structures::PData& pData,
                                                    EquatingRecipes::Structures::BootstrapEquatedRawScoreResults& bootstrapEquatedRawScoreResults) {
       size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                 pData.mininumScoreX,
+                                                                                 pData.minimumScoreX,
                                                                                  pData.scoreIncrementX);
 
       bootstrapEquatedRawScoreResults.sumAndMeanScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
@@ -811,7 +811,7 @@ namespace EquatingRecipes {
                                              EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults,
                                              EquatingRecipes::Structures::BootstrapEquatedRawScoreResults& bootstrapEquatedRawScoreResults) {
       size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                 pData.mininumScoreX,
+                                                                                 pData.minimumScoreX,
                                                                                  pData.scoreIncrementX);
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
@@ -861,7 +861,7 @@ namespace EquatingRecipes {
     void bootstrapStandardErrorsEquatedRawScores(EquatingRecipes::Structures::PData& pData,
                                                  EquatingRecipes::Structures::BootstrapEquatedRawScoreResults& bootstrapEquatedRawScoreResults) {
       size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                 pData.mininumScoreX,
+                                                                                 pData.minimumScoreX,
                                                                                  pData.scoreIncrementX);
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
@@ -927,7 +927,7 @@ namespace EquatingRecipes {
                                                  EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults& bootstrapEquatedScaledScoresResults) {
       size_t numberOfMethods = pData.methods.size();
       size_t numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.maximumScoreX,
-                                                                            pData.mininumScoreX,
+                                                                            pData.minimumScoreX,
                                                                             pData.scoreIncrementX);
 
       bootstrapEquatedScaledScoresResults.unroundedScaledScoresSumsAndMeans.setZero(numberOfMethods, numberOfScores);
@@ -981,7 +981,7 @@ namespace EquatingRecipes {
                                                 EquatingRecipes::Structures::EquatedScaledScoresResults& equatedScaledScoresResults,
                                                 EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults& bootstrapEquatedScaledScoresResults) {
       size_t numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.maximumScoreX,
-                                                                            pData.mininumScoreX,
+                                                                            pData.minimumScoreX,
                                                                             pData.scoreIncrementX);
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
@@ -1056,7 +1056,7 @@ namespace EquatingRecipes {
     void bootstrapStandardErrorsEquatedScaledScores(EquatingRecipes::Structures::PData& pData,
                                                     EquatingRecipes::Structures::BootstrapEquatedScaledScoresResults& bootstrapEqautedScaledScoreResults) {
       size_t numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.maximumScoreX,
-                                                                            pData.mininumScoreX,
+                                                                            pData.minimumScoreX,
                                                                             pData.scoreIncrementX);
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
         /* for unrounded scale scores */

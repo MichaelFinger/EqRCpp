@@ -176,18 +176,18 @@ namespace EquatingRecipes {
         pData.methods = methodNames;
 
         /* following variables are for x */
-        pData.mininumScoreX = pDataXToY.mininumScoreX;
+        pData.minimumScoreX = pDataXToY.minimumScoreX;
         pData.maximumScoreX = pDataXToY.maximumScoreX;
         pData.scoreIncrementX = pDataXToY.scoreIncrementX;
         pData.scoreFrequenciesX = pDataXToY.scoreFrequenciesX;
         pData.numberOfExaminees = pDataXToY.numberOfExaminees;
       }
 
-      double numberOfScoresX = EquatingRecipes::Utilities::getNumberOfScores(pDataXToY.mininumScoreX,
+      double numberOfScoresX = EquatingRecipes::Utilities::getNumberOfScores(pDataXToY.minimumScoreX,
                                                                              pDataXToY.maximumScoreX,
                                                                              pDataXToY.scoreIncrementX);
 
-      double numberOfScoresY = EquatingRecipes::Utilities::getNumberOfScores(pDataYToX.mininumScoreX,
+      double numberOfScoresY = EquatingRecipes::Utilities::getNumberOfScores(pDataYToX.minimumScoreX,
                                                                              pDataYToX.maximumScoreX,
                                                                              pDataYToX.scoreIncrementX);
 
@@ -477,7 +477,7 @@ namespace EquatingRecipes {
 
       for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
         cubicSplineEquatedScores(scoreLocation, 0) = ((equatedRawScoreResults.equatedRawScores(0, scoreLocation) / scoreIncrement) -
-                                                      pDataZ.mininumScoreX / scoreIncrement);
+                                                      pDataZ.minimumScoreX / scoreIncrement);
 
         cubicSplineStandardErrors(scoreLocation, 0) = standardErrors(scoreLocation) / scoreIncrement;
       }
@@ -563,11 +563,11 @@ namespace EquatingRecipes {
       for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
         cubicSplinePostsmoothingXToY.equipercentileEquivalents(scoreLocation) = cubicSplineEquatedEquivalents(scoreLocation) *
                                                                                     scoreIncrement +
-                                                                                pDataZ.mininumScoreX;
+                                                                                pDataZ.minimumScoreX;
       }
 
       for (size_t scoreLocation = 0; scoreLocation < boundedNumberOfScores; scoreLocation++) {
-        cubicSplinePostsmoothingXToY.coefficients(scoreLocation) = smoothingSplineCoefficientMatrix(scoreLocation) * scoreIncrement + pDataZ.mininumScoreX;
+        cubicSplinePostsmoothingXToY.coefficients(scoreLocation) = smoothingSplineCoefficientMatrix(scoreLocation) * scoreIncrement + pDataZ.minimumScoreX;
 
         cubicSplinePostsmoothingXToY.coefficients(boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(boundedNumberOfScores + scoreLocation);
 
@@ -578,7 +578,7 @@ namespace EquatingRecipes {
 
       if (getCubicSplineInverse) {
         for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-          cubicSplinePostsmoothingXToY.inverseCubicSplineSmoothedEquivalents(scoreLocation) = cubicSplineInverseValues(scoreLocation) * scoreIncrement + pDataZ.mininumScoreX;
+          cubicSplinePostsmoothingXToY.inverseCubicSplineSmoothedEquivalents(scoreLocation) = cubicSplineInverseValues(scoreLocation) * scoreIncrement + pDataZ.minimumScoreX;
         }
       }
     }

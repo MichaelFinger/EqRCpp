@@ -43,7 +43,7 @@ namespace EquatingRecipes {
       double reliabilityCommonItemsPopulation1 = std::numeric_limits<double>::quiet_NaN(); /* reliability of common items in pop 1 */
       double reliabilityCommonItemsPopulation2 = std::numeric_limits<double>::quiet_NaN(); /* reliability of common items in pop 2 */
       std::vector<std::string> methods;
-      double mininumScoreX = std::numeric_limits<double>::quiet_NaN();              /* min score for x */
+      double minimumScoreX = std::numeric_limits<double>::quiet_NaN();              /* min score for x */
       double maximumScoreX = std::numeric_limits<double>::quiet_NaN();              /* max score for x */
       double scoreIncrementX = std::numeric_limits<double>::quiet_NaN();            /* increment between adjacent scores for x */
       Eigen::VectorXd scoreFrequenciesX; /* fd for new form x */
