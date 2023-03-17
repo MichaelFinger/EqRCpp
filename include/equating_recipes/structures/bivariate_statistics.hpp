@@ -16,6 +16,9 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct BivariateStatistics {
+      std::string datasetName;
+      std::string rowVariableName;
+      std::string columnVariableName;
       EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsRow;
       EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsColumn;
       int numberOfExaminees;

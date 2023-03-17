@@ -14,11 +14,16 @@
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/wrappers/rg_and_sg_equating.hpp>
 #include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/analyses/univariate_statistics.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
     struct LinearEquatingRandomGroups {
       struct InputData {
+        std::string datasetName;
+        std::string xVariableName;
+        std::string yVariableName;
+
         Eigen::VectorXd scoreFrequenciesX;
         double minimumScoreX;
         double maximumScoreX;
@@ -41,18 +46,39 @@ namespace EquatingRecipes {
         size_t roundToNumberOfDecimalPlaces = 1;
       };
 
-      nlohmann::json operator()(const EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData& inputData) {
-        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = EquatingRecipes::Utilities::univariateFromScoreFrequencies(inputData.scoreFrequenciesX,
-                                                                                                                                             inputData.minimumScoreX,
-                                                                                                                                             inputData.maximumScoreX,
-                                                                                                                                             inputData.scoreIncrementX,
-                                                                                                                                             inputData.idX);
+      struct OutputData {
+        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
+        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
+        EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
+        EquatingRecipes::Structures::PData pData;
+        EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+        EquatingRecipes::Structures::EquatedScaledScoresResults equatedScaledScoreResults;
+      };
 
-        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY = EquatingRecipes::Utilities::univariateFromScoreFrequencies(inputData.scoreFrequenciesY,
-                                                                                                                                             inputData.minimumScoreY,
-                                                                                                                                             inputData.maximumScoreY,
-                                                                                                                                             inputData.scoreIncrementY,
-                                                                                                                                             inputData.idY);
+      nlohmann::json operator()(const EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData& inputData,
+                                EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData& outputData) {
+        EquatingRecipes::Analyses::UnivariateStatistics univariateStatistics;
+        EquatingRecipes::Analyses::UnivariateStatistics::InputData inputDataX;
+
+        inputDataX.datasetName = inputData.datasetName;
+        inputDataX.id = inputData.idX;
+        inputDataX.variableName = inputData.xVariableName;
+        inputDataX.minimumScore = inputData.minimumScoreX;
+        inputDataX.maximumScore = inputData.maximumScoreX;
+        inputDataX.scoreIncrement = inputData.scoreIncrementX;
+        inputDataX.scoreFrequencies = inputData.scoreFrequenciesX;
+
+        EquatingRecipes::Analyses::UnivariateStatistics::InputData inputDataY;
+        inputDataY.datasetName = inputData.datasetName;
+        inputDataY.id = inputData.idY;
+        inputDataY.variableName = inputData.yVariableName;
+        inputDataY.minimumScore = inputData.minimumScoreY;
+        inputDataY.maximumScore = inputData.maximumScoreY;
+        inputDataY.scoreIncrement = inputData.scoreIncrementY;
+        inputDataY.scoreFrequencies = inputData.scoreFrequenciesY;
+
+        nlohmann::json univariateStatisticsXResults = univariateStatistics.operator()(inputDataX, outputData.univariateStatisticsX);
+        nlohmann::json univariateStatisticsYResults = univariateStatistics.operator()(inputDataY, outputData.univariateStatisticsY);
 
         EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
         EquatingRecipes::Structures::PData pData;
@@ -62,8 +88,8 @@ namespace EquatingRecipes {
         randomAndSingleGroupEquating.randomGroupEquating(EquatingRecipes::Structures::Design::RANDOM_GROUPS,
                                                          EquatingRecipes::Structures::Method::LINEAR,
                                                          EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED,
-                                                         univariateStatisticsX,
-                                                         univariateStatisticsY,
+                                                         outputData.univariateStatisticsX,
+                                                         outputData.univariateStatisticsY,
                                                          0,
                                                          pData,
                                                          equatedRawScoreResults);
@@ -79,17 +105,22 @@ namespace EquatingRecipes {
                                                            inputData.highestObservableScaledScore,
                                                            equatedScaledScoreResults);
 
+        outputData.pData = pData;
+        outputData.equatedRawScoreResults = equatedRawScoreResults;
+        outputData.equatedScaledScoreResults = equatedScaledScoreResults;
+
         nlohmann::json j = nlohmann::json::object();
-        nlohmann::json equatingResults = nlohmann::json::object();
 
-        equatingResults["Title"] = "Linear Equating With Random Groups Design";
-        equatingResults["UnivariateStatisticsX"] = univariateStatisticsX;
-        equatingResults["UnivariateStatisticsY"] = univariateStatisticsY;
-        equatingResults["PData"] = pData;
-        equatingResults["EquatedRawScoreResults"] = equatedRawScoreResults;
-        equatingResults["EquatedScaledScoreResults"] = equatedScaledScoreResults;
-
-        j["linear_equating_random_groups"] = equatingResults;
+        j["AnalysisTitle"] = "Linear Equating With Random Groups Design";
+        j["AnalysisType"] = "linear_equating_random_groups";
+        j["DatasetName"] = inputData.datasetName;
+        j["RowVariableName"] = inputData.xVariableName;
+        j["ColumnwVariableName"] = inputData.yVariableName;
+        j["UnivariateStatisticsX"] = outputData.univariateStatisticsX;
+        j["UnivariateStatisticsY"] = outputData.univariateStatisticsY;
+        j["PData"] = outputData.pData;
+        j["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
+        j["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
 
         return j;
       }

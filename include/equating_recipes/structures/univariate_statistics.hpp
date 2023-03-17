@@ -24,6 +24,8 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct UnivariateStatistics {
+      std::string datasetName;
+      std::string variableName;
       std::string id;                             // single character id
       int numberOfExaminees;                      // number of examinees
       double minimumScore;                        // min score in data
@@ -39,6 +41,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd cumulativeRelativeFreqDist; // cum relative freq dist
       Eigen::VectorXd percentileRankDist;         // percentile rank dist
       Eigen::VectorXd momentValues;               // moments: mean, sd, skew, kurt
+      Eigen::VectorXd rawScores;
       
       void configure(const double& minimumScore,
                      const double& maximumScore,
@@ -49,13 +52,14 @@ namespace EquatingRecipes {
         this->scoreIncrement = scoreIncrement;
         this->numberOfScores = numberOfScores;
 
-        this->freqDist.setZero(this->numberOfScores);
-        this->freqDistDouble.setZero(this->numberOfScores);
-        this->relativeFreqDist.setZero(this->numberOfScores);
-        this->cumulativeFreqDist.setZero(this->numberOfScores);
-        this->cumulativeRelativeFreqDist.setZero(this->numberOfScores);
-        this->percentileRankDist.setZero(this->numberOfScores);
-        this->momentValues.setZero(4);
+        this->freqDist.resize(this->numberOfScores);
+        this->freqDistDouble.resize(this->numberOfScores);
+        this->relativeFreqDist.resize(this->numberOfScores);
+        this->cumulativeFreqDist.resize(this->numberOfScores);
+        this->cumulativeRelativeFreqDist.resize(this->numberOfScores);
+        this->percentileRankDist.resize(this->numberOfScores);
+        this->momentValues.resize(4);
+        this->rawScores.resize(this->numberOfScores);
       }
 
       // std::string toString() {

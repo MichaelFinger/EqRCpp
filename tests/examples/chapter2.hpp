@@ -10,7 +10,7 @@
 #include <equating_recipes/wrappers/utilities.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-
+#include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/json/json_document.hpp>
 
@@ -27,20 +27,19 @@ namespace EquatingRecipes {
           /* Random Groups Design: Kolen and Brennan (2004)
            Chapter 2 example (see pp. 50-52) */
 
-          // ReadFdGet_USTATS("actmathfreq.dat",1,2,0,40,1,'X',&x);
-          // Print_USTATS(outf,"ACT Math X",&x);
+          EquatingRecipes::Analyses::UnivariateStatistics univariateStatistics;
+          EquatingRecipes::Analyses::UnivariateStatistics::InputData inputData;
 
-          EquatingRecipes::Structures::UnivariateStatistics univariateStatistics = EquatingRecipes::Utilities::univariateFromScoreFrequencies(actMathFreq.freqX,
-                                                                                                                                              0,
-                                                                                                                                              40,
-                                                                                                                                              1,
-                                                                                                                                              "X");
+          inputData.datasetName = "ACTMathFreq";
+          inputData.id = "X";
+          inputData.variableName = "ACTMathScore";
+          inputData.minimumScore = 0;
+          inputData.maximumScore = 40;
+          inputData.scoreIncrement = 1;
+          inputData.scoreFrequencies = actMathFreq.freqX;
 
-          nlohmann::json j = univariateStatistics;
-
-          EquatingRecipes::JSON::JsonDocument doc;
-          doc.setJson(j);
-          doc.toTextFile("chapter2_ACTMath.json");
+          EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsACTMath;
+          nlohmann::json univariateStatisticsACTMathJson = univariateStatistics(inputData, univariateStatisticsACTMath);
 
           /* Common-items Nonequivalent Groups Design: 
           Kolen and Brennan (2004) Chapter 4 example (see page 123)*/
@@ -54,11 +53,17 @@ namespace EquatingRecipes {
                                                                                                                                  12,
                                                                                                                                  1,
                                                                                                                                  "X",
-                                                                                                                                 "V");
-          j = bivariateStatistics;
+                                                                                                                                 "V",
+                                                                                                                                 "MondatX",
+                                                                                                                                 "RawScoreForm1",
+                                                                                                                                 "RawScoreForm2");
 
+          nlohmann::json j = {univariateStatisticsACTMathJson,
+                              bivariateStatistics};
+
+          EquatingRecipes::JSON::JsonDocument doc;
           doc.setJson(j);
-          doc.toTextFile("chapter2_MONDAT_X.json");
+          doc.toTextFile("chapter2.json");
         }
       };
     } // namespace Examples

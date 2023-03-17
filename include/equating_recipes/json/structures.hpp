@@ -139,6 +139,8 @@ namespace EquatingRecipes {
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::UnivariateStatistics& rec) {
       j = nlohmann::json {{"id", rec.id},
+                          {"datasetName", rec.datasetName},
+                          {"variableName", rec.variableName},
                           {"numberOfExaminees", rec.numberOfExaminees},
                           {"minimumScore", rec.minimumScore},
                           {"maximumScore", rec.maximumScore},
@@ -152,7 +154,8 @@ namespace EquatingRecipes {
                           {"relativeFrequencyDistribution", rec.relativeFreqDist},
                           {"cumulativeRelativeFrequencyDistribution", rec.cumulativeRelativeFreqDist},
                           {"percentileRankDistribution", rec.percentileRankDist},
-                          {"moments", rec.momentValues}};
+                          {"moments", rec.momentValues},
+                          {"rawScores", rec.rawScores}};
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::BivariateLogLinearSmoothing& rec) {
@@ -380,7 +383,10 @@ namespace EquatingRecipes {
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::BivariateStatistics& rec) {
-      j = nlohmann::json {{"univariateStatisticsRow", rec.univariateStatisticsRow},
+      j = nlohmann::json {{"datasetName", rec.datasetName},
+                          {"rowVariableName", rec.rowVariableName},
+                          {"columnVariableName", rec.columnVariableName},
+                          {"univariateStatisticsRow", rec.univariateStatisticsRow},
                           {"univariateStatisticsColumn", rec.univariateStatisticsColumn},
                           {"numberOfExaminees", rec.numberOfExaminees},
                           {"bivariateFreqDist", rec.bivariateFreqDist},

@@ -692,8 +692,15 @@ namespace EquatingRecipes {
                                                                                 const double& maximumColumnScore,
                                                                                 const double& columnScoreIncrement,
                                                                                 const std::string& rowScoreId,
-                                                                                const std::string& columnScoreId) {
+                                                                                const std::string& columnScoreId,
+                                                                                const std::string& datasetName,
+                                                                                const std::string& rowVariableName,
+                                                                                const std::string& columnVariableName) {
       EquatingRecipes::Structures::BivariateStatistics bivariateStatistics;
+
+      bivariateStatistics.datasetName = datasetName;
+      bivariateStatistics.rowVariableName = rowVariableName;
+      bivariateStatistics.columnVariableName = columnVariableName;
 
       size_t rowScoreColumnIndex = 0;
       size_t columnScoreColumnIndex = 1;
@@ -702,13 +709,17 @@ namespace EquatingRecipes {
                                                                          minimumRowScore,
                                                                          maximumRowScore,
                                                                          rowScoreIncrement,
-                                                                         rowScoreId);
+                                                                         rowScoreId,
+                                                                         datasetName,
+                                                                         rowVariableName);
 
       bivariateStatistics.univariateStatisticsColumn = univariateFromScores(scores.col(columnScoreColumnIndex),
                                                                             minimumColumnScore,
                                                                             maximumColumnScore,
                                                                             columnScoreIncrement,
-                                                                            columnScoreId);
+                                                                            columnScoreId,
+                                                                            datasetName,
+                                                                            columnVariableName);
 
       bivariateStatistics.bivariateFreqDist.setZero(bivariateStatistics.univariateStatisticsRow.numberOfScores,
                                                     bivariateStatistics.univariateStatisticsColumn.numberOfScores);
@@ -756,13 +767,17 @@ namespace EquatingRecipes {
                                                                                             const double& minimumScore,
                                                                                             const double& maximumScore,
                                                                                             const double& scoreIncrement,
-                                                                                            const std::string& id) {
+                                                                                            const std::string& id,
+                                                                                            const std::string& datasetName,
+                                                                                            const std::string& variableName) {
       EquatingRecipes::Structures::UnivariateStatistics univariateStatistics;
 
       univariateStatistics.numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(minimumScore,
                                                                                           maximumScore,
                                                                                           scoreIncrement);
 
+      univariateStatistics.datasetName = datasetName;
+      univariateStatistics.variableName = variableName;
       univariateStatistics.id = id;
       univariateStatistics.numberOfExaminees = 0;
       univariateStatistics.configure(minimumScore,
@@ -794,9 +809,16 @@ namespace EquatingRecipes {
       univariateStatistics.relativeFreqDist = univariateStatistics.freqDistDouble /
                                               static_cast<double>(univariateStatistics.numberOfExaminees);
 
-      univariateStatistics.cumulativeFreqDist(0) = scoreFrequencies(0);
-      for (size_t index = 1; index < scoreFrequencies.size(); index++) {
-        univariateStatistics.cumulativeFreqDist(index) = univariateStatistics.cumulativeFreqDist(index - 1) + scoreFrequencies(index);
+      for (size_t scoreLocation = 0; scoreLocation < univariateStatistics.numberOfScores; scoreLocation++) {
+        univariateStatistics.rawScores(scoreLocation) = EquatingRecipes::Utilities::getScore(scoreLocation,
+                                                                                             minimumScore,
+                                                                                             scoreIncrement);
+
+        if (scoreLocation >= 1) {
+          univariateStatistics.cumulativeFreqDist(scoreLocation) = univariateStatistics.cumulativeFreqDist(scoreLocation - 1) + scoreFrequencies(scoreLocation);
+        } else {
+          univariateStatistics.cumulativeFreqDist(scoreLocation) = scoreFrequencies(scoreLocation);
+        }
       }
 
       univariateStatistics.cumulativeRelativeFreqDist = univariateStatistics.cumulativeFreqDist.cast<double>() /
@@ -814,7 +836,9 @@ namespace EquatingRecipes {
                                                                                   const double& minimumScore,
                                                                                   const double& maximumScore,
                                                                                   const double& scoreIncrement,
-                                                                                  const std::string& id) {
+                                                                                  const std::string& id,
+                                                                                  const std::string& datasetName,
+                                                                                  const std::string& variableName) {
       Eigen::VectorXd freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
                                                                                               minimumScore,
                                                                                               maximumScore,
@@ -825,7 +849,9 @@ namespace EquatingRecipes {
                                                                                                               minimumScore,
                                                                                                               maximumScore,
                                                                                                               scoreIncrement,
-                                                                                                              id);
+                                                                                                              id,
+                                                                                                              datasetName,
+                                                                                                              variableName);
 
       return univariateStatistics;
     }
