@@ -32,13 +32,7 @@ namespace EquatingRecipes {
                                                                                           inputData.datasetName,
                                                                                           inputData.variableName);
 
-        nlohmann::json j = nlohmann::json::object();
-
-        j["Analysis"] = "univariate_statistics";
-        j["Title"] = "Univariate Statistics";
-        j["DatasetName"] = inputData.datasetName;
-        j["VariableName"] = inputData.variableName;
-        j["Results"] = univariateStatistics;
+        nlohmann::json j = {{"univariate_statistics", univariateStatistics}};
 
         return j;
       }

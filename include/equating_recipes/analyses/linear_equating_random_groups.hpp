@@ -14,7 +14,6 @@
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/wrappers/rg_and_sg_equating.hpp>
 #include <equating_recipes/wrappers/utilities.hpp>
-#include <equating_recipes/analyses/univariate_statistics.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -77,8 +76,21 @@ namespace EquatingRecipes {
         inputDataY.scoreIncrement = inputData.scoreIncrementY;
         inputDataY.scoreFrequencies = inputData.scoreFrequenciesY;
 
-        nlohmann::json univariateStatisticsXResults = univariateStatistics.operator()(inputDataX, outputData.univariateStatisticsX);
-        nlohmann::json univariateStatisticsYResults = univariateStatistics.operator()(inputDataY, outputData.univariateStatisticsY);
+        outputData.univariateStatisticsX = EquatingRecipes::Utilities::univariateFromScoreFrequencies(inputData.scoreFrequenciesX,
+                                                                                          inputData.minimumScoreX,
+                                                                                          inputData.maximumScoreX,
+                                                                                          inputData.scoreIncrementX,
+                                                                                          inputData.idX,
+                                                                                          inputData.datasetName,
+                                                                                          inputData.xVariableName);
+
+        outputData.univariateStatisticsY = EquatingRecipes::Utilities::univariateFromScoreFrequencies(inputData.scoreFrequenciesY,
+                                                                                          inputData.minimumScoreY,
+                                                                                          inputData.maximumScoreY,
+                                                                                          inputData.scoreIncrementY,
+                                                                                          inputData.idY,
+                                                                                          inputData.datasetName,
+                                                                                          inputData.yVariableName);
 
         EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
         EquatingRecipes::Structures::PData pData;

@@ -11,6 +11,7 @@
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
+#include <equating_recipes/analyses/bivariate_statistics.hpp>
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/json/json_document.hpp>
 
@@ -45,21 +46,28 @@ namespace EquatingRecipes {
           Kolen and Brennan (2004) Chapter 4 example (see page 123)*/
           EquatingRecipes::Tests::Examples::Datasets::MondatX mondatX;
 
-          EquatingRecipes::Structures::BivariateStatistics bivariateStatistics = EquatingRecipes::Utilities::bivariateFromScores(mondatX.rawScores,
-                                                                                                                                 0,
-                                                                                                                                 36,
-                                                                                                                                 1,
-                                                                                                                                 0,
-                                                                                                                                 12,
-                                                                                                                                 1,
-                                                                                                                                 "X",
-                                                                                                                                 "V",
-                                                                                                                                 "MondatX",
-                                                                                                                                 "RawScoreForm1",
-                                                                                                                                 "RawScoreForm2");
+          EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataXY;
+          
+          inputDataXY.datasetName = "MondatX";
+          inputDataXY.rowVariableName =  "RawScoreForm1";
+          inputDataXY.columnVariableName = "RawScoreForm2";
+          inputDataXY.rowScores = mondatX.rawScores.col(0);
+          inputDataXY.rowMinimumScore = 0;
+          inputDataXY.rowMaximumScore = 36;
+          inputDataXY.rowScoreIncrement = 1;
+          inputDataXY.columnScores = mondatX.rawScores.col(1);
+          inputDataXY.columnMinimumScore = 0;
+          inputDataXY.columnMaximumScore = 12;
+          inputDataXY.columnScoreIncrement =1 ;
+          inputDataXY.rowScoreId = "X";
+          inputDataXY.columnScoreId = "Y";
+
+          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXY;
+          EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
+          nlohmann::json bivariateStatisticsMondatXJson = bivariateStatistics(inputDataXY, bivariateStatisticsXY);
 
           nlohmann::json j = {univariateStatisticsACTMathJson,
-                              bivariateStatistics};
+                              bivariateStatisticsMondatXJson};
 
           EquatingRecipes::JSON::JsonDocument doc;
           doc.setJson(j);

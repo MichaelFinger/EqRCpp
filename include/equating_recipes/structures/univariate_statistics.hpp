@@ -24,6 +24,7 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct UnivariateStatistics {
+      std::string analysisType = "univariate_statistics";
       std::string datasetName;
       std::string variableName;
       std::string id;                             // single character id
