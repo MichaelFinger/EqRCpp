@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {

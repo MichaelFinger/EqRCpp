@@ -35,7 +35,7 @@ University of Iowa
 #include <vector>
 #include <Eigen/Core>
 
-#include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/cg_equipercentile_equating_results.hpp>
 
 namespace EquatingRecipes {

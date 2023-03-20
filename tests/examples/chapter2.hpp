@@ -7,7 +7,7 @@
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
 
-#include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
@@ -65,6 +65,7 @@ namespace EquatingRecipes {
           EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXY;
           EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
           nlohmann::json bivariateStatisticsMondatXJson = bivariateStatistics(inputDataXY, bivariateStatisticsXY);
+
 
           nlohmann::json j = {univariateStatisticsACTMathJson,
                               bivariateStatisticsMondatXJson};

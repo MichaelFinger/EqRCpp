@@ -38,9 +38,9 @@ University of Iowa
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 
-#include <equating_recipes/wrappers/cg_equipercentile_equating.hpp>
-#include <equating_recipes/wrappers/log_linear_equating.hpp>
-#include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/cg_equipercentile_equating.hpp>
+#include <equating_recipes/log_linear_equating.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   class KernelEquating {

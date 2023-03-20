@@ -42,7 +42,7 @@
 #include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 
-#include <equating_recipes/wrappers/log_linear_equating.hpp>
+#include <equating_recipes/log_linear_equating.hpp>
 
 namespace Eigen {
   template<typename Derived>

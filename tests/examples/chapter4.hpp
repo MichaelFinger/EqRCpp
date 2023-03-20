@@ -11,11 +11,14 @@
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/wrappers/cg_no_smoothing.hpp>
-#include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/cg_no_smoothing.hpp>
+#include <equating_recipes/utilities.hpp>
 
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/json/json_document.hpp>
+
+#include <equating_recipes/analyses/bivariate_statistics.hpp>
+#include <equating_recipes/analyses/common_item_nonequivalent_groups.hpp>
 
 #include "datasets/mondatx.hpp"
 #include "datasets/mondaty.hpp"
@@ -43,47 +46,64 @@ namespace EquatingRecipes {
           EquatingRecipes::Tests::Examples::Datasets::MondatX mondatX;
           EquatingRecipes::Tests::Examples::Datasets::MondatY mondatY;
 
-          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXV = EquatingRecipes::Utilities::bivariateFromScores(mondatX.rawScores,
-                                                                                                                                   0,
-                                                                                                                                   36,
-                                                                                                                                   1,
-                                                                                                                                   0,
-                                                                                                                                   12,
-                                                                                                                                   1,
-                                                                                                                                   "X",
-                                                                                                                                   "V");
+          EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
+          EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataXV;
+          EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataYV;
 
-          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV = EquatingRecipes::Utilities::bivariateFromScores(mondatY.rawScores,
-                                                                                                                                   0,
-                                                                                                                                   36,
-                                                                                                                                   1,
-                                                                                                                                   0,
-                                                                                                                                   12,
-                                                                                                                                   1,
-                                                                                                                                   "Y",
-                                                                                                                                   "V");
+          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXV;
+          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV;
 
-          EquatingRecipes::CGEquatingNoSmoothing cgEquatingNoSmoothing;
-          EquatingRecipes::Structures::PData pData;
-          EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+          inputDataXV.datasetName = "MondatX";
+          inputDataXV.rowVariableName = "X";
+          inputDataXV.columnVariableName = "V";
+          inputDataXV.rowScores = mondatX.rawScores.col(0);
+          inputDataXV.rowMinimumScore = 0;
+          inputDataXV.rowMaximumScore = 36;
+          inputDataXV.rowScoreIncrement = 1;
+          inputDataXV.columnScores = mondatX.rawScores.col(1);
+          inputDataXV.columnMinimumScore = 0;
+          inputDataXV.columnMaximumScore = 12;
+          inputDataXV.columnScoreIncrement = 1;
+          inputDataXV.rowScoreId = "X";
+          inputDataXV.columnScoreId = "V";
 
-          cgEquatingNoSmoothing.run(EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS,
-                                    EquatingRecipes::Structures::Method::LINEAR,
-                                    EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED,
-                                    -1.0,
-                                    true,
-                                    0.0,
-                                    0.0,
-                                    bivariateStatisticsXV,
-                                    bivariateStatisticsYV,
-                                    0,
-                                    pData,
-                                    equatedRawScoreResults);
+          inputDataYV.datasetName = "MondatY";
+          inputDataYV.rowVariableName = "Y";
+          inputDataYV.columnVariableName = "V";
+          inputDataYV.rowScores = mondatY.rawScores.col(0);
+          inputDataYV.rowMinimumScore = 0;
+          inputDataYV.rowMaximumScore = 36;
+          inputDataYV.rowScoreIncrement = 1;
+          inputDataYV.columnScores = mondatY.rawScores.col(1);
+          inputDataYV.columnMinimumScore = 0;
+          inputDataYV.columnMaximumScore = 12;
+          inputDataYV.columnScoreIncrement = 1;
+          inputDataYV.rowScoreId = "Y";
+          inputDataYV.columnScoreId = "V";
 
-          nlohmann::json j = nlohmann::json::object();
+          nlohmann::json bivariateStatisticsXVJson = bivariateStatistics(inputDataXV,
+                                                                         bivariateStatisticsXV);
 
-          j["PData"] = pData;
-          j["EquatedRawScoreResults"] = equatedRawScoreResults;
+          nlohmann::json bivariateStatisticsYVJson = bivariateStatistics(inputDataYV,
+                                                                         bivariateStatisticsYV);
+
+          EquatingRecipes::Analyses::CommonItemNonequivalentGroups::InputData inputData;
+          EquatingRecipes::Analyses::CommonItemNonequivalentGroups::OutputData outputData;
+
+          inputData.datasetName = "mondat";
+          inputData.xVariableName = "X";
+          inputData.yVariableName = "Y";
+
+          outputData.bivariateStatisticsXV = bivariateStatisticsXV;
+          outputData.bivariateStatisticsYV = bivariateStatisticsYV;
+
+          EquatingRecipes::Analyses::CommonItemNonequivalentGroups cgEquatingNoSmoothing;
+          nlohmann::json commonItemNonequivalentGroupsJson = cgEquatingNoSmoothing(inputData,
+                                                                                   outputData);
+
+          nlohmann::json j = {outputData.bivariateStatisticsXV,
+                              outputData.bivariateStatisticsYV,
+                              commonItemNonequivalentGroupsJson};
 
           EquatingRecipes::JSON::JsonDocument jsonDoc;
           jsonDoc.setJson(j);

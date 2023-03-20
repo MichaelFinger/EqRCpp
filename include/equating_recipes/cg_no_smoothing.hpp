@@ -38,8 +38,8 @@
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/wrappers/utilities.hpp>
-#include <equating_recipes/wrappers/cg_equipercentile_equating.hpp>
+#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/cg_equipercentile_equating.hpp>
 
 namespace EquatingRecipes {
   class CGEquatingNoSmoothing {

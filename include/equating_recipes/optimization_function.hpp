@@ -4,8 +4,8 @@
 #include <vector>
 #include <Eigen/Core>
 
-#include <equating_recipes/wrappers/irt_model_functions.hpp>
-#include <equating_recipes/wrappers/optimization_function.hpp>
+#include <equating_recipes/irt_model_functions.hpp>
+#include <equating_recipes/optimization_function.hpp>
 #include <equating_recipes/structures/common_item_specification.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_method.hpp>

@@ -6,7 +6,7 @@
 
 #include <nlopt.hpp>
 
-#include <equating_recipes/wrappers/optimization_function.hpp>
+#include <equating_recipes/optimization_function.hpp>
 
 namespace EquatingRecipes {
   class LBFGSOptimizer {

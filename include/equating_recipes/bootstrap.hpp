@@ -45,11 +45,11 @@ University of Iowa
 #include <vector>
 #include <Eigen/Core>
 
-#include <equating_recipes/wrappers/beta_binomial.hpp>
-#include <equating_recipes/wrappers/cg_equipercentile_equating.hpp>
-#include <equating_recipes/wrappers/cg_no_smoothing.hpp>
-#include <equating_recipes/wrappers/log_linear_equating.hpp>
-#include <equating_recipes/wrappers/rg_and_sg_equating.hpp>
+#include <equating_recipes/beta_binomial.hpp>
+#include <equating_recipes/cg_equipercentile_equating.hpp>
+#include <equating_recipes/cg_no_smoothing.hpp>
+#include <equating_recipes/log_linear_equating.hpp>
+#include <equating_recipes/rg_and_sg_equating.hpp>
 
 #include <equating_recipes/structures/beta_binomial_smoothing.hpp>
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
@@ -66,7 +66,7 @@ University of Iowa
 #include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 
-#include <equating_recipes/wrappers/utilities.hpp>
+#include <equating_recipes/utilities.hpp>
 
 namespace EquatingRecipes {
   class Bootstrap {
