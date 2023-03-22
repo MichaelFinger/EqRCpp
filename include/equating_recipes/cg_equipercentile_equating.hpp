@@ -147,12 +147,12 @@ namespace EquatingRecipes {
                                                                                       const double& reliabilityCommonItemsPopulation2 = 0.0) {
       EquatingRecipes::Structures::CGEquipercentileEquatingResults results;
 
-      Eigen::VectorXd relFreqDistXSynPop; // (numberOfScoresX);
-      Eigen::VectorXd relFreqDistYSynPop; // (numberOfScoresY);
+      results.syntheticPopulationRelativeFreqDistX.resize(numberOfScoresX);
+      results.syntheticPopulationRelativeFreqDistY.resize(numberOfScoresY);
 
       /* relFreqDistXSynPop and relFreqDistYSynPop: densities for x and y in synthetic population 
-      Note: if 0 < reliabilityCommonItemsPopulation1, reliabilityCommonItemsPopulation2 <= 1, results are for MFE;
-           otherwise, results are for FE */
+        Note: if 0 < reliabilityCommonItemsPopulation1, reliabilityCommonItemsPopulation2 <= 1, results are for MFE;
+        otherwise, results are for FE */
 
       syntheticDensities(population1Weight,
                          isInternalAnchor,
@@ -163,19 +163,19 @@ namespace EquatingRecipes {
                          bivariateRelativeFreqDistYV,
                          reliabilityCommonItemsPopulation1,
                          reliabilityCommonItemsPopulation2,
-                         relFreqDistXSynPop,
-                         relFreqDistYSynPop);
+                         results.syntheticPopulationRelativeFreqDistX,
+                         results.syntheticPopulationRelativeFreqDistY);
 
       /* Fxs, Gys, and prxs */
       Eigen::VectorXd cumRelFreqDistXSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(minimumScoreX,
                                                                                                      maximumScoreX,
                                                                                                      scoreIncrement,
-                                                                                                     relFreqDistXSynPop);
+                                                                                                     results.syntheticPopulationRelativeFreqDistX);
 
       Eigen::VectorXd cumRelFreqDistYSynPop = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(minimumScoreY,
                                                                                                      maximumScoreY,
                                                                                                      scoreIncrement,
-                                                                                                     relFreqDistYSynPop);
+                                                                                                     results.syntheticPopulationRelativeFreqDistY);
 
       Eigen::VectorXd percentileRanksXSynPop(numberOfScoresX);
       for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
@@ -208,8 +208,8 @@ namespace EquatingRecipes {
                                    minimumScoreY,
                                    maximumScoreY,
                                    scoreIncrement,
-                                   relFreqDistXSynPop,
-                                   relFreqDistYSynPop,
+                                   results.syntheticPopulationRelativeFreqDistX,
+                                   results.syntheticPopulationRelativeFreqDistY,
                                    slope,
                                    intercept);
 
@@ -453,8 +453,8 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    void conditionalBivariateDistribution(const size_t& numberOfScoresV,
-                                          const size_t& numberOfScoresX,
+    void conditionalBivariateDistribution(const size_t& numberOfScoresX,
+                                          const size_t& numberOfScoresV,
                                           Eigen::MatrixXd& bivariateRelativeFreqDistXV,
                                           const Eigen::VectorXd& marginalRelativeFreqDistV) {
       for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {

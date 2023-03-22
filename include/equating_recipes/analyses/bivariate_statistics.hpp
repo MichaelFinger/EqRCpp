@@ -13,6 +13,7 @@ namespace EquatingRecipes {
   namespace Analyses {
     struct BivariateStatistics {
       struct InputData {
+        std::string title;
         std::string datasetName;
         std::string rowVariableName;
         std::string columnVariableName;
@@ -50,7 +51,9 @@ namespace EquatingRecipes {
                                                                               inputData.rowVariableName,
                                                                               inputData.columnVariableName);
 
-        nlohmann::json j = {{"bivariate_statistics", bivariateStatistics}};
+        nlohmann::json j = {{"analysis_title", inputData.title},
+                            {"analysis_type", "bivariate_statistics"},
+                            {"analysis_results", bivariateStatistics}};
 
         return j;
       }

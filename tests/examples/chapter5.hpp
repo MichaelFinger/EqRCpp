@@ -1,5 +1,5 @@
-#ifndef TESTS_EXAMPLES_CHAPTER_3_HPP
-#define TESTS_EXAMPLES_CHAPTER_3_HPP
+#ifndef TESTS_EXAMPLES_CHAPTER_5_HPP
+#define TESTS_EXAMPLES_CHAPTER_5_HPP
 
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/method.hpp>
@@ -13,16 +13,16 @@
 #include <equating_recipes/json/json_document.hpp>
 #include <equating_recipes/rg_and_sg_equating.hpp>
 
-#include "datasets/actmathfreq.hpp"
-#include "datasets/yctmath.hpp"
-
 #include <equating_recipes/analyses/linear_equating_random_groups.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
+
+#include "datasets/actmathfreq.hpp"
+#include "datasets/yctmath.hpp"
 
 namespace EquatingRecipes {
   namespace Tests {
     namespace Examples {
-      struct Chapter3 {
+      struct Chapter5 {
         void operator()() {
           EquatingRecipes::Tests::Examples::Datasets::ACTMathFreq actMathFreq;
           EquatingRecipes::Tests::Examples::Datasets::YctMath yctMath;
@@ -55,12 +55,12 @@ namespace EquatingRecipes {
           nlohmann::json univariateStatisticsYJson = univariateStatistics(inputDataY, univariateStatisticsY);
 
           EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData inputData;
-          inputData.title = actMathFreq.datasetName + "---Linear";
+
+          inputData.title = actMathFreq.datasetName + "---Equipercentile";
           inputData.datasetName = actMathFreq.datasetName;
           inputData.design = EquatingRecipes::Structures::Design::RANDOM_GROUPS;
-          inputData.method = EquatingRecipes::Structures::Method::LINEAR;
+          inputData.method = EquatingRecipes::Structures::Method::EQUIPERCENTILE;
           inputData.smoothing = EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED;
-
           inputData.univariateStatisticsX = univariateStatisticsX;
           inputData.univariateStatisticsY = univariateStatisticsY;
           inputData.lowestObservableEquatedRawScore = 0;
@@ -83,7 +83,7 @@ namespace EquatingRecipes {
 
           EquatingRecipes::JSON::JsonDocument jsonDoc;
           jsonDoc.setJson(j);
-          jsonDoc.toTextFile("chapter3.json");
+          jsonDoc.toTextFile("chapter5.json");
         }
       };
     } // namespace Examples

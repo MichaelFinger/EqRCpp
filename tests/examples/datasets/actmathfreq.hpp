@@ -14,6 +14,7 @@ namespace EquatingRecipes {
       namespace Datasets {
         class ACTMathFreq {
         public:
+          std::string datasetName = "ACT Math";
           Eigen::VectorXd rawScores;
           Eigen::VectorXd freqX;
           Eigen::VectorXd freqY;

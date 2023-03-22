@@ -12,6 +12,7 @@ namespace EquatingRecipes {
       namespace Datasets {
         class MondatY {
         public:
+          std::string datasetName = "Mondat Y";
           Eigen::MatrixXd itemResponseMatrix;
           Eigen::MatrixXd rawScores;
 

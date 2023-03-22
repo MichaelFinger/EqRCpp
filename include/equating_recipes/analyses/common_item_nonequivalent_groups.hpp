@@ -21,17 +21,20 @@ namespace EquatingRecipes {
   namespace Analyses {
     struct CommonItemNonequivalentGroups {
       struct InputData {
+        std::string title;
         std::string datasetName;
         std::string xVariableName;
         std::string yVariableName;
-        EquatingRecipes::Structures::Design design = EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS;
-        EquatingRecipes::Structures::Method method = EquatingRecipes::Structures::Method::LINEAR;
-        EquatingRecipes::Structures::Smoothing smoothing = EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED;
+        EquatingRecipes::Structures::Design design;
+        EquatingRecipes::Structures::Method method;
+        EquatingRecipes::Structures::Smoothing smoothing;
         double populationWeight = -1;
         bool isInternalAnchor = true;
         double reliabilityCommonItemsPopulation1 = 0;
         double reliabilityCommonItemsPopulation2 = 0;
         size_t bootstrapReplicationNumber = 0;
+        EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXV;
+        EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV;
       };
 
       struct OutputData {
@@ -44,6 +47,9 @@ namespace EquatingRecipes {
       nlohmann::json operator()(const EquatingRecipes::Analyses::CommonItemNonequivalentGroups::InputData& inputData,
                                 EquatingRecipes::Analyses::CommonItemNonequivalentGroups::OutputData& outputData) {
         EquatingRecipes::CGEquatingNoSmoothing cgEquatingNoSmoothing;
+
+        outputData.bivariateStatisticsXV = inputData.bivariateStatisticsXV;
+        outputData.bivariateStatisticsYV = inputData.bivariateStatisticsYV;
 
         cgEquatingNoSmoothing.run(inputData.design,
                                   inputData.method,
@@ -65,7 +71,19 @@ namespace EquatingRecipes {
         results["PData"] = outputData.pData;
         results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
 
-        nlohmann::json j = {{"common_item_nonequivalent_groups", results}};
+        nlohmann::json j = nlohmann::json::array();
+
+        j.push_back({{"analysis_title", inputData.title},
+                     {"analysis_type", "bivariate_statistics"},
+                     {"analysis_results", outputData.bivariateStatisticsXV}});
+
+        j.push_back({{"analysis_title", inputData.title},
+                     {"analysis_type", "bivariate_statistics"},
+                     {"analysis_results", outputData.bivariateStatisticsYV}});
+
+        j.push_back({{"analysis_title", inputData.title},
+                     {"analysis_type", "common_item_nonequivalent_groups"},
+                     {"analysis_results", results}});
 
         return j;
       }

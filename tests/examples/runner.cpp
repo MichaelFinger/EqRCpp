@@ -1,8 +1,8 @@
 #include "chapter2.hpp"
 #include "chapter3.hpp"
 #include "chapter4.hpp"
-
-// #include <equating_recipes/kernel_equating.hpp>
+#include "chapter5.hpp"
+#include "chapter6.hpp"
 
 int main(int argc, char const *argv[]) {
   EquatingRecipes::Tests::Examples::Chapter2 ch2;
@@ -13,6 +13,12 @@ int main(int argc, char const *argv[]) {
 
   EquatingRecipes::Tests::Examples::Chapter4 ch4;
   ch4();
+
+  EquatingRecipes::Tests::Examples::Chapter5 ch5;
+  ch5();
+
+  EquatingRecipes::Tests::Examples::Chapter6 ch6;
+  ch6();
 
   return 0;
 }

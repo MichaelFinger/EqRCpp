@@ -255,18 +255,18 @@ namespace EquatingRecipes {
       /* allocation and assignments for r */
 
       if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
-        size_t scoreLocationX = EquatingRecipes::Utilities::getScoreLocation(bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+        size_t maxScoreLocationX = EquatingRecipes::Utilities::getScoreLocation(bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
                                                                              bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
                                                                              bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement);
 
-        size_t scoreLocationY = EquatingRecipes::Utilities::getScoreLocation(bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+        size_t maxScoreLocationY = EquatingRecipes::Utilities::getScoreLocation(bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
                                                                              bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
                                                                              bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement);
 
-        equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), scoreLocationX + 1);
+        equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), maxScoreLocationX + 1);
         equatedRawScoreResults.equatedRawScoreMoments.resize(pData.methods.size(), 4);
-        equatedRawScoreResults.relativeFreqDistsX.resize(1, scoreLocationX + 1);
-        equatedRawScoreResults.relativeFreqDistsY.resize(1, scoreLocationY + 1);
+        equatedRawScoreResults.relativeFreqDistsX.resize(2, maxScoreLocationX + 1);
+        equatedRawScoreResults.relativeFreqDistsY.resize(2, maxScoreLocationY + 1);
         equatedRawScoreResults.slope.resize(pData.methods.size());
         equatedRawScoreResults.intercept.resize(pData.methods.size());
       }

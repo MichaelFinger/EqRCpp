@@ -1,23 +1,18 @@
-#ifndef TESTS_EXAMPLES_CHAPTER_4_HPP
-#define TESTS_EXAMPLES_CHAPTER_4_HPP
+#ifndef TESTS_EXAMPLES_CHAPTER_6_HPP
+#define TESTS_EXAMPLES_CHAPTER_6_HPP
 
-#include <filesystem>
-#include <iostream>
-
-#include <Eigen/Core>
-#include <nlohmann/json.hpp>
-
-#include <equating_recipes/structures/bivariate_statistics.hpp>
-#include <equating_recipes/structures/equated_raw_score_results.hpp>
-#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/design.hpp>
+#include <equating_recipes/structures/method.hpp>
+#include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/cg_no_smoothing.hpp>
+#include <equating_recipes/structures/p_data.hpp>
+#include <equating_recipes/structures/equated_raw_score_results.hpp>
+#include <equating_recipes/structures/equated_scaled_scores_results.hpp>
 #include <equating_recipes/utilities.hpp>
-
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/json/json_document.hpp>
-
 #include <equating_recipes/analyses/bivariate_statistics.hpp>
+#include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/analyses/common_item_nonequivalent_groups.hpp>
 
 #include "datasets/mondatx.hpp"
@@ -26,34 +21,21 @@
 namespace EquatingRecipes {
   namespace Tests {
     namespace Examples {
-      struct Chapter4 {
+      struct Chapter6 {
         void operator()() {
           /* Common-item Nonequivalent Groups Design: 
-            Kolen and Brennan (2004) Chapter 4 example:
-            Linear equating  pp. 121-124 */
+            Kolen and Brennan (2004) Chapter 5 example:
+            Equipercentile equating (see p. 151) */
 
-          // convertFtoW("mondatx.dat",2,fieldsACT,"mondatx-temp");
-          // ReadRawGet_BSTATS("mondatx-temp",1,2,0,36,1,0,12,1,'X','V',&xv);
-
-          // convertFtoW("mondaty.dat",2,fieldsACT,"mondaty-temp");
-          // ReadRawGet_BSTATS("mondaty-temp",1,2,0,36,1,0,12,1,'Y','V',&yv);
-
-          // Wrapper_CN('C','L','N',-1,1,0,0,&xv,&yv,0,&pdCLN,&rCLN);
-          // Print_CN(outf,"Chapter 4: proportional wts",&pdCLN,&rCLN);
-
-          /* Common-items Nonequivalent Groups Design: 
-          Kolen and Brennan (2004) Chapter 4 example (see page 123)*/
           EquatingRecipes::Tests::Examples::Datasets::MondatX mondatX;
           EquatingRecipes::Tests::Examples::Datasets::MondatY mondatY;
 
           EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
           EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataXV;
-          EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataYV;
-
           EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXV;
-          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV;
 
-          inputDataXV.datasetName = "MondatX";
+          inputDataXV.title = "Mondat X";
+          inputDataXV.datasetName = mondatX.datasetName;
           inputDataXV.rowVariableName = "X";
           inputDataXV.columnVariableName = "V";
           inputDataXV.rowScores = mondatX.rawScores.col(0);
@@ -67,7 +49,14 @@ namespace EquatingRecipes {
           inputDataXV.rowScoreId = "X";
           inputDataXV.columnScoreId = "V";
 
-          inputDataYV.datasetName = "MondatY";
+          nlohmann::json bivariateStatisticsXVJson = bivariateStatistics(inputDataXV,
+                                                                         bivariateStatisticsXV);
+
+          EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataYV;
+          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV;
+
+          inputDataYV.title = "Mondat Y";
+          inputDataYV.datasetName = mondatY.datasetName;
           inputDataYV.rowVariableName = "Y";
           inputDataYV.columnVariableName = "V";
           inputDataYV.rowScores = mondatY.rawScores.col(0);
@@ -81,36 +70,40 @@ namespace EquatingRecipes {
           inputDataYV.rowScoreId = "Y";
           inputDataYV.columnScoreId = "V";
 
-          nlohmann::json bivariateStatisticsXVJson = bivariateStatistics(inputDataXV,
-                                                                         bivariateStatisticsXV);
-
           nlohmann::json bivariateStatisticsYVJson = bivariateStatistics(inputDataYV,
                                                                          bivariateStatisticsYV);
 
+          EquatingRecipes::Analyses::CommonItemNonequivalentGroups commonItemNonequivalentGroups;
           EquatingRecipes::Analyses::CommonItemNonequivalentGroups::InputData inputData;
           EquatingRecipes::Analyses::CommonItemNonequivalentGroups::OutputData outputData;
 
-          inputData.datasetName = "mondat";
-          inputData.xVariableName = "X";
-          inputData.yVariableName = "Y";
+          inputData.bootstrapReplicationNumber = 0;
+          inputData.datasetName = "Mondat X, Y";
+          inputData.design = EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS;
+          inputData.isInternalAnchor = true;
+          inputData.method = EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED;
+          inputData.populationWeight = 1;
+          inputData.reliabilityCommonItemsPopulation1 = 0.5584431;
+          inputData.reliabilityCommonItemsPopulation2 = 0.5735077;
+          inputData.smoothing = EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED;
+          inputData.title = "Chapter 5 in K&B: w1 = 1";
+          inputData.xVariableName = inputDataXV.rowVariableName;
+          inputData.yVariableName = inputDataYV.rowVariableName;
           inputData.bivariateStatisticsXV = bivariateStatisticsXV;
           inputData.bivariateStatisticsYV = bivariateStatisticsYV;
-          inputData.design = EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS;
-          inputData.method = EquatingRecipes::Structures::Method::LINEAR;
-          inputData.smoothing = EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED;
 
-          EquatingRecipes::Analyses::CommonItemNonequivalentGroups cgEquatingNoSmoothing;
-          nlohmann::json commonItemNonequivalentGroupsJson = cgEquatingNoSmoothing(inputData,
-                                                                                   outputData);
+          nlohmann::json commonItemNonequivalentGroupsJson = commonItemNonequivalentGroups(inputData,
+                                                                                           outputData);
 
           nlohmann::json j = commonItemNonequivalentGroupsJson;
 
           EquatingRecipes::JSON::JsonDocument jsonDoc;
           jsonDoc.setJson(j);
-          jsonDoc.toTextFile("chapter4.json");
+          jsonDoc.toTextFile("chapter6.json");
         }
       };
     } // namespace Examples
   }   // namespace Tests
 } // namespace EquatingRecipes
+
 #endif

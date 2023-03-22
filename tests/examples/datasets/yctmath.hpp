@@ -15,6 +15,7 @@ namespace EquatingRecipes {
       namespace Datasets {
         class YctMath {
         public:
+          std::string datasetName = "Yct Math";
           EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
 
           YctMath() {

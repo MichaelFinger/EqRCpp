@@ -19,30 +19,19 @@ namespace EquatingRecipes {
   namespace Analyses {
     struct LinearEquatingRandomGroups {
       struct InputData {
+        std::string title;
         std::string datasetName;
-        std::string xVariableName;
-        std::string yVariableName;
-
-        // Eigen::VectorXd scoreFrequenciesX;
-        // double minimumScoreX;
-        // double maximumScoreX;
-        // double scoreIncrementX;
-        // std::string idX = "X";
-
-        // Eigen::VectorXd scoreFrequenciesY;
-        // double minimumScoreY;
-        // double maximumScoreY;
-        // double scoreIncrementY;
-        // std::string idY = "Y";
-
-        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
-        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
-
         double lowestObservableEquatedRawScore;
         double highestObservableEquatedRawScore;
         double scoreIncrementEquatedRawScore;
         double lowestObservableScaledScore;
         double highestObservableScaledScore;
+        
+        EquatingRecipes::Structures::Design design;
+        EquatingRecipes::Structures::Method method;
+        EquatingRecipes::Structures::Smoothing smoothing;
+        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
+        EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
         EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
 
         size_t roundToNumberOfDecimalPlaces = 1;
@@ -62,9 +51,9 @@ namespace EquatingRecipes {
         EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
         EquatingRecipes::Structures::EquatedScaledScoresResults equatedScaledScoreResults;
 
-        randomAndSingleGroupEquating.randomGroupEquating(EquatingRecipes::Structures::Design::RANDOM_GROUPS,
-                                                         EquatingRecipes::Structures::Method::LINEAR,
-                                                         EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED,
+        randomAndSingleGroupEquating.randomGroupEquating(inputData.design,
+                                                         inputData.method,
+                                                         inputData.smoothing,
                                                          inputData.univariateStatisticsX,
                                                          inputData.univariateStatisticsY,
                                                          0,
@@ -88,13 +77,15 @@ namespace EquatingRecipes {
 
         nlohmann::json results = nlohmann::json::object();
         results["DatasetName"] = inputData.datasetName;
-        results["RowVariableName"] = inputData.xVariableName;
-        results["ColumnwVariableName"] = inputData.yVariableName;
+        results["RowVariableName"] = inputData.univariateStatisticsX.variableName;
+        results["ColumnwVariableName"] = inputData.univariateStatisticsY.variableName;
         results["PData"] = outputData.pData;
         results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
         results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
 
-        nlohmann::json j = {{"linear_equating_random_groups", results}};
+        nlohmann::json j = {{"analysis_title", inputData.title},
+                            {"analysis_type", "linear_equating_random_groups"},
+                            {"analysis_results", results}};
 
         return j;
       }

@@ -12,6 +12,7 @@ namespace EquatingRecipes {
   namespace Analyses {
     struct UnivariateStatistics {
       struct InputData {
+        std::string title;
         std::string datasetName;
         std::string variableName;
 
@@ -32,7 +33,9 @@ namespace EquatingRecipes {
                                                                                           inputData.datasetName,
                                                                                           inputData.variableName);
 
-        nlohmann::json j = {{"univariate_statistics", univariateStatistics}};
+        nlohmann::json j = {{"analysis_title", inputData.title},
+                            {"analysis_type", "univariate_statistics"},
+                            {"analysis_results", univariateStatistics}};
 
         return j;
       }
