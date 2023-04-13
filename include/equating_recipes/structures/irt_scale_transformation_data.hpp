@@ -7,6 +7,7 @@
 #ifndef STRUCTURES_IRT_SCALE_TRANSFORMATION_DATA_HPP
 #define STRUCTURES_IRT_SCALE_TRANSFORMATION_DATA_HPP
 
+#include <map>
 #include <optional>
 #include <Eigen/Core>
 
@@ -20,49 +21,37 @@
 namespace EquatingRecipes {
   namespace Structures {
     struct IRTScaleTransformationData {
-      double minimumRawScoreNewForm;
-      double maximumRawScoreNewForm;
-      double rawScoreIncrementNewForm;
+      // double minimumRawScoreNewForm;
+      // double maximumRawScoreNewForm;
+      // double rawScoreIncrementNewForm;
       
-      double minimumRawScoreOldForm;
-      double maximumRawScoreOldForm;
-      double rawScoreIncrementOldForm;
+      // double minimumRawScoreOldForm;
+      // double maximumRawScoreOldForm;
+      // double rawScoreIncrementOldForm;
       
-      EquatingRecipes::Structures::Quadrature quadratureNewForm;
-      EquatingRecipes::Structures::Quadrature quadratureOldForm;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> quadratureNewForm;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> quadratureOldForm;
       
       std::vector<EquatingRecipes::Structures::ItemSpecification> newItems;
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
       std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems;
 
-      bool runHaebara;
       EquatingRecipes::Structures::Symmetry haebaraSymmetryOption;
       bool haebaraFunctionStandardization;
-      std::optional<double> haebaraSlopeStartingValue;
-      std::optional<double> haebaraInterceptStartingValue;
 
-      bool runStockingLord;
       EquatingRecipes::Structures::Symmetry stockingLordSymmetryOption;
       bool stockingLordFunctionStandardization;
-      std::optional<double> stockingLordSlopeStartingValue;
-      std::optional<double> stockingLordInterceptStartingValue;
 
-      std::optional<double> haebaraSlope;
-      std::optional<double> haebaraIntercept;
-      
-      std::optional<double> stockingLordSlope;
-      std::optional<double> stockingLordIntercept;
-      
-      double meanMeanSlope;
-      double meanMeanIntercept;
-      
-      double meanSigmaSlope;
-      double meanSigmaIntercept;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> slopeStartingValue;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> interceptStartingValue;
 
-      EquatingRecipes::Structures::Quadrature transformedQuadratureNewForm;
-      std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults> itemResultsNewForm;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> slopeEstimate;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> interceptEstimate;
 
-      EquatingRecipes::Structures::IRTScaleTransformationMethod irtScaleTranformationMethod;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> transformedQuadratureNewForm;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults>> itemResultsNewForm;
+
+      std::vector<EquatingRecipes::Structures::IRTScaleTransformationMethod> irtScaleTranformationMethods;
     };
   } // namespace Structures
 } // namespace EquatingRecipes

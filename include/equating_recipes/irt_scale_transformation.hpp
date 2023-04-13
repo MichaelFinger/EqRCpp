@@ -39,7 +39,7 @@
 namespace EquatingRecipes {
   class IRTScaleTransformation {
   public:
-    void runIRTScaleTransformation(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+    void run(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       bool missingQuadrature = irtScaleTransformationData.quadratureNewForm.thetaValues.size() == 0 ||
                                irtScaleTransformationData.quadratureNewForm.thetaWeights.size() == 0 ||
                                irtScaleTransformationData.quadratureOldForm.thetaValues.size() == 0 ||
@@ -49,16 +49,30 @@ namespace EquatingRecipes {
         throw std::runtime_error("Haebara or Stocking-Lord results cannot be computed because at least\none of the ability distributions is not present");
       }
 
-      StMeanSigma(irtScaleTransformationData);
-      StMeanMean(irtScaleTransformationData);
+      std::for_each(irtScaleTransformationData.irtScaleTranformationMethods.begin(),
+                    irtScaleTransformationData.irtScaleTranformationMethods.end(),
+                    [&](const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+                      switch (method) {
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN:
+                          StMeanMean(irtScaleTransformationData);
+                          break;
 
-      if (irtScaleTransformationData.runHaebara) {
-        StHaebara(irtScaleTransformationData);
-      }
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA:
+                          StMeanSigma(irtScaleTransformationData);
+                          break;
 
-      if (irtScaleTransformationData.runStockingLord) {
-        StStockingLord(irtScaleTransformationData);
-      }
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBERA:
+                          StHaebara(irtScaleTransformationData);
+                          break;
+
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
+                          StStockingLord(irtScaleTransformationData);
+                          break;
+
+                        default:
+                          break;
+                      }
+                    });
 
       getScaleTransformResults(irtScaleTransformationData);
     }
@@ -95,40 +109,38 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     --------------------------------------------------------------------------------------*/
-    void
-    getScaleTransformResults(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+    void getScaleTransformResults(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       double slope = std::numeric_limits<double>::quiet_NaN();
       double intercept = std::numeric_limits<double>::quiet_NaN();
 
-      switch (irtScaleTransformationData.irtScaleTranformationMethod) {
-        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:
-          slope = irtScaleTransformationData.haebaraSlope.value_or(std::numeric_limits<double>::quiet_NaN());
-          intercept = irtScaleTransformationData.haebaraIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
-          break;
+      std::for_each(irtScaleTransformationData.irtScaleTranformationMethods.begin(),
+                    irtScaleTransformationData.irtScaleTranformationMethods.end(),
+                    [&](const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+                      switch (method) {
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:
+                          slope = irtScaleTransformationData.haebaraSlope.value_or(std::numeric_limits<double>::quiet_NaN());
+                          intercept = irtScaleTransformationData.haebaraIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
+                          break;
 
-        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN:
-          slope = irtScaleTransformationData.meanMeanSlope;
-          intercept = irtScaleTransformationData.meanMeanIntercept;
-          break;
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN:
+                          slope = irtScaleTransformationData.meanMeanSlope;
+                          intercept = irtScaleTransformationData.meanMeanIntercept;
+                          break;
 
-        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA:
-          slope = irtScaleTransformationData.meanSigmaSlope;
-          intercept = irtScaleTransformationData.meanSigmaIntercept;
-          break;
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA:
+                          slope = irtScaleTransformationData.meanSigmaSlope;
+                          intercept = irtScaleTransformationData.meanSigmaIntercept;
+                          break;
 
-        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
-          slope = irtScaleTransformationData.stockingLordSlope.value_or(std::numeric_limits<double>::quiet_NaN());
-          intercept = irtScaleTransformationData.stockingLordIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
-          break;
+                        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
+                          slope = irtScaleTransformationData.stockingLordSlope.value_or(std::numeric_limits<double>::quiet_NaN());
+                          intercept = irtScaleTransformationData.stockingLordIntercept.value_or(std::numeric_limits<double>::quiet_NaN());
+                          break;
 
-        default:
-          break;
-      }
-
-      if (slope == std::numeric_limits<double>::quiet_NaN() ||
-          intercept == std::numeric_limits<double>::quiet_NaN()) {
-        return;
-      }
+                        default:
+                          break;
+                      }
+                    });
 
       std::for_each(irtScaleTransformationData.newItems.begin(),
                     irtScaleTransformationData.newItems.end(),
@@ -199,8 +211,8 @@ namespace EquatingRecipes {
     void StHaebara(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       double ftol = 0.0000000001;
 
-      std::vector<double> x {irtScaleTransformationData.haebaraSlopeStartingValue.value(),
-                             irtScaleTransformationData.haebaraInterceptStartingValue.value()};
+      std::vector<double> x {slopeStartingValue.at(EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA),
+                             interceptStartingValue.at(EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA)};
 
       std::shared_ptr<EquatingRecipes::HaebaraFunction> optimizationFunction =
           std::make_shared<EquatingRecipes::HaebaraFunction>();
