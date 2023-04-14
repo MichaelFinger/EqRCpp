@@ -69,6 +69,24 @@ include_directories(${fmtlib_SOURCE_DIR}/include)
 include_directories(${json_SOURCE_DIR}/single_include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+
+add_library(EqRCpp SHARED ${HEADER_LIST})
+target_compile_features(EqRCpp PUBLIC cxx_std_20)
+target_include_directories(EqRCpp PUBLIC 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include
+                           ${Boost_INCLUDE_DIRS}
+                           ${eigen_SOURCE_DIR}
+                           ${fmtlib_SOURCE_DIR}/include
+                           ${json_SOURCE_DIR}/single_include)
+target_link_libraries(EqRCpp PUBLIC
+                      ${Boost_LIBRARIES}
+                      fmt::fmt
+                      nlohmann_json::nlohmann_json
+                      nlopt
+                      pthread
+                      dl)
+
 # add_executable(EqRCppExamples ${CMAKE_CURRENT_SOURCE_DIR}/tests/examples/runner.cpp)
 # target_compile_features(EqRCppExamples PRIVATE cxx_std_20)
 # target_include_directories(EqRCppExamples PRIVATE 
@@ -86,4 +104,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 #                       pthread
 #                       dl)
 
-add_subdirectory("tests/examples")
+# add_subdirectory("tests/examples")

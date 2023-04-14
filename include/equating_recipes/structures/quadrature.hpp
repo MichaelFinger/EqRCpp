@@ -8,6 +8,12 @@ namespace EquatingRecipes {
     struct Quadrature {
       Eigen::VectorXd thetaValues;
       Eigen::VectorXd thetaWeights;
+
+      bool empty() {
+        bool isEmpty = (thetaValues.size() == 0 || thetaWeights.size() == 0);
+
+        return isEmpty;
+      }
     };
   }
 }

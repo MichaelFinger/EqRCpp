@@ -24,14 +24,14 @@ namespace EquatingRecipes {
       // double minimumRawScoreNewForm;
       // double maximumRawScoreNewForm;
       // double rawScoreIncrementNewForm;
-      
+
       // double minimumRawScoreOldForm;
       // double maximumRawScoreOldForm;
       // double rawScoreIncrementOldForm;
-      
+
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> quadratureNewForm;
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> quadratureOldForm;
-      
+
       std::vector<EquatingRecipes::Structures::ItemSpecification> newItems;
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
       std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems;
