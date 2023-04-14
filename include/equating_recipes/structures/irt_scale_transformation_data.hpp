@@ -9,6 +9,7 @@
 
 #include <map>
 #include <optional>
+#include <set>
 #include <Eigen/Core>
 
 #include <equating_recipes/structures/common_item_specification.hpp>
@@ -29,29 +30,31 @@ namespace EquatingRecipes {
       // double maximumRawScoreOldForm;
       // double rawScoreIncrementOldForm;
 
-      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> quadratureNewForm;
-      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> quadratureOldForm;
+      
+      // Input
+      double ftol = 0.0000000001;
+
+      EquatingRecipes::Structures::Quadrature quadratureNewForm;
+      EquatingRecipes::Structures::Quadrature quadratureOldForm;
 
       std::vector<EquatingRecipes::Structures::ItemSpecification> newItems;
       std::vector<EquatingRecipes::Structures::ItemSpecification> oldItems;
       std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems;
 
-      EquatingRecipes::Structures::Symmetry haebaraSymmetryOption;
-      bool haebaraFunctionStandardization;
-
-      EquatingRecipes::Structures::Symmetry stockingLordSymmetryOption;
-      bool stockingLordFunctionStandardization;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Symmetry> symmetryOptions;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, bool> standardizations;
 
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> slopeStartingValue;
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> interceptStartingValue;
 
+      std::set<EquatingRecipes::Structures::IRTScaleTransformationMethod> irtScaleTranformationMethods;
+
+      // Results
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> slopeEstimate;
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> interceptEstimate;
 
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> transformedQuadratureNewForm;
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults>> itemResultsNewForm;
-
-      std::vector<EquatingRecipes::Structures::IRTScaleTransformationMethod> irtScaleTranformationMethods;
     };
   } // namespace Structures
 } // namespace EquatingRecipes

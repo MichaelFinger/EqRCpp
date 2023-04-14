@@ -15,24 +15,17 @@
 namespace EquatingRecipes {
   class OptimizationFunction {
   public:
-    void configure(const EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+    void configure(const EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData,
+                   const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+      this->method = method;
+
       this->oldThetaValues = irtScaleTransformationData.quadratureOldForm.thetaValues;
       this->oldThetaWeights = irtScaleTransformationData.quadratureOldForm.thetaWeights;
       this->newThetaValues = irtScaleTransformationData.quadratureNewForm.thetaValues;
       this->newThetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
 
-      switch (irtScaleTransformationData.irtScaleTranformationMethod) {
-        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:
-          this->symmetry = irtScaleTransformationData.haebaraSymmetryOption;
-          this->functionStandardization = irtScaleTransformationData.haebaraFunctionStandardization;
-          break;
-        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
-          this->symmetry = irtScaleTransformationData.stockingLordSymmetryOption;
-          this->functionStandardization = irtScaleTransformationData.stockingLordFunctionStandardization;
-           break;
-        default:
-          break;
-      }
+      this->symmetry = irtScaleTransformationData.symmetryOptions[this->method];
+      this->functionStandardization = irtScaleTransformationData.standardization[this->method];
 
       this->commonItems = irtScaleTransformationData.commonItems;
     }
@@ -61,7 +54,7 @@ namespace EquatingRecipes {
     std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems;
     EquatingRecipes::Structures::Symmetry symmetry;
     bool functionStandardization;
-
+    EquatingRecipes::Structures::IRTScaleTransformationMethod method;
     EquatingRecipes::IRTModelFunctions irtModelFunctions;
   };
 } // namespace EquatingRecipes

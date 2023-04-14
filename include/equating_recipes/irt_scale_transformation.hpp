@@ -114,23 +114,24 @@ namespace EquatingRecipes {
                       double intercept = irtScaleTransformationData.interceptEstimate.at(method);
 
                       std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults> newItemResults;
-                      
+
                       std::for_each(irtScaleTransformationData.newItems.begin(),
                                     irtScaleTransformationData.newItems.end(),
                                     [&](const EquatingRecipes::Structures::ItemSpecification& newItem) {
                                       EquatingRecipes::Structures::IRTScaleTransformationItemResults newItemResult =
-                                        getNewItemResult(newItem, slope, intercept);
+                                          getNewItemResult(newItem, slope, intercept);
 
                                       newItemResults.push_back(newItemResult)
                                     });
 
                       irtScaleTransformationData.itemResultsNewForm[method] = newItemResults;
 
-                      irtScaleTransformationData.transformedQuadratureNewForm.thetaValues = (irtScaleTransformationData.quadratureNewForm.thetaValues * slope) +
-                                                                            Eigen::VectorXd::Constant(irtScaleTransformationData.quadratureNewForm.thetaValues.size(), intercept);
+                      EquatingRecipes::Structures::Quadrature quadrature;
+                      quadrature.thetaValues = (irtScaleTransformationData.quadratureNewForm.thetaValues * slope) +
+                                               Eigen::VectorXd::Constant(irtScaleTransformationData.quadratureNewForm.thetaValues.size(), intercept);
+                      quadrature.thetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
 
-                    irtScaleTransformationData.transformedQuadratureNewForm
-      irtScaleTransformationData.transformedQuadratureNewForm.thetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
+                      irtScaleTransformationData.transformedQuadratureNewForm[method] = quadrature;
                     });
     }
 
@@ -154,26 +155,9 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
     void StHaebara(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
-      double ftol = 0.0000000001;
+      EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA;
 
-      std::vector<double> x {slopeStartingValue.at(EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA),
-                             interceptStartingValue.at(EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA)};
-
-      std::shared_ptr<EquatingRecipes::HaebaraFunction> optimizationFunction =
-          std::make_shared<EquatingRecipes::HaebaraFunction>();
-
-      optimizationFunction->configure(irtScaleTransformationData);
-
-      EquatingRecipes::LBFGSOptimizer optimizer;
-      double functionValue = optimizer.optimize(x,
-                                                optimizationFunction,
-                                                ftol);
-
-      double slope = x[0];
-      double intercept = x[1];
-
-      irtScaleTransformationData.haebaraSlope = slope;
-      irtScaleTransformationData.haebaraIntercept = intercept;
+      this->StOptimizationMethod(method);
     }
 
     /*------------------------------------------------------------------------------
@@ -192,6 +176,8 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
     void StMeanMean(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+      EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN;
+
       int j, k, a_num = 0, b_num = 0, index_a = 0, index_b = 0;
       double new_mu_a = 0.0, old_mu_a = 0.0;
       double new_mu_b = 0.0, old_mu_b = 0.0;
@@ -272,8 +258,8 @@ namespace EquatingRecipes {
         intercept = 0.0;
       }
 
-      irtScaleTransformationData.meanMeanSlope = slope;
-      irtScaleTransformationData.meanMeanIntercept = intercept;
+      irtScaleTransformationData.slopeEstimate[method] = slope;
+      irtScaleTransformationData.interceptEstimate[method] = intercept;
     }
 
     /*------------------------------------------------------------------------------
@@ -292,6 +278,8 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
     void StMeanSigma(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+      EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA;
+
       int j, k, b_num = 0, index = 0;
       double new_mu_b = 0.0, old_mu_b = 0.0;
       double new_si_b = 0.0, old_si_b = 0.0;
@@ -358,8 +346,8 @@ namespace EquatingRecipes {
         intercept = 0.0;
       }
 
-      irtScaleTransformationData.meanSigmaSlope = slope;
-      irtScaleTransformationData.meanSigmaIntercept = intercept;
+      irtScaleTransformationData.slopeEstimate[method] = slope;
+      irtScaleTransformationData.interceptEstimate[method] = intercept;
     }
 
     /*------------------------------------------------------------------------------
@@ -382,14 +370,35 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
 ------------------------------------------------------------------------------*/
     void StStockingLord(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
-      std::vector<double> x {irtScaleTransformationData.stockingLordSlopeStartingValue.value(),
-                             irtScaleTransformationData.stockingLordInterceptStartingValue.value()};
-      double ftol = 0.0000000001;
+      EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD;
 
-      std::shared_ptr<EquatingRecipes::StockingLordFunction> optimizationFunction =
-          std::make_shared<EquatingRecipes::StockingLordFunction>();
+      this->StOptimizationMethod(method);
+    }
 
-      optimizationFunction->configure(irtScaleTransformationData);
+    void StOptimizationMethod(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+      double slopeStartingValue;
+      double interceptStartingValue;
+
+      if (irtScaleTransformationData.slopeStartingValue.contains(method)) {
+        slopeStartingValue = irtScaleTransformationData.slopeStartingValue[method];
+      } else {
+        slopeStartingValue = 1.0;
+      }
+
+      if (irtScaleTransformationData.interceptStartingValue.contains(method)) {
+        interceptStartingValue = irtScaleTransformationData.interceptStartingValue[method];
+      } else {
+        interceptStartingValue = 0.0;
+      }
+
+      std::vector<double> x {slopeStartingValue,
+                             interceptStartingValue};
+      double ftol = irtScaleTransformationData.ftol;
+
+      std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction = getOptimizationFunction(method);
+
+      optimizationFunction->configure(irtScaleTransformationData,
+                                      method);
 
       EquatingRecipes::LBFGSOptimizer optimizer;
       double functionValue = optimizer.optimize(x,
@@ -399,18 +408,35 @@ namespace EquatingRecipes {
       double slope = x[0];
       double intercept = x[1];
 
-      irtScaleTransformationData.stockingLordSlope = slope;
-      irtScaleTransformationData.stockingLordIntercept = intercept;
+      irtScaleTransformationData.slopeEstimate[method] = slope;
+      irtScaleTransformationData.interceptEstimate[method] = intercept;
     }
 
-    bool quadratureIsEmpty(const std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature>& quadratures) {
+    std::shared_ptr<EquatingRecipes::OptimizationFunction> getOptimizationFunction(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+      std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction;
+
+      switch (method) {
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:
+          optimizationFunction = std::make_shared<EquatingRecipes::HaebaraFunction>();
+          break;
+
+        case EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD:
+          optimizationFunction = std::make_shared<EquatingRecipes::StockingLordFunction>();
+          break;
+
+        default:
+          // TODO: throw error
+          break;
+      }
+
+      return optimizationFunction;
+    }
+
+    bool quadratureIsEmpty(const EquatingRecipes::Structures::Quadrature& quadratures) {
       bool isEmpty = false;
 
-      std::for_each(quadratures.begin(),
-                    quadratures.end(),
-                    [&](const std::pair<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature>& entry) {
-                      isEmpty = isEmpty | entry.second.thetaValues.size() == 0 | entry.second.thetaWeights.size() == 0;
-                    });
+      isEmpty = (quadratures.thetaValues.size() == 0 ||
+                 quadratures.thetaWeights.size() == 0);
 
       return isEmpty;
     }
