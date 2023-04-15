@@ -2,10 +2,10 @@
 #define JSON_STRUCTURES_HPP
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <Eigen/Core>
-
 #include <nlohmann/json.hpp>
 
 #include <equating_recipes/structures/beta_binomial_smoothing.hpp>
@@ -435,62 +435,21 @@ namespace EquatingRecipes {
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::IRTScaleTransformationData& rec) {
-      j = nlohmann::json {{"minimumRawScoreNewForm", rec.minimumRawScoreNewForm},
-                          {"maximumRawScoreNewForm", rec.maximumRawScoreNewForm},
-                          {"rawScoreIncrementNewForm", rec.rawScoreIncrementNewForm},
-                          {"minimumRawScoreOldForm", rec.minimumRawScoreOldForm},
-                          {"maximumRawScoreOldForm", rec.maximumRawScoreOldForm},
-                          {"rawScoreIncrementOldForm", rec.rawScoreIncrementOldForm},
+      j = nlohmann::json {{"ftol", rec.ftol},
                           {"quadratureNewForm", rec.quadratureNewForm},
                           {"quadratureOldForm", rec.quadratureOldForm},
                           {"newItems", rec.newItems},
                           {"oldItems", rec.oldItems},
                           {"commonItems", rec.commonItems},
-                          {"runHaebara", rec.runHaebara},
-                          {"haebaraSymmetryOption", rec.haebaraSymmetryOption},
-                          {"haebaraFunctionStandardization", rec.haebaraFunctionStandardization},
-                          {"runStockingLord", rec.runStockingLord},
-                          {"stockingLordSymmetryOption", rec.stockingLordSymmetryOption},
-                          {"stockingLordFunctionStandardization", rec.stockingLordFunctionStandardization},
-                          {"meanMeanSlope", rec.meanMeanSlope},
-                          {"meanMeanIntercept", rec.meanMeanIntercept},
-                          {"meanSigmaSlope", rec.meanSigmaSlope},
-                          {"meanSigmaIntercept", rec.meanSigmaIntercept},
+                          {"symmetryOptions", rec.symmetryOptions},
+                          {"standardizations", rec.standardizations},
+                          {"slopeStartingValue", rec.slopeStartingValue},
+                          {"interceptStartingValue", rec.interceptStartingValue},
+                          {"irtScaleTranformationMethods", rec.irtScaleTranformationMethods},
+                          {"slopeEstimate", rec.slopeEstimate},
+                          {"interceptEstimate", rec.interceptEstimate},
                           {"transformedQuadratureNewForm", rec.transformedQuadratureNewForm},
-                          {"itemResultsNewForm", rec.itemResultsNewForm},
-                          {"irtScaleTranformationMethod", rec.irtScaleTranformationMethod}};
-
-      if (rec.haebaraSlopeStartingValue.has_value()) {
-        j["haebaraSlopeStartingValue"] = rec.haebaraSlopeStartingValue.value();
-      }
-
-      if (rec.haebaraInterceptStartingValue.has_value()) {
-        j["haebaraInterceptStartingValue"] = rec.haebaraInterceptStartingValue.value();
-      }
-
-      if (rec.stockingLordSlopeStartingValue.has_value()) {
-        j["stockingLordSlopeStartingValue"] = rec.stockingLordSlopeStartingValue.value();
-      }
-
-      if (rec.stockingLordInterceptStartingValue.has_value()) {
-        j["stockingLordInterceptStartingValue"] = rec.stockingLordInterceptStartingValue.value();
-      }
-
-      if (rec.haebaraSlope.has_value()) {
-        j["haebaraSlope"] = rec.haebaraSlope.value();
-      }
-
-      if (rec.haebaraIntercept.has_value()) {
-        j["haebaraIntercept"] = rec.haebaraIntercept.value();
-      }
-
-      if (rec.stockingLordSlope.has_value()) {
-        j["stockingLordSlope"] = rec.stockingLordSlope.value();
-      }
-
-      if (rec.stockingLordIntercept.has_value()) {
-        j["stockingLordIntercept"] = rec.stockingLordIntercept.value();
-      }
+                          {"itemResultsNewForm", rec.itemResultsNewForm}};
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::IRTInput& rec) {

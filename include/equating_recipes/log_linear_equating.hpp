@@ -46,6 +46,8 @@ University of Iowa
 
 #include <Eigen/Dense>
 #include <Eigen/LU>
+#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <equating_recipes/structures/bivariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>

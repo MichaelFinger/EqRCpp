@@ -8,7 +8,6 @@
 #define STRUCTURES_IRT_SCALE_TRANSFORMATION_DATA_HPP
 
 #include <map>
-#include <optional>
 #include <set>
 #include <Eigen/Core>
 

@@ -24,8 +24,8 @@ namespace EquatingRecipes {
       this->newThetaValues = irtScaleTransformationData.quadratureNewForm.thetaValues;
       this->newThetaWeights = irtScaleTransformationData.quadratureNewForm.thetaWeights;
 
-      this->symmetry = irtScaleTransformationData.symmetryOptions[this->method];
-      this->functionStandardization = irtScaleTransformationData.standardization[this->method];
+      this->symmetry = irtScaleTransformationData.symmetryOptions.at(this->method);
+      this->functionStandardization = irtScaleTransformationData.standardizations.at(this->method);
 
       this->commonItems = irtScaleTransformationData.commonItems;
     }

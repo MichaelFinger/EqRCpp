@@ -119,9 +119,9 @@ namespace EquatingRecipes {
                                     irtScaleTransformationData.newItems.end(),
                                     [&](const EquatingRecipes::Structures::ItemSpecification& newItem) {
                                       EquatingRecipes::Structures::IRTScaleTransformationItemResults newItemResult =
-                                          getNewItemResult(newItem, slope, intercept);
+                                          this->getNewItemResult(newItem, slope, intercept);
 
-                                      newItemResults.push_back(newItemResult)
+                                      newItemResults.push_back(newItemResult);
                                     });
 
                       irtScaleTransformationData.itemResultsNewForm[method] = newItemResults;
@@ -157,7 +157,8 @@ namespace EquatingRecipes {
     void StHaebara(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA;
 
-      this->StOptimizationMethod(method);
+      this->StOptimizationMethod(method,
+                                 irtScaleTransformationData);
     }
 
     /*------------------------------------------------------------------------------
@@ -372,10 +373,12 @@ namespace EquatingRecipes {
     void StStockingLord(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD;
 
-      this->StOptimizationMethod(method);
+      this->StOptimizationMethod(method,
+                                 irtScaleTransformationData);
     }
 
-    void StOptimizationMethod(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+    void StOptimizationMethod(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method,
+                              EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       double slopeStartingValue;
       double interceptStartingValue;
 
@@ -440,49 +443,49 @@ namespace EquatingRecipes {
 
       return isEmpty;
     }
+
+    EquatingRecipes::Structures::IRTScaleTransformationItemResults getNewItemResult(const EquatingRecipes::Structures::ItemSpecification& newItem,
+                                                                                    const double& slope,
+                                                                                    const double& intercept) {
+      EquatingRecipes::Structures::IRTScaleTransformationItemResults newItemResult;
+      newItemResult.configure(newItem);
+
+      switch (newItem.irtModel) {
+        case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
+          newItemResult.transformedA(1) = newItem.a(1) / slope;
+          newItemResult.transformedB(1) = newItem.b(1) * slope + intercept;
+          newItemResult.transformedC(1) = newItem.c(1);
+
+          break;
+        case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
+          newItemResult.transformedA(1) = newItem.a(1) / slope;
+          newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories - 1)) =
+              newItem.b(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope +
+              Eigen::VectorXd::Constant(newItem.numberOfCategories - 2, intercept);
+
+          break;
+        case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
+          newItemResult.transformedA(1) = newItem.a(1) / slope;
+          newItemResult.transformedB(0) = newItem.b(0) * slope + intercept;
+          newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories)) =
+              newItem.d(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope;
+
+          break;
+        case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
+          newItemResult.transformedA(Eigen::seq(0, newItem.numberOfCategories - 1)) =
+              newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1)) / slope;
+
+          newItemResult.transformedC(Eigen::seq(0, newItem.numberOfCategories - 1)) =
+              newItem.c(Eigen::seq(0, newItem.numberOfCategories - 1)) -
+              (intercept / slope) * newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1));
+          break;
+        default:
+          break;
+      }
+
+      return newItemResult;
+    };
   };
-
-  EquatingRecipes::Structures::IRTScaleTransformationItemResults getNewItemResult(const EquatingRecipes::Structures::ItemSpecification& newItem,
-                                                                                  const double& slope,
-                                                                                  const double& intercept) {
-    EquatingRecipes::Structures::IRTScaleTransformationItemResults newItemResult;
-    newItemResult.configure(newItem);
-
-    switch (newItem.irtModel) {
-      case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
-        newItemResult.transformedA(1) = newItem.a(1) / slope;
-        newItemResult.transformedB(1) = newItem.b(1) * slope + intercept;
-        newItemResult.transformedC(1) = newItem.c(1);
-
-        break;
-      case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
-        newItemResult.transformedA(1) = newItem.a(1) / slope;
-        newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories - 1)) =
-            newItem.b(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope +
-            Eigen::VectorXd::Constant(newItem.numberOfCategories - 2, intercept);
-
-        break;
-      case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
-        newItemResult.transformedA(1) = newItem.a(1) / slope;
-        newItemResult.transformedB(0) = newItem.b(0) * slope + intercept;
-        newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories)) =
-            newItem.d(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope;
-
-        break;
-      case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
-        newItemResult.transformedA(Eigen::seq(0, newItem.numberOfCategories - 1)) =
-            newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1)) / slope;
-
-        newItemResult.transformedC(Eigen::seq(0, newItem.numberOfCategories - 1)) =
-            newItem.c(Eigen::seq(0, newItem.numberOfCategories - 1)) -
-            (intercept / slope) * newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1));
-        break;
-      default:
-        break;
-    }
-
-    return newItemResult;
-  }
 } // namespace EquatingRecipes
 
 #endif
