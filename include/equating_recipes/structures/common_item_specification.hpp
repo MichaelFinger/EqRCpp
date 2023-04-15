@@ -22,9 +22,11 @@ namespace EquatingRecipes {
       Eigen::VectorXd newA;
       Eigen::VectorXd newB;
       Eigen::VectorXd newC;
+      Eigen::VectorXd newD;
       Eigen::VectorXd oldA;
       Eigen::VectorXd oldB;
       Eigen::VectorXd oldC;
+      Eigen::VectorXd oldD;
       EquatingRecipes::Structures::IRTModel irtModel;
     };
   } // namespace Structures

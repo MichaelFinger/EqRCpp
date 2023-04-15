@@ -1591,9 +1591,9 @@ namespace EquatingRecipes {
 
         if (debug) {
           std::cout << fmt::format("\n        {:2d}    ", iterationNumber);
-          std::cout << fmt::format("  {10.5f}", normalizingConstant);
+          std::cout << fmt::format("  {:10.5f}", normalizingConstant);
           for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-            std::cout << fmt::format("  {10.5f}\n", uConstants.has_value() ? (uConstants.value())(columnIndex) : 0.0);
+            std::cout << fmt::format("  {:10.5f}\n", uConstants.has_value() ? (uConstants.value())(columnIndex) : 0.0);
           }
 
           for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
