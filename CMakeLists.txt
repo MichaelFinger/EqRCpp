@@ -15,8 +15,6 @@ include(CheckCXXCompilerFlag)
 set(ENABLE_EQRCPP_SHARED_LIBRARY_TARGET OFF CACHE BOOL "Enable shared library target." FORCE)
 set(ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TARGET OFF CACHE BOOL "Enable examples executable target." FORCE)
 
-# file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
-
 add_library(EqRCpp INTERFACE ${HEADER_LIST})
 set_target_properties(EqRCpp PROPERTIES LINKER_LANGUAGE CXX)
 

@@ -33,7 +33,7 @@
 
 #include <equating_recipes/analyses/bootstrap.hpp>
 #include <equating_recipes/analyses/equated_scaled_scores.hpp>
-#include <equating_recipes/analyses/linear_equating_random_groups.hpp>
+#include <equating_recipes/analyses/random_groups_equating.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/json/json_document.hpp>
 #include <equating_recipes/json/structures.hpp>
@@ -93,9 +93,9 @@ namespace EquatingRecipes {
           nlohmann::json univariateStatisticsYJson = univariateStatistics(inputDataY,
                                                                           univariateStatisticsY);
 
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups linearEquatingRandomGroups;
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData inputData;
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData outputData;
+          EquatingRecipes::Analyses::RandomGroupsEquating linearEquatingRandomGroups;
+          EquatingRecipes::Analyses::RandomGroupsEquating::InputData inputData;
+          EquatingRecipes::Analyses::RandomGroupsEquating::OutputData outputData;
 
           inputData.title = "ACT Math---Equipercentile";
           inputData.datasetName = actMathFreq.datasetName;
@@ -105,9 +105,7 @@ namespace EquatingRecipes {
           inputData.univariateStatisticsX = univariateStatisticsX;
           inputData.univariateStatisticsY = univariateStatisticsY;
 
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups linearEquatingRandomGroups;
-
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData linearEquatingRandomGroupsOutputData;
+          EquatingRecipes::Analyses::RandomGroupsEquating::OutputData linearEquatingRandomGroupsOutputData;
 
           nlohmann::json linearEquatingRandomGroupsJson = linearEquatingRandomGroups(inputData,
                                                                                      linearEquatingRandomGroupsOutputData);
@@ -129,10 +127,6 @@ namespace EquatingRecipes {
 
           nlohmann::json equatedScaledScoresJson = equatedScaledScores(inputDataScaledScores,
                                                                        outputDataScaledScores);
-
-          
-  
-  Wrapper_Bootstrap(&pdREN,1000,&idum,&tREN,&uREN);
         }
       };
     } // namespace Examples

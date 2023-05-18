@@ -13,7 +13,7 @@
 #include <equating_recipes/json/json_document.hpp>
 #include <equating_recipes/rg_and_sg_equating.hpp>
 
-#include <equating_recipes/analyses/linear_equating_random_groups.hpp>
+#include <equating_recipes/analyses/random_groups_equating.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/analyses/analytic_standard_errors.hpp>
 

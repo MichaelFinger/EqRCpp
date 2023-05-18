@@ -17,7 +17,7 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    struct RandomGroupsEuating {
+    struct RandomGroupsEquating {
       struct InputData {
         std::string title;
         std::string datasetName;
@@ -34,8 +34,8 @@ namespace EquatingRecipes {
         EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
       };
 
-      nlohmann::json operator()(const EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData& inputData,
-                                EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData& outputData) {
+      nlohmann::json operator()(const EquatingRecipes::Analyses::RandomGroupsEquating::InputData& inputData,
+                                EquatingRecipes::Analyses::RandomGroupsEquating::OutputData& outputData) {
         EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
 
         EquatingRecipes::Structures::PData pData;

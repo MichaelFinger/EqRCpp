@@ -16,7 +16,7 @@
 #include "datasets/actmathfreq.hpp"
 #include "datasets/yctmath.hpp"
 
-#include <equating_recipes/analyses/linear_equating_random_groups.hpp>
+#include <equating_recipes/analyses/random_groups_equating.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/analyses/equated_scaled_scores.hpp>
 
@@ -55,7 +55,7 @@ namespace EquatingRecipes {
           nlohmann::json univariateStatisticsXJson = univariateStatistics(inputDataX, univariateStatisticsX);
           nlohmann::json univariateStatisticsYJson = univariateStatistics(inputDataY, univariateStatisticsY);
 
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData inputData;
+          EquatingRecipes::Analyses::RandomGroupsEquating::InputData inputData;
           inputData.title = actMathFreq.datasetName + "---Linear";
           inputData.datasetName = actMathFreq.datasetName;
           inputData.design = EquatingRecipes::Structures::Design::RANDOM_GROUPS;
@@ -65,9 +65,9 @@ namespace EquatingRecipes {
           inputData.univariateStatisticsX = univariateStatisticsX;
           inputData.univariateStatisticsY = univariateStatisticsY;
           
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups linearEquatingRandomGroups;
+          EquatingRecipes::Analyses::RandomGroupsEquating linearEquatingRandomGroups;
 
-          EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData linearEquatingRandomGroupsOutputData;
+          EquatingRecipes::Analyses::RandomGroupsEquating::OutputData linearEquatingRandomGroupsOutputData;
 
           nlohmann::json linearEquatingRandomGroupsJson = linearEquatingRandomGroups(inputData,
                                                                                      linearEquatingRandomGroupsOutputData);
