@@ -32,10 +32,6 @@ namespace EquatingRecipes {
         j["analysis_type"] = "irt_scale_transformation";
         j["analysis_results"] = irtScaleTransformationData;
 
-        // nlohmann::json j = {{"analysis_title", ""},
-                            // {"analysis_type", "irt_scale_transformation"},
-                            // {"analysis_results", irtScaleTransformationData}};
-
         return j;
       }
     };

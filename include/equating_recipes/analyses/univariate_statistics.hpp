@@ -15,7 +15,6 @@ namespace EquatingRecipes {
         std::string title;
         std::string datasetName;
         std::string variableName;
-
         Eigen::VectorXd scoreFrequencies;
         double minimumScore;
         double maximumScore;

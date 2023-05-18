@@ -1,3 +1,193 @@
+Wrapper_Bootstrap
+
+Wrapper_BC
+  Wrapper for doing CLL equating for SG with counter-balance design 
+  and log-linear smoothing.  
+  
+  NOTE: This is for the SG with counter balance design in which x and y 
+  in both group 1 and group 2 do not share any items in 
+  common, which means that functionally this is the external anchor case.  
+  The bivariate log-linear smoothing procedure needs to know this. So, when
+  Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+  anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+  (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
+  of the smoothing algorithm may be compromised because of dependencies between
+  x and y. 
+    
+  Assumes that equating puts raw scores for x on scale of y
+Wrapper_BK
+  Wrapper for doing kernel equating with SG with counter-balance design 
+  and log-linear smoothing.  
+  
+  NOTE: This is for the SG with counter balance design in which x and y 
+  in both group 1 and group 2 do not share any items in 
+  common, which means that functionally this is the external anchor case.  
+  The bivariate log-linear smoothing procedure needs to know this. So, when
+  Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+  anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+  (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
+  of the smoothing algorithm may be compromised because of dependencies between
+  x and y. (To date my experience does not suggest this is a problem.)
+    
+  Assumes that equating puts raw scores for x on scale of y
+Wrapper_CC
+  Wrapper for CLL equating for CG design with log-linear smoothing. 
+  Equipercentile equating includes frequency estimation with 
+  Braun-Holland (linear) results, modified frequency estimation with 
+  Braun-Holland (linear) results, and chained equipercentile equating
+    
+  Assumes that in xv, score 1 is for x and score 2 is for v
+  Assumes that in yv, score 1 is for y and score 2 is for v
+  Assumes that equating puts raw scores for x on scale of y
+Wrapper_CK
+  Wrapper for conitnuized log-linear equating for CG design with log-linear smoothing. 
+  Equipercentile equating includes frequency estimation with 
+  Braun-Holland (linear) results, modified frequency estimation with 
+  Braun-Holland (linear) results, and chained equipercentile equating
+    
+  Assumes that in xv, score 1 is for x and score 2 is for v
+  Assumes that in yv, score 1 is for y and score 2 is for v
+  Assumes that equating puts raw scores for x on scale of y
+  
+  NOTE: This function is used (unaltered) for both actual equating and 
+        equating done in Wrapper_Bootstrap().  Distinguishing between the
+        two is the purpose of the variable rep
+Wrapper_CL
+  Wrapper for equipercentile equating for CG design with log-linear smoothing. 
+  Equipercentile equating includes frequency estimation with 
+  Braun-Holland (linear) results, modified frequency estimation with 
+  Braun-Holland (linear) results, and chained equipercentile equating
+    
+  Assumes that in xv, score 1 is for x and score 2 is for v
+  Assumes that in yv, score 1 is for y and score 2 is for v
+  Assumes that equating puts raw scores for x on scale of y
+  
+  NOTE: This function is used (unaltered) for both actual equating and 
+        equating done in Wrapper_Bootstrap().  Distinguishing between the
+        two is the purpose of the variable rep
+Wrapper_CN
+  Wrapper for getting mean, linear, or equipercentile equating for CINEG design
+  with no smoothing. Equipercentile equating includes frequency estimation with 
+  Braun-Holland (linear) results, modified frequency estimation with 
+  Braun-Holland (linear) results, and chained equipercentile equating
+Wrapper_IRTeq
+  Wrapper for IRT equating, including both true score equating and observed score equating
+Wrapper_IRTst
+  Wrapper for IRT scale-score transformation.  As distinct from other Wrapper
+  functions in Equating Recipes, this Wrapper function does its own printing
+Wrapper_RB
+  Wrapper for doing equipercentile equating with RG design and beta-binomial smoothing. Assumes that equating puts raw scores for x on scale of y
+Wrapper_RC
+  Wrapper for doing CLL equating with RG design and log-linear smoothing smoothing. Assumes that equating puts raw scores for x on scale of y
+Wrapper_RK
+  Wrapper for doing kernel equating with RG design and log-linear smoothing smoothing. Assumes that equating puts raw scores for x on scale of y
+Wrapper_RL
+  Wrapper for doing equipercentile equating with RG design and log-linear smoothing smoothing. Assumes that equating puts raw scores for x on scale of y
+Wrapper_RN
+  Wrapper for getting mean, linear, or equipercentile equating for RG design with no smoothing
+Wrapper_SC
+  Wrapper for doing CLL equating with SG design
+  and log-linear smoothing.  
+  
+  NOTE: This is for the SG design in which x and y do not share any items in 
+  common, which means that functionally this is the external anchor case.  
+  The bivariate log-linear smoothing procedure needs to know this. So, when
+  Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+  anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+  (with anchor set to 0) and Wrapper_SC() can still be used, but convergence 
+  of the smoothing algorithm may be compromised because of dependencies between
+  x and y.
+    
+  Assumes that equating puts raw scores for x on scale of y
+Wrapper_SK
+  Wrapper for doing kernel equating with SG design
+  and log-linear smoothing.  
+  
+  NOTE: This is for the SG design in which x and y do not share any items in 
+  common, which means that functionally this is the external anchor case.  
+  The bivariate log-linear smoothing procedure needs to know this. So, when
+  Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+  anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+  (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
+  of the smoothing algorithm may be compromised because of dependencies between
+  x and y. 
+    
+  Assumes that equating puts raw scores for x on scale of y
+Wrapper_SL
+  Wrapper for doing equipercentile equating with SG design
+  and log-linear smoothing.  
+  
+  NOTE: This is for the SG design in which x and y do not share any items in 
+  common, which means that functionally this is the external anchor case.  
+  The bivariate log-linear smoothing procedure needs to know this. So, when
+  Wrapper_Smooth_BLL() is called (as it must be prior to calling Wrapper_SL()),
+  anchor must be set to 0. If x and y share common items, Wrapper_Smooth_BLL()
+  (with anchor set to 0) and Wrapper_SL() can still be used, but convergence 
+  of the smoothing algorithm may be compromised because of dependencies between
+  x and y. (To date my experience does not suggest this is a problem.)
+    
+  Assumes that equating puts raw scores for x on scale of y
+Wrapper_Smooth_BB
+  Wrapper to do beta binomial smoothing.  There are three types: 2 parameter beta, binomial errors; 4 parameter beta, binomial errors; and 4 parameter beta, compound binomial errors
+Wrapper_Smooth_BLL
+  Wrapper to do univariate log-linear smoothing.
+Wrapper_Smooth_CubSpl
+  Wrapper function for cubic-spline postsmoothing. 
+  Assumes input is unsmmothed equivalents (and associated data)
+  for random groups design ('R'), single group design ('S'), or CINEG design ('C').
+  See Kolen and Brennan (2004, pp. 84-89).  Note in particular that final results
+  are the average of cubic spline for x to y and inverse of cubic spline for y to x.
+
+  In a sense, logically, the design type is not needed for cubic spline 
+  postsmoothing.  However, knowing the design simplifies obtaining the 
+  range [low,high] within which the cubic spline is determined.  This is because
+  percentile ranks have already been determined and stored in the USATS or BSTATS
+  structure(s). (Recall that RG usus two USTATS structures, SG uses one BSTATS 
+  structure, and CG uses two BSTATS structures.) 
+  
+  Strictly speacking the design parameter could be elminated from the 
+  calling sequence since it is avaialble in every PDATA structure.  However,
+  requiring the design parameter forces the user to be careful about the 
+  functions that are called prior to calling Wrapper_Smooth_CubSpl().  As 
+  discussed more fully below, Wrapper_Smooth_CubSpl('R' ...) must be paired with
+  two calls to Wrapper_RN(), Wrapper_Smooth_CubSpl('S' ...) must be paired with
+  two calls to Wrapper_SN(), and Wrapper_Smooth_CubSpl('C' ...) must be paired 
+  with two calls to Wrapper_RN().
+
+  For the 'R' design, two prior calls to ReadRawGet_USTATS() are required, 
+  one returning a structure, say, &x, and the other returning a structure,
+  say, &y. One call to Wrapper_RN() should use &x followed by &y.  
+  The other call should use &y followed by &x.
+
+  For the CINEG design, two calls to ReadRawGet_BSTATS() are required, 
+  one returning a structure, say, &xv, and the other returning a structure,
+  say, &yv. One call to Wrapper_CN() should use &xv followed by &yv.  
+  The other call should use &yv followed by &xv. The method for the 
+  x to y and the y to x CINEG designs must be the same. The method
+  variable can be E, F, or C; i.e., only one type of equipercentile
+  equating is smoothed per call to Wrapper_Smooth_CubSpl(). This
+  restriction considerably simplifies the code.  (Complexity
+  arises because for frequency estimation, the low and high scores
+  for use of the cubic spline need to be determined relative to
+  synthestic densities; same is true for modified frequency 
+  estimation but the synthetic densities are different.)
+
+  Care must be taken with the 'S' design.  It is assumed here that
+  there have been two calls to ReadRawGet_BSTATS(). The first call 
+  reads data in order x then y with results stored in, say, &xy.  
+  The second call reads data in order y then x, 
+  with results stored in a different structure, say, &yx.  Then Wrapper_SN
+  needs to be called twice, once using &xy with results stored in 
+  structures, say, &pdxy and &rxy, and once using &yx with results stored in 
+  structures, say, &pdyx and &ryx.
+Wrapper_Smooth_ULL
+  Wrapper to do univariate log-linear smoothing.
+Wrapper_SN
+  Wrapper for getting mean, linear, or equipercentile equating for SG design with no smoothing
+
+
+
+
 void Wrapper_Smooth_BB(struct USTATS *x, int nparm, double rel,
                       struct BB_SMOOTH *s);
 

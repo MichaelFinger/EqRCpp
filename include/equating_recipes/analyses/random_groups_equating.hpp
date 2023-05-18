@@ -17,39 +17,29 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    struct LinearEquatingRandomGroups {
+    struct RandomGroupsEuating {
       struct InputData {
         std::string title;
         std::string datasetName;
-        double lowestObservableEquatedRawScore;
-        double highestObservableEquatedRawScore;
-        double scoreIncrementEquatedRawScore;
-        double lowestObservableScaledScore;
-        double highestObservableScaledScore;
-        
         EquatingRecipes::Structures::Design design;
         EquatingRecipes::Structures::Method method;
         EquatingRecipes::Structures::Smoothing smoothing;
         EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
         EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
-        EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
-
         size_t roundToNumberOfDecimalPlaces = 1;
       };
 
       struct OutputData {
-        EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
         EquatingRecipes::Structures::PData pData;
         EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
-        EquatingRecipes::Structures::EquatedScaledScoresResults equatedScaledScoreResults;
       };
 
       nlohmann::json operator()(const EquatingRecipes::Analyses::LinearEquatingRandomGroups::InputData& inputData,
                                 EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData& outputData) {
         EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
+
         EquatingRecipes::Structures::PData pData;
         EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
-        EquatingRecipes::Structures::EquatedScaledScoresResults equatedScaledScoreResults;
 
         randomAndSingleGroupEquating.randomGroupEquating(inputData.design,
                                                          inputData.method,
@@ -57,23 +47,8 @@ namespace EquatingRecipes {
                                                          inputData.univariateStatisticsX,
                                                          inputData.univariateStatisticsY,
                                                          0,
-                                                         pData,
-                                                         equatedRawScoreResults);
-
-        EquatingRecipes::Utilities::runEquatedScaledScores(pData,
-                                                           equatedRawScoreResults,
-                                                           inputData.lowestObservableEquatedRawScore,
-                                                           inputData.highestObservableEquatedRawScore,
-                                                           inputData.scoreIncrementEquatedRawScore,
-                                                           inputData.rawToScaledScoreTable,
-                                                           inputData.roundToNumberOfDecimalPlaces,
-                                                           inputData.lowestObservableScaledScore,
-                                                           inputData.highestObservableScaledScore,
-                                                           equatedScaledScoreResults);
-
-        outputData.pData = pData;
-        outputData.equatedRawScoreResults = equatedRawScoreResults;
-        outputData.equatedScaledScoreResults = equatedScaledScoreResults;
+                                                         outputData.pData,
+                                                         outputData.equatedRawScoreResults);
 
         nlohmann::json results = nlohmann::json::object();
         results["DatasetName"] = inputData.datasetName;
@@ -81,10 +56,9 @@ namespace EquatingRecipes {
         results["ColumnwVariableName"] = inputData.univariateStatisticsY.variableName;
         results["PData"] = outputData.pData;
         results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
-        results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
 
         nlohmann::json j = {{"analysis_title", inputData.title},
-                            {"analysis_type", "linear_equating_random_groups"},
+                            {"analysis_type", "random_groups_equating"},
                             {"analysis_results", results}};
 
         return j;

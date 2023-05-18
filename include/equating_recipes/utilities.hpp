@@ -603,7 +603,7 @@ namespace EquatingRecipes {
       Date of last revision: 6/30/08                                     
     */
     static void runEquatedScaledScores(EquatingRecipes::Structures::PData& pData,
-                                       EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults,
+                                       const EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults,
                                        const double& minimumScoreYct,
                                        const double& maximumScoreYct,
                                        const double& scoreIncrementYct,

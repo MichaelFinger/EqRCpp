@@ -18,6 +18,7 @@
 
 #include <equating_recipes/analyses/linear_equating_random_groups.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
+#include <equating_recipes/analyses/equated_scaled_scores.hpp>
 
 namespace EquatingRecipes {
   namespace Tests {
@@ -63,19 +64,25 @@ namespace EquatingRecipes {
 
           inputData.univariateStatisticsX = univariateStatisticsX;
           inputData.univariateStatisticsY = univariateStatisticsY;
-          inputData.lowestObservableEquatedRawScore = 0;
-          inputData.highestObservableEquatedRawScore = 40;
-          inputData.scoreIncrementEquatedRawScore = 1;
-          inputData.lowestObservableScaledScore = 1;
-          inputData.highestObservableScaledScore = 36;
-          inputData.rawToScaledScoreTable = yctMath.rawToScaledScoreTable;
-
+          
           EquatingRecipes::Analyses::LinearEquatingRandomGroups linearEquatingRandomGroups;
 
           EquatingRecipes::Analyses::LinearEquatingRandomGroups::OutputData linearEquatingRandomGroupsOutputData;
 
           nlohmann::json linearEquatingRandomGroupsJson = linearEquatingRandomGroups(inputData,
                                                                                      linearEquatingRandomGroupsOutputData);
+
+          EquatingRecipes::Analyses::EquatedScaledScores equatedScaledScores;
+          EquatingRecipes::Analyses::EquatedScaledScores::InputData inputDataScaledScores;
+          inputDataScaledScores.datasetName = "ACT Math";
+          inputDataScaledScores.equatedRawScoreResults = linearEquatingRandomGroupsOutputData.equatedRawScoreResults;
+          inputDataScaledScores.pData = linearEquatingRandomGroupsOutputData.pData;
+          inputDataScaledScores.lowestObservableEquatedRawScore = 0;
+          inputDataScaledScores.highestObservableEquatedRawScore = 40;
+          inputDataScaledScores.scoreIncrementEquatedRawScore = 1;
+          inputDataScaledScores.lowestObservableScaledScore = 1;
+          inputDataScaledScores.highestObservableScaledScore = 36;
+          inputDataScaledScores.rawToScaledScoreTable = yctMath.rawToScaledScoreTable;
 
           nlohmann::json j = {univariateStatisticsXJson,
                               univariateStatisticsYJson,

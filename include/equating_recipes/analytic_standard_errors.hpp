@@ -23,7 +23,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd standardErrors(numberOfRawScoreCategoriesX);
 
       for (size_t scoreLocationX = 0; scoreLocationX < numberOfRawScoreCategoriesX; scoreLocationX++) {
-        double percentileRankProportion = percentileRankDistX[scoreLocationX] / 100.0;
+        double percentileRankProportion = percentileRankDistX(scoreLocationX) / 100.0;
 
         if (percentileRankProportion >= 1.0) {
           standardErrors(scoreLocationX) = 0.0;
@@ -40,11 +40,16 @@ namespace EquatingRecipes {
             double relativeFrequencyY = cumulativeRelativeFreqDistY(scoreLocationY) - cumulativeRelativeFreqDistY(scoreLocationY - 1);
 
             standardErrors(scoreLocationX) = (1.0 / std::pow(relativeFrequencyY, 2)) *
-                                                 (percentileRankProportion * (1.0 - percentileRankProportion) *
+                                             (percentileRankProportion * (1.0 - percentileRankProportion) *
                                                   static_cast<double>(numberOfExamineesX + numberOfExamineesY) /
-                                                  (numberOfExamineesX * numberOfExamineesY)) -
-                                             (cumulativeRelativeFreqDistY(scoreLocationX) - percentileRankProportion) * (percentileRankProportion - cumulativeRelativeFreqDistY(scoreLocationX - 1) /
-                                                                                                                                                        (static_cast<double>(numberOfExamineesY) * relativeFrequencyY));
+                                                  static_cast<double>(numberOfExamineesX * numberOfExamineesY) -
+                                              (cumulativeRelativeFreqDistY(scoreLocationY) - percentileRankProportion) * (percentileRankProportion - cumulativeRelativeFreqDistY(scoreLocationY - 1)) /
+                                                  (static_cast<double>(numberOfExamineesY) * relativeFrequencyY));
+
+            standardErrors(scoreLocationX) = standardErrors(scoreLocationX) > 0.0 ? std::sqrt(standardErrors(scoreLocationX)) : 0.0;
+
+            /* The following line handles non-unit increments */
+            standardErrors(scoreLocationX) = scoreIncrementX * standardErrors(scoreLocationX);
           } else {
             standardErrors(scoreLocationX) = 0.0;
           }
