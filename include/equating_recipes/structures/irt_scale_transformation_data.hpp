@@ -8,6 +8,7 @@
 #define STRUCTURES_IRT_SCALE_TRANSFORMATION_DATA_HPP
 
 #include <map>
+#include <optional>
 #include <set>
 #include <Eigen/Core>
 
@@ -31,7 +32,11 @@ namespace EquatingRecipes {
 
       
       // Input
-      double ftol = 0.0000000001;
+      unsigned long maximumNumberOfIterations = 100;
+      std::optional<double> maximumAbsoluteChangeInFunctionValue;
+      std::optional<double> maximumRelativeChangeInFunctionValue;
+      std::optional<double> maximumAbsoluteChangeInParameterValues;
+      std::optional<double> maximumRelativeChangeInParameterValues;
 
       EquatingRecipes::Structures::Quadrature quadratureNewForm;
       EquatingRecipes::Structures::Quadrature quadratureOldForm;

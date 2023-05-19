@@ -40,12 +40,6 @@ namespace EquatingRecipes {
   class IRTScaleTransformation {
   public:
     void run(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
-      bool missingQuadrature = quadratureIsEmpty(irtScaleTransformationData.quadratureNewForm);
-
-      if (missingQuadrature) {
-        throw std::runtime_error("Haebara or Stocking-Lord results cannot be computed because at least\none of the ability distributions is not present");
-      }
-
       std::for_each(irtScaleTransformationData.irtScaleTranformationMethods.begin(),
                     irtScaleTransformationData.irtScaleTranformationMethods.end(),
                     [&](const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
@@ -155,6 +149,12 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
     void StHaebara(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+      bool missingQuadrature = quadratureIsEmpty(irtScaleTransformationData.quadratureNewForm);
+
+      if (missingQuadrature) {
+        throw std::runtime_error("Haebara results cannot be computed because at least\none of the ability distributions is not present");
+      }
+
       EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA;
 
       this->StOptimizationMethod(method,
@@ -371,6 +371,12 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
 ------------------------------------------------------------------------------*/
     void StStockingLord(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
+      bool missingQuadrature = quadratureIsEmpty(irtScaleTransformationData.quadratureNewForm);
+
+      if (missingQuadrature) {
+        throw std::runtime_error("Haebara results cannot be computed because at least\none of the ability distributions is not present");
+      }
+
       EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD;
 
       this->StOptimizationMethod(method,
@@ -396,7 +402,6 @@ namespace EquatingRecipes {
 
       std::vector<double> x {slopeStartingValue,
                              interceptStartingValue};
-      double ftol = irtScaleTransformationData.ftol;
 
       std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction = getOptimizationFunction(method);
 
@@ -406,7 +411,11 @@ namespace EquatingRecipes {
       EquatingRecipes::LBFGSOptimizer optimizer;
       double functionValue = optimizer.optimize(x,
                                                 optimizationFunction,
-                                                ftol);
+                                                irtScaleTransformationData.maximumNumberOfIterations,
+                                                irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue,
+                                                irtScaleTransformationData.maximumRelativeChangeInFunctionValue,
+                                                irtScaleTransformationData.maximumAbsoluteChangeInParameterValues,
+                                                irtScaleTransformationData.maximumRelativeChangeInParameterValues);
 
       double slope = x[0];
       double intercept = x[1];
@@ -484,7 +493,7 @@ namespace EquatingRecipes {
       }
 
       return newItemResult;
-    };
+    }
   };
 } // namespace EquatingRecipes
 

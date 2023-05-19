@@ -2,6 +2,7 @@
 #define LBFGS_OPTIMIZER_HPP
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include <nlopt.hpp>
@@ -16,13 +17,33 @@ namespace EquatingRecipes {
     }
 
     double optimize(const std::vector<double>& x,
-                           std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction,
-                           const double& ftol) {
+                    std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction,
+                    const unsigned long& maximumNumberOfIterations,
+                    const std::optional<double>& maximumAbsoluteChangeInFunctionValue,
+                    const std::optional<double>& maximumRelativeChangeInFunctionValue,
+                    const std::optional<double>& maximumAbsoluteChangeInParameterValues,
+                    const std::optional<double>& maximumRelativeChangeInParameterValues) {
       nlopt::opt opt(nlopt::LD_LBFGS, x.size());
 
       opt.set_min_objective(EquatingRecipes::LBFGSOptimizer::wrap, &(*optimizationFunction));
 
-      opt.set_ftol_rel(ftol);
+      opt.set_maxeval(maximumNumberOfIterations);
+      
+      if (maximumAbsoluteChangeInFunctionValue.has_value()) {
+        opt.set_ftol_abs(maximumAbsoluteChangeInFunctionValue.value());
+      }
+
+      if (maximumRelativeChangeInFunctionValue.has_value()) {
+        opt.set_ftol_rel(maximumRelativeChangeInFunctionValue.value());
+      }
+
+      if (maximumAbsoluteChangeInParameterValues.has_value()) {
+        opt.set_xtol_abs(maximumAbsoluteChangeInParameterValues.value());
+      }
+
+      if (maximumRelativeChangeInParameterValues.has_value()) {
+        opt.set_xtol_rel(maximumRelativeChangeInParameterValues.value());
+      }
 
       double minf;
 
