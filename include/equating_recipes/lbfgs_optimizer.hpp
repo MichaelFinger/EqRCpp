@@ -28,7 +28,7 @@ namespace EquatingRecipes {
       opt.set_min_objective(EquatingRecipes::LBFGSOptimizer::wrap, &(*optimizationFunction));
 
       opt.set_maxeval(maximumNumberOfIterations);
-      
+
       if (maximumAbsoluteChangeInFunctionValue.has_value()) {
         opt.set_ftol_abs(maximumAbsoluteChangeInFunctionValue.value());
       }
@@ -47,7 +47,11 @@ namespace EquatingRecipes {
 
       double minf;
 
-      opt.optimize(x);
+      try {
+         opt.optimize(x);
+      } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+      }
 
       return minf;
     }

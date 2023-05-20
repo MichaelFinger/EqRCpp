@@ -13,7 +13,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(CheckCXXCompilerFlag)
 
 set(ENABLE_EQRCPP_SHARED_LIBRARY_TARGET OFF CACHE BOOL "Enable shared library target." FORCE)
-set(ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TARGET OFF CACHE BOOL "Enable examples executable target." FORCE)
+set(ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TARGET ON CACHE BOOL "Enable examples executable target." FORCE)
 
 add_library(EqRCpp INTERFACE ${HEADER_LIST})
 set_target_properties(EqRCpp PROPERTIES LINKER_LANGUAGE CXX)

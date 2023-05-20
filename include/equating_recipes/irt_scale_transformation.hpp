@@ -468,9 +468,10 @@ namespace EquatingRecipes {
           break;
         case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
           newItemResult.transformedA(1) = newItem.a(1) / slope;
+
           newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories - 1)) =
-              newItem.b(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope +
-              Eigen::VectorXd::Constant(newItem.numberOfCategories - 2, intercept);
+              newItem.b(Eigen::seq(1, newItem.numberOfCategories - 1)).cwiseProduct(Eigen::VectorXd::Constant(newItem.numberOfCategories - 1, slope)) +
+              Eigen::VectorXd::Constant(newItem.numberOfCategories - 1, intercept);
 
           break;
         case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
