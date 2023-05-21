@@ -401,8 +401,9 @@ namespace EquatingRecipes {
         interceptStartingValue = 0.0;
       }
 
-      std::vector<double> x {slopeStartingValue,
-                             interceptStartingValue};
+      std::vector<double> x;
+      x.push_back(slopeStartingValue);
+      x.push_back(interceptStartingValue);
 
       std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction = getOptimizationFunction(method);
 

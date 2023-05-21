@@ -1,6 +1,7 @@
 #ifndef EQUATING_RECIPES_STOCKING_LORD_FUNCTION_HPP
 #define EQUATING_RECIPES_STOCKING_LORD_FUNCTION_HPP
 
+#include <cmath>
 #include <vector>
 #include <Eigen/Core>
 

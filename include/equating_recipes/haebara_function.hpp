@@ -1,6 +1,7 @@
 #ifndef EQUATING_RECIPES_HAEBERA_FUNCION_HPP
 #define EQUATING_RECIPES_HAEBERA_FUNCION_HPP
 
+#include <cmath>
 #include <vector>
 #include <Eigen/Core>
 

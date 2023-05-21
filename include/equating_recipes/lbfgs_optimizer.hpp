@@ -37,7 +37,7 @@ namespace EquatingRecipes {
                                                               const std::optional<double>& maximumAbsoluteChangeInParameterValues,
                                                               const std::optional<double>& maximumRelativeChangeInParameterValues) {
       nlopt::opt opt(nlopt::LD_LBFGS, x.size());
-
+    
       opt.set_min_objective(EquatingRecipes::LBFGSOptimizer::wrap, &(*optimizationFunction));
 
       opt.set_maxeval(maximumNumberOfIterations);
@@ -74,7 +74,7 @@ namespace EquatingRecipes {
 
       double minf;
 
-      try {
+      // try {
         nlopt::result result = opt.optimize(x, minf);
 
         results.functionValue = minf;
@@ -106,9 +106,9 @@ namespace EquatingRecipes {
         results.maximumRelativeChangeInParameterValues = opt.get_xtol_rel();
 
         results.resultCode = getOptimizationResultCode(result);
-      } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
-      }
+      // } catch (const std::exception& e) {
+      //   std::cerr << e.what() << '\n';
+      // }
 
       return results;
     }
