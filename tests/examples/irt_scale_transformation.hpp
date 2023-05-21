@@ -11,6 +11,7 @@
 #include <equating_recipes/json/json_document.hpp>
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_data.hpp>
+#include <datasets/item_pair_file.hpp>
 
 namespace EquatingRecipes {
   namespace Tests {
@@ -33,46 +34,71 @@ namespace EquatingRecipes {
           EquatingRecipes::Tests::Examples::Datasets::QuadratureFile dummyYDist;
           dummyYDist.import("dummyYdist.txt");
 
-          std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems = createCommonItemSpecs(dummyYItems.itemSpecs,
-                                                                                                                dummyXItems.itemSpecs,
-                                                                                                                dummyV3Items.itemPairSpecs);
+          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile kbXItems;
+          kbXItems.import("KB6Xitems");
+
+          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile kbYItems;
+          kbYItems.import("KB6Yitems");
+
+          EquatingRecipes::Tests::Examples::Datasets::ItemPairFile kbVItems;
+          kbVItems.import("KB6Vitems");
+
+          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile kbXDist;
+          kbXDist.import("KB6Xdist");
+
+          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile kbYDist;
+          kbYDist.import("KB6Ydist");
+
+          // std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems = createCommonItemSpecs(dummyYItems.itemSpecs,
+          //                                                                                                       dummyXItems.itemSpecs,
+          //                                                                                                       dummyV3Items.itemPairSpecs);
+
+          std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems = createCommonItemSpecs(kbYItems.itemSpecs,
+                                                                                                                kbXItems.itemSpecs,
+                                                                                                                kbVItems.itemPairSpecs);
+
 
           EquatingRecipes::Structures::IRTScaleTransformationData irtScaleTransformationData;
 
-          // irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN);
-          // irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA);
+          irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN);
+          irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA);
           irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA);
-          // irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD);
+          irtScaleTransformationData.irtScaleTranformationMethods.insert(EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD);
 
           irtScaleTransformationData.commonItems = commonItems;
 
           irtScaleTransformationData.interceptStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = 0;
           irtScaleTransformationData.slopeStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = 1;
 
-          // irtScaleTransformationData.interceptStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 0;
-          // irtScaleTransformationData.slopeStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 1;
+          irtScaleTransformationData.interceptStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 0;
+          irtScaleTransformationData.slopeStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 1;
           
-          // irtScaleTransformationData.maximumNumberOfIterations = 100;
+          irtScaleTransformationData.maximumNumberOfIterations = 1000;
           // irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue = 0.0001;
-          irtScaleTransformationData.maximumRelativeChangeInFunctionValue = 0.0000000001;
+          // irtScaleTransformationData.maximumRelativeChangeInFunctionValue = 0.0000000001;
           // irtScaleTransformationData.maximumAbsoluteChangeInParameterValues = 0.0001;
           // irtScaleTransformationData.maximumRelativeChangeInParameterValues = 1e-8;
 
-          irtScaleTransformationData.newItems = dummyXItems.itemSpecs;
-          irtScaleTransformationData.oldItems = dummyYItems.itemSpecs;
+          // irtScaleTransformationData.newItems = dummyXItems.itemSpecs;
+          // irtScaleTransformationData.oldItems = dummyYItems.itemSpecs;
 
-          irtScaleTransformationData.quadratureNewForm = dummyXDist.quadrature;
-          irtScaleTransformationData.quadratureOldForm = dummyYDist.quadrature;
+          irtScaleTransformationData.newItems = kbXItems.itemSpecs;
+          irtScaleTransformationData.oldItems = kbYItems.itemSpecs;
+
+          // irtScaleTransformationData.quadratureNewForm = dummyXDist.quadrature;
+          // irtScaleTransformationData.quadratureOldForm = dummyYDist.quadrature;
+
+          irtScaleTransformationData.quadratureNewForm = kbXDist.quadrature;
+          irtScaleTransformationData.quadratureOldForm = kbYDist.quadrature;
           
           irtScaleTransformationData.standardizations[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = true;
           irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = EquatingRecipes::Structures::Symmetry::SYMMETRIC;
           
-          // irtScaleTransformationData.standardizations[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = true;
-          // irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = EquatingRecipes::Structures::Symmetry::SYMMETRIC;
+          irtScaleTransformationData.standardizations[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = true;
+          irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = EquatingRecipes::Structures::Symmetry::OLD_SCALE;
 
           EquatingRecipes::Analyses::IRTScaleTransformation irtScaleTransformation;
           std::string title = "IRT Scale Transformation";
-          irtScaleTransformation(title, irtScaleTransformationData);
           nlohmann::json irtScaleTransformationResults = irtScaleTransformation(title, irtScaleTransformationData);
 
           EquatingRecipes::JSON::JsonDocument jsonDoc;

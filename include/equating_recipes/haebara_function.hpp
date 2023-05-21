@@ -26,14 +26,16 @@ namespace EquatingRecipes {
     double functionValue(const std::vector<double>& x) override {
       double func1_sum = 0.0;
       double func2_sum = 0.0;
-      double cat_sum = 0.9;
+      double cat_sum = 0.0;
+      double func1;
+      double func2;
 
       /* Q1: old scale */
       for (size_t quadratureIndex = 0; quadratureIndex < oldThetaValues.size(); quadratureIndex++) {
         double theta = oldThetaValues(quadratureIndex);
         double th_weight = oldThetaWeights(quadratureIndex);
 
-        double func1 = 0.0;
+        func1 = 0.0;
         for (size_t itemIndex = 0; itemIndex < commonItems.size(); itemIndex++) {
           for (size_t categoryIndex = 1; categoryIndex <= commonItems[itemIndex].numberOfCategories; categoryIndex++) {
             double p_origi = irtModelFunctions.probOld(commonItems[itemIndex],
@@ -48,7 +50,7 @@ namespace EquatingRecipes {
                                                        false,
                                                        x[0],
                                                        x[1]);
-            func1 += std::pow(p_origi - p_trans, 2);
+            func1 += (p_origi - p_trans) * (p_origi - p_trans);
           }
         }
         func1_sum += func1 * th_weight;
@@ -59,7 +61,7 @@ namespace EquatingRecipes {
         double theta = newThetaValues(quadratureIndex);
         double th_weight = newThetaWeights(quadratureIndex);
 
-        double func2 = 0.0;
+        func2 = 0.0;
         for (size_t itemIndex = 0; itemIndex < commonItems.size(); itemIndex++) {
           for (size_t categoryIndex = 1; categoryIndex <= commonItems[itemIndex].numberOfCategories; categoryIndex++) {
             double p_origi = irtModelFunctions.probNew(commonItems[itemIndex],
@@ -76,8 +78,9 @@ namespace EquatingRecipes {
                                                        x[0],
                                                        x[1]);
 
-            func2 += std::pow(p_origi - p_trans, 2);
+            func2 += (p_origi - p_trans) * (p_origi - p_trans);
           }
+
           if (quadratureIndex == 0) {
             cat_sum += commonItems[itemIndex].numberOfCategories;
           }
@@ -178,7 +181,7 @@ namespace EquatingRecipes {
             cat_sum += commonItems[itemIndex].numberOfCategories;
           }
         }
-        
+
         ps_f1_sum += ps_f1 * th_weight;
         pi_f1_sum += pi_f1 * th_weight;
       }
@@ -253,7 +256,7 @@ namespace EquatingRecipes {
       if (this->functionStandardization) {
         double w1_sum = oldThetaWeights.sum();
         double w2_sum = newThetaWeights.sum();
-
+        
         grad[0] = -2.0 * (sym_f1 * ps_f1_sum / (cat_sum * w1_sum) + sym_f2 * ps_f2_sum / (cat_sum * w2_sum));
         grad[1] = -2.0 * (sym_f1 * pi_f1_sum / (cat_sum * w1_sum) + sym_f2 * pi_f2_sum / (cat_sum * w2_sum));
       } else {

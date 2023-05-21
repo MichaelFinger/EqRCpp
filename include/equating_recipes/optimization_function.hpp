@@ -30,9 +30,38 @@ namespace EquatingRecipes {
       this->commonItems = irtScaleTransformationData.commonItems;
     }
 
+    double evaluateFunction(const Eigen::VectorXd& x) {
+      std::vector<double> xVec;
+
+      for (size_t index = 0; index < x.size(); index++) {
+        xVec.push_back(x[index]);
+      }
+
+      double result = evaluateFunction(xVec);
+
+      return result;
+    }
+
     double evaluateFunction(const std::vector<double>& x) {
       double funcValue = functionValue(x);
       return funcValue;
+    }
+
+    Eigen::VectorXd evaluateGradient(const Eigen::VectorXd& x) {
+      std::vector<double> xVec;
+
+      for (size_t index = 0; index < x.size(); index++) {
+        xVec.push_back(x[index]);
+      }
+
+      std::vector<double> grad = evaluateGradient(xVec);
+
+      Eigen::VectorXd result(grad.size());
+      for (size_t index = 0; index < grad.size(); index++) {
+        result(index) = grad[index];
+      }
+
+      return result;
     }
 
     std::vector<double> evaluateGradient(const std::vector<double>& x) {

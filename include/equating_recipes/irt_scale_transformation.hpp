@@ -36,6 +36,7 @@
 #include <equating_recipes/stocking_lord_function.hpp>
 #include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/optimization_results.hpp>
+#include <equating_recipes/bfgs_optimizer.hpp>
 
 namespace EquatingRecipes {
   class IRTScaleTransformation {
@@ -180,7 +181,7 @@ namespace EquatingRecipes {
     void StMeanMean(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN;
 
-      int j, k, a_num = 0, b_num = 0, index_a = 0, index_b = 0;
+      size_t a_num = 0, b_num = 0, index_a = 0, index_b = 0;
       double new_mu_a = 0.0, old_mu_a = 0.0;
       double new_mu_b = 0.0, old_mu_b = 0.0;
       Eigen::VectorXd na_vec;
@@ -238,11 +239,11 @@ namespace EquatingRecipes {
         }
       }
 
-      new_mu_a += na_vec(Eigen::seq(1, a_num)).sum();
-      old_mu_a += oa_vec(Eigen::seq(1, a_num)).sum();
+      new_mu_a = na_vec(Eigen::seq(1, a_num)).sum();
+      old_mu_a = oa_vec(Eigen::seq(1, a_num)).sum();
 
-      new_mu_b += nb_vec(Eigen::seq(1, b_num)).sum();
-      old_mu_b += ob_vec(Eigen::seq(1, b_num)).sum();
+      new_mu_b = nb_vec(Eigen::seq(1, b_num)).sum();
+      old_mu_b = ob_vec(Eigen::seq(1, b_num)).sum();
 
       double slope;
       double intercept;
@@ -282,7 +283,7 @@ namespace EquatingRecipes {
     void StMeanSigma(EquatingRecipes::Structures::IRTScaleTransformationData& irtScaleTransformationData) {
       EquatingRecipes::Structures::IRTScaleTransformationMethod method = EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA;
 
-      int j, k, b_num = 0, index = 0;
+      size_t b_num = 0, index = 0;
       double new_mu_b = 0.0, old_mu_b = 0.0;
       double new_si_b = 0.0, old_si_b = 0.0;
       Eigen::VectorXd nb_vec;
@@ -313,13 +314,13 @@ namespace EquatingRecipes {
         if (irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC ||
             irtModel == EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE ||
             irtModel == EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT) {
-          for (size_t categoryIndex = 1; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 2; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             index++;
             nb_vec(index) = commonItem.newB(categoryIndex);
             ob_vec(index) = commonItem.oldB(categoryIndex);
           }
         } else {
-          for (size_t categoryIndex = 0; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             index++;
             nb_vec(index) = -1.0 * (commonItem.newC(categoryIndex) / commonItem.newA(categoryIndex));
             ob_vec(index) = -1.0 * (commonItem.oldC(categoryIndex) / commonItem.oldA(categoryIndex));
@@ -327,10 +328,10 @@ namespace EquatingRecipes {
         }
       }
 
-      new_mu_b += nb_vec.sum();
-      old_mu_b += ob_vec.sum();
-      new_si_b += nb_vec.cwiseProduct(nb_vec).sum();
-      old_si_b += ob_vec.cwiseProduct(ob_vec).sum();
+      new_mu_b = nb_vec.sum();
+      old_mu_b = ob_vec.sum();
+      new_si_b = nb_vec.dot(nb_vec);
+      old_si_b = ob_vec.dot(ob_vec);
 
       double slope;
       double intercept;
@@ -338,8 +339,8 @@ namespace EquatingRecipes {
       if (b_num != 0) {
         new_mu_b /= b_num;
         old_mu_b /= b_num;
-        new_si_b = std::sqrt(new_si_b / b_num - new_mu_b * new_mu_b);
-        old_si_b = std::sqrt(old_si_b / b_num - old_mu_b * old_mu_b);
+        new_si_b = std::sqrt(new_si_b / b_num - std::pow(new_mu_b, 2));
+        old_si_b = std::sqrt(old_si_b / b_num - std::pow(old_mu_b, 2));
 
         slope = old_si_b / new_si_b;
         intercept = old_mu_b - slope * new_mu_b;
@@ -410,7 +411,7 @@ namespace EquatingRecipes {
       optimizationFunction->configure(irtScaleTransformationData,
                                       method);
 
-      EquatingRecipes::LBFGSOptimizer optimizer;
+      EquatingRecipes::BFGSOptimizer optimizer;
       EquatingRecipes::Structures::OptimizationResults optimizationResults =
           optimizer.optimize(x,
                              optimizationFunction,
