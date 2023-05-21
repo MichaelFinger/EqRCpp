@@ -30,6 +30,19 @@ namespace EquatingRecipes {
       this->commonItems = irtScaleTransformationData.commonItems;
     }
 
+    double evaluateFunction(const std::vector<double>& x) {
+      double funcValue = functionValue(x);
+      return funcValue;
+    }
+
+    std::vector<double> evaluateGradient(const std::vector<double>& x) {
+      std::vector<double> grad(x.size());
+      
+      functionGradient(x, grad);
+
+      return grad;
+    }
+
     double operator()(const std::vector<double>& x,
                       std::vector<double>& grad) {
       double funcValue = functionValue(x);

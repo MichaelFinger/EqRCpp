@@ -17,16 +17,16 @@ namespace EquatingRecipes {
   namespace Tests {
     namespace Examples {
       namespace Datasets {
-        struct ItemSpecsFile {
+        class ItemSpecsFile {
+        public:
           size_t numberOfItems;
           std::vector<EquatingRecipes::Structures::ItemSpecification> itemSpecs;
 
-          void import() {
-            std::string filename = "dummyXitems.txt";
-
+          void import(const std::string& filename) {
             itemSpecs = importItemSpecsFile(filename);
           }
 
+        private:
           std::vector<EquatingRecipes::Structures::ItemSpecification> importItemSpecsFile(const std::string& filename) {
             std::vector<std::string> linesRead;
 
@@ -81,11 +81,12 @@ namespace EquatingRecipes {
               itemSpec.scalingConstant = std::stod(values[fieldIndex]);
               fieldIndex++;
 
-              if (itemSpec.irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
-                itemSpec.a.setZero(3);
-                itemSpec.b.setZero(3);
-                itemSpec.c.setZero(3);
+              itemSpec.a.setZero(itemSpec.numberOfCategories + 1);
+              itemSpec.b.setZero(itemSpec.numberOfCategories + 1);
+              itemSpec.c.setZero(itemSpec.numberOfCategories + 1);
+              itemSpec.d.setZero(itemSpec.numberOfCategories + 1);
 
+              if (itemSpec.irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
                 itemSpec.a(2) = std::stod(values[fieldIndex]);
                 fieldIndex++;
 
@@ -95,23 +96,16 @@ namespace EquatingRecipes {
                 itemSpec.c(2) = std::stod(values[fieldIndex]);
                 fieldIndex++;
               } else if (itemSpec.irtModel == EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE) {
-                itemSpec.a.resize(3);
                 itemSpec.a(2) = std::stod(values[fieldIndex]);
                 fieldIndex++;
 
-                itemSpec.b.setZero(itemSpec.numberOfCategories + 1);
                 for (size_t respIndex = 2; respIndex <= itemSpec.numberOfCategories; respIndex++) {
                   itemSpec.b(respIndex) = std::stod(values[fieldIndex]);
                   fieldIndex++;
                 }
               } else if (itemSpec.irtModel == EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT) {
-                itemSpec.a.setZero(3);
-
                 itemSpec.a(2) = std::stod(values[fieldIndex]);
                 fieldIndex++;
-
-                itemSpec.b.setZero(itemSpec.numberOfCategories + 1);
-                itemSpec.d.setZero(itemSpec.numberOfCategories + 1);
 
                 itemSpec.b(0) = std::stod(values[fieldIndex]); // location
                 fieldIndex++;
@@ -125,13 +119,11 @@ namespace EquatingRecipes {
               } else if (itemSpec.irtModel == EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE) {
                 itemSpec.scalingConstant = 1.0;
 
-                itemSpec.a.setZero(itemSpec.numberOfCategories + 1);
                 for (size_t respIndex = 1; respIndex <= itemSpec.numberOfCategories; respIndex++) {
                   itemSpec.a(respIndex) = std::stod(values[fieldIndex]);
                   fieldIndex++;
                 }
 
-                itemSpec.c.setZero(itemSpec.numberOfCategories + 1);
                 for (size_t respIndex = 1; respIndex <= itemSpec.numberOfCategories; respIndex++) {
                   itemSpec.c(respIndex) = std::stod(values[fieldIndex]);
                   fieldIndex++;

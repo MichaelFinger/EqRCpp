@@ -91,9 +91,7 @@ if (ENABLE_EQRCPP_SHARED_LIBRARY_TARGET OR ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TAR
                           ${Boost_LIBRARIES}
                           fmt::fmt
                           nlohmann_json::nlohmann_json
-                          nlopt
-                          pthread
-                          dl)
+                          nlopt)
   endif()
 
   if (ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TARGET)

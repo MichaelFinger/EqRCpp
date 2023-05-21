@@ -18,6 +18,7 @@
 #include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_item_results.hpp>
 #include <equating_recipes/structures/irt_scale_transformation_method.hpp>
+#include <equating_recipes/structures/optimization_results.hpp>
 
 namespace EquatingRecipes {
   namespace Structures {
@@ -32,7 +33,7 @@ namespace EquatingRecipes {
 
       
       // Input
-      unsigned long maximumNumberOfIterations = 100;
+      int maximumNumberOfIterations;
       std::optional<double> maximumAbsoluteChangeInFunctionValue;
       std::optional<double> maximumRelativeChangeInFunctionValue;
       std::optional<double> maximumAbsoluteChangeInParameterValues;
@@ -59,6 +60,8 @@ namespace EquatingRecipes {
 
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::Quadrature> transformedQuadratureNewForm;
       std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, std::vector<EquatingRecipes::Structures::IRTScaleTransformationItemResults>> itemResultsNewForm;
+
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, EquatingRecipes::Structures::OptimizationResults> optimizationResults;
     };
   } // namespace Structures
 } // namespace EquatingRecipes

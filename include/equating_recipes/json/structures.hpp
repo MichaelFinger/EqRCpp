@@ -41,6 +41,7 @@
 #include <equating_recipes/structures/symmetry.hpp>
 #include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
+#include <equating_recipes/structures/optimization_results.hpp>
 
 #include <equating_recipes/log_linear_equating.hpp>
 
@@ -102,7 +103,7 @@ namespace EquatingRecipes {
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA, "Haebara"},
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_MEAN, "mean mean"},
                                                                                              {EquatingRecipes::Structures::IRTScaleTransformationMethod::MEAN_SIGMA, "mean sigma"},
-                                                                                             {EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD, "Stocking Lord"}})
+                                                                                             {EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD, "Stocking-Lord"}})
 
     NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::LossSpec, {{EquatingRecipes::Structures::LossSpec::NOT_SPECIFIED, ""},
                                                                          {EquatingRecipes::Structures::LossSpec::MIX_HA, "Haebara"},
@@ -118,6 +119,14 @@ namespace EquatingRecipes {
                                                                        {EquatingRecipes::Structures::Method::CHAINED, "chained"},
                                                                        {EquatingRecipes::Structures::Method::FE_BH_CHAINED, "chained frequency estimation with Braun-Holland"},
                                                                        {EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED, "chained frequency estimation with Braun-Holland & modified estimation with Braun-Holland"}})
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::OptimizationResultCode, {{EquatingRecipes::Structures::OptimizationResultCode::SUCCESS, "success"},
+                                                                                       {EquatingRecipes::Structures::OptimizationResultCode::FAILED, "failed"},
+                                                                                       {EquatingRecipes::Structures::OptimizationResultCode::FUNCTION_STOP_VALUE, "function_stop_value"},
+                                                                                       {EquatingRecipes::Structures::OptimizationResultCode::FUNCTION_TOLERANCE, "function_tolerance"},
+                                                                                       {EquatingRecipes::Structures::OptimizationResultCode::PARAMETER_TOLERANCE, "parameter_tolerance"},
+                                                                                       {EquatingRecipes::Structures::OptimizationResultCode::MAXIMUM_NUMBER_OF_ITERATIONS, "maximum_number_of_iterations"},
+                                                                                       {EquatingRecipes::Structures::OptimizationResultCode::MAXIMUM_TIME, "maximum_time"}})
 
     NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Smoothing, {{EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED, ""},
                                                                           {EquatingRecipes::Structures::Smoothing::LOG_LINEAR, "log linear"},
@@ -434,6 +443,19 @@ namespace EquatingRecipes {
                           {"transformedC", rec.transformedC}};
     }
 
+    void to_json(nlohmann::json& j, const EquatingRecipes::Structures::OptimizationResults& rec) {
+      j = nlohmann::json {{"functionValue", rec.functionValue},
+                          {"gradientVector", rec.gradientVector},
+                          {"parameterEstimates", rec.parameterEstimates},
+                          {"parameterStartingValues", rec.parameterStartingValues},
+                          {"resultCode", rec.resultCode},
+                          {"numberOfIterations", rec.numberOfIterations},
+                          {"maximumAbsoluteChangeInFunctionValue", rec.maximumAbsoluteChangeInFunctionValue},
+                          {"maximumRelativeChangeInFunctionValue", rec.maximumRelativeChangeInFunctionValue},
+                          {"maximumAbsoluteChangeInParameterValues", rec.maximumAbsoluteChangeInParameterValues},
+                          {"maximumRelativeChangeInParameterValues", rec.maximumRelativeChangeInParameterValues}};
+    }
+
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::IRTScaleTransformationData& rec) {
       j = nlohmann::json {{"maximumNumberOfIterations", rec.maximumNumberOfIterations},
                           {"maximumAbsoluteChangeInFunctionValue", rec.maximumAbsoluteChangeInFunctionValue.value_or(std::numeric_limits<double>::quiet_NaN())},
@@ -453,7 +475,8 @@ namespace EquatingRecipes {
                           {"slopeEstimate", rec.slopeEstimate},
                           {"interceptEstimate", rec.interceptEstimate},
                           {"transformedQuadratureNewForm", rec.transformedQuadratureNewForm},
-                          {"itemResultsNewForm", rec.itemResultsNewForm}};
+                          {"itemResultsNewForm", rec.itemResultsNewForm},
+                          {"optimization_results", rec.optimizationResults}};
     }
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::IRTInput& rec) {

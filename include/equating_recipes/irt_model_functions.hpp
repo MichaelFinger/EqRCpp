@@ -43,9 +43,9 @@ namespace EquatingRecipes {
           prob = itemResponseFunction3PL(categoryIndex,
                                          theta,
                                          item.scalingConstant,
-                                         item.a(1),
-                                         item.b(1),
-                                         item.c(1),
+                                         item.a(2),
+                                         item.b(2),
+                                         item.c(2),
                                          EquatingRecipes::Structures::FormType::OLD,
                                          1,
                                          0);
@@ -56,7 +56,7 @@ namespace EquatingRecipes {
                                          categoryIndex,
                                          theta,
                                          item.scalingConstant,
-                                         item.a(1),
+                                         item.a(2),
                                          item.b,
                                          EquatingRecipes::Structures::FormType::OLD,
                                          1,
@@ -67,7 +67,7 @@ namespace EquatingRecipes {
                                          categoryIndex,
                                          theta,
                                          item.scalingConstant,
-                                         item.a(1),
+                                         item.a(2),
                                          item.b,
                                          EquatingRecipes::Structures::FormType::OLD,
                                          1,
@@ -108,16 +108,16 @@ namespace EquatingRecipes {
           derivative = itemResponseFunctionDerivative3PL(categoryIndex,
                                                          theta,
                                                          item.scalingConstant,
-                                                         item.a(1),
-                                                         item.b(1),
-                                                         item.c(1));
+                                                         item.a(2),
+                                                         item.b(2),
+                                                         item.c(2));
           break;
         case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
           derivative = itemResponseFunctionDerivativeLGR(item.numberOfCategories,
                                                          categoryIndex,
                                                          theta,
                                                          item.scalingConstant,
-                                                         item.a(1),
+                                                         item.a(2),
                                                          item.b);
           break;
         case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
@@ -125,7 +125,7 @@ namespace EquatingRecipes {
                                                          categoryIndex,
                                                          theta,
                                                          item.scalingConstant,
-                                                         item.a(1),
+                                                         item.a(2),
                                                          item.b);
 
           break;
@@ -190,9 +190,9 @@ namespace EquatingRecipes {
             prob = itemResponseFunction3PL(categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB(1),
-                                           commonItem.oldC(1),
+                                           commonItem.oldA(2),
+                                           commonItem.oldB(2),
+                                           commonItem.oldC(2),
                                            EquatingRecipes::Structures::FormType::OLD,
                                            1,
                                            0);
@@ -200,9 +200,9 @@ namespace EquatingRecipes {
             prob = itemResponseFunction3PL(categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB(1),
-                                           commonItem.newC(1),
+                                           commonItem.newA(2),
+                                           commonItem.newB(2),
+                                           commonItem.newC(2),
                                            EquatingRecipes::Structures::FormType::OLD,
                                            S,
                                            I);
@@ -214,7 +214,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.oldA(1),
+                                           commonItem.oldA(2),
                                            commonItem.oldB,
                                            EquatingRecipes::Structures::FormType::OLD,
                                            1,
@@ -224,7 +224,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.newA(1),
+                                           commonItem.newA(2),
                                            commonItem.newB,
                                            EquatingRecipes::Structures::FormType::OLD,
                                            S,
@@ -237,7 +237,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.oldA(1),
+                                           commonItem.oldA(2),
                                            commonItem.oldB,
                                            EquatingRecipes::Structures::FormType::OLD,
                                            1,
@@ -247,7 +247,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.newA(1),
+                                           commonItem.newA(2),
                                            commonItem.newB,
                                            EquatingRecipes::Structures::FormType::OLD,
                                            S,
@@ -319,9 +319,9 @@ namespace EquatingRecipes {
             prob = itemResponseFunction3PL(categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.newA(1),
-                                           commonItem.newB(1),
-                                           commonItem.newC(1),
+                                           commonItem.newA(2),
+                                           commonItem.newB(2),
+                                           commonItem.newC(2),
                                            EquatingRecipes::Structures::FormType::NEW,
                                            1,
                                            0);
@@ -329,9 +329,9 @@ namespace EquatingRecipes {
             prob = itemResponseFunction3PL(categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.oldA(1),
-                                           commonItem.oldB(1),
-                                           commonItem.oldC(1),
+                                           commonItem.oldA(2),
+                                           commonItem.oldB(2),
+                                           commonItem.oldC(2),
                                            EquatingRecipes::Structures::FormType::NEW,
                                            S,
                                            I);
@@ -344,7 +344,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.newA(1),
+                                           commonItem.newA(2),
                                            commonItem.newB,
                                            EquatingRecipes::Structures::FormType::NEW,
                                            1,
@@ -354,7 +354,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.oldA(1),
+                                           commonItem.oldA(2),
                                            commonItem.oldB,
                                            EquatingRecipes::Structures::FormType::NEW,
                                            S,
@@ -368,7 +368,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.newA(1),
+                                           commonItem.newA(2),
                                            commonItem.newB,
                                            EquatingRecipes::Structures::FormType::NEW,
                                            1,
@@ -378,7 +378,7 @@ namespace EquatingRecipes {
                                            categoryIndex,
                                            theta,
                                            commonItem.scalingConstant,
-                                           commonItem.oldA(1),
+                                           commonItem.oldA(2),
                                            commonItem.oldB,
                                            EquatingRecipes::Structures::FormType::NEW,
                                            S,
@@ -434,9 +434,9 @@ namespace EquatingRecipes {
           derivative = itemResponseFunctionDerivative3PLOldOverS(categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.newA(1),
-                                                                 commonItem.newB(1),
-                                                                 commonItem.newC(1),
+                                                                 commonItem.newA(2),
+                                                                 commonItem.newB(2),
+                                                                 commonItem.newC(2),
                                                                  S,
                                                                  I);
 
@@ -447,7 +447,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.newA(1),
+                                                                 commonItem.newA(2),
                                                                  commonItem.newB,
                                                                  S,
                                                                  I);
@@ -459,7 +459,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.newA(1),
+                                                                 commonItem.newA(2),
                                                                  commonItem.newB,
                                                                  S,
                                                                  I);
@@ -503,9 +503,9 @@ namespace EquatingRecipes {
           derivative = itemResponseFunctionDerivative3PLOldOverI(categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.newA(1),
-                                                                 commonItem.newB(1),
-                                                                 commonItem.newC(1),
+                                                                 commonItem.newA(2),
+                                                                 commonItem.newB(2),
+                                                                 commonItem.newC(2),
                                                                  S,
                                                                  I);
 
@@ -516,7 +516,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.newA(1),
+                                                                 commonItem.newA(2),
                                                                  commonItem.newB,
                                                                  S,
                                                                  I);
@@ -528,7 +528,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.newA(1),
+                                                                 commonItem.newA(2),
                                                                  commonItem.newB,
                                                                  S,
                                                                  I);
@@ -564,9 +564,9 @@ namespace EquatingRecipes {
           derivative = itemResponseFunctionDerivative3PLNewOverS(categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.oldA(1),
-                                                                 commonItem.oldB(1),
-                                                                 commonItem.oldC(1),
+                                                                 commonItem.oldA(2),
+                                                                 commonItem.oldB(2),
+                                                                 commonItem.oldC(2),
                                                                  S,
                                                                  I);
 
@@ -577,7 +577,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.oldA(1),
+                                                                 commonItem.oldA(2),
                                                                  commonItem.oldB,
                                                                  S,
                                                                  I);
@@ -589,7 +589,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.oldA(1),
+                                                                 commonItem.oldA(2),
                                                                  commonItem.oldB,
                                                                  S,
                                                                  I);
@@ -625,9 +625,9 @@ namespace EquatingRecipes {
           derivative = itemResponseFunctionDerivative3PLNewOverI(categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.oldA(1),
-                                                                 commonItem.oldB(1),
-                                                                 commonItem.oldC(1),
+                                                                 commonItem.oldA(2),
+                                                                 commonItem.oldB(2),
+                                                                 commonItem.oldC(2),
                                                                  S,
                                                                  I);
 
@@ -638,7 +638,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.oldA(1),
+                                                                 commonItem.oldA(2),
                                                                  commonItem.oldB,
                                                                  S,
                                                                  I);
@@ -650,7 +650,7 @@ namespace EquatingRecipes {
                                                                  categoryIndex,
                                                                  theta,
                                                                  commonItem.scalingConstant,
-                                                                 commonItem.oldA(1),
+                                                                 commonItem.oldA(2),
                                                                  commonItem.oldB,
                                                                  S,
                                                                  I);
@@ -693,9 +693,9 @@ namespace EquatingRecipes {
 
       uj = std::exp(D * a * (theta - b));
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         derivative = -1.0 * D * a * (1.0 - c) * uj / ((1.0 + uj) * (1.0 + uj));
-      } else if (categoryIndex == 1) {
+      } else if (categoryIndex == 2) {
         derivative = D * a * (1.0 - c) * uj / ((1.0 + uj) * (1.0 + uj));
       }
 
@@ -723,11 +723,11 @@ namespace EquatingRecipes {
       double cp_jk;
       double cp_jk1;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         cp_jk = 1.0;
         cp_jk1 = 1.0 / (1.0 + std::exp(-1.0 * D * a * (theta - b(categoryIndex + 1))));
       } else {
-        if (categoryIndex < numberOfCategories - 1) {
+        if (categoryIndex < numberOfCategories) {
           cp_jk = 1.0 / (1.0 + std::exp(-1.0 * D * a * (theta - b(categoryIndex))));
           cp_jk1 = 1.0 / (1.0 + std::exp(-1.0 * D * a * (theta - b(categoryIndex + 1))));
         } else {
@@ -760,16 +760,16 @@ namespace EquatingRecipes {
       double aUSum = 0.0;
       double vj = 0.0;
 
-      for (size_t index = 0; index < numberOfCategories; index++) {
+      for (size_t index = 1; index <= numberOfCategories; index++) {
         double aSum = static_cast<double>(index + 1) * D * a;
-        double bSum = -1.0 * D * a * b(Eigen::seq(1, b.size() - 1)).sum(); /* b[0] = 0 */
+        double bSum = -1.0 * D * a * b(Eigen::seq(2, index)).sum(); /* b[0] = 0 */
         double ujk = std::exp(aSum * theta + bSum);
         vj += ujk;
         aUSum += aSum * ujk;
       }
 
-      double aSum = static_cast<double>(categoryIndex + 1) * D * a;
-      double bSum = -1.0 * D * a * b(Eigen::seq(1, categoryIndex)).sum(); /* b[0] = 0 */
+      double aSum = static_cast<double>(categoryIndex) * D * a;
+      double bSum = -1.0 * D * a * b(Eigen::seq(2, categoryIndex)).sum(); /* b[0] = 0 */
       bSum *= -1.0 * D * a;
       double ujk = std::exp(aSum * theta + bSum);
 
@@ -799,7 +799,7 @@ namespace EquatingRecipes {
       double vj = 0.0;
       double aUSum = 0.0;
 
-      for (size_t index = 0; index < numberOfCategories; index++) {
+      for (size_t index = 1; index <= numberOfCategories; index++) {
         double ujk = std::exp(a(index) * theta + c(index));
         vj += ujk;
         aUSum += a(index) * ujk;
@@ -864,7 +864,7 @@ namespace EquatingRecipes {
 
       double prob = cPar + (1.0 - cPar) / (1.0 + std::exp(-1.0 * deviate));
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         prob = 1.0 - prob;
       }
 
@@ -909,7 +909,7 @@ namespace EquatingRecipes {
 
       double derivative = ps_over_S;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         derivative *= -1.0;
       }
 
@@ -940,11 +940,19 @@ namespace EquatingRecipes {
       as = na / S;
       cs = nc;
 
-      ps = // Prob3PL(2, theta, D, na, nb, nc, "old", S, I);
-          qs = 1.0 - ps;
+      ps = itemResponseFunction3PL(2,
+                                   theta,
+                                   D,
+                                   na,
+                                   nb,
+                                   nc,
+                                   EquatingRecipes::Structures::FormType::OLD,
+                                   S,
+                                   I);
+      qs = 1.0 - ps;
       ps_over_I = -D * as * (ps - cs) * qs / (1.0 - cs);
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         ps_over_I *= -1.0;
       }
 
@@ -989,7 +997,7 @@ namespace EquatingRecipes {
 
       double derivative = pr_over_S;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         derivative *= -1.0;
       }
 
@@ -1035,7 +1043,7 @@ namespace EquatingRecipes {
 
       double derivative = pr_over_I;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         derivative *= -1.0;
       }
 
@@ -1142,7 +1150,7 @@ namespace EquatingRecipes {
                                                   S,
                                                   I);
 
-        if (categoryIndex < numberOfCategories - 1)
+        if (categoryIndex < numberOfCategories)
           pos_cp = cumulativeResponseProbabilityLGR(categoryIndex + 1,
                                                     theta,
                                                     D,
@@ -1162,7 +1170,7 @@ namespace EquatingRecipes {
                                                   EquatingRecipes::Structures::FormType::NEW,
                                                   S,
                                                   I);
-        if (categoryIndex < numberOfCategories - 1) {
+        if (categoryIndex < numberOfCategories) {
           pos_cp = cumulativeResponseProbabilityLGR(categoryIndex + 1,
                                                     theta,
                                                     D,
@@ -1210,7 +1218,7 @@ namespace EquatingRecipes {
 
       as = na / S;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         pos_cps = cumulativeResponseProbabilityLGR(categoryIndex + 1,
                                                    theta,
                                                    D,
@@ -1223,7 +1231,7 @@ namespace EquatingRecipes {
         pos_cps_over_S = -1.0 * D * as * ((theta - I) / S) * pos_cps * (1.0 - pos_cps);
         ps_over_S = 0.0 - pos_cps_over_S;
       } else {
-        if (categoryIndex < numberOfCategories - 1) {
+        if (categoryIndex < numberOfCategories) {
           pre_cps = cumulativeResponseProbabilityLGR(categoryIndex,
                                                      theta,
                                                      D,
@@ -1288,7 +1296,7 @@ namespace EquatingRecipes {
 
       as = na / S;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         pos_cps = cumulativeResponseProbabilityLGR(categoryIndex + 1,
                                                    theta,
                                                    D,
@@ -1300,7 +1308,7 @@ namespace EquatingRecipes {
         pos_cps_over_I = -1.0 * D * as * pos_cps * (1.0 - pos_cps);
         ps_over_I = 0.0 - pos_cps_over_I;
       } else {
-        if (categoryIndex < numberOfCategories - 1) {
+        if (categoryIndex < numberOfCategories) {
           pre_cps = cumulativeResponseProbabilityLGR(categoryIndex,
                                                      theta,
                                                      D,
@@ -1362,7 +1370,7 @@ namespace EquatingRecipes {
       double pos_cpr_over_S;
       double pr_over_S;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         pos_cpr = cumulativeResponseProbabilityLGR(categoryIndex + 1,
                                                    theta,
                                                    D,
@@ -1374,7 +1382,7 @@ namespace EquatingRecipes {
         pos_cpr_over_S = D * oa * theta * pos_cpr * (1.0 - pos_cpr);
         pr_over_S = 0.0 - pos_cpr_over_S;
       } else {
-        if (categoryIndex < numberOfCategories - 1) {
+        if (categoryIndex < numberOfCategories) {
           pre_cpr = cumulativeResponseProbabilityLGR(categoryIndex,
                                                      theta,
                                                      D,
@@ -1435,7 +1443,7 @@ namespace EquatingRecipes {
       double pre_cpr_over_I, pos_cpr_over_I;
       double pr_over_I;
 
-      if (categoryIndex == 0) {
+      if (categoryIndex == 1) {
         pos_cpr = cumulativeResponseProbabilityLGR(categoryIndex + 1,
                                                    theta,
                                                    D,
@@ -1447,7 +1455,7 @@ namespace EquatingRecipes {
         pos_cpr_over_I = D * oa * pos_cpr * (1.0 - pos_cpr);
         pr_over_I = 0.0 - pos_cpr_over_I;
       } else {
-        if (categoryIndex < numberOfCategories - 1) {
+        if (categoryIndex < numberOfCategories) {
           pre_cpr = cumulativeResponseProbabilityLGR(categoryIndex,
                                                      theta,
                                                      D,
@@ -1535,10 +1543,10 @@ namespace EquatingRecipes {
       double br;
 
       if (scale == EquatingRecipes::Structures::FormType::OLD) {
-        for (k = 0; k < numberOfCategories; k++) {
-          a_sum = (k + 1) * D * a;
+        for (k = 1; k <= numberOfCategories; k++) {
+          a_sum = k * D * a;
           b_sum = 0.0;
-          for (l = 1; l <= k; l++) {
+          for (l = 2; l <= k; l++) {
             b_sum += b[l];
           }
           b_sum *= -1.0 * D * a;
@@ -1548,9 +1556,9 @@ namespace EquatingRecipes {
           bs = b_sum - (I / S) * a_sum;
           vjs += std::exp(as * theta + bs);
         }
-        a_sum = (categoryIndex + 1) * D * a;
+        a_sum = (categoryIndex) * D * a;
         b_sum = 0.0;
-        for (l = 1; l < categoryIndex; l++) {
+        for (l = 2; l <= categoryIndex; l++) {
           b_sum += b[l];
         }
         b_sum *= -D * a;
@@ -1560,10 +1568,10 @@ namespace EquatingRecipes {
         bs = b_sum - (I / S) * a_sum;
         return std::exp(as * theta + bs) / vjs;
       } else {
-        for (k = 0; k < numberOfCategories; k++) {
+        for (k = 1; k <= numberOfCategories; k++) {
           a_sum = k * D * a;
           b_sum = 0.0;
-          for (l = 1; l <= k; l++) {
+          for (l = 2; l <= k; l++) {
             b_sum += b[l];
           }
           b_sum *= -1.0 * D * a;
@@ -1573,9 +1581,9 @@ namespace EquatingRecipes {
           br = b_sum + I * a_sum;
           vjr += std::exp(ar * theta + br);
         }
-        a_sum = (categoryIndex + 1) * D * a;
+        a_sum = categoryIndex * D * a;
         b_sum = 0.0;
-        for (l = 1; l <= categoryIndex; l++) {
+        for (l = 2; l <= categoryIndex; l++) {
           b_sum += b[l];
         }
         b_sum *= -1.0 * D * a;
@@ -1613,8 +1621,8 @@ namespace EquatingRecipes {
       double na_sum, as_ps_sum = 0.0;
       double ps_over_S;
 
-      for (k = 0; k < numberOfCategories; k++) {
-        na_sum = (k + 1) * D * na;
+      for (k = 1; k <= numberOfCategories; k++) {
+        na_sum = k * D * na;
         as = na_sum / S; /* new-to-old transformation */
         ps = itemResponseFunctionGPC(numberOfCategories,
                                      k,
@@ -1628,7 +1636,7 @@ namespace EquatingRecipes {
         as_ps_sum += as * ps;
       }
 
-      na_sum = (categoryIndex + 1) * D * na; /* for the category in question */
+      na_sum = categoryIndex * D * na; /* for the category in question */
       as = na_sum / S;                       /* new-to-old transformation */
       ps = itemResponseFunctionGPC(numberOfCategories,
                                    categoryIndex,
@@ -1671,8 +1679,8 @@ namespace EquatingRecipes {
       double as_ps_sum = 0.0;
       double ps_over_I;
 
-      for (k = 0; k < numberOfCategories; k++) {
-        na_sum = (k + 1) * D * na;
+      for (k = 1; k <= numberOfCategories; k++) {
+        na_sum = k * D * na;
         as = na_sum / S; /* new-to-old transformation */
         ps = itemResponseFunctionGPC(numberOfCategories,
                                      categoryIndex,
@@ -1686,7 +1694,7 @@ namespace EquatingRecipes {
         as_ps_sum += as * ps;
       }
 
-      na_sum = (categoryIndex + 1) * D * na; /* for the category in question */
+      na_sum = categoryIndex * D * na; /* for the category in question */
       as = na_sum / S;                       /* new-to-old transformation */
       ps = itemResponseFunctionGPC(numberOfCategories,
                                    categoryIndex,
@@ -1728,8 +1736,8 @@ namespace EquatingRecipes {
       double oa_sum, oa_pr_sum = 0.0;
       double pr_over_S;
 
-      for (k = 0; k < numberOfCategories; k++) {
-        oa_sum = (k + 1) * D * oa;
+      for (k = 1; k <= numberOfCategories; k++) {
+        oa_sum = k * D * oa;
         pr = itemResponseFunctionGPC(numberOfCategories,
                                      k,
                                      theta,
@@ -1741,7 +1749,7 @@ namespace EquatingRecipes {
                                      I);
         oa_pr_sum += oa_sum * pr;
       }
-      oa_sum = (categoryIndex + 1) * D * oa; /* for the category in question */
+      oa_sum = categoryIndex * D * oa; /* for the category in question */
       pr = itemResponseFunctionGPC(numberOfCategories,
                                    categoryIndex,
                                    theta,
@@ -1782,8 +1790,8 @@ namespace EquatingRecipes {
       double oa_pr_sum = 0.0;
       double pr_over_I;
 
-      for (k = 0; k < numberOfCategories; k++) {
-        oa_sum = (k + 1) * D * oa;
+      for (k = 1; k <= numberOfCategories; k++) {
+        oa_sum = k * D * oa;
         pr = itemResponseFunctionGPC(numberOfCategories,
                                      k,
                                      theta,
@@ -1795,7 +1803,7 @@ namespace EquatingRecipes {
                                      I);
         oa_pr_sum += oa_sum * pr;
       }
-      oa_sum = (categoryIndex + 1) * D * oa; /* for the category in question */
+      oa_sum = categoryIndex * D * oa; /* for the category in question */
       pr = itemResponseFunctionGPC(numberOfCategories,
                                    categoryIndex,
                                    theta,
@@ -1853,7 +1861,7 @@ namespace EquatingRecipes {
       double cr;
 
       if (scale == EquatingRecipes::Structures::FormType::OLD) {
-        for (k = 0; k < numberOfCategories; k++) {
+        for (k = 1; k <= numberOfCategories; k++) {
           as = a(k) / S;
           cs = c(k) - (I / S) * a(k);
           vjs += exp(as * theta + cs);
@@ -1862,7 +1870,7 @@ namespace EquatingRecipes {
         cs = c(categoryIndex) - (I / S) * a(categoryIndex);
         return std::exp(as * theta + cs) / vjs;
       } else {
-        for (k = 0; k < numberOfCategories; k++) {
+        for (k = 1; k <= numberOfCategories; k++) {
           ar = S * a(k);
           cr = c(k) + I * a(k);
           vjr += std::exp(ar * theta + cr);
@@ -1899,7 +1907,7 @@ namespace EquatingRecipes {
       double as_ps_sum = 0.0;
       double ps_over_S;
 
-      for (k = 0; k < numberOfCategories; k++) {
+      for (k = 1; k <= numberOfCategories; k++) {
         as = na(k) / S;
         ps = itemResponseFunctionNRM(numberOfCategories,
                                      k,
@@ -1950,7 +1958,7 @@ namespace EquatingRecipes {
       double as_ps_sum = 0.0;
       double ps_over_I;
 
-      for (k = 0; k < numberOfCategories; k++) {
+      for (k = 1; k <= numberOfCategories; k++) {
         as = na(k) / S;
         ps = itemResponseFunctionNRM(numberOfCategories,
                                      k,
@@ -2001,7 +2009,7 @@ namespace EquatingRecipes {
       double oa_pr_sum = 0.0;
       double pr_over_S;
 
-      for (k = 0; k < numberOfCategories; k++) {
+      for (k = 1; k <= numberOfCategories; k++) {
         pr = itemResponseFunctionNRM(numberOfCategories,
                                      k,
                                      theta,
@@ -2049,7 +2057,7 @@ namespace EquatingRecipes {
       double oa_pr_sum = 0.0;
       double pr_over_I;
 
-      for (k = 0; k < numberOfCategories; k++) {
+      for (k = 1; k <= numberOfCategories; k++) {
         pr = itemResponseFunctionNRM(numberOfCategories,
                                      k,
                                      theta,

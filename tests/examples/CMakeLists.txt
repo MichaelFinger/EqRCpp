@@ -11,6 +11,4 @@ target_link_libraries(EqRCppExamples PRIVATE
                       ${Boost_LIBRARIES}
                       fmt::fmt
                       nlohmann_json::nlohmann_json
-                      nlopt
-                      pthread
-                      dl)
+                      nlopt)

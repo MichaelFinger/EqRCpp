@@ -35,6 +35,7 @@
 #include <equating_recipes/optimization_function.hpp>
 #include <equating_recipes/stocking_lord_function.hpp>
 #include <equating_recipes/utilities.hpp>
+#include <equating_recipes/structures/optimization_results.hpp>
 
 namespace EquatingRecipes {
   class IRTScaleTransformation {
@@ -204,10 +205,10 @@ namespace EquatingRecipes {
         }
       }
 
-      na_vec.resize(a_num + 1);
-      oa_vec.resize(a_num + 1);
-      nb_vec.resize(b_num + 1);
-      ob_vec.resize(b_num + 1);
+      na_vec.setZero(a_num + 1);
+      oa_vec.setZero(a_num + 1);
+      nb_vec.setZero(b_num + 1);
+      ob_vec.setZero(b_num + 1);
 
       /* copying valid a- and b-parameters by model into nb_vec and ob_vec */
       for (size_t itemIndex = 0; itemIndex < irtScaleTransformationData.commonItems.size(); itemIndex++) {
@@ -218,15 +219,15 @@ namespace EquatingRecipes {
             irtModel == EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE ||
             irtModel == EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT) {
           index_a++;
-          na_vec(index_a) = commonItem.newA(1);
-          oa_vec(index_a) = commonItem.oldA(1);
-          for (size_t categoryIndex = 1; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          na_vec(index_a) = commonItem.newA(2);
+          oa_vec(index_a) = commonItem.oldA(2);
+          for (size_t categoryIndex = 2; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             index_b++;
             nb_vec(index_b) = commonItem.newB(categoryIndex);
             ob_vec(index_b) = commonItem.oldB(categoryIndex);
           }
         } else {
-          for (size_t categoryIndex = 1; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             index_a++;
             index_b++;
             na_vec(index_a) = commonItem.newA(categoryIndex);
@@ -237,11 +238,11 @@ namespace EquatingRecipes {
         }
       }
 
-      new_mu_a += na_vec.sum();
-      old_mu_a += oa_vec.sum();
+      new_mu_a += na_vec(Eigen::seq(1, a_num)).sum();
+      old_mu_a += oa_vec(Eigen::seq(1, a_num)).sum();
 
-      new_mu_b += nb_vec.sum();
-      old_mu_b += ob_vec.sum();
+      new_mu_b += nb_vec(Eigen::seq(1, b_num)).sum();
+      old_mu_b += ob_vec(Eigen::seq(1, b_num)).sum();
 
       double slope;
       double intercept;
@@ -409,19 +410,21 @@ namespace EquatingRecipes {
                                       method);
 
       EquatingRecipes::LBFGSOptimizer optimizer;
-      double functionValue = optimizer.optimize(x,
-                                                optimizationFunction,
-                                                irtScaleTransformationData.maximumNumberOfIterations,
-                                                irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue,
-                                                irtScaleTransformationData.maximumRelativeChangeInFunctionValue,
-                                                irtScaleTransformationData.maximumAbsoluteChangeInParameterValues,
-                                                irtScaleTransformationData.maximumRelativeChangeInParameterValues);
+      EquatingRecipes::Structures::OptimizationResults optimizationResults =
+          optimizer.optimize(x,
+                             optimizationFunction,
+                             irtScaleTransformationData.maximumNumberOfIterations,
+                             irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue,
+                             irtScaleTransformationData.maximumRelativeChangeInFunctionValue,
+                             irtScaleTransformationData.maximumAbsoluteChangeInParameterValues,
+                             irtScaleTransformationData.maximumRelativeChangeInParameterValues);
 
       double slope = x[0];
       double intercept = x[1];
 
       irtScaleTransformationData.slopeEstimate[method] = slope;
       irtScaleTransformationData.interceptEstimate[method] = intercept;
+      irtScaleTransformationData.optimizationResults[method] = optimizationResults;
     }
 
     std::shared_ptr<EquatingRecipes::OptimizationFunction> getOptimizationFunction(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
@@ -461,33 +464,33 @@ namespace EquatingRecipes {
 
       switch (newItem.irtModel) {
         case EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC:
-          newItemResult.transformedA(1) = newItem.a(1) / slope;
-          newItemResult.transformedB(1) = newItem.b(1) * slope + intercept;
-          newItemResult.transformedC(1) = newItem.c(1);
+          newItemResult.transformedA(2) = newItem.a(2) / slope;
+          newItemResult.transformedB(2) = newItem.b(2) * slope + intercept;
+          newItemResult.transformedC(2) = newItem.c(2);
 
           break;
         case EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE:
-          newItemResult.transformedA(1) = newItem.a(1) / slope;
+          newItemResult.transformedA(2) = newItem.a(2) / slope;
 
-          newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories - 1)) =
-              newItem.b(Eigen::seq(1, newItem.numberOfCategories - 1)).cwiseProduct(Eigen::VectorXd::Constant(newItem.numberOfCategories - 1, slope)) +
+          newItemResult.transformedB(Eigen::seq(2, newItem.numberOfCategories)) =
+              newItem.b(Eigen::seq(2, newItem.numberOfCategories)).cwiseProduct(Eigen::VectorXd::Constant(newItem.numberOfCategories - 1, slope)) +
               Eigen::VectorXd::Constant(newItem.numberOfCategories - 1, intercept);
 
           break;
         case EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT:
-          newItemResult.transformedA(1) = newItem.a(1) / slope;
+          newItemResult.transformedA(2) = newItem.a(2) / slope;
           newItemResult.transformedB(0) = newItem.b(0) * slope + intercept;
           newItemResult.transformedB(Eigen::seq(1, newItem.numberOfCategories)) =
-              newItem.d(Eigen::seq(1, newItem.numberOfCategories - 1)) * slope;
+              newItem.d(Eigen::seq(1, newItem.numberOfCategories)) * slope;
 
           break;
         case EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE:
-          newItemResult.transformedA(Eigen::seq(0, newItem.numberOfCategories - 1)) =
-              newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1)) / slope;
+          newItemResult.transformedA(Eigen::seq(1, newItem.numberOfCategories)) =
+              newItem.a(Eigen::seq(1, newItem.numberOfCategories)) / slope;
 
-          newItemResult.transformedC(Eigen::seq(0, newItem.numberOfCategories - 1)) =
-              newItem.c(Eigen::seq(0, newItem.numberOfCategories - 1)) -
-              (intercept / slope) * newItem.a(Eigen::seq(0, newItem.numberOfCategories - 1));
+          newItemResult.transformedC(Eigen::seq(1, newItem.numberOfCategories)) =
+              newItem.c(Eigen::seq(1, newItem.numberOfCategories)) -
+              (intercept / slope) * newItem.a(Eigen::seq(1, newItem.numberOfCategories));
           break;
         default:
           break;

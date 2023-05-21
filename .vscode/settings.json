@@ -1,6 +1,7 @@
 {
   "files.associations": {
     "*.ejs": "html",
+    "*.njk": "handlebars",
     "*.json.liquid": "json",
     "*.yaml.liquid": "yaml",
     "*.md.liquid": "markdown",
@@ -123,6 +124,7 @@
     "memory_resource": "cpp",
     "utility": "cpp",
     "stop_token": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "source_location": "cpp"
   }
 }

@@ -41,7 +41,7 @@ namespace EquatingRecipes {
         for (size_t itemIndex = 0; itemIndex < commonItems.size(); itemIndex++) {
           EquatingRecipes::Structures::CommonItemSpecification commonItem = commonItems[itemIndex];
 
-          for (size_t categoryIndex = 0; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             double uJK = commonItem.scoringFunctionValues(categoryIndex);
             double p_origi = irtModelFunctions.probOld(commonItem,
                                                        categoryIndex,
@@ -62,6 +62,8 @@ namespace EquatingRecipes {
         func1_sum += std::pow(func1, 2) * th_weight;
       }
 
+      double w1_sum = oldThetaWeights.sum();
+
       /* F2: new scale */
 
       for (size_t quadratureIndex = 0; quadratureIndex < oldThetaValues.size(); quadratureIndex++) {
@@ -73,7 +75,7 @@ namespace EquatingRecipes {
         for (size_t itemIndex = 0; itemIndex < commonItems.size(); itemIndex++) {
           EquatingRecipes::Structures::CommonItemSpecification commonItem = commonItems[itemIndex];
 
-          for (size_t categoryIndex = 0; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             double uJK = commonItem.scoringFunctionValues(categoryIndex);
             double p_orig = irtModelFunctions.probNew(commonItem,
                                                       categoryIndex,
@@ -85,7 +87,7 @@ namespace EquatingRecipes {
             double p_trans = irtModelFunctions.probNew(commonItem,
                                                        categoryIndex,
                                                        theta,
-                                                       true,
+                                                       false,
                                                        x[0],
                                                        x[1]);
 
@@ -95,6 +97,8 @@ namespace EquatingRecipes {
 
         func2_sum += std::pow(func2, 2) * th_weight;
       }
+
+      double w2_sum = newThetaWeights.sum();
 
       /* symmetric or non-symmetric setting*/
       double sym_f1;
@@ -112,9 +116,6 @@ namespace EquatingRecipes {
           sym_f2 = 1.0;
         }
       }
-
-      double w1_sum = oldThetaWeights.sum();
-      double w2_sum = newThetaWeights.sum();
 
       /* function standardization */
       double functionValue;
@@ -167,7 +168,7 @@ namespace EquatingRecipes {
         for (size_t itemIndex = 0; itemIndex < commonItems.size(); itemIndex++) {
           EquatingRecipes::Structures::CommonItemSpecification commonItem = commonItems[itemIndex];
 
-          for (size_t categoryIndex = 0; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             double uJK = commonItem.scoringFunctionValues(categoryIndex);
 
             double p_origi = irtModelFunctions.probOld(commonItem,
@@ -209,7 +210,7 @@ namespace EquatingRecipes {
       double pi_f2_sum = 0.0;
 
       /* F2: new scale */
-      for (size_t quadratureIndex = 0; quadratureIndex < oldThetaValues.size(); quadratureIndex++) {
+      for (size_t quadratureIndex = 0; quadratureIndex < newThetaValues.size(); quadratureIndex++) {
         double theta = newThetaValues(quadratureIndex);
         double th_weight = newThetaWeights(quadratureIndex);
 
@@ -220,7 +221,7 @@ namespace EquatingRecipes {
         for (size_t itemIndex = 0; itemIndex < commonItems.size(); itemIndex++) {
           EquatingRecipes::Structures::CommonItemSpecification commonItem = commonItems[itemIndex];
 
-          for (size_t categoryIndex = 0; categoryIndex < commonItem.numberOfCategories; categoryIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= commonItem.numberOfCategories; categoryIndex++) {
             double uJK = commonItem.scoringFunctionValues(categoryIndex);
 
             double p_origi = irtModelFunctions.probNew(commonItem,
@@ -279,11 +280,11 @@ namespace EquatingRecipes {
       double w2_sum = newThetaWeights.sum();
 
       if (this->functionStandardization) {
-        grad[1] = -2.0 * (sym_f1 * ps_f1_sum / w1_sum + sym_f2 * ps_f2_sum / w2_sum);
-        grad[2] = -2.0 * (sym_f1 * pi_f1_sum / w1_sum + sym_f2 * pi_f2_sum / w2_sum);
+        grad[0] = -2.0 * (sym_f1 * ps_f1_sum / w1_sum + sym_f2 * ps_f2_sum / w2_sum);
+        grad[1] = -2.0 * (sym_f1 * pi_f1_sum / w1_sum + sym_f2 * pi_f2_sum / w2_sum);
       } else {
-        grad[1] = -2.0 * (sym_f1 * ps_f1_sum + sym_f2 * ps_f2_sum);
-        grad[2] = -2.0 * (sym_f1 * pi_f1_sum + sym_f2 * pi_f2_sum);
+        grad[0] = -2.0 * (sym_f1 * ps_f1_sum + sym_f2 * ps_f2_sum);
+        grad[1] = -2.0 * (sym_f1 * pi_f1_sum + sym_f2 * pi_f2_sum);
       }
     }
   };
