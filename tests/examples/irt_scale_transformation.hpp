@@ -19,44 +19,36 @@ namespace EquatingRecipes {
       class IRTScaleTransformation {
       public:
         void operator()() {
-          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile dummyXItems;
-          dummyXItems.import("dummyXItems.txt");
+          std::string newItemsFilename = "dummyXItems.txt";
+          std::string oldItemsFilename = "dummyYItems.txt";
+          std::string itemPairsFilename = "dummyV3Items.txt";
+          std::string newQuadDistFilename = "dummyXdist.txt";
+          std::string oldQuadDistFilename = "dummyYdist.txt";
 
-          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile dummyYItems;
-          dummyYItems.import("dummyYItems.txt");
+          // std::string newItemsFilename = "KB6Xitems";
+          // std::string oldItemsFilename = "KB6Yitems";
+          // std::string itemPairsFilename = "KB6Vitems";
+          // std::string newQuadDistFilename = "KB6Xdist";
+          // std::string oldQuadDistFilename = "KB6Ydist";
 
-          EquatingRecipes::Tests::Examples::Datasets::DummyV3Items dummyV3Items;
-          dummyV3Items.import();
+          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile newItems;
+          newItems.import(newItemsFilename);
 
-          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile dummyXDist;
-          dummyXDist.import("dummyXdist.txt");
+          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile oldItems;
+          oldItems.import(oldItemsFilename);
 
-          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile dummyYDist;
-          dummyYDist.import("dummyYdist.txt");
+          EquatingRecipes::Tests::Examples::Datasets::ItemPairFile itemPairs;
+          itemPairs.import(itemPairsFilename);
 
-          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile kbXItems;
-          kbXItems.import("KB6Xitems");
+          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile oldDist;
+          oldDist.import(oldQuadDistFilename);
 
-          EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile kbYItems;
-          kbYItems.import("KB6Yitems");
+          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile newDist;
+          newDist.import(newQuadDistFilename);
 
-          EquatingRecipes::Tests::Examples::Datasets::ItemPairFile kbVItems;
-          kbVItems.import("KB6Vitems");
-
-          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile kbXDist;
-          kbXDist.import("KB6Xdist");
-
-          EquatingRecipes::Tests::Examples::Datasets::QuadratureFile kbYDist;
-          kbYDist.import("KB6Ydist");
-
-          // std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems = createCommonItemSpecs(dummyYItems.itemSpecs,
-          //                                                                                                       dummyXItems.itemSpecs,
-          //                                                                                                       dummyV3Items.itemPairSpecs);
-
-          std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems = createCommonItemSpecs(kbYItems.itemSpecs,
-                                                                                                                kbXItems.itemSpecs,
-                                                                                                                kbVItems.itemPairSpecs);
-
+          std::vector<EquatingRecipes::Structures::CommonItemSpecification> commonItems = createCommonItemSpecs(oldItems.itemSpecs,
+                                                                                                                newItems.itemSpecs,
+                                                                                                                itemPairs.itemPairSpecs);
 
           EquatingRecipes::Structures::IRTScaleTransformationData irtScaleTransformationData;
 
@@ -74,28 +66,19 @@ namespace EquatingRecipes {
           irtScaleTransformationData.slopeStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 1;
           
           irtScaleTransformationData.maximumNumberOfIterations = 1000;
-          // irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue = 0.0001;
-          // irtScaleTransformationData.maximumRelativeChangeInFunctionValue = 0.0000000001;
-          // irtScaleTransformationData.maximumAbsoluteChangeInParameterValues = 0.0001;
-          // irtScaleTransformationData.maximumRelativeChangeInParameterValues = 1e-8;
+          irtScaleTransformationData.maximumRelativeChangeInParameterValues = 1e-8;
 
-          // irtScaleTransformationData.newItems = dummyXItems.itemSpecs;
-          // irtScaleTransformationData.oldItems = dummyYItems.itemSpecs;
+          irtScaleTransformationData.newItems = newItems.itemSpecs;
+          irtScaleTransformationData.oldItems = oldItems.itemSpecs;
 
-          irtScaleTransformationData.newItems = kbXItems.itemSpecs;
-          irtScaleTransformationData.oldItems = kbYItems.itemSpecs;
-
-          // irtScaleTransformationData.quadratureNewForm = dummyXDist.quadrature;
-          // irtScaleTransformationData.quadratureOldForm = dummyYDist.quadrature;
-
-          irtScaleTransformationData.quadratureNewForm = kbXDist.quadrature;
-          irtScaleTransformationData.quadratureOldForm = kbYDist.quadrature;
+          irtScaleTransformationData.quadratureNewForm = newDist.quadrature;
+          irtScaleTransformationData.quadratureOldForm = oldDist.quadrature;
           
           irtScaleTransformationData.standardizations[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = true;
           irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = EquatingRecipes::Structures::Symmetry::SYMMETRIC;
           
           irtScaleTransformationData.standardizations[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = true;
-          irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = EquatingRecipes::Structures::Symmetry::OLD_SCALE;
+          irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = EquatingRecipes::Structures::Symmetry::SYMMETRIC;
 
           EquatingRecipes::Analyses::IRTScaleTransformation irtScaleTransformation;
           std::string title = "IRT Scale Transformation";

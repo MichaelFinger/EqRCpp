@@ -23,7 +23,8 @@ namespace EquatingRecipes {
           std::vector<EquatingRecipes::Structures::ItemSpecification> itemSpecs;
 
           void import(const std::string& filename) {
-            itemSpecs = importItemSpecsFile(filename);
+            // itemSpecs = importItemSpecsFile(filename);
+            itemSpecs = importItemSpecsFileAlt(filename);
           }
 
         private:
@@ -70,9 +71,9 @@ namespace EquatingRecipes {
               itemSpec.numberOfCategories = static_cast<unsigned long>(std::stoi(values[fieldIndex]));
               fieldIndex++;
 
-              itemSpec.scoringFunctionValues.resize(itemSpec.numberOfCategories + 1);
+              itemSpec.scoringFunctionValues.resize(itemSpec.numberOfCategories);
 
-              for (size_t respIndex = 1; respIndex <= itemSpec.numberOfCategories; respIndex++) {
+              for (size_t respIndex = 0; respIndex < itemSpec.numberOfCategories; respIndex++) {
                 itemSpec.scoringFunctionValues(respIndex) = std::stod(values[fieldIndex]);
 
                 fieldIndex++;
@@ -128,6 +129,136 @@ namespace EquatingRecipes {
                   itemSpec.c(respIndex) = std::stod(values[fieldIndex]);
                   fieldIndex++;
                 }
+              }
+
+              itemSpecs.push_back(itemSpec);
+            }
+
+            return itemSpecs;
+          }
+
+          std::vector<EquatingRecipes::Structures::ItemSpecification> importItemSpecsFileAlt(const std::string& filename) {
+            std::vector<std::string> linesRead;
+
+            std::ifstream ifs(filename,
+                              std::ios::in);
+
+            for (std::string lineRead; std::getline(ifs, lineRead);) {
+              linesRead.push_back(lineRead);
+            }
+
+            ifs.close();
+
+            size_t lineIndex = 0;
+
+            numberOfItems = static_cast<size_t>(std::stoi(linesRead[0]));
+
+            for (size_t itemIndex = 0; itemIndex < numberOfItems; itemIndex++) {
+              lineIndex++;
+
+              size_t fieldIndex = 0;
+
+              std::vector<std::string> values = splitString(linesRead[lineIndex]);
+
+              int itemID = std::stoi(values[fieldIndex]);
+              fieldIndex++;
+
+              EquatingRecipes::Structures::IRTModel irtModel;
+
+              if (values[fieldIndex] == "L3") {
+                irtModel = EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC;
+              } else if (values[fieldIndex] == "GR") {
+                irtModel = EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE;
+              } else if (values[fieldIndex] == "PC") {
+                irtModel = EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT;
+              } else if (values[fieldIndex] == "NR") {
+                irtModel = EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE;
+              }
+              fieldIndex++;
+
+              unsigned long numberOfCategories = static_cast<unsigned long>(std::stoi(values[fieldIndex]));
+              fieldIndex++;
+
+              Eigen::VectorXd scoringFunctionValues(numberOfCategories + 1);
+              for (size_t respIndex = 1; respIndex <= numberOfCategories; respIndex++) {
+                scoringFunctionValues(respIndex) = std::stod(values[fieldIndex]);
+                fieldIndex++;
+              }
+
+              double scalingConstant = std::stod(values[fieldIndex]);
+              fieldIndex++;
+
+              EquatingRecipes::Structures::ItemSpecification itemSpec;
+
+              if (irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
+                double a = std::stod(values[fieldIndex]);
+                fieldIndex++;
+
+                double b = std::stod(values[fieldIndex]);
+                fieldIndex++;
+
+                double c = std::stod(values[fieldIndex]);
+                fieldIndex++;
+
+                itemSpec = EquatingRecipes::Structures::ItemSpecification::buildThreeParameterLogistic(itemID,
+                                                                                                       a,
+                                                                                                       b,
+                                                                                                       c,
+                                                                                                       scalingConstant,
+                                                                                                       scoringFunctionValues);
+              } else if (irtModel == EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE) {
+                double a = std::stod(values[fieldIndex]);
+                fieldIndex++;
+
+                Eigen::VectorXd b(numberOfCategories - 1);
+                for (size_t respIndex = 0; respIndex < numberOfCategories - 1; respIndex++) {
+                  b(respIndex) = std::stod(values[fieldIndex]);
+                  fieldIndex++;
+                }
+
+                itemSpec = EquatingRecipes::Structures::ItemSpecification::buildGradedResponse(itemID,
+                                                                                               a,
+                                                                                               b,
+                                                                                               scalingConstant,
+                                                                                               scoringFunctionValues);
+              } else if (irtModel == EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT) {
+                double a = std::stod(values[fieldIndex]);
+                fieldIndex++;
+
+                double b = std::stod(values[fieldIndex]);
+                fieldIndex++;
+
+                Eigen::VectorXd d(numberOfCategories);
+                for (size_t respIndex = 0; respIndex < numberOfCategories - 1; respIndex++) {
+                  d(respIndex) = std::stod(values[fieldIndex]);
+                  fieldIndex++;
+                }
+
+                itemSpec = EquatingRecipes::Structures::ItemSpecification::buildGeneralizedPartialCreditRatingScale(itemID,
+                                                                                                                    a,
+                                                                                                                    b,
+                                                                                                                    d,
+                                                                                                                    scalingConstant,
+                                                                                                                    scoringFunctionValues);
+              } else if (irtModel == EquatingRecipes::Structures::IRTModel::NOMINAL_RESPONSE) {
+                scalingConstant = 1.0;
+                Eigen::VectorXd a(numberOfCategories);
+                Eigen::VectorXd c(numberOfCategories);
+
+                for (size_t respIndex = 0; respIndex < numberOfCategories; respIndex++) {
+                  a(respIndex) = std::stod(values[fieldIndex]);
+                  fieldIndex++;
+                }
+
+                for (size_t respIndex = 0; respIndex < numberOfCategories; respIndex++) {
+                  c(respIndex) = std::stod(values[fieldIndex]);
+                  fieldIndex++;
+                }
+
+                itemSpec = EquatingRecipes::Structures::ItemSpecification::buildNominalResponse(itemID,
+                                                                                                a,
+                                                                                                c,
+                                                                                                scoringFunctionValues);
               }
 
               itemSpecs.push_back(itemSpec);
