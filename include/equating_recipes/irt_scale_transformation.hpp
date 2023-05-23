@@ -411,15 +411,41 @@ namespace EquatingRecipes {
       optimizationFunction->configure(irtScaleTransformationData,
                                       method);
 
+      std::optional<double> maximumNumberOfIterations;
+      std::optional<double> maximumAbsoluteChangeInFunctionValue;
+      std::optional<double> maximumRelativeChangeInFunctionValue;
+      std::optional<double> maximumAbsoluteChangeInParameterValues;
+      std::optional<double> maximumRelativeChangeInParameterValues;
+
+      if (irtScaleTransformationData.maximumNumberOfIterations.contains(method)) {
+        maximumNumberOfIterations = irtScaleTransformationData.maximumNumberOfIterations.at(method);
+      }
+
+      if (irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue.contains(method)) {
+        maximumAbsoluteChangeInFunctionValue = irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue.at(method);
+      }
+
+      if (irtScaleTransformationData.maximumRelativeChangeInFunctionValue.contains(method)) {
+        maximumRelativeChangeInFunctionValue = irtScaleTransformationData.maximumRelativeChangeInFunctionValue.at(method);
+      }
+
+      if (irtScaleTransformationData.maximumAbsoluteChangeInParameterValues.contains(method)) {
+        maximumAbsoluteChangeInParameterValues = irtScaleTransformationData.maximumAbsoluteChangeInParameterValues.at(method);
+      }
+
+      if (irtScaleTransformationData.maximumRelativeChangeInParameterValues.contains(method)) {
+        maximumRelativeChangeInParameterValues = irtScaleTransformationData.maximumRelativeChangeInParameterValues.at(method);
+      }
+
       EquatingRecipes::BFGSOptimizer optimizer;
       EquatingRecipes::Structures::OptimizationResults optimizationResults =
           optimizer.optimize(x,
                              optimizationFunction,
-                             irtScaleTransformationData.maximumNumberOfIterations,
-                             irtScaleTransformationData.maximumAbsoluteChangeInFunctionValue,
-                             irtScaleTransformationData.maximumRelativeChangeInFunctionValue,
-                             irtScaleTransformationData.maximumAbsoluteChangeInParameterValues,
-                             irtScaleTransformationData.maximumRelativeChangeInParameterValues);
+                             maximumNumberOfIterations,
+                             maximumAbsoluteChangeInFunctionValue,
+                             maximumRelativeChangeInFunctionValue,
+                             maximumAbsoluteChangeInParameterValues,
+                             maximumRelativeChangeInParameterValues);
 
       double slope = x[0];
       double intercept = x[1];

@@ -20,7 +20,7 @@ namespace EquatingRecipes {
   public:
     EquatingRecipes::Structures::OptimizationResults optimize(std::vector<double>& x,
                                                               std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction,
-                                                              const int& maximumNumberOfIterations,
+                                                              const std::optional<size_t>& maximumNumberOfIterations,
                                                               const std::optional<double>& maximumAbsoluteChangeInFunctionValue,
                                                               const std::optional<double>& maximumRelativeChangeInFunctionValue,
                                                               const std::optional<double>& maximumAbsoluteChangeInParameterValues,
@@ -44,6 +44,7 @@ namespace EquatingRecipes {
       er_dfpmin(xVect,
                 maximumRelativeChangeInParameterValues.value_or(0.0000000001),
                 numberOfIterations,
+                maximumNumberOfIterations.value_or(250),
                 minf,
                 optimizationFunction);
 
@@ -239,6 +240,7 @@ namespace EquatingRecipes {
     void er_dfpmin(Eigen::VectorXd& xold,
                    const double& error,
                    size_t& numiter,
+                   const size_t& maximumNumberOfIterations,
                    double& fvalue,
                    std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction) {
       int i;
@@ -278,7 +280,7 @@ namespace EquatingRecipes {
         maxstep = 100.0 * static_cast<double>(numberOfParameters);
       }
 
-      size_t maximumNumberOfIterations = 250;
+      // size_t maximumNumberOfIterations = 250;
       size_t num;
       for (num = 0; num <= maximumNumberOfIterations; num++) {
         sk = -1.0 * matxh * gk;

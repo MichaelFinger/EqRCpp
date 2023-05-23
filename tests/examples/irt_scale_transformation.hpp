@@ -65,8 +65,11 @@ namespace EquatingRecipes {
           irtScaleTransformationData.interceptStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 0;
           irtScaleTransformationData.slopeStartingValue[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 1;
           
-          irtScaleTransformationData.maximumNumberOfIterations = 1000;
-          irtScaleTransformationData.maximumRelativeChangeInParameterValues = 1e-8;
+          irtScaleTransformationData.maximumNumberOfIterations[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = 1000;
+          irtScaleTransformationData.maximumNumberOfIterations[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 1000;
+          
+          irtScaleTransformationData.maximumRelativeChangeInParameterValues[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = 1e-8;
+          irtScaleTransformationData.maximumRelativeChangeInParameterValues[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = 1e-8;
 
           irtScaleTransformationData.newItems = newItems.itemSpecs;
           irtScaleTransformationData.oldItems = oldItems.itemSpecs;

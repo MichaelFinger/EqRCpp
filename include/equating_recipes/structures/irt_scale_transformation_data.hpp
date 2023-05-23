@@ -31,13 +31,12 @@ namespace EquatingRecipes {
       // double maximumRawScoreOldForm;
       // double rawScoreIncrementOldForm;
 
-      
       // Input
-      int maximumNumberOfIterations;
-      std::optional<double> maximumAbsoluteChangeInFunctionValue;
-      std::optional<double> maximumRelativeChangeInFunctionValue;
-      std::optional<double> maximumAbsoluteChangeInParameterValues;
-      std::optional<double> maximumRelativeChangeInParameterValues;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, int> maximumNumberOfIterations;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> maximumAbsoluteChangeInFunctionValue;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> maximumRelativeChangeInFunctionValue;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> maximumAbsoluteChangeInParameterValues;
+      std::map<EquatingRecipes::Structures::IRTScaleTransformationMethod, double> maximumRelativeChangeInParameterValues;
 
       EquatingRecipes::Structures::Quadrature quadratureNewForm;
       EquatingRecipes::Structures::Quadrature quadratureOldForm;

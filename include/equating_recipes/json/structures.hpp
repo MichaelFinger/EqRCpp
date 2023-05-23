@@ -458,10 +458,10 @@ namespace EquatingRecipes {
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::IRTScaleTransformationData& rec) {
       j = nlohmann::json {{"maximumNumberOfIterations", rec.maximumNumberOfIterations},
-                          {"maximumAbsoluteChangeInFunctionValue", rec.maximumAbsoluteChangeInFunctionValue.value_or(std::numeric_limits<double>::quiet_NaN())},
-                          {"maximumRelativeChangeInFunctionValue", rec.maximumRelativeChangeInFunctionValue.value_or(std::numeric_limits<double>::quiet_NaN())},
-                          {"maximumAbsoluteChangeInParameterValues", rec.maximumAbsoluteChangeInParameterValues.value_or(std::numeric_limits<double>::quiet_NaN())},
-                          {"maximumRelativeChangeInParameterValues", rec.maximumRelativeChangeInParameterValues.value_or(std::numeric_limits<double>::quiet_NaN())},
+                          {"maximumAbsoluteChangeInFunctionValue", rec.maximumAbsoluteChangeInFunctionValue},
+                          {"maximumRelativeChangeInFunctionValue", rec.maximumRelativeChangeInFunctionValue},
+                          {"maximumAbsoluteChangeInParameterValues", rec.maximumAbsoluteChangeInParameterValues},
+                          {"maximumRelativeChangeInParameterValues", rec.maximumRelativeChangeInParameterValues},
                           {"quadratureNewForm", rec.quadratureNewForm},
                           {"quadratureOldForm", rec.quadratureOldForm},
                           {"newItems", rec.newItems},
