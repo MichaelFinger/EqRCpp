@@ -29,13 +29,15 @@ namespace EquatingRecipes {
       static ItemSpecification buildOneParameterLogistic(const int& itemID,
                                                          const double& itemDifficulty,
                                                          const double& scalingConstant,
-                                                         const std::optional<Eigen::VectorXd>& scoringFunctionValues) {
+                                                         const std::optional<Eigen::VectorXd>& scoringFunctionValues,
+                                                         const bool& locationParameterization) {
         ItemSpecification itemSpec = ItemSpecification::buildDichotomousParameterLogistic(itemID,
                                                                                           1.0,
                                                                                           itemDifficulty,
                                                                                           0.0,
                                                                                           scalingConstant,
-                                                                                          scoringFunctionValues);
+                                                                                          scoringFunctionValues,
+                                                                                          locationParameterization);
         return itemSpec;
       }
 
@@ -43,35 +45,42 @@ namespace EquatingRecipes {
                                                          const double& itemDiscrimination,
                                                          const double& itemDifficulty,
                                                          const double& scalingConstant,
-                                                         const std::optional<Eigen::VectorXd>& scoringFunctionValues) {
+                                                         const std::optional<Eigen::VectorXd>& scoringFunctionValues,
+                                                         const bool& locationParameterization) {
         ItemSpecification itemSpec = ItemSpecification::buildDichotomousParameterLogistic(itemID,
                                                                                           itemDiscrimination,
                                                                                           itemDifficulty,
                                                                                           0.0,
                                                                                           scalingConstant,
-                                                                                          scoringFunctionValues);
+                                                                                          scoringFunctionValues,
+                                                                                          locationParameterization);
 
         return itemSpec;
       }
+
       static ItemSpecification buildThreeParameterLogistic(const int& itemID,
                                                            const double& itemDiscrimination,
                                                            const double& itemDifficulty,
                                                            const double& lowerAsymptote,
                                                            const double& scalingConstant,
-                                                           const std::optional<Eigen::VectorXd>& scoringFunctionValues) {
+                                                           const std::optional<Eigen::VectorXd>& scoringFunctionValues,
+                                                           const bool& locationParameterization) {
         ItemSpecification itemSpec = ItemSpecification::buildDichotomousParameterLogistic(itemID,
                                                                                           itemDiscrimination,
                                                                                           itemDifficulty,
                                                                                           lowerAsymptote,
                                                                                           scalingConstant,
-                                                                                          scoringFunctionValues);
+                                                                                          scoringFunctionValues,
+                                                                                          locationParameterization);
         return itemSpec;
       }
+
       static ItemSpecification buildGradedResponse(const int& itemID,
                                                    const double& itemDiscrimination,
                                                    const Eigen::VectorXd& thresholdParameters,
                                                    const double& scalingConstant,
-                                                   const std::optional<Eigen::VectorXd>& scoringFunctionValues) {
+                                                   const std::optional<Eigen::VectorXd>& scoringFunctionValues,
+                                                   const bool& locationParameterization) {
         ItemSpecification itemSpec;
 
         itemSpec.itemID = itemID;
@@ -84,7 +93,12 @@ namespace EquatingRecipes {
         itemSpec.b.resize(itemSpec.numberOfCategories + 1);
 
         itemSpec.a(2) = itemDiscrimination;
-        itemSpec.b(Eigen::seq(2, itemSpec.numberOfCategories)) = thresholdParameters;
+
+        if (locationParameterization) {
+          itemSpec.b(Eigen::seq(2, itemSpec.numberOfCategories)) = thresholdParameters;
+        } else {
+          itemSpec.b(Eigen::seq(2, itemSpec.numberOfCategories)) = -1.0 * thresholdParameters / itemDiscrimination;
+        }
 
         return itemSpec;
       }
@@ -93,7 +107,8 @@ namespace EquatingRecipes {
                                                              const double& itemDiscrimination,
                                                              const Eigen::VectorXd& stepParameters,
                                                              const double& scalingConstant,
-                                                             const std::optional<Eigen::VectorXd>& scoringFunctionValues) {
+                                                             const std::optional<Eigen::VectorXd>& scoringFunctionValues,
+                                                             const bool& locationParameterization) {
         ItemSpecification itemSpec;
 
         itemSpec.itemID = itemID;
@@ -106,7 +121,12 @@ namespace EquatingRecipes {
         itemSpec.b.resize(itemSpec.numberOfCategories + 1);
 
         itemSpec.a(2) = itemDiscrimination;
-        itemSpec.b(Eigen::seq(1, itemSpec.numberOfCategories)) = stepParameters;
+
+        if (locationParameterization) {
+          itemSpec.b(Eigen::seq(1, itemSpec.numberOfCategories)) = stepParameters;
+        } else {
+          itemSpec.b(Eigen::seq(1, itemSpec.numberOfCategories)) = -1.0 * stepParameters / itemDiscrimination;
+        }
 
         return itemSpec;
       }
@@ -130,6 +150,7 @@ namespace EquatingRecipes {
         itemSpec.b.resize(itemSpec.numberOfCategories + 1);
 
         itemSpec.a(2) = itemDiscrimination;
+
         itemSpec.b(Eigen::seq(2, itemSpec.numberOfCategories)) =
             Eigen::VectorXd::Constant(itemSpec.numberOfCategories, itemLocation) - categoryParameters;
 
@@ -191,7 +212,8 @@ namespace EquatingRecipes {
                                                                  const double& itemDifficulty,
                                                                  const double& lowerAsymptote,
                                                                  const double& scalingConstant,
-                                                                 const std::optional<Eigen::VectorXd>& scoringFunctionValues) {
+                                                                 const std::optional<Eigen::VectorXd>& scoringFunctionValues,
+                                                                 const bool& locationParameterization) {
         ItemSpecification itemSpec;
 
         itemSpec.itemID = itemID;
@@ -202,7 +224,13 @@ namespace EquatingRecipes {
         itemSpec.c.resize(itemSpec.numberOfCategories + 1);
 
         itemSpec.a(itemSpec.numberOfCategories) = itemDiscrimination;
-        itemSpec.b(itemSpec.numberOfCategories) = itemDifficulty;
+
+        if (locationParameterization) {
+          itemSpec.b(itemSpec.numberOfCategories) = itemDifficulty;
+        } else {
+          itemSpec.b(itemSpec.numberOfCategories) = -1.0 * itemDifficulty / itemDiscrimination;
+        }
+
         itemSpec.c(itemSpec.numberOfCategories) = lowerAsymptote;
 
         itemSpec.scalingConstant = scalingConstant;
