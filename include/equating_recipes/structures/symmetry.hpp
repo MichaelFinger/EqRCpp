@@ -1,5 +1,5 @@
-#ifndef STRUCTURES_SYMMETRY_HPP
-#define STRUCTURES_SYMMETRY_HPP
+#ifndef IMPLEMENTATION_SYMMETRY_HPP
+#define IMPLEMENTATION_SYMMETRY_HPP
 
 // Original coding:
 //   enum symmetry {old_scale, new_scale, symmetric};

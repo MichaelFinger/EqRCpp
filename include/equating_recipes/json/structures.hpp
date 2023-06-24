@@ -1,5 +1,5 @@
-#ifndef JSON_STRUCTURES_HPP
-#define JSON_STRUCTURES_HPP
+#ifndef JSON_IMPLEMENTATION_HPP
+#define JSON_IMPLEMENTATION_HPP
 
 #include <map>
 #include <set>

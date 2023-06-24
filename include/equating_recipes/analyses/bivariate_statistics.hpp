@@ -38,7 +38,7 @@ namespace EquatingRecipes {
         scores.col(0) = inputData.rowScores;
         scores.col(1) = inputData.columnScores;
 
-        bivariateStatistics = EquatingRecipes::Utilities::bivariateFromScores(scores,
+        bivariateStatistics = EquatingRecipes::Implementation::Utilities::bivariateFromScores(scores,
                                                                               inputData.rowMinimumScore,
                                                                               inputData.rowMaximumScore,
                                                                               inputData.rowScoreIncrement,

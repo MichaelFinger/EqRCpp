@@ -406,7 +406,7 @@ namespace EquatingRecipes {
       x.push_back(slopeStartingValue);
       x.push_back(interceptStartingValue);
 
-      std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction = getOptimizationFunction(method);
+      std::shared_ptr<EquatingRecipes::Implementation::OptimizationFunction> optimizationFunction = getOptimizationFunction(method);
 
       optimizationFunction->configure(irtScaleTransformationData,
                                       method);
@@ -455,8 +455,8 @@ namespace EquatingRecipes {
       irtScaleTransformationData.optimizationResults[method] = optimizationResults;
     }
 
-    std::shared_ptr<EquatingRecipes::OptimizationFunction> getOptimizationFunction(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
-      std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction;
+    std::shared_ptr<EquatingRecipes::Implementation::OptimizationFunction> getOptimizationFunction(const EquatingRecipes::Structures::IRTScaleTransformationMethod& method) {
+      std::shared_ptr<EquatingRecipes::Implementation::OptimizationFunction> optimizationFunction;
 
       switch (method) {
         case EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA:

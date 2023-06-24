@@ -17,7 +17,7 @@ namespace EquatingRecipes {
   class LBFGSOptimizer {
   public:
     static double wrap(const std::vector<double>& x, std::vector<double>& grad, void* data) {
-      double func = (*reinterpret_cast<EquatingRecipes::OptimizationFunction*>(data))(x, grad);
+      double func = (*reinterpret_cast<EquatingRecipes::Implementation::OptimizationFunction*>(data))(x, grad);
 
       std::cout.precision(10);
       std::cout << "func = " << func
@@ -30,7 +30,7 @@ namespace EquatingRecipes {
     }
 
     EquatingRecipes::Structures::OptimizationResults optimize(std::vector<double>& x,
-                                                              std::shared_ptr<EquatingRecipes::OptimizationFunction> optimizationFunction,
+                                                              std::shared_ptr<EquatingRecipes::Implementation::OptimizationFunction> optimizationFunction,
                                                               const int& maximumNumberOfIterations,
                                                               const std::optional<double>& maximumAbsoluteChangeInFunctionValue,
                                                               const std::optional<double>& maximumRelativeChangeInFunctionValue,

@@ -157,7 +157,7 @@ namespace EquatingRecipes {
                                  "one or more prior calls to a Wrapper function");
       }
 
-      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(pDataXToY.method);
+      std::string methodCode = EquatingRecipes::Implementation::Utilities::getMethodCode(pDataXToY.method);
 
       if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS &&
           methodCode != "E" &&
@@ -183,11 +183,11 @@ namespace EquatingRecipes {
         pData.numberOfExaminees = pDataXToY.numberOfExaminees;
       }
 
-      double numberOfScoresX = EquatingRecipes::Utilities::getNumberOfScores(pDataXToY.minimumScoreX,
+      double numberOfScoresX = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pDataXToY.minimumScoreX,
                                                                              pDataXToY.maximumScoreX,
                                                                              pDataXToY.scoreIncrementX);
 
-      double numberOfScoresY = EquatingRecipes::Utilities::getNumberOfScores(pDataYToX.minimumScoreX,
+      double numberOfScoresY = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pDataYToX.minimumScoreX,
                                                                              pDataYToX.maximumScoreX,
                                                                              pDataYToX.scoreIncrementX);
 
@@ -229,7 +229,7 @@ namespace EquatingRecipes {
                                                                     2.0;
       }
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(
           equatedRawScoreResults.equatedRawScores.row(0),
           pData.scoreFrequenciesX);
 
@@ -375,12 +375,12 @@ namespace EquatingRecipes {
 
           percentileRankHighestScore = static_cast<double>(scoreLocation);
         } else if (pDataZ.method == EquatingRecipes::Structures::Method::FE_BH) {
-          cumulativeRelFreqDist = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(0,
+          cumulativeRelFreqDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
                                                                                          numberOfScores - 1,
                                                                                          1,
                                                                                          equatedRawScoreResults.relativeFreqDistsX.row(0));
 
-          percentileRankDist = EquatingRecipes::Utilities::percentileRanks(0,
+          percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
                                                                            numberOfScores - 1,
                                                                            1,
                                                                            cumulativeRelFreqDist);
@@ -403,12 +403,12 @@ namespace EquatingRecipes {
 
           percentileRankHighestScore = static_cast<double>(scoreLocation);
         } else if (pDataZ.method == EquatingRecipes::Structures::Method::MFE_BH) {
-          cumulativeRelFreqDist = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(0,
+          cumulativeRelFreqDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
                                                                                          numberOfScores - 1,
                                                                                          1,
                                                                                          equatedRawScoreResults.relativeFreqDistsX.row(1));
 
-          percentileRankDist = EquatingRecipes::Utilities::percentileRanks(0,
+          percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
                                                                            numberOfScores - 1,
                                                                            1,
                                                                            cumulativeRelFreqDist);

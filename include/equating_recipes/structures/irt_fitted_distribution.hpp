@@ -4,8 +4,8 @@
   Description: Structure that stores IRT fitted distributions
 */
 
-#ifndef STRUCTURES_IRT_FITTED_DISTRIBUTION_HPP
-#define STRUCTURES_IRT_FITTED_DISTRIBUTION_HPP
+#ifndef IMPLEMENTATION_IRT_FITTED_DISTRIBUTION_HPP
+#define IMPLEMENTATION_IRT_FITTED_DISTRIBUTION_HPP
 
 #include <Eigen/Core>
 

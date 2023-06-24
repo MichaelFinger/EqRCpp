@@ -140,7 +140,7 @@ namespace EquatingRecipes {
       /* allocation and assignments for r */
 
       if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
-        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
                                                                                    pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
 
@@ -169,7 +169,7 @@ namespace EquatingRecipes {
                                           equatedRawScoreResults.intercept(0));
 
       } else {
-        equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
+        equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
                                                                                     univariateStatisticsY.minimumScore,
                                                                                     univariateStatisticsY.scoreIncrement,
                                                                                     univariateStatisticsY.cumulativeRelativeFreqDist,
@@ -180,7 +180,7 @@ namespace EquatingRecipes {
       equatedRawScoreResults.equatedRawScores.row(0) = equatedRawScores;
 
       /* get moments */
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
                                                                                                                    pData.scoreFrequenciesX);
 
       equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
@@ -286,7 +286,7 @@ namespace EquatingRecipes {
       /* allocation and assignments for r */
       /* no storage allocation for bootstrap reps >1 */
       if (pData.bootstrapReplicationNumber <= 1) {
-        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
                                                                                    pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
 
@@ -298,7 +298,7 @@ namespace EquatingRecipes {
 
       //   if(method != 'E')
       if (method == EquatingRecipes::Structures::Method::EQUIPERCENTILE) {
-        equatedRawScoreResults.equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
+        equatedRawScoreResults.equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
                                                                                                            bivariateStatisticsXY.univariateStatisticsColumn.minimumScore,
                                                                                                            bivariateStatisticsXY.univariateStatisticsColumn.scoreIncrement,
                                                                                                            bivariateStatisticsXY.univariateStatisticsColumn.cumulativeRelativeFreqDist,
@@ -319,7 +319,7 @@ namespace EquatingRecipes {
 
       /* get moments */
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
       equatedRawScoreResults.equatedRawScoreMoments = moments.momentValues;
@@ -369,14 +369,14 @@ namespace EquatingRecipes {
       intercept = meanY - slope * meanX;
 
       /* get equated raw scores */
-      size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(maximumScoreX,
+      size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(maximumScoreX,
                                                                                  minimumScoreX,
                                                                                  scoreIncrementX);
 
       Eigen::VectorXd equatedRawScores(maximumScoreLocation + 1);
 
       for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
-        equatedRawScores(scoreLocation) = intercept + slope * EquatingRecipes::Utilities::getScore(scoreLocation,
+        equatedRawScores(scoreLocation) = intercept + slope * EquatingRecipes::Implementation::Utilities::getScore(scoreLocation,
                                                                                                    minimumScoreX,
                                                                                                    scoreIncrementX);
       }

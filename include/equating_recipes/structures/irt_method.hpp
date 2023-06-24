@@ -4,8 +4,8 @@
   Description: 
 */
 
-#ifndef STRUCTURES_IRT_METHOD_HPP
-#define STRUCTURES_IRT_METHOD_HPP
+#ifndef IMPLEMENTATION_IRT_METHOD_HPP
+#define IMPLEMENTATION_IRT_METHOD_HPP
 
 #include <Eigen/Core>
 

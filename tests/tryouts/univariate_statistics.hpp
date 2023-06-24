@@ -58,12 +58,12 @@ namespace Tests {
       double maxixmumScore = 5;
       double scoreIncrement = 1;
 
-      double maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(maxixmumScore,
+      double maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(maxixmumScore,
                                                                                  minimumScore,
                                                                                  scoreIncrement);
 
       EquatingRecipes::Structures::UnivariateStatistics univariateStatistics =
-          EquatingRecipes::Utilities::univariateFromScoreFrequencies(lsat6FreqDist,
+          EquatingRecipes::Implementation::Utilities::univariateFromScoreFrequencies(lsat6FreqDist,
                                                                     0,
                                                                     5,
                                                                     1,

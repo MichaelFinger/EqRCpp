@@ -71,8 +71,8 @@ University of Iowa
   March 18, 2009                           
 */
 
-#ifndef STRUCTURES_UTILITIES_HPP
-#define STRUCTURES_UTILITIES_HPP
+#ifndef IMPLEMENTATION_UTILITIES_HPP
+#define IMPLEMENTATION_UTILITIES_HPP
 
 #include <algorithm>
 #include <cmath>
@@ -488,11 +488,11 @@ namespace EquatingRecipes {
                                        const int highestObservableRoundedScaledScore,
                                        Eigen::VectorXd& unroundedEquatedScaledScores,
                                        Eigen::VectorXd& roundedEquatedScaledScores) {
-      size_t numberOfRawScoresYct = EquatingRecipes::Utilities::getNumberOfScores(minimumRawScoreYct,
+      size_t numberOfRawScoresYct = EquatingRecipes::Implementation::Utilities::getNumberOfScores(minimumRawScoreYct,
                                                                                   maximumRawScoreYct,
                                                                                   scoreIncrementYct);
 
-      size_t numberOfEquatedRawScores = EquatingRecipes::Utilities::getNumberOfScores(minimumRawScoreX,
+      size_t numberOfEquatedRawScores = EquatingRecipes::Implementation::Utilities::getNumberOfScores(minimumRawScoreX,
                                                                                       maximumRawScoreX,
                                                                                       rawScoreIncrement);
 
@@ -612,7 +612,7 @@ namespace EquatingRecipes {
                                        const int& lowestObservableScaledScore,
                                        const int& highestObservableScaledScore,
                                        EquatingRecipes::Structures::EquatedScaledScoresResults& equatedScaledScoresResults) {
-      int numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(pData.minimumScoreX,
+      int numberOfScores = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pData.minimumScoreX,
                                                                          pData.maximumScoreX,
                                                                          pData.scoreIncrementX);
 
@@ -642,7 +642,7 @@ namespace EquatingRecipes {
         Eigen::VectorXd unroundedEquatedScaledScores(numberOfScores);
         Eigen::VectorXd roundedEquatedScaledScores(numberOfScores);
 
-        EquatingRecipes::Utilities::getEquatedScaledScores(pData.minimumScoreX,
+        EquatingRecipes::Implementation::Utilities::getEquatedScaledScores(pData.minimumScoreX,
                                                            pData.maximumScoreX,
                                                            pData.scoreIncrementX,
                                                            minimumScoreYct,
@@ -670,13 +670,13 @@ namespace EquatingRecipes {
       if (pData.scoreFrequenciesX.size() >= 1) {
         for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
           EquatingRecipes::Structures::Moments unroundedScaledScoreMoments =
-              EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedScaledScoresResults.unroundedEquatedScaledScores.row(methodIndex),
+              EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedScaledScoresResults.unroundedEquatedScaledScores.row(methodIndex),
                                                                       pData.scoreFrequenciesX);
 
           equatedScaledScoresResults.unroundedEquatedScaledScoreMoments.row(methodIndex) = unroundedScaledScoreMoments.momentValues;
 
           EquatingRecipes::Structures::Moments roundedScaledScoreMoments =
-              EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedScaledScoresResults.roundedEquatedScaledScores.row(methodIndex),
+              EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedScaledScoresResults.roundedEquatedScaledScores.row(methodIndex),
                                                                       pData.scoreFrequenciesX);
 
           equatedScaledScoresResults.roundedEquatedScaledScoreMoments.row(methodIndex) = roundedScaledScoreMoments.momentValues;
@@ -736,11 +736,11 @@ namespace EquatingRecipes {
         double rowScore = scores(rowIndex, rowScoreColumnIndex);
         double columnScore = scores(rowIndex, columnScoreColumnIndex);
 
-        size_t rowScoreLocation = EquatingRecipes::Utilities::getScoreLocation(rowScore,
+        size_t rowScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(rowScore,
                                                                                minimumRowScore,
                                                                                rowScoreIncrement);
 
-        size_t columnScoreLocation = EquatingRecipes::Utilities::getScoreLocation(columnScore,
+        size_t columnScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(columnScore,
                                                                                   minimumColumnScore,
                                                                                   columnScoreIncrement);
 
@@ -772,7 +772,7 @@ namespace EquatingRecipes {
                                                                                             const std::string& variableName) {
       EquatingRecipes::Structures::UnivariateStatistics univariateStatistics;
 
-      univariateStatistics.numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(minimumScore,
+      univariateStatistics.numberOfScores = EquatingRecipes::Implementation::Utilities::getNumberOfScores(minimumScore,
                                                                                           maximumScore,
                                                                                           scoreIncrement);
 
@@ -791,13 +791,13 @@ namespace EquatingRecipes {
                                                                                  scoreIncrement);
 
       univariateStatistics.numberOfExaminees = scoreFrequencies.sum();
-      univariateStatistics.freqDistMinimumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
+      univariateStatistics.freqDistMinimumScore = EquatingRecipes::Implementation::Utilities::getFirstObservedScore(scoreFrequencies,
                                                                                                     minimumScore,
                                                                                                     maximumScore,
                                                                                                     scoreIncrement,
                                                                                                     true);
 
-      univariateStatistics.freqDistMaximumScore = EquatingRecipes::Utilities::getFirstObservedScore(scoreFrequencies,
+      univariateStatistics.freqDistMaximumScore = EquatingRecipes::Implementation::Utilities::getFirstObservedScore(scoreFrequencies,
                                                                                                     minimumScore,
                                                                                                     maximumScore,
                                                                                                     scoreIncrement,
@@ -810,7 +810,7 @@ namespace EquatingRecipes {
                                               static_cast<double>(univariateStatistics.numberOfExaminees);
 
       for (size_t scoreLocation = 0; scoreLocation < univariateStatistics.numberOfScores; scoreLocation++) {
-        univariateStatistics.rawScores(scoreLocation) = EquatingRecipes::Utilities::getScore(scoreLocation,
+        univariateStatistics.rawScores(scoreLocation) = EquatingRecipes::Implementation::Utilities::getScore(scoreLocation,
                                                                                              minimumScore,
                                                                                              scoreIncrement);
 
@@ -824,7 +824,7 @@ namespace EquatingRecipes {
       univariateStatistics.cumulativeRelativeFreqDist = univariateStatistics.cumulativeFreqDist.cast<double>() /
                                                         static_cast<double>(univariateStatistics.numberOfExaminees);
 
-      univariateStatistics.percentileRankDist = EquatingRecipes::Utilities::percentileRanks(minimumScore,
+      univariateStatistics.percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(minimumScore,
                                                                                             maximumScore,
                                                                                             scoreIncrement,
                                                                                             univariateStatistics.cumulativeRelativeFreqDist);
@@ -839,7 +839,7 @@ namespace EquatingRecipes {
                                                                                   const std::string& id,
                                                                                   const std::string& datasetName,
                                                                                   const std::string& variableName) {
-      Eigen::VectorXd freqDist = EquatingRecipes::Utilities::getRawScoreFrequencyDistribution(scores,
+      Eigen::VectorXd freqDist = EquatingRecipes::Implementation::Utilities::getRawScoreFrequencyDistribution(scores,
                                                                                               minimumScore,
                                                                                               maximumScore,
                                                                                               scoreIncrement,
@@ -880,14 +880,14 @@ namespace EquatingRecipes {
                                                                             const double& minimumScore,
                                                                             const double& maximumScore,
                                                                             const double& scoreIncrement) {
-      size_t numberOfScores = EquatingRecipes::Utilities::getNumberOfScores(minimumScore,
+      size_t numberOfScores = EquatingRecipes::Implementation::Utilities::getNumberOfScores(minimumScore,
                                                                             maximumScore,
                                                                             scoreIncrement);
 
       Eigen::VectorXd scores(numberOfScores);
 
       for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-        scores(scoreLocation) = EquatingRecipes::Utilities::getScore(scoreLocation,
+        scores(scoreLocation) = EquatingRecipes::Implementation::Utilities::getScore(scoreLocation,
                                                                      minimumScore,
                                                                      scoreIncrement);
       }

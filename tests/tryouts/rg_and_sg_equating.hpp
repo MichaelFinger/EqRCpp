@@ -18,17 +18,17 @@ namespace Tests {
       Tests::Fixtures::ACTMathFreqData actMathFreqData = Tests::Fixtures::ACTMathFreq::getFreqDist();
       double maximumScore = actMathFreqData.rawScores.maxCoeff();
 
-      // std::cout << EquatingRecipes::Utilities::vectorXdToString(actMathFreqData.rawScores, false) << "\n"
-      //           << EquatingRecipes::Utilities::vectorXdToString(actMathFreqData.freqX, false) << "\n"
-      //           << EquatingRecipes::Utilities::vectorXdToString(actMathFreqData.freqY, false) << "\n";
+      // std::cout << EquatingRecipes::Implementation::Utilities::vectorXdToString(actMathFreqData.rawScores, false) << "\n"
+      //           << EquatingRecipes::Implementation::Utilities::vectorXdToString(actMathFreqData.freqX, false) << "\n"
+      //           << EquatingRecipes::Implementation::Utilities::vectorXdToString(actMathFreqData.freqY, false) << "\n";
 
-      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = EquatingRecipes::Utilities::univariateFromScoreFrequencies(actMathFreqData.freqX,
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX = EquatingRecipes::Implementation::Utilities::univariateFromScoreFrequencies(actMathFreqData.freqX,
                                                                                                                                                  0,
                                                                                                                                                  maximumScore,
                                                                                                                                                  1,
                                                                                                                                                  "X");
 
-      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY = EquatingRecipes::Utilities::univariateFromScoreFrequencies(actMathFreqData.freqY,
+      EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY = EquatingRecipes::Implementation::Utilities::univariateFromScoreFrequencies(actMathFreqData.freqY,
                                                                                                                                                  0,
                                                                                                                                                  maximumScore,
                                                                                                                                                  1,

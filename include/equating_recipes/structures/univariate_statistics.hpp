@@ -12,8 +12,8 @@
   Description: Read raw data and get or assign all elements for struct s
 */
 
-#ifndef STRUCTURES_UNIVARIATE_STATISTICS_HPP
-#define STRUCTURES_UNIVARIATE_STATISTICS_HPP
+#ifndef IMPLEMENTATION_UNIVARIATE_STATISTICS_HPP
+#define IMPLEMENTATION_UNIVARIATE_STATISTICS_HPP
 
 #include <algorithm>
 #include <string>
@@ -74,13 +74,13 @@ namespace EquatingRecipes {
       //   msg.append(fmt::format("max score for fd[]: {}\n", freqDistMaximumScore));
       //   msg.append(fmt::format("increment between adjacent scores: {}\n", scoreIncrement));
       //   msg.append(fmt::format("number of scores (or categories): {}\n", numberOfScores));
-      //   msg.append(fmt::format("freq dist fd[0]...fd[ns-1]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDist, false)));
-      //   msg.append(fmt::format("double version of fd[]: {}\n", EquatingRecipes::Utilities::vectorXdToString(freqDistDouble, false)));
-      //   msg.append(fmt::format("cum freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeFreqDist, false)));
-      //   msg.append(fmt::format("relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(relativeFreqDist, false)));
-      //   msg.append(fmt::format("cum relative freq dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(cumulativeRelativeFreqDist, false)));
-      //   msg.append(fmt::format("percentile rank dist: {}\n", EquatingRecipes::Utilities::vectorXdToString(percentileRankDist, false)));
-      //   msg.append(fmt::format("moments: mean, sd, skew, kurt: {}\n", EquatingRecipes::Utilities::vectorXdToString(momentValues, false)));
+      //   msg.append(fmt::format("freq dist fd[0]...fd[ns-1]: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(freqDist, false)));
+      //   msg.append(fmt::format("double version of fd[]: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(freqDistDouble, false)));
+      //   msg.append(fmt::format("cum freq dist: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(cumulativeFreqDist, false)));
+      //   msg.append(fmt::format("relative freq dist: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(relativeFreqDist, false)));
+      //   msg.append(fmt::format("cum relative freq dist: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(cumulativeRelativeFreqDist, false)));
+      //   msg.append(fmt::format("percentile rank dist: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(percentileRankDist, false)));
+      //   msg.append(fmt::format("moments: mean, sd, skew, kurt: {}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(momentValues, false)));
 
       //   return msg;
       // }

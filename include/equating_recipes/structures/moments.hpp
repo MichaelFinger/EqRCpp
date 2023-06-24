@@ -26,8 +26,8 @@
     Date of last revision: 6/30/08  
 */
 
-#ifndef STRUCTURES_MOMENTS_HPP
-#define STRUCTURES_MOMENTS_HPP
+#ifndef IMPLEMENTATION_MOMENTS_HPP
+#define IMPLEMENTATION_MOMENTS_HPP
 
 #include <cmath>
 #include <string>

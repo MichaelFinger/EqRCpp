@@ -4,8 +4,8 @@
   Description: raw-score statistics for a bivariate distribution 
 */
 
-#ifndef STRUCTURES_BIVARIATE_STATISTICS_HPP
-#define STRUCTURES_BIVARIATE_STATISTICS_HPP
+#ifndef IMPLEMENTATION_BIVARIATE_STATISTICS_HPP
+#define IMPLEMENTATION_BIVARIATE_STATISTICS_HPP
 
 #include <string>
 #include <Eigen/Core>
@@ -39,9 +39,9 @@ namespace EquatingRecipes {
 
       //   value.append(fmt::format("Number of Examinees: {}\n", this->numberOfExaminees));
 
-      //   value.append(fmt::format("Bivariate Frequency Distribution:\n{}\n", EquatingRecipes::Utilities::matrixXiToString(this->bivariateFreqDist)));
-      //   value.append(fmt::format("Bivariate Frequency Distribution (double):\n{}\n", EquatingRecipes::Utilities::matrixXdToString(this->bivariateFreqDistDouble)));
-      //   value.append(fmt::format("Bivariate Proportions:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(this->bivariateProportions)));
+      //   value.append(fmt::format("Bivariate Frequency Distribution:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXiToString(this->bivariateFreqDist)));
+      //   value.append(fmt::format("Bivariate Frequency Distribution (double):\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(this->bivariateFreqDistDouble)));
+      //   value.append(fmt::format("Bivariate Proportions:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(this->bivariateProportions)));
       //   value.append(fmt::format("Sum of Bivariate Proportions: {}\n", this->bivariateProportions.sum()));
       //   value.append(fmt::format("Covariance: {}\n", this->covariance));
       //   value.append(fmt::format("Correlation: {}\n", this->correlation));

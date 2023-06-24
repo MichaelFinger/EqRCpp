@@ -4,8 +4,8 @@
   Description: equated raw score results
 */
 
-#ifndef STRUCTURES_EQUATED_RAW_SCORE_RESULTS_HPP
-#define STRUCTURES_EQUATED_RAW_SCORE_RESULTS_HPP
+#ifndef IMPLEMENTATION_EQUATED_RAW_SCORE_RESULTS_HPP
+#define IMPLEMENTATION_EQUATED_RAW_SCORE_RESULTS_HPP
 
 #include <string>
 #include <Eigen/Core>
@@ -31,18 +31,18 @@ namespace EquatingRecipes {
       // std::string toString() {
       //   std::string msg = "Equated Raw Score Results\n";
         
-      //   msg.append(fmt::format("xSyntheticPopulationMean:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(xSyntheticPopulationMean, false)));
-      //   msg.append(fmt::format("ySyntheticPopulationMean:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(ySyntheticPopulationMean, false)));
-      //   msg.append(fmt::format("xSyntheticPopulationSD:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(xSyntheticPopulationSD, false)));
-      //   msg.append(fmt::format("ySyntheticPopulationSD:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(ySyntheticPopulationSD, false)));
-      //   msg.append(fmt::format("gammaPopulation1:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(gammaPopulation1, false)));
-      //   msg.append(fmt::format("gammaPopulation2:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(gammaPopulation2, false)));
-      //   msg.append(fmt::format("slope:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(slope, false)));
-      //   msg.append(fmt::format("intercept:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(intercept, false)));
-      //   msg.append(fmt::format("equatedRawScores:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(equatedRawScores.transpose())));
-      //   msg.append(fmt::format("equatedRawScoreMoments:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(equatedRawScoreMoments.transpose())));
-      //   msg.append(fmt::format("relativeFreqDistsX:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(relativeFreqDistsX)));
-      //   msg.append(fmt::format("relativeFreqDistsY:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(relativeFreqDistsY)));
+      //   msg.append(fmt::format("xSyntheticPopulationMean:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(xSyntheticPopulationMean, false)));
+      //   msg.append(fmt::format("ySyntheticPopulationMean:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(ySyntheticPopulationMean, false)));
+      //   msg.append(fmt::format("xSyntheticPopulationSD:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(xSyntheticPopulationSD, false)));
+      //   msg.append(fmt::format("ySyntheticPopulationSD:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(ySyntheticPopulationSD, false)));
+      //   msg.append(fmt::format("gammaPopulation1:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(gammaPopulation1, false)));
+      //   msg.append(fmt::format("gammaPopulation2:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(gammaPopulation2, false)));
+      //   msg.append(fmt::format("slope:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(slope, false)));
+      //   msg.append(fmt::format("intercept:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(intercept, false)));
+      //   msg.append(fmt::format("equatedRawScores:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(equatedRawScores.transpose())));
+      //   msg.append(fmt::format("equatedRawScoreMoments:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(equatedRawScoreMoments.transpose())));
+      //   msg.append(fmt::format("relativeFreqDistsX:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(relativeFreqDistsX)));
+      //   msg.append(fmt::format("relativeFreqDistsY:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(relativeFreqDistsY)));
 
       //   return msg;
       // }

@@ -14,7 +14,7 @@ namespace Tests {
 
       Eigen::VectorXd lsat6RelativeFreqDist = Tests::Fixtures::LSAT6::rawScoreRelativeFrequencyDistribution();
 
-      std::cout << "Relative Freq Dist:\n" << EquatingRecipes::Utilities::vectorXdToString(lsat6RelativeFreqDist, false) << "\n";
+      std::cout << "Relative Freq Dist:\n" << EquatingRecipes::Implementation::Utilities::vectorXdToString(lsat6RelativeFreqDist, false) << "\n";
 
       // EquatingRecipes::Structures::Moments moments = EquatingRecipes::Structures::Moments::fromScoreFrequencies(lsat6FreqDist,
       //                                                                                                           0.0,

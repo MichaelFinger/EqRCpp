@@ -39,7 +39,7 @@ namespace EquatingRecipes {
                                 EquatingRecipes::Analyses::EquatedScaledScores::OutputData& outputData) {
         outputData.pData = inputData.pData;
 
-        EquatingRecipes::Utilities::runEquatedScaledScores(outputData.pData,
+        EquatingRecipes::Implementation::Utilities::runEquatedScaledScores(outputData.pData,
                                                            inputData.equatedRawScoreResults,
                                                            inputData.lowestObservableEquatedRawScore,
                                                            inputData.highestObservableEquatedRawScore,

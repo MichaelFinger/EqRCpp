@@ -1,5 +1,5 @@
-#ifndef STRUCTURES_SMOOTHING_HPP
-#define STRUCTURES_SMOOTHING_HPP
+#ifndef IMPLEMENTATION_SMOOTHING_HPP
+#define IMPLEMENTATION_SMOOTHING_HPP
 
 // Original coding: 'N'= no; 'L' = loglin; 'B' = betabin; 'S' = cub spl; 'K' = kernel; 'Z' = CLL
 

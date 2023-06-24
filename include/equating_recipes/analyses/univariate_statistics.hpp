@@ -24,7 +24,7 @@ namespace EquatingRecipes {
 
       nlohmann::json operator()(const EquatingRecipes::Analyses::UnivariateStatistics::InputData& inputData,
                                 EquatingRecipes::Structures::UnivariateStatistics& univariateStatistics) {
-        univariateStatistics = EquatingRecipes::Utilities::univariateFromScoreFrequencies(inputData.scoreFrequencies,
+        univariateStatistics = EquatingRecipes::Implementation::Utilities::univariateFromScoreFrequencies(inputData.scoreFrequencies,
                                                                                           inputData.minimumScore,
                                                                                           inputData.maximumScore,
                                                                                           inputData.scoreIncrement,

@@ -222,7 +222,7 @@ namespace EquatingRecipes {
       }
 
       if (pData.bootstrapReplicationNumber <= 1) {
-        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
                                                                                    pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
         equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(), maximumScoreLocation + 1);
@@ -230,7 +230,7 @@ namespace EquatingRecipes {
       }
 
       /* Compute equating results */
-      Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
+      Eigen::VectorXd equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
                                                                                                   univariateStatisticsY.minimumScore,
                                                                                                   univariateStatisticsY.scoreIncrement,
                                                                                                   univariateLogLinearSmoothingY.fittedRawScoreCumulativeRelativeDist,
@@ -241,7 +241,7 @@ namespace EquatingRecipes {
       }
 
       /* get moments */
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
       for (size_t index = 0; index < moments.momentValues.size(); index++) {
@@ -350,7 +350,7 @@ namespace EquatingRecipes {
       }
 
       if (pData.bootstrapReplicationNumber <= 1) {
-        size_t maximumScoreLocation = EquatingRecipes::Utilities::getScoreLocation(pData.maximumScoreX,
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
                                                                                    pData.minimumScoreX,
                                                                                    pData.scoreIncrementX);
         equatedRawScoreResults.equatedRawScores(pData.methods.size(), maximumScoreLocation + 1);
@@ -368,7 +368,7 @@ namespace EquatingRecipes {
           bllxy->prd_x = log-linear smoothed PR dist for x
         r->eraw[0] = y equivalents for x (output) */
 
-      Eigen::VectorXd equatedRawScores = EquatingRecipes::Utilities::getEquipercentileEquivalents(xy.univariateStatisticsColumn.numberOfScores,
+      Eigen::VectorXd equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(xy.univariateStatisticsColumn.numberOfScores,
                                                                                                   xy.univariateStatisticsColumn.minimumScore,
                                                                                                   xy.univariateStatisticsColumn.scoreIncrement,
                                                                                                   bivariateLogLinearSmoothingXY.fittedRawScoreCumulativeRelativeFreqDistV,
@@ -379,7 +379,7 @@ namespace EquatingRecipes {
         equatedRawScoreResults.equatedRawScores(0, index) = equatedRawScores(index);
       }
 
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
                                                                                                                    pData.scoreFrequenciesX);
 
       for (size_t index = 0; index < moments.momentValues.size(); index++) {
@@ -490,7 +490,7 @@ namespace EquatingRecipes {
                                       "    BH-MFE",
                                       "  ChainedE"};
 
-      std::string methodCode = EquatingRecipes::Utilities::getMethodCode(method);
+      std::string methodCode = EquatingRecipes::Implementation::Utilities::getMethodCode(method);
 
       pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating. */
                                                             /* Counting of replications done in Wrapper_Bootstrap(), 
@@ -560,11 +560,11 @@ namespace EquatingRecipes {
       }
 
       if (pData.bootstrapReplicationNumber <= 1) {
-        size_t maximumScoreLocationXV = EquatingRecipes::Utilities::getScoreLocation(xv.univariateStatisticsRow.maximumScore,
+        size_t maximumScoreLocationXV = EquatingRecipes::Implementation::Utilities::getScoreLocation(xv.univariateStatisticsRow.maximumScore,
                                                                                      xv.univariateStatisticsRow.minimumScore,
                                                                                      xv.univariateStatisticsRow.scoreIncrement);
 
-        size_t maximumScoreLocationYV = EquatingRecipes::Utilities::getScoreLocation(yv.univariateStatisticsRow.maximumScore,
+        size_t maximumScoreLocationYV = EquatingRecipes::Implementation::Utilities::getScoreLocation(yv.univariateStatisticsRow.maximumScore,
                                                                                      yv.univariateStatisticsRow.minimumScore,
                                                                                      yv.univariateStatisticsRow.scoreIncrement);
 
@@ -733,7 +733,7 @@ namespace EquatingRecipes {
 
       for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
         EquatingRecipes::Structures::Moments moments =
-            EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
+            EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
                                                                           xv.univariateStatisticsRow.freqDistDouble);
 
         equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
@@ -882,12 +882,12 @@ namespace EquatingRecipes {
       univariateLogLinearSmoothing.fittedRawScoreDist = univariateLogLinearSmoothing.fittedFrequencies /
                                                         static_cast<double>(univariateLogLinearSmoothing.numberOfExaminees);
 
-      univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist = EquatingRecipes::Utilities::cumulativeRelativeFreqDist(0,
+      univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
                                                                                                                                  univariateLogLinearSmoothing.numberOfScores - 1,
                                                                                                                                  1,
                                                                                                                                  univariateLogLinearSmoothing.fittedRawScoreDist);
 
-      univariateLogLinearSmoothing.fittedRawScorePercentileRankDist = EquatingRecipes::Utilities::percentileRanks(0,
+      univariateLogLinearSmoothing.fittedRawScorePercentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
                                                                                                                   univariateLogLinearSmoothing.numberOfScores - 1,
                                                                                                                   1,
                                                                                                                   univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist);
@@ -973,7 +973,7 @@ namespace EquatingRecipes {
       /* univariate LL smoothing */
       if (numberOfScoresV == 0) {
         for (size_t scoreLocationU = 0; scoreLocationU < numberOfScoresU; scoreLocationU++) {
-          double scoreU = EquatingRecipes::Utilities::getScore(scoreLocationU, minimumScoreU, scoreIncrementU);
+          double scoreU = EquatingRecipes::Implementation::Utilities::getScore(scoreLocationU, minimumScoreU, scoreIncrementU);
 
           for (size_t degreesOfSmoothingUIndex = 1; degreesOfSmoothingUIndex <= numberOfDegreesOfSmoothingU; degreesOfSmoothingUIndex++) {
             rawScoreDesignMatrix(scoreLocationU, degreesOfSmoothingUIndex - 1) = std::pow(scoreU, static_cast<double>(degreesOfSmoothingUIndex));
@@ -988,7 +988,7 @@ namespace EquatingRecipes {
         /* u polynomials */
         size_t cell = 0;
         for (size_t scoreLocationU; scoreLocationU < numberOfScoresU; scoreLocationU++) {
-          double scoreU = EquatingRecipes::Utilities::getScore(scoreLocationU, minimumScoreU, scoreIncrementU);
+          double scoreU = EquatingRecipes::Implementation::Utilities::getScore(scoreLocationU, minimumScoreU, scoreIncrementU);
 
           for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
             for (size_t degreesOfSmoothingUIndex = 1; degreesOfSmoothingUIndex <= numberOfDegreesOfSmoothingU; degreesOfSmoothingUIndex++) {
@@ -999,7 +999,7 @@ namespace EquatingRecipes {
 
           /* v polynomials */
           for (size_t scoreLocationV = 0; scoreLocationV < numberOfScoresV; scoreLocationV++) {
-            double scoreV = EquatingRecipes::Utilities::getScore(scoreLocationV,
+            double scoreV = EquatingRecipes::Implementation::Utilities::getScore(scoreLocationV,
                                                                  minimumScoreV,
                                                                  scoreIncrementV);
 
@@ -1302,14 +1302,14 @@ namespace EquatingRecipes {
       Eigen::VectorXd a = (rho * observedFrequencies) + Eigen::VectorXd::Constant(numberOfRows, observedFrequenciesSum / static_cast<double>(numberOfRows));
 
       if (debug) {
-        std::cout << fmt::format("a debug:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(a, false));
+        std::cout << fmt::format("a debug:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(a, false));
       }
 
       /* get BtSaB -- first term on left side of Eq 49 in H&T */
       Eigen::MatrixXd BtSaB = getBtSmB(designMatrix, a);
 
       if (debug) {
-        std::cout << fmt::format("BtSaB debug:\n{}\n", EquatingRecipes::Utilities::matrixXdToString(BtSaB));
+        std::cout << fmt::format("BtSaB debug:\n{}\n", EquatingRecipes::Implementation::Utilities::matrixXdToString(BtSaB));
       }
 
       /*  get right side of Eq 49 in H&T, which is computed using
@@ -1386,7 +1386,7 @@ namespace EquatingRecipes {
       Eigen::VectorXd BBeta = designMatrix * betaParameterEstimates;
 
       if (debug) {
-        std::cout << fmt::format("BBeta debug:\n{}\n", EquatingRecipes::Utilities::vectorXdToString(BBeta, false));
+        std::cout << fmt::format("BBeta debug:\n{}\n", EquatingRecipes::Implementation::Utilities::vectorXdToString(BBeta, false));
       }
 
       double normalizingConstant = 0.0; // = ap

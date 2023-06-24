@@ -5,8 +5,8 @@
                This struct is a member of the PDATA structure
 */
 
-#ifndef STRUCTURES_IRT_INPUT_HPP
-#define STRUCTURES_IRT_INPUT_HPP
+#ifndef IMPLEMENTATION_IRT_INPUT_HPP
+#define IMPLEMENTATION_IRT_INPUT_HPP
 
 #include <vector>
 

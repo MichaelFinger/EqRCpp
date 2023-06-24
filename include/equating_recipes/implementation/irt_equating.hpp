@@ -273,7 +273,7 @@ namespace EquatingRecipes {
         pData.scoreFrequenciesX = newFormFrequencyDistribution;
 
         for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
+          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
                                                                                                                  newFormFrequencyDistribution);
 
           equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
@@ -292,27 +292,27 @@ namespace EquatingRecipes {
         The first three parameters of each call were revised on 3/8/09  */
       if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
           irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
                                                                                                                newForm.fittedDistributionNewGroup);
         newForm.momentsFittedDistributionNewGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
+        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
                                                                           newForm.fittedDistributionOldGroup);
         newForm.momentsFittedDistributionOldGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
+        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
                                                                           newForm.fittedDistributionSyntheticGroup);
         newForm.momentsFittedDistributionSyntheticGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
+        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
                                                                           oldForm.fittedDistributionNewGroup);
         oldForm.momentsFittedDistributionNewGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
+        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
                                                                           oldForm.fittedDistributionOldGroup);
         oldForm.momentsFittedDistributionOldGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
+        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
                                                                           oldForm.fittedDistributionSyntheticGroup);
         oldForm.momentsFittedDistributionSyntheticGroup = moments.momentValues;
       }
@@ -325,7 +325,7 @@ namespace EquatingRecipes {
         involve synthetic groups */
       if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_SCORE ||
           irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedTrueScore,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedTrueScore,
                                                                                                                newForm.fittedDistributionNewGroup);
 
         irtEquatingResults.momentsEquatedTrueScores = moments.momentValues;
@@ -333,7 +333,7 @@ namespace EquatingRecipes {
 
       if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
           irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedObservedScore,
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedObservedScore,
                                                                                                                newForm.fittedDistributionNewGroup);
 
         irtEquatingResults.momentsEquatedObservedScores = moments.momentValues;
@@ -620,13 +620,13 @@ namespace EquatingRecipes {
       double oldFormScoreIncrement = oldForm.rawScores(1) - oldFormMinimumScore;
 
       /* compute the percentile rank function --Tianyou added 8/18/08 */
-      newFormPercentileRankDist = EquatingRecipes::Utilities::percentileRanks(0,
+      newFormPercentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
                                                                               newForm.numberOfRawScoreCategories - 1,
                                                                               1,
                                                                               newFormCumulativeFreqDist);
 
       /* calling ERutilities equipercentile equating function (TW 8/18/08) */
-      irtEquatingResults.unroundedEquatedObservedScore = EquatingRecipes::Utilities::getEquipercentileEquivalents(oldForm.numberOfRawScoreCategories,
+      irtEquatingResults.unroundedEquatedObservedScore = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(oldForm.numberOfRawScoreCategories,
                                                                                                                   oldFormMinimumScore,
                                                                                                                   oldFormScoreIncrement,
                                                                                                                   oldFormCumulativeFreqDist,
