@@ -10,7 +10,7 @@
 
 #include <Eigen/Core>
 
-#include <equating_recipes/implmentations/optimization_function.hpp>
+#include <equating_recipes/implementation/optimization_function.hpp>
 #include <equating_recipes/structures/optimization_results.hpp>
 
 #include <iostream>

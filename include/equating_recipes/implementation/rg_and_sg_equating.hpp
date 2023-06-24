@@ -39,11 +39,12 @@ University of Iowa
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/implementation/utilities.hpp>
 
 namespace EquatingRecipes {
-  struct RandomAndSingleGroupEquating {
-    /*
+  namespace Implementation {
+    struct RandomAndSingleGroupEquating {
+      /*
       Wrapper for getting mean, linear, or equipercentile equating for RG design
         with no smoothing
 
@@ -101,92 +102,92 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08 
     */
-    void randomGroupEquating(const EquatingRecipes::Structures::Design& design,
-                             const EquatingRecipes::Structures::Method& method,
-                             const EquatingRecipes::Structures::Smoothing& smoothing,
-                             const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
-                             const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
-                             const size_t& replication,
-                             EquatingRecipes::Structures::PData& pData,
-                             EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
-      /* method names --- 10 characters; right justified */
-      std::vector<std::string> methodNames {"   y-equiv"};
+      void runRandomGroupEquating(const EquatingRecipes::Structures::Design& design,
+                                  const EquatingRecipes::Structures::Method& method,
+                                  const EquatingRecipes::Structures::Smoothing& smoothing,
+                                  const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                                  const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
+                                  const size_t& replication,
+                                  EquatingRecipes::Structures::PData& pData,
+                                  EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+        /* method names --- 10 characters; right justified */
+        std::vector<std::string> methodNames {"   y-equiv"};
 
-      /* should be set to 0 for actual equating */
-      /* counting of replications done in Wrapper_Bootstrap() */
-      pData.bootstrapReplicationNumber = replication;
+        /* should be set to 0 for actual equating */
+        /* counting of replications done in Wrapper_Bootstrap() */
+        pData.bootstrapReplicationNumber = replication;
 
-      /* allocation and assignments for in
+        /* allocation and assignments for in
       Note that for every assignment of the form inall->(var) = xv->(var)
       values vary depending on whether x (or y) is for actual equating or
       a bootstrap sample; all other values are the same for the 
       actual equating and a bootstrap sample */
 
-      if (pData.bootstrapReplicationNumber == 0) {
-        pData.summaryRawDataX = univariateStatisticsX;
-        pData.summaryRawDataY = univariateStatisticsY;
-        pData.design = design;
-        pData.method = method;
-        pData.smoothing = smoothing;
-        pData.methods = methodNames;
+        if (pData.bootstrapReplicationNumber == 0) {
+          pData.summaryRawDataX = univariateStatisticsX;
+          pData.summaryRawDataY = univariateStatisticsY;
+          pData.design = design;
+          pData.method = method;
+          pData.smoothing = smoothing;
+          pData.methods = methodNames;
 
-        pData.minimumScoreX = univariateStatisticsX.minimumScore;
-        pData.maximumScoreX = univariateStatisticsX.maximumScore;
-        pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
-        pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
-        pData.numberOfExaminees = univariateStatisticsX.numberOfExaminees;
+          pData.minimumScoreX = univariateStatisticsX.minimumScore;
+          pData.maximumScoreX = univariateStatisticsX.maximumScore;
+          pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
+          pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
+          pData.numberOfExaminees = univariateStatisticsX.numberOfExaminees;
+        }
+
+        /* allocation and assignments for r */
+
+        if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+          size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                                     pData.minimumScoreX,
+                                                                                                     pData.scoreIncrementX);
+
+          equatedRawScoreResults.equatedRawScores.setZero(1, maximumScoreLocation + 1);
+          equatedRawScoreResults.equatedRawScoreMoments.setZero(1, 4);
+        }
+
+        /* Compute equating results */
+        double slope;
+        double intercept;
+        Eigen::VectorXd equatedRawScores;
+
+        if (method != EquatingRecipes::Structures::Method::EQUIPERCENTILE) {
+          equatedRawScoreResults.slope.resize(1);
+          equatedRawScoreResults.intercept.resize(1);
+
+          equatedRawScores = linearEquating(univariateStatisticsX.momentValues(0),
+                                            univariateStatisticsX.momentValues(1),
+                                            univariateStatisticsY.momentValues(0),
+                                            univariateStatisticsY.momentValues(1),
+                                            method,
+                                            pData.minimumScoreX,
+                                            pData.maximumScoreX,
+                                            pData.scoreIncrementX,
+                                            equatedRawScoreResults.slope(0),
+                                            equatedRawScoreResults.intercept(0));
+
+        } else {
+          equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
+                                                                                                      univariateStatisticsY.minimumScore,
+                                                                                                      univariateStatisticsY.scoreIncrement,
+                                                                                                      univariateStatisticsY.cumulativeRelativeFreqDist,
+                                                                                                      univariateStatisticsX.numberOfScores,
+                                                                                                      univariateStatisticsX.percentileRankDist);
+        }
+
+        equatedRawScoreResults.equatedRawScores.row(0) = equatedRawScores;
+
+        /* get moments */
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
+                                                                                                                               pData.scoreFrequenciesX);
+
+        equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
       }
 
-      /* allocation and assignments for r */
-
-      if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
-        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.minimumScoreX,
-                                                                                   pData.scoreIncrementX);
-
-        equatedRawScoreResults.equatedRawScores.setZero(1, maximumScoreLocation + 1);
-        equatedRawScoreResults.equatedRawScoreMoments.setZero(1, 4);
-      }
-
-      /* Compute equating results */
-      double slope;
-      double intercept;
-      Eigen::VectorXd equatedRawScores;
-
-      if (method != EquatingRecipes::Structures::Method::EQUIPERCENTILE) {
-        equatedRawScoreResults.slope.resize(1);
-        equatedRawScoreResults.intercept.resize(1);
-
-        equatedRawScores = linearEquating(univariateStatisticsX.momentValues(0),
-                                          univariateStatisticsX.momentValues(1),
-                                          univariateStatisticsY.momentValues(0),
-                                          univariateStatisticsY.momentValues(1),
-                                          method,
-                                          pData.minimumScoreX,
-                                          pData.maximumScoreX,
-                                          pData.scoreIncrementX,
-                                          equatedRawScoreResults.slope(0),
-                                          equatedRawScoreResults.intercept(0));
-
-      } else {
-        equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(univariateStatisticsY.numberOfScores,
-                                                                                    univariateStatisticsY.minimumScore,
-                                                                                    univariateStatisticsY.scoreIncrement,
-                                                                                    univariateStatisticsY.cumulativeRelativeFreqDist,
-                                                                                    univariateStatisticsX.numberOfScores,
-                                                                                    univariateStatisticsX.percentileRankDist);
-      }
-
-      equatedRawScoreResults.equatedRawScores.row(0) = equatedRawScores;
-
-      /* get moments */
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(0),
-                                                                                                                   pData.scoreFrequenciesX);
-
-      equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
-    }
-
-    /*
+      /*
       Wrapper for getting mean, linear, or equipercentile equating for SG design
         with no smoothing
 
@@ -248,84 +249,85 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-    void singleGroupEquating(const EquatingRecipes::Structures::Design& design,
-                             const EquatingRecipes::Structures::Method& method,
-                             const EquatingRecipes::Structures::Smoothing& smoothing,
-                             const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXY,
-                             const size_t& replication,
-                             EquatingRecipes::Structures::PData& pData,
-                             EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
-      // void Wrapper_SN(char design, char method, char smoothing,  struct BSTATS *xy,
-      //                int rep, struct PDATA *inall, struct ERAW_RESULTS *r)
+      void runSingleGroupEquating(const EquatingRecipes::Structures::Design& design,
+                                  const EquatingRecipes::Structures::Method& method,
+                                  const EquatingRecipes::Structures::Smoothing& smoothing,
+                                  const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXY,
+                                  const size_t& replication,
+                                  EquatingRecipes::Structures::PData& pData,
+                                  EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+        // void Wrapper_SN(char design, char method, char smoothing,  struct BSTATS *xy,
+        //                int rep, struct PDATA *inall, struct ERAW_RESULTS *r)
 
-      pData.methods.push_back("   y-equiv");
+        pData.methods.push_back("   y-equiv");
 
-      /* should be set to 0 for actual equating */
-      /* counting of replications done in Wrapper_Bootstrap() */
-      pData.bootstrapReplicationNumber = replication;
+        /* should be set to 0 for actual equating */
+        /* counting of replications done in Wrapper_Bootstrap() */
+        pData.bootstrapReplicationNumber = replication;
 
-      /* allocation and assignments for in
+        /* allocation and assignments for in
         Note that for every assignment of the form inall->(var) = xv->(var)
         values vary depending on whether xy is for actual equating or
         a bootstrap sample; all other values are the same for the 
         actual equating and a bootstrap sample */
 
-      if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
-        pData.summaryRawDataXY = bivariateStatisticsXY;
-        pData.design = design;
-        pData.method = method;
-        pData.smoothing = smoothing;
+        if (pData.bootstrapReplicationNumber == 0) { /* no assignment or stor alloc for bootstrap reps */
+          pData.summaryRawDataXY = bivariateStatisticsXY;
+          pData.design = design;
+          pData.method = method;
+          pData.smoothing = smoothing;
 
-        pData.minimumScoreX = bivariateStatisticsXY.univariateStatisticsRow.minimumScore;
-        pData.maximumScoreX = bivariateStatisticsXY.univariateStatisticsRow.maximumScore;
-        pData.scoreIncrementX = bivariateStatisticsXY.univariateStatisticsRow.scoreIncrement;
-        pData.scoreFrequenciesX = bivariateStatisticsXY.univariateStatisticsRow.freqDistDouble;
-        pData.numberOfExaminees = bivariateStatisticsXY.univariateStatisticsRow.numberOfExaminees;
+          pData.minimumScoreX = bivariateStatisticsXY.univariateStatisticsRow.minimumScore;
+          pData.maximumScoreX = bivariateStatisticsXY.univariateStatisticsRow.maximumScore;
+          pData.scoreIncrementX = bivariateStatisticsXY.univariateStatisticsRow.scoreIncrement;
+          pData.scoreFrequenciesX = bivariateStatisticsXY.univariateStatisticsRow.freqDistDouble;
+          pData.numberOfExaminees = bivariateStatisticsXY.univariateStatisticsRow.numberOfExaminees;
+        }
+
+        /* allocation and assignments for r */
+        /* no storage allocation for bootstrap reps >1 */
+        if (pData.bootstrapReplicationNumber <= 1) {
+          size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                                     pData.minimumScoreX,
+                                                                                                     pData.scoreIncrementX);
+
+          equatedRawScoreResults.equatedRawScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
+          equatedRawScoreResults.equatedRawScoreMoments.setZero(pData.methods.size(), 4);
+        }
+
+        /* Compute equating results */
+
+        //   if(method != 'E')
+        if (method == EquatingRecipes::Structures::Method::EQUIPERCENTILE) {
+          equatedRawScoreResults.equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
+                                                                                                                             bivariateStatisticsXY.univariateStatisticsColumn.minimumScore,
+                                                                                                                             bivariateStatisticsXY.univariateStatisticsColumn.scoreIncrement,
+                                                                                                                             bivariateStatisticsXY.univariateStatisticsColumn.cumulativeRelativeFreqDist,
+                                                                                                                             bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
+                                                                                                                             bivariateStatisticsXY.univariateStatisticsColumn.percentileRankDist);
+        } else {
+          equatedRawScoreResults.equatedRawScores = linearEquating(bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
+                                                                   bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
+                                                                   bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
+                                                                   bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
+                                                                   method,
+                                                                   pData.minimumScoreX,
+                                                                   pData.maximumScoreX,
+                                                                   pData.scoreIncrementX,
+                                                                   equatedRawScoreResults.slope(0),
+                                                                   equatedRawScoreResults.intercept(0));
+        }
+
+        /* get moments */
+
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
+                                                                                                                               pData.scoreFrequenciesX);
+
+        equatedRawScoreResults.equatedRawScoreMoments = moments.momentValues;
       }
 
-      /* allocation and assignments for r */
-      /* no storage allocation for bootstrap reps >1 */
-      if (pData.bootstrapReplicationNumber <= 1) {
-        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
-                                                                                   pData.minimumScoreX,
-                                                                                   pData.scoreIncrementX);
-
-        equatedRawScoreResults.equatedRawScores.setZero(pData.methods.size(), maximumScoreLocation + 1);
-        equatedRawScoreResults.equatedRawScoreMoments.setZero(pData.methods.size(), 4);
-      }
-
-      /* Compute equating results */
-
-      //   if(method != 'E')
-      if (method == EquatingRecipes::Structures::Method::EQUIPERCENTILE) {
-        equatedRawScoreResults.equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.minimumScore,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.scoreIncrement,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.cumulativeRelativeFreqDist,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.numberOfScores,
-                                                                                                           bivariateStatisticsXY.univariateStatisticsColumn.percentileRankDist);
-      } else {
-        equatedRawScoreResults.equatedRawScores = linearEquating(bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
-                                                                 bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
-                                                                 bivariateStatisticsXY.univariateStatisticsColumn.momentValues(0),
-                                                                 bivariateStatisticsXY.univariateStatisticsColumn.momentValues(1),
-                                                                 method,
-                                                                 pData.minimumScoreX,
-                                                                 pData.maximumScoreX,
-                                                                 pData.scoreIncrementX,
-                                                                 equatedRawScoreResults.slope(0),
-                                                                 equatedRawScoreResults.intercept(0));
-      }
-
-      /* get moments */
-
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores,
-                                                                                                                   pData.scoreFrequenciesX);
-
-      equatedRawScoreResults.equatedRawScoreMoments = moments.momentValues;
-    }
-
-    /*  
+    private:
+      /*  
       Linear equating for RG and SG designs
 
       Input
@@ -350,40 +352,41 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-    Eigen::VectorXd linearEquating(const double& meanX,
-                                   const double& sdX,
-                                   const double& meanY,
-                                   const double& sdY,
-                                   const EquatingRecipes::Structures::Method& method,
-                                   const double& minimumScoreX,
-                                   const double& maximumScoreX,
-                                   const double& scoreIncrementX,
-                                   double& slope,
-                                   double& intercept) {
-      if (method == EquatingRecipes::Structures::Method::MEAN) {
-        slope = 1.0;
-      } else {
-        slope = sdY / sdX;
-      }
+      Eigen::VectorXd linearEquating(const double& meanX,
+                                     const double& sdX,
+                                     const double& meanY,
+                                     const double& sdY,
+                                     const EquatingRecipes::Structures::Method& method,
+                                     const double& minimumScoreX,
+                                     const double& maximumScoreX,
+                                     const double& scoreIncrementX,
+                                     double& slope,
+                                     double& intercept) {
+        if (method == EquatingRecipes::Structures::Method::MEAN) {
+          slope = 1.0;
+        } else {
+          slope = sdY / sdX;
+        }
 
-      intercept = meanY - slope * meanX;
+        intercept = meanY - slope * meanX;
 
-      /* get equated raw scores */
-      size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(maximumScoreX,
-                                                                                 minimumScoreX,
-                                                                                 scoreIncrementX);
-
-      Eigen::VectorXd equatedRawScores(maximumScoreLocation + 1);
-
-      for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
-        equatedRawScores(scoreLocation) = intercept + slope * EquatingRecipes::Implementation::Utilities::getScore(scoreLocation,
+        /* get equated raw scores */
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(maximumScoreX,
                                                                                                    minimumScoreX,
                                                                                                    scoreIncrementX);
-      }
 
-      return equatedRawScores;
-    }
-  };
+        Eigen::VectorXd equatedRawScores(maximumScoreLocation + 1);
+
+        for (size_t scoreLocation = 0; scoreLocation <= maximumScoreLocation; scoreLocation++) {
+          equatedRawScores(scoreLocation) = intercept + slope * EquatingRecipes::Implementation::Utilities::getScore(scoreLocation,
+                                                                                                                     minimumScoreX,
+                                                                                                                     scoreIncrementX);
+        }
+
+        return equatedRawScores;
+      }
+    };
+  } // namespace Implementation
 } // namespace EquatingRecipes
 
 #endif

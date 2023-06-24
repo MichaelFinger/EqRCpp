@@ -53,23 +53,6 @@ if (ENABLE_EQRCPP_SHARED_LIBRARY_TARGET OR ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TAR
   FetchContent_MakeAvailable(json)
   # adds nlohmann_json::nlohmann_json
 
-  # nlopt
-  set(NLOPT_CXX ON CACHE BOOL "enable cxx routines" FORCE)
-  set(NLOPT_FORTRAN OFF CACHE BOOL "enable fortran tests" FORCE)
-  set(NLOPT_PYTHON OFF CACHE BOOL "build python bindings" FORCE)
-  set(NLOPT_OCTAVE OFF CACHE BOOL "build octave bindings" FORCE)
-  set(NLOPT_MATLAB OFF CACHE BOOL "build matlab bindings" FORCE)
-  set(NLOPT_GUILE OFF CACHE BOOL "build guile bindings" FORCE)
-  set(NLOPT_SWIG OFF CACHE BOOL "use SWIG to build bindings" FORCE)
-
-  FetchContent_Declare(
-    nlopt
-    GIT_REPOSITORY https://github.com/stevengj/nlopt.git
-    GIT_TAG        v2.7.1
-    DOWNLOAD_EXTRACT_TIMESTAMP ON)
-  FetchContent_MakeAvailable(nlopt)
-  # adds nlopt
-
   include_directories(${Boost_INCLUDE_DIRS})
   include_directories(${Eigen_SOURCE_DIR})
   include_directories(${fmtlib_SOURCE_DIR}/include)
@@ -90,8 +73,7 @@ if (ENABLE_EQRCPP_SHARED_LIBRARY_TARGET OR ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TAR
     target_link_libraries(EqRCppLib PUBLIC
                           ${Boost_LIBRARIES}
                           fmt::fmt
-                          nlohmann_json::nlohmann_json
-                          nlopt)
+                          nlohmann_json::nlohmann_json)
   endif()
 
   if (ENABLE_EQRCPP_EXAMPLES_EXECUTABLE_TARGET)

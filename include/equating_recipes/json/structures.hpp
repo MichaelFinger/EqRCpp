@@ -42,8 +42,9 @@
 #include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/structures/optimization_results.hpp>
+#include <equating_recipes/structures/criterion_comparison_type.hpp>
+#include <equating_recipes/structures/design_matrix_type.hpp>
 
-#include <equating_recipes/log_linear_equating.hpp>
 
 namespace Eigen {
   template<typename Derived>
@@ -140,11 +141,11 @@ namespace EquatingRecipes {
                                                                          {EquatingRecipes::Structures::Symmetry::OLD_SCALE, "old scale"},
                                                                          {EquatingRecipes::Structures::Symmetry::SYMMETRIC, "symmetric"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::LogLinearEquating::CriterionComparisonType, {{EquatingRecipes::LogLinearEquating::CriterionComparisonType::ABSOLUTE, "absolute"},
-                                                                                               {EquatingRecipes::LogLinearEquating::CriterionComparisonType::RELATIVE, "relative"}})
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::CriterionComparisonType, {{EquatingRecipes::Structures::CriterionComparisonType::ABSOLUTE, "absolute"},
+                                                                                               {EquatingRecipes::Structures::CriterionComparisonType::RELATIVE, "relative"}})
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::LogLinearEquating::DesignMatrixType, {{EquatingRecipes::LogLinearEquating::DesignMatrixType::SOLUTION, "solution"},
-                                                                                        {EquatingRecipes::LogLinearEquating::DesignMatrixType::RAW_SCORE, "raw score"}})
+    NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::DesignMatrixType, {{EquatingRecipes::Structures::DesignMatrixType::SOLUTION, "solution"},
+                                                                                        {EquatingRecipes::Structures::DesignMatrixType::RAW_SCORE, "raw score"}})
 
     void to_json(nlohmann::json& j, const EquatingRecipes::Structures::UnivariateStatistics& rec) {
       j = nlohmann::json {{"id", rec.id},

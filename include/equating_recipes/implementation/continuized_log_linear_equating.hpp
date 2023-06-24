@@ -100,16 +100,16 @@ namespace EquatingRecipes {
 
     Date of last revision: 6/30/08       
   */
-      void runCLLEquatingWithRGDesign(const EquatingRecipes::Structures::Design& design,
-                                      const EquatingRecipes::Structures::Method& method,
-                                      const EquatingRecipes::Structures::Smoothing& smoothing,
-                                      const EquatingRecipes::Structures::UnivariateStatistics& x,
-                                      const EquatingRecipes::Structures::UnivariateStatistics& y,
-                                      const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
-                                      const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
-                                      const size_t& replicationNumber,
-                                      EquatingRecipes::Structures::PData& pData,
-                                      EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+      void runWithRGDesign(const EquatingRecipes::Structures::Design& design,
+                           const EquatingRecipes::Structures::Method& method,
+                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                           const EquatingRecipes::Structures::UnivariateStatistics& x,
+                           const EquatingRecipes::Structures::UnivariateStatistics& y,
+                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
+                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
+                           const size_t& replicationNumber,
+                           EquatingRecipes::Structures::PData& pData,
+                           EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method name --- 10 characters; right justified */
         std::vector<std::string> names {"   y-equiv"};
         // double maxx, maxy, *scoresx, *scoresy;
@@ -270,14 +270,14 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-      void runCLLEquatingWithSGDesign(const EquatingRecipes::Structures::Design& design,
-                                      const EquatingRecipes::Structures::Method& method,
-                                      const EquatingRecipes::Structures::Smoothing& smoothing,
-                                      const EquatingRecipes::Structures::BivariateStatistics& xy,
-                                      const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy,
-                                      const size_t& replicationNumber,
-                                      EquatingRecipes::Structures::PData& pData,
-                                      EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+      void runWithSGDesign(const EquatingRecipes::Structures::Design& design,
+                           const EquatingRecipes::Structures::Method& method,
+                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                           const EquatingRecipes::Structures::BivariateStatistics& xy,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy,
+                           const size_t& replicationNumber,
+                           EquatingRecipes::Structures::PData& pData,
+                           EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
         std::vector<std::string> names {"   y-equiv"};
 
@@ -410,18 +410,18 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-      void runCLLEquatingWithSGCounterBalanceDesign(const EquatingRecipes::Structures::Design& design,
-                                                    const EquatingRecipes::Structures::Method& method,
-                                                    const EquatingRecipes::Structures::Smoothing& smoothing,
-                                                    const double& wtsx,
-                                                    const double& wtsy,
-                                                    const EquatingRecipes::Structures::BivariateStatistics& xy1,
-                                                    const EquatingRecipes::Structures::BivariateStatistics& xy2,
-                                                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy1,
-                                                    const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy2,
-                                                    const size_t& replicationNumber,
-                                                    EquatingRecipes::Structures::PData& pData,
-                                                    EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+      void runWithSGCounterBalanceDesign(const EquatingRecipes::Structures::Design& design,
+                                         const EquatingRecipes::Structures::Method& method,
+                                         const EquatingRecipes::Structures::Smoothing& smoothing,
+                                         const double& wtsx,
+                                         const double& wtsy,
+                                         const EquatingRecipes::Structures::BivariateStatistics& xy1,
+                                         const EquatingRecipes::Structures::BivariateStatistics& xy2,
+                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy1,
+                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy2,
+                                         const size_t& replicationNumber,
+                                         EquatingRecipes::Structures::PData& pData,
+                                         EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
         std::vector<std::string> names {"   y-equiv"};
 
@@ -558,20 +558,20 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-      void Wrapper_CC(const EquatingRecipes::Structures::Design& design,
-                      const EquatingRecipes::Structures::Method& method,
-                      const EquatingRecipes::Structures::Smoothing& smoothing,
-                      const double& w1,
-                      const bool& isInternalAnchor,
-                      const double& reliabilityCommonItemsPopulation1,
-                      const double& reliabilityCommonItemsPopulation2,
-                      const EquatingRecipes::Structures::BivariateStatistics& xv,
-                      const EquatingRecipes::Structures::BivariateStatistics& yv,
-                      const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
-                      const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllyv,
-                      const size_t& replicationNumber,
-                      EquatingRecipes::Structures::PData& pData,
-                      EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+      void runWithCGDesign(const EquatingRecipes::Structures::Design& design,
+                           const EquatingRecipes::Structures::Method& method,
+                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                           const double& w1,
+                           const bool& isInternalAnchor,
+                           const double& reliabilityCommonItemsPopulation1,
+                           const double& reliabilityCommonItemsPopulation2,
+                           const EquatingRecipes::Structures::BivariateStatistics& xv,
+                           const EquatingRecipes::Structures::BivariateStatistics& yv,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllyv,
+                           const size_t& replicationNumber,
+                           EquatingRecipes::Structures::PData& pData,
+                           EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         std::vector<std::string> names {"        FE", "       MFE", "  ChainedE"};
 
         std::string methodCode = EquatingRecipes::Implementation::Utilities::getMethodCode(method);

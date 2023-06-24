@@ -8,10 +8,8 @@
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/equated_scaled_scores_results.hpp>
-#include <equating_recipes/utilities.hpp>
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/json/json_document.hpp>
-#include <equating_recipes/rg_and_sg_equating.hpp>
 
 #include <equating_recipes/analyses/equated_scaled_scores.hpp>
 #include <equating_recipes/analyses/random_groups_equating.hpp>

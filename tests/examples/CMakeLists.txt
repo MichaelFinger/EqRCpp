@@ -10,5 +10,4 @@ target_include_directories(EqRCppExamples PRIVATE
 target_link_libraries(EqRCppExamples PRIVATE
                       ${Boost_LIBRARIES}
                       fmt::fmt
-                      nlohmann_json::nlohmann_json
-                      nlopt)
+                      nlohmann_json::nlohmann_json)

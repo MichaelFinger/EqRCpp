@@ -7,7 +7,6 @@
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
 
-#include <equating_recipes/utilities.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>

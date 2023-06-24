@@ -44,12 +44,13 @@ University of Iowa
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/implementation/utilities.hpp>
 
 namespace EquatingRecipes {
-  class CubicSpline {
-  public:
-    /*
+  namespace Implementation {
+    class CubicSpline {
+    public:
+      /*
       Wrapper function for cubic-spline postsmoothing. 
       Assumes input is unsmmothed equivalents (and associated data)
       for random groups design ('R'), single group design ('S'), or CINEG design ('C').
@@ -134,110 +135,110 @@ namespace EquatingRecipes {
       Author: Robert L. Brennan
       Date of last revision: 3-17-09  
     */
-    void runCubicSpline(const EquatingRecipes::Structures::Design& design,
-                        EquatingRecipes::Structures::PData& pDataXToY,
-                        EquatingRecipes::Structures::EquatedRawScoreResults& equaredRawScoreResultsXToY,
-                        Eigen::VectorXd& standardErrorXToY,
-                        EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingXToY,
-                        EquatingRecipes::Structures::PData& pDataYToX,
-                        EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResultsYToX,
-                        Eigen::VectorXd& standardErrorYToX,
-                        EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingYToX,
-                        double& percentileRankLow,
-                        double& percentileRankHigh,
-                        double& smoothingParameter,
-                        size_t& replicationNumber,
-                        EquatingRecipes::Structures::PData& pData,
-                        EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
-      std::vector<std::string> methodNames {"     equiv"};
-      /* error checking */
+      void runCubicSpline(const EquatingRecipes::Structures::Design& design,
+                          EquatingRecipes::Structures::PData& pDataXToY,
+                          EquatingRecipes::Structures::EquatedRawScoreResults& equaredRawScoreResultsXToY,
+                          Eigen::VectorXd& standardErrorXToY,
+                          EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingXToY,
+                          EquatingRecipes::Structures::PData& pDataYToX,
+                          EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResultsYToX,
+                          Eigen::VectorXd& standardErrorYToX,
+                          EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingYToX,
+                          double& percentileRankLow,
+                          double& percentileRankHigh,
+                          double& smoothingParameter,
+                          size_t& replicationNumber,
+                          EquatingRecipes::Structures::PData& pData,
+                          EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+        std::vector<std::string> methodNames {"     equiv"};
+        /* error checking */
 
-      if (design != pDataXToY.design || design != pDataYToX.design) {
-        throw std::runtime_error("\nThere is a design mismatch between Wrapper_Smooth_CubSpl() and "
-                                 "one or more prior calls to a Wrapper function");
+        if (design != pDataXToY.design || design != pDataYToX.design) {
+          throw std::runtime_error("\nThere is a design mismatch between Wrapper_Smooth_CubSpl() and "
+                                   "one or more prior calls to a Wrapper function");
+        }
+
+        std::string methodCode = EquatingRecipes::Implementation::Utilities::getMethodCode(pDataXToY.method);
+
+        if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS &&
+            methodCode != "E" &&
+            methodCode != "F" &&
+            methodCode != "C") {
+          throw std::runtime_error("\nFor the CINEG design, the method must be F, E, or C.");
+        }
+
+        pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
+                                                              /* counting of replications done in Wrapper_Bootstrap() */
+
+        if (pData.bootstrapReplicationNumber == 0) {
+          pData.design = design;
+          pData.method = pDataXToY.method;
+          pData.smoothing = EquatingRecipes::Structures::Smoothing::CUBIC_SPLINE;
+          pData.methods = methodNames;
+
+          /* following variables are for x */
+          pData.minimumScoreX = pDataXToY.minimumScoreX;
+          pData.maximumScoreX = pDataXToY.maximumScoreX;
+          pData.scoreIncrementX = pDataXToY.scoreIncrementX;
+          pData.scoreFrequenciesX = pDataXToY.scoreFrequenciesX;
+          pData.numberOfExaminees = pDataXToY.numberOfExaminees;
+        }
+
+        double numberOfScoresX = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pDataXToY.minimumScoreX,
+                                                                                               pDataXToY.maximumScoreX,
+                                                                                               pDataXToY.scoreIncrementX);
+
+        double numberOfScoresY = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pDataYToX.minimumScoreX,
+                                                                                               pDataYToX.maximumScoreX,
+                                                                                               pDataYToX.scoreIncrementX);
+
+        if (pData.bootstrapReplicationNumber <= 1) {
+          equatedRawScoreResults.equatedRawScores.resize(1, numberOfScoresX);
+          equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
+        }
+
+        /* populate CS_SMOOTH structures in xtoy and in ytox */
+        cubicSplineSmoothing(design,
+                             pDataXToY,
+                             equaredRawScoreResultsXToY,
+                             standardErrorXToY,
+                             cubicSplinePostsmoothingXToY,
+                             percentileRankLow,
+                             percentileRankHigh,
+                             smoothingParameter,
+                             replicationNumber,
+                             numberOfScoresX,
+                             numberOfScoresY,
+                             false); /* cubic spline for x to y */
+
+        cubicSplineSmoothing(design,
+                             pDataYToX,
+                             equatedRawScoreResultsYToX,
+                             standardErrorYToX,
+                             cubicSplinePostsmoothingYToX,
+                             percentileRankLow,
+                             percentileRankHigh,
+                             smoothingParameter,
+                             replicationNumber,
+                             numberOfScoresY,
+                             numberOfScoresX,
+                             true); /* inv of cub spl for y to x */
+
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
+          equatedRawScoreResults.equatedRawScores(0, scoreLocation) = (pDataXToY.cubicSplinePostsmoothing.value().cubicSplineSmoothedEquivalents(scoreLocation) +
+                                                                       pDataYToX.cubicSplinePostsmoothing.value().cubicSplineSmoothedEquivalents(scoreLocation)) /
+                                                                      2.0;
+        }
+
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(
+            equatedRawScoreResults.equatedRawScores.row(0),
+            pData.scoreFrequenciesX);
+
+        equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
       }
 
-      std::string methodCode = EquatingRecipes::Implementation::Utilities::getMethodCode(pDataXToY.method);
-
-      if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS &&
-          methodCode != "E" &&
-          methodCode != "F" &&
-          methodCode != "C") {
-        throw std::runtime_error("\nFor the CINEG design, the method must be F, E, or C.");
-      }
-
-      pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
-                                                            /* counting of replications done in Wrapper_Bootstrap() */
-
-      if (pData.bootstrapReplicationNumber == 0) {
-        pData.design = design;
-        pData.method = pDataXToY.method;
-        pData.smoothing = EquatingRecipes::Structures::Smoothing::CUBIC_SPLINE;
-        pData.methods = methodNames;
-
-        /* following variables are for x */
-        pData.minimumScoreX = pDataXToY.minimumScoreX;
-        pData.maximumScoreX = pDataXToY.maximumScoreX;
-        pData.scoreIncrementX = pDataXToY.scoreIncrementX;
-        pData.scoreFrequenciesX = pDataXToY.scoreFrequenciesX;
-        pData.numberOfExaminees = pDataXToY.numberOfExaminees;
-      }
-
-      double numberOfScoresX = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pDataXToY.minimumScoreX,
-                                                                             pDataXToY.maximumScoreX,
-                                                                             pDataXToY.scoreIncrementX);
-
-      double numberOfScoresY = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pDataYToX.minimumScoreX,
-                                                                             pDataYToX.maximumScoreX,
-                                                                             pDataYToX.scoreIncrementX);
-
-      if (pData.bootstrapReplicationNumber <= 1) {
-        equatedRawScoreResults.equatedRawScores.resize(1, numberOfScoresX);
-        equatedRawScoreResults.equatedRawScoreMoments.resize(1, 4);
-      }
-
-      /* populate CS_SMOOTH structures in xtoy and in ytox */
-      cubicSplineSmoothing(design,
-                           pDataXToY,
-                           equaredRawScoreResultsXToY,
-                           standardErrorXToY,
-                           cubicSplinePostsmoothingXToY,
-                           percentileRankLow,
-                           percentileRankHigh,
-                           smoothingParameter,
-                           replicationNumber,
-                           numberOfScoresX,
-                           numberOfScoresY,
-                           false); /* cubic spline for x to y */
-
-      cubicSplineSmoothing(design,
-                           pDataYToX,
-                           equatedRawScoreResultsYToX,
-                           standardErrorYToX,
-                           cubicSplinePostsmoothingYToX,
-                           percentileRankLow,
-                           percentileRankHigh,
-                           smoothingParameter,
-                           replicationNumber,
-                           numberOfScoresY,
-                           numberOfScoresX,
-                           true); /* inv of cub spl for y to x */
-
-      for (size_t scoreLocation = 0; scoreLocation < numberOfScoresX; scoreLocation++) {
-        equatedRawScoreResults.equatedRawScores(0, scoreLocation) = (pDataXToY.cubicSplinePostsmoothing.value().cubicSplineSmoothedEquivalents(scoreLocation) +
-                                                                     pDataYToX.cubicSplinePostsmoothing.value().cubicSplineSmoothedEquivalents(scoreLocation)) /
-                                                                    2.0;
-      }
-
-      EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(
-          equatedRawScoreResults.equatedRawScores.row(0),
-          pData.scoreFrequenciesX);
-
-      equatedRawScoreResults.equatedRawScoreMoments.row(0) = moments.momentValues;
-    }
-
-  private:
-    /*
+    private:
+      /*
       Populates CS_SMOOTH structure in z (which is either xtoy or ytox).
       If inverse==0, z is xtoy, ns1 = nsx, and ns2 = nsy;
       if inverse==1, x is ytox, ns1 = nsy, ns2 = nsx, and inverse is taken
@@ -266,88 +267,88 @@ namespace EquatingRecipes {
       Author: Robert L. Brennan
       Date of last revision: 6/30/08  
     */
-    void cubicSplineSmoothing(const EquatingRecipes::Structures::Design& design,
-                              EquatingRecipes::Structures::PData& pDataZ,
-                              EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults,
-                              Eigen::VectorXd& standardErrors,
-                              EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingXToY,
-                              double& percentileRankLow,
-                              double& percentileRankHigh,
-                              double& smoothingParameter,
-                              const size_t& replicationNumber,
-                              const size_t& numberOfScores1,
-                              const size_t& numberOfScores2,
-                              const bool& getCubicSplineInverse) {
-      size_t numberOfScores;                  /* number of score categories */
-      double percentileRankLowestScore;       /* lowest score with pr >= prlow */
-      double percentileRankHighestScore;      /* highest score with pr <= prhigh */
-      size_t boundedNumberOfScores;           /* number of scores in [low, high] = high-low+1; 'b' --> bounded */
-      double scoreIncrement;                  /* score increment    */
-      double lowScoresInterpolationConstant;  /* constant for interpolation of low scores (Equation 3.13 in K&B) */
-      double highScoresInterpolationConstant; /* constant for interpolation of high scores (Equation 3.13 in K&B) */
+      void cubicSplineSmoothing(const EquatingRecipes::Structures::Design& design,
+                                EquatingRecipes::Structures::PData& pDataZ,
+                                EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults,
+                                Eigen::VectorXd& standardErrors,
+                                EquatingRecipes::Structures::CubicSplinePostsmoothing& cubicSplinePostsmoothingXToY,
+                                double& percentileRankLow,
+                                double& percentileRankHigh,
+                                double& smoothingParameter,
+                                const size_t& replicationNumber,
+                                const size_t& numberOfScores1,
+                                const size_t& numberOfScores2,
+                                const bool& getCubicSplineInverse) {
+        size_t numberOfScores;                  /* number of score categories */
+        double percentileRankLowestScore;       /* lowest score with pr >= prlow */
+        double percentileRankHighestScore;      /* highest score with pr <= prhigh */
+        size_t boundedNumberOfScores;           /* number of scores in [low, high] = high-low+1; 'b' --> bounded */
+        double scoreIncrement;                  /* score increment    */
+        double lowScoresInterpolationConstant;  /* constant for interpolation of low scores (Equation 3.13 in K&B) */
+        double highScoresInterpolationConstant; /* constant for interpolation of high scores (Equation 3.13 in K&B) */
 
-      Eigen::MatrixXd pseduoRawScores;  /* pointer to vector of pseudo raw scores
+        Eigen::MatrixXd pseduoRawScores;  /* pointer to vector of pseudo raw scores
                                i.e., raw scores in the sense of 0,1,...,ns-1 */
-      Eigen::MatrixXd pseduoRawScoresX; /* pseudo raw scores always associated with x;
+        Eigen::MatrixXd pseduoRawScoresX; /* pseudo raw scores always associated with x;
                                needed for inversePostSmooth() */
-      Eigen::MatrixXd cumulativeRelFreqDist;
-      Eigen::MatrixXd percentileRankDist;
-      Eigen::MatrixXd smoothingSplineCoefficientMatrix; /* coefficient matrix of the smoothing spline */
-      Eigen::MatrixXd cubicSplineEquatedScores;         /* vector of equated scores */
-      Eigen::MatrixXd cubicSplineStandardErrors;        /* vector of standard errors */
-      Eigen::MatrixXd cubicSplineInverseValues;         /* vector of inverse values  */
-      Eigen::MatrixXd cubicSplineEquatedEquivalents;    /* vector of equated equivalents smoothed by qubic splne */
+        Eigen::MatrixXd cumulativeRelFreqDist;
+        Eigen::MatrixXd percentileRankDist;
+        Eigen::MatrixXd smoothingSplineCoefficientMatrix; /* coefficient matrix of the smoothing spline */
+        Eigen::MatrixXd cubicSplineEquatedScores;         /* vector of equated scores */
+        Eigen::MatrixXd cubicSplineStandardErrors;        /* vector of standard errors */
+        Eigen::MatrixXd cubicSplineInverseValues;         /* vector of inverse values  */
+        Eigen::MatrixXd cubicSplineEquatedEquivalents;    /* vector of equated equivalents smoothed by qubic splne */
 
-      /* get ns as well as low and high scores associated with
+        /* get ns as well as low and high scores associated with
            percentile ranks of prlow and prhigh, respectively,
            for various designs (R, S, or G) */
 
-      if (design == EquatingRecipes::Structures::Design::RANDOM_GROUPS) {
-        numberOfScores = pDataZ.summaryRawDataX.value().numberOfScores;
+        if (design == EquatingRecipes::Structures::Design::RANDOM_GROUPS) {
+          numberOfScores = pDataZ.summaryRawDataX.value().numberOfScores;
 
-        size_t scoreLocation;
+          size_t scoreLocation;
 
-        for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-          if (percentileRankLow <= pDataZ.summaryRawDataX.value().percentileRankDist(scoreLocation)) {
-            break;
+          for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+            if (percentileRankLow <= pDataZ.summaryRawDataX.value().percentileRankDist(scoreLocation)) {
+              break;
+            }
           }
-        }
 
-        percentileRankLowestScore = static_cast<double>(scoreLocation);
+          percentileRankLowestScore = static_cast<double>(scoreLocation);
 
-        for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-          if (percentileRankHigh >= pDataZ.summaryRawDataX.value().percentileRankDist(scoreLocation)) {
-            break;
+          for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
+            if (percentileRankHigh >= pDataZ.summaryRawDataX.value().percentileRankDist(scoreLocation)) {
+              break;
+            }
           }
-        }
 
-        percentileRankHighestScore = static_cast<double>(scoreLocation);
+          percentileRankHighestScore = static_cast<double>(scoreLocation);
 
-      } else if (design == EquatingRecipes::Structures::Design::SINGLE_GROUP) {
-        numberOfScores = pDataZ.summaryRawDataXY.value().univariateStatisticsRow.numberOfScores;
+        } else if (design == EquatingRecipes::Structures::Design::SINGLE_GROUP) {
+          numberOfScores = pDataZ.summaryRawDataXY.value().univariateStatisticsRow.numberOfScores;
 
-        size_t scoreLocation;
+          size_t scoreLocation;
 
-        for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-          if (percentileRankLow <= pDataZ.summaryRawDataXY.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
-            break;
+          for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+            if (percentileRankLow <= pDataZ.summaryRawDataXY.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+              break;
+            }
           }
-        }
 
-        percentileRankLowestScore = static_cast<double>(scoreLocation);
+          percentileRankLowestScore = static_cast<double>(scoreLocation);
 
-        for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-          if (percentileRankHigh >= pDataZ.summaryRawDataXY.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
-            break;
+          for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
+            if (percentileRankHigh >= pDataZ.summaryRawDataXY.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+              break;
+            }
           }
-        }
 
-        percentileRankHighestScore = static_cast<double>(scoreLocation);
+          percentileRankHighestScore = static_cast<double>(scoreLocation);
 
-      } else if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS) {
-        numberOfScores = pDataZ.summaryRawDataXV.value().univariateStatisticsRow.numberOfScores;
+        } else if (design == EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS) {
+          numberOfScores = pDataZ.summaryRawDataXV.value().univariateStatisticsRow.numberOfScores;
 
-        /* In next section of code, low and high are determined using
+          /* In next section of code, low and high are determined using
            actual raw score distribtuion for chained (C), synthetic raw score
            distrbution [0] (i.e., fxs[0] or gys[0]) for frequency
               estimation (E), and synthetic raw score distribution [1]
@@ -356,236 +357,236 @@ namespace EquatingRecipes {
               stored in eraw[0]. See comments in Wrapper_CN() for
               further explanation. */
 
-        if (pDataZ.method == EquatingRecipes::Structures::Method::CHAINED) {
-          size_t scoreLocation;
+          if (pDataZ.method == EquatingRecipes::Structures::Method::CHAINED) {
+            size_t scoreLocation;
 
-          for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-            if (percentileRankLow <= pDataZ.summaryRawDataXV.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
-              break;
+            for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+              if (percentileRankLow <= pDataZ.summaryRawDataXV.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+                break;
+              }
             }
-          }
 
-          percentileRankLowestScore = static_cast<double>(scoreLocation);
+            percentileRankLowestScore = static_cast<double>(scoreLocation);
 
-          for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-            if (percentileRankHigh >= pDataZ.summaryRawDataXV.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
-              break;
+            for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
+              if (percentileRankHigh >= pDataZ.summaryRawDataXV.value().univariateStatisticsRow.percentileRankDist(scoreLocation)) {
+                break;
+              }
             }
-          }
 
-          percentileRankHighestScore = static_cast<double>(scoreLocation);
-        } else if (pDataZ.method == EquatingRecipes::Structures::Method::FE_BH) {
-          cumulativeRelFreqDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
-                                                                                         numberOfScores - 1,
-                                                                                         1,
-                                                                                         equatedRawScoreResults.relativeFreqDistsX.row(0));
+            percentileRankHighestScore = static_cast<double>(scoreLocation);
+          } else if (pDataZ.method == EquatingRecipes::Structures::Method::FE_BH) {
+            cumulativeRelFreqDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
+                                                                                                           numberOfScores - 1,
+                                                                                                           1,
+                                                                                                           equatedRawScoreResults.relativeFreqDistsX.row(0));
 
-          percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
-                                                                           numberOfScores - 1,
-                                                                           1,
-                                                                           cumulativeRelFreqDist);
+            percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
+                                                                                             numberOfScores - 1,
+                                                                                             1,
+                                                                                             cumulativeRelFreqDist);
 
-          size_t scoreLocation;
+            size_t scoreLocation;
 
-          for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-            if (percentileRankLow <= percentileRankDist(scoreLocation)) {
-              break;
+            for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+              if (percentileRankLow <= percentileRankDist(scoreLocation)) {
+                break;
+              }
             }
-          }
 
-          percentileRankLowestScore = static_cast<double>(scoreLocation);
+            percentileRankLowestScore = static_cast<double>(scoreLocation);
 
-          for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation++) {
-            if (percentileRankHigh >= percentileRankDist(scoreLocation)) {
-              break;
+            for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation++) {
+              if (percentileRankHigh >= percentileRankDist(scoreLocation)) {
+                break;
+              }
             }
-          }
 
-          percentileRankHighestScore = static_cast<double>(scoreLocation);
-        } else if (pDataZ.method == EquatingRecipes::Structures::Method::MFE_BH) {
-          cumulativeRelFreqDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
-                                                                                         numberOfScores - 1,
-                                                                                         1,
-                                                                                         equatedRawScoreResults.relativeFreqDistsX.row(1));
+            percentileRankHighestScore = static_cast<double>(scoreLocation);
+          } else if (pDataZ.method == EquatingRecipes::Structures::Method::MFE_BH) {
+            cumulativeRelFreqDist = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
+                                                                                                           numberOfScores - 1,
+                                                                                                           1,
+                                                                                                           equatedRawScoreResults.relativeFreqDistsX.row(1));
 
-          percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
-                                                                           numberOfScores - 1,
-                                                                           1,
-                                                                           cumulativeRelFreqDist);
+            percentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
+                                                                                             numberOfScores - 1,
+                                                                                             1,
+                                                                                             cumulativeRelFreqDist);
 
-          size_t scoreLocation;
+            size_t scoreLocation;
 
-          for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-            if (percentileRankLow <= percentileRankDist(scoreLocation)) {
-              break;
+            for (scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+              if (percentileRankLow <= percentileRankDist(scoreLocation)) {
+                break;
+              }
             }
-          }
 
-          percentileRankLowestScore = static_cast<double>(scoreLocation);
+            percentileRankLowestScore = static_cast<double>(scoreLocation);
 
-          for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
-            if (percentileRankHigh >= percentileRankDist(scoreLocation)) {
-              break;
+            for (scoreLocation = numberOfScores - 1; scoreLocation >= 0; scoreLocation--) {
+              if (percentileRankHigh >= percentileRankDist(scoreLocation)) {
+                break;
+              }
             }
-          }
 
-          percentileRankHighestScore = static_cast<double>(scoreLocation);
+            percentileRankHighestScore = static_cast<double>(scoreLocation);
+          }
+        } else {
+          throw std::runtime_error("Invalid method submitted to cubic spline.");
         }
-      } else {
-        throw std::runtime_error("Invalid method submitted to cubic spline.");
-      }
 
-      boundedNumberOfScores = percentileRankHighestScore - percentileRankLowestScore + 1;
+        boundedNumberOfScores = percentileRankHighestScore - percentileRankLowestScore + 1;
 
-      if (numberOfScores != numberOfScores1) {
-        throw std::runtime_error("\nns should be equal to ns1");
-      }
+        if (numberOfScores != numberOfScores1) {
+          throw std::runtime_error("\nns should be equal to ns1");
+        }
 
-      //   inc = z->inc;                                     /* raw score increment*/
+        //   inc = z->inc;                                     /* raw score increment*/
 
-      if (pDataZ.bootstrapReplicationNumber <= 1) {
-        cubicSplinePostsmoothingXToY.numberOfScores = numberOfScores;
-        cubicSplinePostsmoothingXToY.smoothingParameter = smoothingParameter;
-        cubicSplinePostsmoothingXToY.percentileRankLowestScore = percentileRankLow;
-        cubicSplinePostsmoothingXToY.percentileRankHighestScore = percentileRankHigh;
-        cubicSplinePostsmoothingXToY.lowestSmoothedPseudoRawScorePercentileRank = percentileRankLowestScore;
-        cubicSplinePostsmoothingXToY.higestSmoothedPseudoRawScorePercentileRank = percentileRankHighestScore;
-        cubicSplinePostsmoothingXToY.boundedNumberOfScores = boundedNumberOfScores;
-        cubicSplinePostsmoothingXToY.equipercentileEquivalents.col(0) = equatedRawScoreResults.equatedRawScores.row(0); /* raw-score equipercentile equivalents */
-        cubicSplinePostsmoothingXToY.standardErrors.col(0) = standardErrors;                                            /* standard errors of r->eraw[0] */
-        cubicSplinePostsmoothingXToY.coefficients.resize(4 * numberOfScores, 1);                                        /* coeffs; dimensioned at max */
-        cubicSplinePostsmoothingXToY.equipercentileEquivalents.resize(numberOfScores, 1);                               /* cub spl results */
+        if (pDataZ.bootstrapReplicationNumber <= 1) {
+          cubicSplinePostsmoothingXToY.numberOfScores = numberOfScores;
+          cubicSplinePostsmoothingXToY.smoothingParameter = smoothingParameter;
+          cubicSplinePostsmoothingXToY.percentileRankLowestScore = percentileRankLow;
+          cubicSplinePostsmoothingXToY.percentileRankHighestScore = percentileRankHigh;
+          cubicSplinePostsmoothingXToY.lowestSmoothedPseudoRawScorePercentileRank = percentileRankLowestScore;
+          cubicSplinePostsmoothingXToY.higestSmoothedPseudoRawScorePercentileRank = percentileRankHighestScore;
+          cubicSplinePostsmoothingXToY.boundedNumberOfScores = boundedNumberOfScores;
+          cubicSplinePostsmoothingXToY.equipercentileEquivalents.col(0) = equatedRawScoreResults.equatedRawScores.row(0); /* raw-score equipercentile equivalents */
+          cubicSplinePostsmoothingXToY.standardErrors.col(0) = standardErrors;                                            /* standard errors of r->eraw[0] */
+          cubicSplinePostsmoothingXToY.coefficients.resize(4 * numberOfScores, 1);                                        /* coeffs; dimensioned at max */
+          cubicSplinePostsmoothingXToY.equipercentileEquivalents.resize(numberOfScores, 1);                               /* cub spl results */
 
-        /* inverse of cub spl y to x */
+          /* inverse of cub spl y to x */
+          if (getCubicSplineInverse) {
+            cubicSplinePostsmoothingXToY.inverseCubicSplineSmoothedEquivalents.resize(numberOfScores2, 1);
+          }
+
+          pDataZ.cubicSplinePostsmoothing = cubicSplinePostsmoothingXToY;
+        }
+
+        /* scale input data so that it starts at 0 with unit increment*/
+        cubicSplineEquatedScores.resize(numberOfScores, 1);
+        cubicSplineStandardErrors.resize(numberOfScores, 1);
+
         if (getCubicSplineInverse) {
-          cubicSplinePostsmoothingXToY.inverseCubicSplineSmoothedEquivalents.resize(numberOfScores2, 1);
+          cubicSplineInverseValues.resize(numberOfScores2, 1);
         }
 
-        pDataZ.cubicSplinePostsmoothing = cubicSplinePostsmoothingXToY;
-      }
+        cubicSplineEquatedEquivalents.resize(numberOfScores2, 1);
+        smoothingSplineCoefficientMatrix.resize(4 * boundedNumberOfScores, 1);
 
-      /* scale input data so that it starts at 0 with unit increment*/
-      cubicSplineEquatedScores.resize(numberOfScores, 1);
-      cubicSplineStandardErrors.resize(numberOfScores, 1);
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+          cubicSplineEquatedScores(scoreLocation, 0) = ((equatedRawScoreResults.equatedRawScores(0, scoreLocation) / scoreIncrement) -
+                                                        pDataZ.minimumScoreX / scoreIncrement);
 
-      if (getCubicSplineInverse) {
-        cubicSplineInverseValues.resize(numberOfScores2, 1);
-      }
-
-      cubicSplineEquatedEquivalents.resize(numberOfScores2, 1);
-      smoothingSplineCoefficientMatrix.resize(4 * boundedNumberOfScores, 1);
-
-      for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-        cubicSplineEquatedScores(scoreLocation, 0) = ((equatedRawScoreResults.equatedRawScores(0, scoreLocation) / scoreIncrement) -
-                                                      pDataZ.minimumScoreX / scoreIncrement);
-
-        cubicSplineStandardErrors(scoreLocation, 0) = standardErrors(scoreLocation) / scoreIncrement;
-      }
-
-      Eigen::VectorXd rawScores(numberOfScores);
-      for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
-        rawScores(scoreLocation, 0) = static_cast<double>(scoreLocation);
-      }
-
-      if (!getCubicSplineInverse) {
-        postSmoothing(rawScores,
-                      cubicSplineEquatedScores,
-                      cubicSplineStandardErrors,
-                      numberOfScores,
-                      smoothingParameter,
-                      percentileRankLowestScore,
-                      percentileRankHighestScore,
-                      static_cast<double>(numberOfScores2 - 1),
-                      rawScores,
-                      numberOfScores,
-                      cubicSplineEquatedEquivalents,
-                      smoothingSplineCoefficientMatrix);
-      } else {
-        Eigen::VectorXd rawScoresX(numberOfScores2);
-
-        for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-          rawScoresX(scoreLocation) = static_cast<double>(scoreLocation);
+          cubicSplineStandardErrors(scoreLocation, 0) = standardErrors(scoreLocation) / scoreIncrement;
         }
 
-        inversePostSmoothing(rawScoresX,
-                             cubicSplineEquatedScores,
-                             cubicSplineStandardErrors,
-                             numberOfScores,
-                             smoothingParameter,
-                             percentileRankLowestScore,
-                             percentileRankHighestScore,
-                             static_cast<double>(numberOfScores2 - 1),
-                             rawScoresX,
-                             numberOfScores2,
-                             cubicSplineInverseValues,
-                             smoothingSplineCoefficientMatrix);
+        Eigen::VectorXd rawScores(numberOfScores);
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScores; scoreLocation++) {
+          rawScores(scoreLocation, 0) = static_cast<double>(scoreLocation);
+        }
 
-        /* The following code is to get the eeqs[] vector; i.e., the
+        if (!getCubicSplineInverse) {
+          postSmoothing(rawScores,
+                        cubicSplineEquatedScores,
+                        cubicSplineStandardErrors,
+                        numberOfScores,
+                        smoothingParameter,
+                        percentileRankLowestScore,
+                        percentileRankHighestScore,
+                        static_cast<double>(numberOfScores2 - 1),
+                        rawScores,
+                        numberOfScores,
+                        cubicSplineEquatedEquivalents,
+                        smoothingSplineCoefficientMatrix);
+        } else {
+          Eigen::VectorXd rawScoresX(numberOfScores2);
+
+          for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
+            rawScoresX(scoreLocation) = static_cast<double>(scoreLocation);
+          }
+
+          inversePostSmoothing(rawScoresX,
+                               cubicSplineEquatedScores,
+                               cubicSplineStandardErrors,
+                               numberOfScores,
+                               smoothingParameter,
+                               percentileRankLowestScore,
+                               percentileRankHighestScore,
+                               static_cast<double>(numberOfScores2 - 1),
+                               rawScoresX,
+                               numberOfScores2,
+                               cubicSplineInverseValues,
+                               smoothingSplineCoefficientMatrix);
+
+          /* The following code is to get the eeqs[] vector; i.e., the
           cubic-spline smoothed equivalents for putting y on scale of x.
           This code is necessary because inversePostSmooth() does not
           return eeqs[], but it can be obtained from cmat[] plus
           linear interpolation at the ends */
 
-        for (size_t scoreLocation = 0; scoreLocation < boundedNumberOfScores; scoreIncrement++) {
-          cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankLowestScore) + scoreLocation) =
-              smoothingSplineCoefficientMatrix(scoreLocation);
+          for (size_t scoreLocation = 0; scoreLocation < boundedNumberOfScores; scoreIncrement++) {
+            cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankLowestScore) + scoreLocation) =
+                smoothingSplineCoefficientMatrix(scoreLocation);
+          }
+
+          cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankHighestScore)) =
+              smoothingSplineCoefficientMatrix(boundedNumberOfScores - 2) +
+              smoothingSplineCoefficientMatrix(2 * boundedNumberOfScores - 3) +
+              smoothingSplineCoefficientMatrix(3 * boundedNumberOfScores - 4) +
+              smoothingSplineCoefficientMatrix(4 * boundedNumberOfScores - 5);
+
+          /* linear interpolation for low scores */
+          lowScoresInterpolationConstant = (cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankLowestScore)) + 0.5) /
+                                           (percentileRankLowestScore + 0.5);
+
+          for (size_t scoreLocation = 0; scoreLocation < static_cast<size_t>(percentileRankLowestScore); scoreLocation++) {
+            cubicSplineEquatedEquivalents(scoreLocation) = lowScoresInterpolationConstant *
+                                                               (static_cast<double>(scoreLocation) + 0.5) -
+                                                           0.5;
+          }
+
+          /* linear interpolation for high scores */
+          highScoresInterpolationConstant = (cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankHighestScore)) -
+                                             (static_cast<double>(numberOfScores2 - 1) + 0.5)) /
+                                            (percentileRankHighestScore - (static_cast<double>(numberOfScores - 1) + 0.5));
+
+          for (size_t scoreLocation = static_cast<size_t>(percentileRankHighestScore) + 1; scoreLocation < numberOfScores2; scoreLocation++) {
+            cubicSplineEquatedEquivalents(scoreLocation) = highScoresInterpolationConstant *
+                                                               (static_cast<double>(scoreLocation) - percentileRankHighestScore) +
+                                                           cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankHighestScore));
+          }
         }
 
-        cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankHighestScore)) =
-            smoothingSplineCoefficientMatrix(boundedNumberOfScores - 2) +
-            smoothingSplineCoefficientMatrix(2 * boundedNumberOfScores - 3) +
-            smoothingSplineCoefficientMatrix(3 * boundedNumberOfScores - 4) +
-            smoothingSplineCoefficientMatrix(4 * boundedNumberOfScores - 5);
-
-        /* linear interpolation for low scores */
-        lowScoresInterpolationConstant = (cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankLowestScore)) + 0.5) /
-                                         (percentileRankLowestScore + 0.5);
-
-        for (size_t scoreLocation = 0; scoreLocation < static_cast<size_t>(percentileRankLowestScore); scoreLocation++) {
-          cubicSplineEquatedEquivalents(scoreLocation) = lowScoresInterpolationConstant *
-                                                             (static_cast<double>(scoreLocation) + 0.5) -
-                                                         0.5;
-        }
-
-        /* linear interpolation for high scores */
-        highScoresInterpolationConstant = (cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankHighestScore)) -
-                                           (static_cast<double>(numberOfScores2 - 1) + 0.5)) /
-                                          (percentileRankHighestScore - (static_cast<double>(numberOfScores - 1) + 0.5));
-
-        for (size_t scoreLocation = static_cast<size_t>(percentileRankHighestScore) + 1; scoreLocation < numberOfScores2; scoreLocation++) {
-          cubicSplineEquatedEquivalents(scoreLocation) = highScoresInterpolationConstant *
-                                                             (static_cast<double>(scoreLocation) - percentileRankHighestScore) +
-                                                         cubicSplineEquatedEquivalents(static_cast<size_t>(percentileRankHighestScore));
-        }
-      }
-
-      /* scale input data back to the original scale*/
-      for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-        cubicSplinePostsmoothingXToY.equipercentileEquivalents(scoreLocation) = cubicSplineEquatedEquivalents(scoreLocation) *
-                                                                                    scoreIncrement +
-                                                                                pDataZ.minimumScoreX;
-      }
-
-      for (size_t scoreLocation = 0; scoreLocation < boundedNumberOfScores; scoreLocation++) {
-        cubicSplinePostsmoothingXToY.coefficients(scoreLocation) = smoothingSplineCoefficientMatrix(scoreLocation) * scoreIncrement + pDataZ.minimumScoreX;
-
-        cubicSplinePostsmoothingXToY.coefficients(boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(boundedNumberOfScores + scoreLocation);
-
-        cubicSplinePostsmoothingXToY.coefficients(2 * boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(2 * boundedNumberOfScores + scoreLocation) / scoreIncrement;
-
-        cubicSplinePostsmoothingXToY.coefficients(3 * boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(3 * boundedNumberOfScores + scoreLocation) / std::pow(scoreIncrement, 2);
-      }
-
-      if (getCubicSplineInverse) {
+        /* scale input data back to the original scale*/
         for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-          cubicSplinePostsmoothingXToY.inverseCubicSplineSmoothedEquivalents(scoreLocation) = cubicSplineInverseValues(scoreLocation) * scoreIncrement + pDataZ.minimumScoreX;
+          cubicSplinePostsmoothingXToY.equipercentileEquivalents(scoreLocation) = cubicSplineEquatedEquivalents(scoreLocation) *
+                                                                                      scoreIncrement +
+                                                                                  pDataZ.minimumScoreX;
+        }
+
+        for (size_t scoreLocation = 0; scoreLocation < boundedNumberOfScores; scoreLocation++) {
+          cubicSplinePostsmoothingXToY.coefficients(scoreLocation) = smoothingSplineCoefficientMatrix(scoreLocation) * scoreIncrement + pDataZ.minimumScoreX;
+
+          cubicSplinePostsmoothingXToY.coefficients(boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(boundedNumberOfScores + scoreLocation);
+
+          cubicSplinePostsmoothingXToY.coefficients(2 * boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(2 * boundedNumberOfScores + scoreLocation) / scoreIncrement;
+
+          cubicSplinePostsmoothingXToY.coefficients(3 * boundedNumberOfScores + scoreLocation) = smoothingSplineCoefficientMatrix(3 * boundedNumberOfScores + scoreLocation) / std::pow(scoreIncrement, 2);
+        }
+
+        if (getCubicSplineInverse) {
+          for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
+            cubicSplinePostsmoothingXToY.inverseCubicSplineSmoothedEquivalents(scoreLocation) = cubicSplineInverseValues(scoreLocation) * scoreIncrement + pDataZ.minimumScoreX;
+          }
         }
       }
-    }
 
-    /* functions related to numerical linear/cubic polynomial */
+      /* functions related to numerical linear/cubic polynomial */
 
-    /* 
+      /* 
    Purpose:                                                            
       Linear polynomial function f passing through (x0,y0) and (x1,y1) 
                                                                        
@@ -608,24 +609,24 @@ namespace EquatingRecipes {
   Author: Jaehoon Seol
   Date of last revision: 7/4/08
 */
-    double linearPolynomial(const double& x0,
-                            const double& y0,
-                            const double& x1,
-                            const double& y1,
-                            const double& xvalue) {
-      /* evaluate the function         */
-      double slope = (y1 - y0) / (x1 - x0);
-      /* check that slope != 0         */
-      if (std::abs(slope) < std::pow(10.0, 3.0) * std::numeric_limits<double>::epsilon()) {
-        throw std::runtime_error("linearPoly: Input Warning, slope ~ 0 \n");
+      double linearPolynomial(const double& x0,
+                              const double& y0,
+                              const double& x1,
+                              const double& y1,
+                              const double& xvalue) {
+        /* evaluate the function         */
+        double slope = (y1 - y0) / (x1 - x0);
+        /* check that slope != 0         */
+        if (std::abs(slope) < std::pow(10.0, 3.0) * std::numeric_limits<double>::epsilon()) {
+          throw std::runtime_error("linearPoly: Input Warning, slope ~ 0 \n");
+        }
+
+        double rvalue = y0 + slope * (xvalue - x0);
+
+        return rvalue;
       }
 
-      double rvalue = y0 + slope * (xvalue - x0);
-
-      return rvalue;
-    }
-
-    /* 
+      /* 
    Purpose:                                                            
       Cubic polynomial function f defined by ai,bi,ci,di, i.e.,     
        f(ai,bi,ci,di,xvalue)                                          
@@ -647,30 +648,30 @@ namespace EquatingRecipes {
   Author: Jaehoon Seol
   Date of last revision: 7/3/08
 */
-    double cubicPolynomial(const double& xleft,
-                           const double& xright,
-                           const double& ai,
-                           const double& bi,
-                           const double& ci,
-                           const double& di,
-                           const double& xvalue) {
-      /* confirm xleft<=xvalue<=xright */
-      if (xvalue < xleft || xvalue > xright) {
-        std::string msg = "cubicPoly: Input Error, cubic poly. used outside domain\n";
-        msg.append(fmt::format("xleft = {:f}, xright= {:f} xvalue = {:f}\n", xleft, xright, xvalue));
-        throw std::runtime_error(msg);
+      double cubicPolynomial(const double& xleft,
+                             const double& xright,
+                             const double& ai,
+                             const double& bi,
+                             const double& ci,
+                             const double& di,
+                             const double& xvalue) {
+        /* confirm xleft<=xvalue<=xright */
+        if (xvalue < xleft || xvalue > xright) {
+          std::string msg = "cubicPoly: Input Error, cubic poly. used outside domain\n";
+          msg.append(fmt::format("xleft = {:f}, xright= {:f} xvalue = {:f}\n", xleft, xright, xvalue));
+          throw std::runtime_error(msg);
+        }
+
+        /* evaluate the function         */
+        double tempX = xvalue - xleft;
+        double rvalue = ai + bi * tempX + ci * std::pow(tempX, 2.0) + di * std::pow(tempX, 3.0);
+
+        return rvalue;
       }
 
-      /* evaluate the function         */
-      double tempX = xvalue - xleft;
-      double rvalue = ai + bi * tempX + ci * std::pow(tempX, 2.0) + di * std::pow(tempX, 3.0);
+      /* functions related to post-smoothing method using cubic splines */
 
-      return rvalue;
-    }
-
-    /* functions related to post-smoothing method using cubic splines */
-
-    /*
+      /*
    Purpose: 
      This function sets up a positive definite, (n-1)x(n-1) tridiagonal matrix  
   defined by
@@ -708,37 +709,37 @@ namespace EquatingRecipes {
   Date of last revision: 2/18/08
 
 */
-    void setupT(const bool& edist,
-                Eigen::MatrixXd& mt,
-                size_t& n,
-                Eigen::MatrixXd& h) {
-      mt.setZero(n - 1, n - 1);
+      void setupT(const bool& edist,
+                  Eigen::MatrixXd& mt,
+                  size_t& n,
+                  Eigen::MatrixXd& h) {
+        mt.setZero(n - 1, n - 1);
 
-      double h0 = h(0); /* will be used if h is equi-distance */
+        double h0 = h(0); /* will be used if h is equi-distance */
 
-      for (size_t index = 0; index < mt.rows(); index++) {
-        if (edist) {
-          if (index >= 1) {
-            mt(index - 1, index) = h0 / 3.0;
-            mt(index + 1, index) = h0 / 3.0;
-          }
+        for (size_t index = 0; index < mt.rows(); index++) {
+          if (edist) {
+            if (index >= 1) {
+              mt(index - 1, index) = h0 / 3.0;
+              mt(index + 1, index) = h0 / 3.0;
+            }
 
-          mt(index, index) = 4.0 * h0 / 3.0;
-        } else {
-          if (index >= 1) {
-            mt(index - 1, index) = h(index - 1, 0) / 3.0;
-            mt(index + 1, index) = h(index, 0) / 3.0;
-          }
+            mt(index, index) = 4.0 * h0 / 3.0;
+          } else {
+            if (index >= 1) {
+              mt(index - 1, index) = h(index - 1, 0) / 3.0;
+              mt(index + 1, index) = h(index, 0) / 3.0;
+            }
 
-          if (index < mt.rows() - 1) {
-            double x = h(index) + h(index + 1, 0);
-            mt(index, index) = x * 2.0 / 3.0;
+            if (index < mt.rows() - 1) {
+              double x = h(index) + h(index + 1, 0);
+              mt(index, index) = x * 2.0 / 3.0;
+            }
           }
         }
       }
-    }
 
-    /*
+      /*
    Purpose: 
      This function sets up a positive definite, (n+1)x(n-1) tridiagonal matrix  
   defined by
@@ -777,40 +778,40 @@ namespace EquatingRecipes {
   Author: Jaehoon Seol
   Date of last revision: 2/18/08
 */
-    void setupQt(const bool& edist,
-                 Eigen::MatrixXd& mqt,
-                 const size_t n,
-                 Eigen::MatrixXd& h) {
-      mqt.setZero(n + 1, n - 1);
+      void setupQt(const bool& edist,
+                   Eigen::MatrixXd& mqt,
+                   const size_t n,
+                   Eigen::MatrixXd& h) {
+        mqt.setZero(n + 1, n - 1);
 
-      double h0 = h(0);
+        double h0 = h(0);
 
-      size_t maxIndex = (mqt.rows() <= mqt.cols()) ? mqt.rows() : mqt.cols();
+        size_t maxIndex = (mqt.rows() <= mqt.cols()) ? mqt.rows() : mqt.cols();
 
-      for (size_t index = 0; index < maxIndex; index++) {
-        if (edist) {
-          h0 = h(0, 0);
+        for (size_t index = 0; index < maxIndex; index++) {
+          if (edist) {
+            h0 = h(0, 0);
 
-          if (index >= 1) {
-            mqt(index - 1, index) = 1.0 / h0;
+            if (index >= 1) {
+              mqt(index - 1, index) = 1.0 / h0;
+            }
+
+            mqt(index, index) = -2.0 / h0;
+
+            mqt(index + 1, index) = 1.0 / h0;
+          } else {
+            if (index >= 1) {
+              mqt(index - 1, index) = 1.0 / h(index, 0);
+            }
+
+            mqt(index, index) = -1.0 * (1.0 / h(index - 1, 0) + 1.0 / h(index, 0));
+
+            mqt(index + 1, index) = 1.0 / h(index, 0);
           }
-
-          mqt(index, index) = -2.0 / h0;
-
-          mqt(index + 1, index) = 1.0 / h0;
-        } else {
-          if (index >= 1) {
-            mqt(index - 1, index) = 1.0 / h(index, 0);
-          }
-
-          mqt(index, index) = -1.0 * (1.0 / h(index - 1, 0) + 1.0 / h(index, 0));
-
-          mqt(index + 1, index) = 1.0 / h(index, 0);
         }
       }
-    }
 
-    /*
+      /*
       Purpose:  
         This function calculates the coefficients
 
@@ -886,113 +887,113 @@ namespace EquatingRecipes {
       Author: Jaehoon Seol
       Date of last revision: 8/10/08
     */
-    int getCubicSplineSmoothingCoefficients(const Eigen::MatrixXd& x,
-                                            const Eigen::MatrixXd& y,
-                                            const Eigen::MatrixXd& dyi,
-                                            const size_t& num,
-                                            const double& smoothingParameter,
-                                            Eigen::MatrixXd& mc) {
-      size_t iteration;
-      size_t n = num - 1; /* col. dim of cmat */
-      double s = smoothingParameter * (x(n) - x(0) + 1);
+      int getCubicSplineSmoothingCoefficients(const Eigen::MatrixXd& x,
+                                              const Eigen::MatrixXd& y,
+                                              const Eigen::MatrixXd& dyi,
+                                              const size_t& num,
+                                              const double& smoothingParameter,
+                                              Eigen::MatrixXd& mc) {
+        size_t iteration;
+        size_t n = num - 1; /* col. dim of cmat */
+        double s = smoothingParameter * (x(n) - x(0) + 1);
 
-      Eigen::MatrixXd mpt(n - 1, n - 1);  /* mpt = p T */
-      Eigen::MatrixXd mpt1(n - 1, n - 1); /* part 1:(fixed) Q^t D^2 Q */
-      Eigen::MatrixXd mpt2(n - 1, n - 1); /* part 2: Q^t D^2 Q + p T */
-      Eigen::MatrixXd mq(n - 1, n + 1);   /* matrix Q */
-      Eigen::MatrixXd mqt(n - 1, n + 1);  /* matrix Q^t */
-      Eigen::MatrixXd mt(n - 1, n - 1);   /* matrix T */
-      Eigen::MatrixXd mtmp(n - 1, n + 1); /* temp matrix for Q */
-      Eigen::MatrixXd va(n + 1, 1);       /* cubic spline coeff. a */
-      Eigen::MatrixXd vc(n + 1, 1);       /* cubic spline coeff. c */
-      Eigen::MatrixXd vh(n, 1);           /* h_i = x_(i+1)-x_i */
-      Eigen::MatrixXd vtu(n - 1, 1);      /* temporary of size n-1 */
-      Eigen::MatrixXd vtw(n - 1, 1);      /* tw: T w */
-      Eigen::MatrixXd vu(n - 1, 1);       /* u: R^t R u = Q^t y */
-      Eigen::MatrixXd vv(n + 1, 1);       /* v= D Q u */
-      Eigen::MatrixXd vw(n - 1, 1);       /* w: R^t R w = T u */
-      Eigen::MatrixXd vy2(n + 1, 1);      /* y2: Q^t y */
+        Eigen::MatrixXd mpt(n - 1, n - 1);  /* mpt = p T */
+        Eigen::MatrixXd mpt1(n - 1, n - 1); /* part 1:(fixed) Q^t D^2 Q */
+        Eigen::MatrixXd mpt2(n - 1, n - 1); /* part 2: Q^t D^2 Q + p T */
+        Eigen::MatrixXd mq(n - 1, n + 1);   /* matrix Q */
+        Eigen::MatrixXd mqt(n - 1, n + 1);  /* matrix Q^t */
+        Eigen::MatrixXd mt(n - 1, n - 1);   /* matrix T */
+        Eigen::MatrixXd mtmp(n - 1, n + 1); /* temp matrix for Q */
+        Eigen::MatrixXd va(n + 1, 1);       /* cubic spline coeff. a */
+        Eigen::MatrixXd vc(n + 1, 1);       /* cubic spline coeff. c */
+        Eigen::MatrixXd vh(n, 1);           /* h_i = x_(i+1)-x_i */
+        Eigen::MatrixXd vtu(n - 1, 1);      /* temporary of size n-1 */
+        Eigen::MatrixXd vtw(n - 1, 1);      /* tw: T w */
+        Eigen::MatrixXd vu(n - 1, 1);       /* u: R^t R u = Q^t y */
+        Eigen::MatrixXd vv(n + 1, 1);       /* v= D Q u */
+        Eigen::MatrixXd vw(n - 1, 1);       /* w: R^t R w = T u */
+        Eigen::MatrixXd vy2(n + 1, 1);      /* y2: Q^t y */
 
-      /* setup vectors and matrices that does not change thru. loop */
-      vh.col(0) = x(Eigen::seq(1, n), 0) - x(Eigen::seq(0, n - 1), 0);
+        /* setup vectors and matrices that does not change thru. loop */
+        vh.col(0) = x(Eigen::seq(1, n), 0) - x(Eigen::seq(0, n - 1), 0);
 
-      setupQt(false,
-              mqt,
-              n,
-              vh); /* setup matrix Q^t  */
+        setupQt(false,
+                mqt,
+                n,
+                vh); /* setup matrix Q^t  */
 
-      mq = mqt.transpose(); /* setup matrix Q */
+        mq = mqt.transpose(); /* setup matrix Q */
 
-      setupT(false,
-             mt,
-             n,
-             vh); /* setup matrix T */
+        setupT(false,
+               mt,
+               n,
+               vh); /* setup matrix T */
 
-      mpt1 = mq.transpose() * dyi.asDiagonal() * dyi.asDiagonal() * mq; /* mpt1 = Q^t D^2 Q */
+        mpt1 = mq.transpose() * dyi.asDiagonal() * dyi.asDiagonal() * mq; /* mpt1 = Q^t D^2 Q */
 
-      vy2 = mqt * y; /* compute y2 = Q^t y */
+        vy2 = mqt * y; /* compute y2 = Q^t y */
 
-      double np = 0.0; /* new, updated p */
-      double p = 1.0;  /* p<-p+(e-(Se)^(.5))/(f-p*g) */
+        double np = 0.0; /* new, updated p */
+        double p = 1.0;  /* p<-p+(e-(Se)^(.5))/(f-p*g) */
 
-      for (iteration = 0; iteration < 35; iteration++) {
-        if (std::abs(np - p) <= std::pow(10.0, 3.0) * std::numeric_limits<double>::epsilon()) {
-          break;
+        for (iteration = 0; iteration < 35; iteration++) {
+          if (std::abs(np - p) <= std::pow(10.0, 3.0) * std::numeric_limits<double>::epsilon()) {
+            break;
+          }
+
+          p = np;
+          mpt = mt * p;
+          mpt2 = mpt1 + mpt;
+
+          /* cholesky decomposition R^t R of (mpt2=) Q^t D^2 Q + p*T               chsol(vu,vy2,mpt2,n-1);   */
+          Eigen::LLT<Eigen::MatrixXd> llt(mpt2);
+          vu = llt.solve(vy2); /* R^t R u = Q^t y  */
+
+          vv = dyi.asDiagonal() * mq * vu; /* compute v=D Q u  */
+
+          double e = (vv.col(0)).dot(vv.col(0)); /* e=v^t v */
+
+          vtu = mt * vu;
+
+          /* compute w in R^t R w = T u */
+          vw = llt.solve(vtu);
+
+          /* compute f, g, and p    */
+          double f = (vu.col(0)).dot(vtu.col(0)); /* g = w^t w */
+          double g = (vu.col(0)).dot(vtw.col(0)); /* f = u^t T u */
+
+          if (s != 0.0) {
+            np = p + std::sqrt(e / s) * (e - std::sqrt(s * e)) / (f - p * g);
+          } else {
+            np = p + (e - std::sqrt(s * e)) / (f - p * g);
+          }
+
+          if (e <= s) {
+            break;
+          }
         }
 
-        p = np;
-        mpt = mt * p;
-        mpt2 = mpt1 + mpt;
+        va(0, 0) = y(0, 0) - dyi(0, 0) * vv(0, 0);
+        vc(0, 0) = 0.0;
 
-        /* cholesky decomposition R^t R of (mpt2=) Q^t D^2 Q + p*T               chsol(vu,vy2,mpt2,n-1);   */
-        Eigen::LLT<Eigen::MatrixXd> llt(mpt2);
-        vu = llt.solve(vy2); /* R^t R u = Q^t y  */
+        /* return coefficients b and d    */
+        // mc.setZero(n);
 
-        vv = dyi.asDiagonal() * mq * vu; /* compute v=D Q u  */
-
-        double e = (vv.col(0)).dot(vv.col(0)); /* e=v^t v */
-
-        vtu = mt * vu;
-
-        /* compute w in R^t R w = T u */
-        vw = llt.solve(vtu);
-
-        /* compute f, g, and p    */
-        double f = (vu.col(0)).dot(vtu.col(0)); /* g = w^t w */
-        double g = (vu.col(0)).dot(vtw.col(0)); /* f = u^t T u */
-
-        if (s != 0.0) {
-          np = p + std::sqrt(e / s) * (e - std::sqrt(s * e)) / (f - p * g);
-        } else {
-          np = p + (e - std::sqrt(s * e)) / (f - p * g);
+        for (size_t scoreLocation = 0; scoreLocation < n; scoreLocation++) {
+          va(scoreLocation + 1, 0) = y(scoreLocation + 1, 0) - dyi(scoreLocation + 1, 0) * vv(scoreLocation + 1, 0);
+          vc(scoreLocation + 1, 0) = (scoreLocation == n - 1) ? 0.0 : np * vu(scoreLocation, 0);
+          mc(3 * n + scoreLocation) = (vc(scoreLocation + 1, 0) - vc(scoreLocation, 0)) / (3.0 * vh(scoreLocation, 0));
+          mc(n + scoreLocation) = ((va(scoreLocation + 1, 0) - va(scoreLocation, 0)) / vh(scoreLocation, 0)) -
+                                  (vc(scoreLocation) + mc(3 * n + scoreLocation) * vh(scoreLocation, 0)) * vh(scoreLocation, 0);
         }
 
-        if (e <= s) {
-          break;
-        }
+        mc(Eigen::seq(0, n - 1), 0) = va.col(0);
+        mc(Eigen::seq(n, 2 * n - 1), 0) = vc.col(0);
+
+        return (iteration == 25) ? -1 : static_cast<int>(iteration);
       }
 
-      va(0, 0) = y(0, 0) - dyi(0, 0) * vv(0, 0);
-      vc(0, 0) = 0.0;
-
-      /* return coefficients b and d    */
-      // mc.setZero(n);
-
-      for (size_t scoreLocation = 0; scoreLocation < n; scoreLocation++) {
-        va(scoreLocation + 1, 0) = y(scoreLocation + 1, 0) - dyi(scoreLocation + 1, 0) * vv(scoreLocation + 1, 0);
-        vc(scoreLocation + 1, 0) = (scoreLocation == n - 1) ? 0.0 : np * vu(scoreLocation, 0);
-        mc(3 * n + scoreLocation) = (vc(scoreLocation + 1, 0) - vc(scoreLocation, 0)) / (3.0 * vh(scoreLocation, 0));
-        mc(n + scoreLocation) = ((va(scoreLocation + 1, 0) - va(scoreLocation, 0)) / vh(scoreLocation, 0)) -
-                                (vc(scoreLocation) + mc(3 * n + scoreLocation) * vh(scoreLocation, 0)) * vh(scoreLocation, 0);
-      }
-
-      mc(Eigen::seq(0, n - 1), 0) = va.col(0);
-      mc(Eigen::seq(n, 2 * n - 1), 0) = vc.col(0);
-
-      return (iteration == 25) ? -1 : static_cast<int>(iteration);
-    }
-
-    /* Purpose/functionality
+      /* Purpose/functionality
           Implementation of the post-smoothing method dy(x) using smooth cubic splines
         defined piecewise from -0.5 to Kx+0.5 (see Kolen & Brennan, 2004, pp. 84-89).
         This function implements the following formula:
@@ -1054,105 +1055,105 @@ namespace EquatingRecipes {
       Author: Jaehoon Seol
       Date of last revision: 7/10/08
     */
-    void postSmoothing(const Eigen::MatrixXd& rawScores,
-                       const Eigen::MatrixXd& cubicSplineRawScores,
-                       const Eigen::MatrixXd& cubicSplineStandardErrors,
-                       const size_t& numberOfScores1,
-                       const double& smoothingParameter,
-                       const double& percentileRankLowestScore,
-                       const double& percentileRankHighestScore,
-                       const double& ky,
-                       const Eigen::MatrixXd& vectX,
-                       const size_t& numberOfScores2,
-                       Eigen::MatrixXd& vectY,
-                       Eigen::MatrixXd& smoothingSplineCoefficientMatrix) {
-      /* compute coefficient matrix of the cubic spline */
-      size_t scoreLocationPercentRankLowestScore = static_cast<size_t>(percentileRankLowestScore);
-      size_t scoreLocationPercentRankHighestScore = static_cast<size_t>(percentileRankHighestScore);
+      void postSmoothing(const Eigen::MatrixXd& rawScores,
+                         const Eigen::MatrixXd& cubicSplineRawScores,
+                         const Eigen::MatrixXd& cubicSplineStandardErrors,
+                         const size_t& numberOfScores1,
+                         const double& smoothingParameter,
+                         const double& percentileRankLowestScore,
+                         const double& percentileRankHighestScore,
+                         const double& ky,
+                         const Eigen::MatrixXd& vectX,
+                         const size_t& numberOfScores2,
+                         Eigen::MatrixXd& vectY,
+                         Eigen::MatrixXd& smoothingSplineCoefficientMatrix) {
+        /* compute coefficient matrix of the cubic spline */
+        size_t scoreLocationPercentRankLowestScore = static_cast<size_t>(percentileRankLowestScore);
+        size_t scoreLocationPercentRankHighestScore = static_cast<size_t>(percentileRankHighestScore);
 
-      /* number of cubic spline pieces */
-      size_t numcoeff = scoreLocationPercentRankHighestScore - scoreLocationPercentRankLowestScore;
+        /* number of cubic spline pieces */
+        size_t numcoeff = scoreLocationPercentRankHighestScore - scoreLocationPercentRankLowestScore;
 
-      Eigen::ArithmeticSequence<Eigen::Index, Eigen::Index> indices = Eigen::seq(scoreLocationPercentRankLowestScore, numcoeff);
+        Eigen::ArithmeticSequence<Eigen::Index, Eigen::Index> indices = Eigen::seq(scoreLocationPercentRankLowestScore, numcoeff);
 
-      getCubicSplineSmoothingCoefficients(rawScores(Eigen::seq(scoreLocationPercentRankLowestScore, rawScores.rows() - 1), 0),
-                                          cubicSplineRawScores(Eigen::seq(scoreLocationPercentRankLowestScore, cubicSplineRawScores.rows() - 1), 0),
-                                          cubicSplineStandardErrors(Eigen::seq(scoreLocationPercentRankLowestScore, cubicSplineStandardErrors.rows() - 1), 0),
-                                          numcoeff + 1,
-                                          smoothingParameter,
-                                          smoothingSplineCoefficientMatrix);
+        getCubicSplineSmoothingCoefficients(rawScores(Eigen::seq(scoreLocationPercentRankLowestScore, rawScores.rows() - 1), 0),
+                                            cubicSplineRawScores(Eigen::seq(scoreLocationPercentRankLowestScore, cubicSplineRawScores.rows() - 1), 0),
+                                            cubicSplineStandardErrors(Eigen::seq(scoreLocationPercentRankLowestScore, cubicSplineStandardErrors.rows() - 1), 0),
+                                            numcoeff + 1,
+                                            smoothingParameter,
+                                            smoothingSplineCoefficientMatrix);
 
-      /* dy(xlow) */
-      double dy_xlow = cubicPolynomial(rawScores(scoreLocationPercentRankLowestScore, 0),
-                                       rawScores(scoreLocationPercentRankLowestScore + 1, 0),
-                                       smoothingSplineCoefficientMatrix(0, 0),
-                                       smoothingSplineCoefficientMatrix(numcoeff, 0),
-                                       smoothingSplineCoefficientMatrix(2 * numcoeff, 0),
-                                       smoothingSplineCoefficientMatrix(3 * numcoeff, 0),
-                                       rawScores(scoreLocationPercentRankLowestScore, 0));
+        /* dy(xlow) */
+        double dy_xlow = cubicPolynomial(rawScores(scoreLocationPercentRankLowestScore, 0),
+                                         rawScores(scoreLocationPercentRankLowestScore + 1, 0),
+                                         smoothingSplineCoefficientMatrix(0, 0),
+                                         smoothingSplineCoefficientMatrix(numcoeff, 0),
+                                         smoothingSplineCoefficientMatrix(2 * numcoeff, 0),
+                                         smoothingSplineCoefficientMatrix(3 * numcoeff, 0),
+                                         rawScores(scoreLocationPercentRankLowestScore, 0));
 
-      /* dy(xhigh) */
-      double dy_xhigh = cubicPolynomial(rawScores(scoreLocationPercentRankHighestScore - 1, 0),
-                                        rawScores(scoreLocationPercentRankHighestScore, 0),
-                                        smoothingSplineCoefficientMatrix(numcoeff - 1, 0),
-                                        smoothingSplineCoefficientMatrix(2 * numcoeff - 1, 0),
-                                        smoothingSplineCoefficientMatrix(3 * numcoeff - 1, 0),
-                                        smoothingSplineCoefficientMatrix(4 * numcoeff - 1, 0),
-                                        rawScores(scoreLocationPercentRankHighestScore, 0));
-      /* maximum x value (Kx in Kolen & Brennan, 2004)*/
-      double kx = rawScores(numberOfScores1 - 1, 0);
+        /* dy(xhigh) */
+        double dy_xhigh = cubicPolynomial(rawScores(scoreLocationPercentRankHighestScore - 1, 0),
+                                          rawScores(scoreLocationPercentRankHighestScore, 0),
+                                          smoothingSplineCoefficientMatrix(numcoeff - 1, 0),
+                                          smoothingSplineCoefficientMatrix(2 * numcoeff - 1, 0),
+                                          smoothingSplineCoefficientMatrix(3 * numcoeff - 1, 0),
+                                          smoothingSplineCoefficientMatrix(4 * numcoeff - 1, 0),
+                                          rawScores(scoreLocationPercentRankHighestScore, 0));
+        /* maximum x value (Kx in Kolen & Brennan, 2004)*/
+        double kx = rawScores(numberOfScores1 - 1, 0);
 
-      for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-        double xvalue = vectX(scoreLocation, 0);
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
+          double xvalue = vectX(scoreLocation, 0);
 
-        if (-0.5 <= xvalue && xvalue < rawScores(scoreLocationPercentRankLowestScore, 0)) {
-          /* Use Eq. 1,   */
-          vectY(scoreLocation, 0) = linearPolynomial(-0.5,
-                                                     -0.5,
-                                                     rawScores(scoreLocationPercentRankLowestScore, 0),
-                                                     dy_xlow,
-                                                     xvalue);
-        } else if (rawScores(scoreLocationPercentRankHighestScore, 0) < xvalue && xvalue <= kx + 0.5) {
-          /* Use Eq. 3,   */
-          vectY(scoreLocation, 0) = linearPolynomial(rawScores(scoreLocationPercentRankHighestScore, 0),
-                                                     dy_xhigh,
-                                                     kx + 0.5,
-                                                     ky + 0.5,
-                                                     xvalue);
-        } else if (rawScores(scoreLocationPercentRankLowestScore, 0) <= xvalue &&
-                   xvalue <= rawScores(scoreLocationPercentRankHighestScore, 0)) {
-          /* Use Eq. 2,   */
+          if (-0.5 <= xvalue && xvalue < rawScores(scoreLocationPercentRankLowestScore, 0)) {
+            /* Use Eq. 1,   */
+            vectY(scoreLocation, 0) = linearPolynomial(-0.5,
+                                                       -0.5,
+                                                       rawScores(scoreLocationPercentRankLowestScore, 0),
+                                                       dy_xlow,
+                                                       xvalue);
+          } else if (rawScores(scoreLocationPercentRankHighestScore, 0) < xvalue && xvalue <= kx + 0.5) {
+            /* Use Eq. 3,   */
+            vectY(scoreLocation, 0) = linearPolynomial(rawScores(scoreLocationPercentRankHighestScore, 0),
+                                                       dy_xhigh,
+                                                       kx + 0.5,
+                                                       ky + 0.5,
+                                                       xvalue);
+          } else if (rawScores(scoreLocationPercentRankLowestScore, 0) <= xvalue &&
+                     xvalue <= rawScores(scoreLocationPercentRankHighestScore, 0)) {
+            /* Use Eq. 2,   */
 
-          /* find the index of the  sub-interval     *
+            /* find the index of the  sub-interval     *
           * to which xvalue belongs to              */
-          for (size_t innerScoreLocation = 0; innerScoreLocation < numcoeff; innerScoreLocation++) {
-            if (rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation, 0) <= xvalue &&
-                xvalue <= rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation + 1, 0)) {
-              break;
+            for (size_t innerScoreLocation = 0; innerScoreLocation < numcoeff; innerScoreLocation++) {
+              if (rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation, 0) <= xvalue &&
+                  xvalue <= rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation + 1, 0)) {
+                break;
+              }
+              /* evaluate dy(xvalue)                     */
+              vectY(scoreLocation, 0) = cubicPolynomial(rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation, 0),
+                                                        rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation + 1, 0),
+                                                        smoothingSplineCoefficientMatrix(innerScoreLocation, 0),
+                                                        smoothingSplineCoefficientMatrix(innerScoreLocation + numcoeff, 0),
+                                                        smoothingSplineCoefficientMatrix(innerScoreLocation + 2 * numcoeff, 0),
+                                                        smoothingSplineCoefficientMatrix(innerScoreLocation + 3 * numcoeff, 0),
+                                                        xvalue);
             }
-            /* evaluate dy(xvalue)                     */
-            vectY(scoreLocation, 0) = cubicPolynomial(rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation, 0),
-                                                      rawScores(scoreLocationPercentRankLowestScore + innerScoreLocation + 1, 0),
-                                                      smoothingSplineCoefficientMatrix(innerScoreLocation, 0),
-                                                      smoothingSplineCoefficientMatrix(innerScoreLocation + numcoeff, 0),
-                                                      smoothingSplineCoefficientMatrix(innerScoreLocation + 2 * numcoeff, 0),
-                                                      smoothingSplineCoefficientMatrix(innerScoreLocation + 3 * numcoeff, 0),
-                                                      xvalue);
-          }
-        } else {
-          std::string msg = fmt::format("postSmooth: Input Error\nxvalue = {:8.5f} xvalues[xlow]={:8.5f} xvalues[xhigh]={:8.5f}\n",
-                                        xvalue,
-                                        rawScores(scoreLocationPercentRankHighestScore, 0),
-                                        rawScores(scoreLocationPercentRankHighestScore, 0));
+          } else {
+            std::string msg = fmt::format("postSmooth: Input Error\nxvalue = {:8.5f} xvalues[xlow]={:8.5f} xvalues[xhigh]={:8.5f}\n",
+                                          xvalue,
+                                          rawScores(scoreLocationPercentRankHighestScore, 0),
+                                          rawScores(scoreLocationPercentRankHighestScore, 0));
 
-          throw std::runtime_error(msg);
+            throw std::runtime_error(msg);
+          }
         }
       }
-    }
 
-    /* functions related to the inverse of the post-smoothing method using cubic splines */
+      /* functions related to the inverse of the post-smoothing method using cubic splines */
 
-    /* Purpose:                                                          
+      /* Purpose:                                                          
       Use bisection method to compute the xvalue satisfying the       
       following equation                                             
                                                                      
@@ -1180,61 +1181,61 @@ namespace EquatingRecipes {
       Author: Jaehoon Seol
       Date of last revision: 7/3/08
     */
-    double inverseCubicPolynomial(const double& left,
-                                  const double& right,
-                                  const double& ai,
-                                  const double& bi,
-                                  const double& ci,
-                                  const double& di,
-                                  const double& yvalue) {
-      double left1 = left;
-      double right1 = right;
-      double left0 = left;   /* left end of cubic spline's domain  */
-      double right0 = right; /* right end of cubic spline's domain */
-      const double errorValue = std::pow(10.0, 6.0) * std::numeric_limits<double>::epsilon();
-      double mid;
+      double inverseCubicPolynomial(const double& left,
+                                    const double& right,
+                                    const double& ai,
+                                    const double& bi,
+                                    const double& ci,
+                                    const double& di,
+                                    const double& yvalue) {
+        double left1 = left;
+        double right1 = right;
+        double left0 = left;   /* left end of cubic spline's domain  */
+        double right0 = right; /* right end of cubic spline's domain */
+        const double errorValue = std::pow(10.0, 6.0) * std::numeric_limits<double>::epsilon();
+        double mid;
 
-      /* check the precondition */
-      double side1 = cubicPolynomial(left1, right1, ai, bi, ci, di, left1);
-      double side2 = cubicPolynomial(left1, right1, ai, bi, ci, di, right1);
+        /* check the precondition */
+        double side1 = cubicPolynomial(left1, right1, ai, bi, ci, di, left1);
+        double side2 = cubicPolynomial(left1, right1, ai, bi, ci, di, right1);
 
-      if (side1 >= side2) {
-        std::string msg = "inverseCubicPolynomial: Input Error 1\n";
-        msg.append(fmt::format("left end = {:f} right end = {:f\n", side1, side2));
-        std::cout << msg;
+        if (side1 >= side2) {
+          std::string msg = "inverseCubicPolynomial: Input Error 1\n";
+          msg.append(fmt::format("left end = {:f} right end = {:f\n", side1, side2));
+          std::cout << msg;
 
-        return yvalue;
-      }
-
-      if (yvalue < side1 || side2 < yvalue) {
-        std::string msg = "inverseCubicPoly: Input Error 2\n";
-        msg.append(fmt::format("left end={:f} right end={:f} yvalue={:f\n", side1, side2, yvalue));
-        std::cout << msg;
-
-        return yvalue;
-      }
-
-      double diff = std::abs(right1 - left1);
-
-      while (diff > errorValue) {
-        mid = (left1 + right1) / 2.0;
-
-        side1 = cubicPolynomial(left0, right0, ai, bi, ci, di, mid) - yvalue;
-        side2 = cubicPolynomial(left0, right0, ai, bi, ci, di, right1) - yvalue;
-
-        if (side1 * side2 <= 0) {
-          left1 = mid;
-        } else {
-          right1 = mid;
+          return yvalue;
         }
 
-        diff = std::abs(right1 - left1);
+        if (yvalue < side1 || side2 < yvalue) {
+          std::string msg = "inverseCubicPoly: Input Error 2\n";
+          msg.append(fmt::format("left end={:f} right end={:f} yvalue={:f\n", side1, side2, yvalue));
+          std::cout << msg;
+
+          return yvalue;
+        }
+
+        double diff = std::abs(right1 - left1);
+
+        while (diff > errorValue) {
+          mid = (left1 + right1) / 2.0;
+
+          side1 = cubicPolynomial(left0, right0, ai, bi, ci, di, mid) - yvalue;
+          side2 = cubicPolynomial(left0, right0, ai, bi, ci, di, right1) - yvalue;
+
+          if (side1 * side2 <= 0) {
+            left1 = mid;
+          } else {
+            right1 = mid;
+          }
+
+          diff = std::abs(right1 - left1);
+        }
+
+        return mid;
       }
 
-      return mid;
-    }
-
-    /*
+      /*
     Purpose:
         compute the inverse of the cubic spline defined by ynodes[] and  
         cmat[]. The cubic spline is defined by cmat[i],cmat[i+n2],       
@@ -1257,68 +1258,68 @@ namespace EquatingRecipes {
     Author: Jaehoon Seol
     Date of last revision: 7/3/08
   */
-    void inverseCubicSplineSmoothing(const Eigen::MatrixXd& ynodes,
-                                     const Eigen::MatrixXd& smoothingSplineCoefficientMatrix,
-                                     const size_t& numberOfScores2,
-                                     const Eigen::MatrixXd& vectX,
-                                     const size_t& numberOfScores1,
-                                     Eigen::MatrixXd& vectY) {
-      Eigen::MatrixXd xnodes(numberOfScores2, 1); /* x node values */
+      void inverseCubicSplineSmoothing(const Eigen::MatrixXd& ynodes,
+                                       const Eigen::MatrixXd& smoothingSplineCoefficientMatrix,
+                                       const size_t& numberOfScores2,
+                                       const Eigen::MatrixXd& vectX,
+                                       const size_t& numberOfScores1,
+                                       Eigen::MatrixXd& vectY) {
+        Eigen::MatrixXd xnodes(numberOfScores2, 1); /* x node values */
 
-      /* setup y[i]=cubicPoly(,,,ynodes[i])         */
-      size_t scoreLocation;
-      for (scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-        xnodes(scoreLocation, 0) = cubicPolynomial(ynodes(scoreLocation, 0),
-                                                   ynodes(scoreLocation + 1, 0),
-                                                   smoothingSplineCoefficientMatrix(scoreLocation, 0),
-                                                   smoothingSplineCoefficientMatrix(numberOfScores2 + scoreLocation, 0),
-                                                   smoothingSplineCoefficientMatrix(2 * numberOfScores2 + scoreLocation, 0),
-                                                   smoothingSplineCoefficientMatrix(3 * numberOfScores2 + scoreLocation, 0),
-                                                   ynodes(scoreLocation, 0));
-      }
-
-      scoreLocation--;
-
-      xnodes(numberOfScores2, 0) = cubicPolynomial(ynodes(scoreLocation, 0),
-                                                   ynodes(scoreLocation + 1, 0),
-                                                   smoothingSplineCoefficientMatrix(scoreLocation, 0),
-                                                   smoothingSplineCoefficientMatrix(numberOfScores2 + scoreLocation, 0),
-                                                   smoothingSplineCoefficientMatrix(2 * numberOfScores2 + scoreLocation, 0),
-                                                   smoothingSplineCoefficientMatrix(3 * numberOfScores2 + scoreLocation, 0),
-                                                   ynodes(numberOfScores2, 0));
-
-      for (size_t scoreLocation1 = 0; scoreLocation1 < numberOfScores1; scoreLocation1++) {
-        /* evaluate the inverse of the cubic spline at vectY[i] */
-        /* step 0: check xnodes[0]<= vectX[i]<= xnodes[n2]      */
-        if (vectX(scoreLocation1, 0) < xnodes(0, 0) ||
-            vectX(scoreLocation1, 0) > xnodes(numberOfScores2, 0)) {
-          std::cout << fmt::format("inverseCubicSplineSmoothing: Input Error\nvalue = {:f}\n",
-                                   vectX(scoreLocation1, 0));
-
-          return;
+        /* setup y[i]=cubicPoly(,,,ynodes[i])         */
+        size_t scoreLocation;
+        for (scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
+          xnodes(scoreLocation, 0) = cubicPolynomial(ynodes(scoreLocation, 0),
+                                                     ynodes(scoreLocation + 1, 0),
+                                                     smoothingSplineCoefficientMatrix(scoreLocation, 0),
+                                                     smoothingSplineCoefficientMatrix(numberOfScores2 + scoreLocation, 0),
+                                                     smoothingSplineCoefficientMatrix(2 * numberOfScores2 + scoreLocation, 0),
+                                                     smoothingSplineCoefficientMatrix(3 * numberOfScores2 + scoreLocation, 0),
+                                                     ynodes(scoreLocation, 0));
         }
 
-        /* step 1: find node index to which vectX[i] belongs    */
-        size_t scoreLocation2;
-        for (scoreLocation2 = 0; scoreLocation2 < numberOfScores2; scoreLocation2++) {
-          if (xnodes(scoreLocation2, 0) <= vectX(scoreLocation1, 0) &&
-              vectX(scoreLocation1, 0) <= xnodes(scoreLocation2 + 1, 0)) {
-            break;
+        scoreLocation--;
+
+        xnodes(numberOfScores2, 0) = cubicPolynomial(ynodes(scoreLocation, 0),
+                                                     ynodes(scoreLocation + 1, 0),
+                                                     smoothingSplineCoefficientMatrix(scoreLocation, 0),
+                                                     smoothingSplineCoefficientMatrix(numberOfScores2 + scoreLocation, 0),
+                                                     smoothingSplineCoefficientMatrix(2 * numberOfScores2 + scoreLocation, 0),
+                                                     smoothingSplineCoefficientMatrix(3 * numberOfScores2 + scoreLocation, 0),
+                                                     ynodes(numberOfScores2, 0));
+
+        for (size_t scoreLocation1 = 0; scoreLocation1 < numberOfScores1; scoreLocation1++) {
+          /* evaluate the inverse of the cubic spline at vectY[i] */
+          /* step 0: check xnodes[0]<= vectX[i]<= xnodes[n2]      */
+          if (vectX(scoreLocation1, 0) < xnodes(0, 0) ||
+              vectX(scoreLocation1, 0) > xnodes(numberOfScores2, 0)) {
+            std::cout << fmt::format("inverseCubicSplineSmoothing: Input Error\nvalue = {:f}\n",
+                                     vectX(scoreLocation1, 0));
+
+            return;
           }
+
+          /* step 1: find node index to which vectX[i] belongs    */
+          size_t scoreLocation2;
+          for (scoreLocation2 = 0; scoreLocation2 < numberOfScores2; scoreLocation2++) {
+            if (xnodes(scoreLocation2, 0) <= vectX(scoreLocation1, 0) &&
+                vectX(scoreLocation1, 0) <= xnodes(scoreLocation2 + 1, 0)) {
+              break;
+            }
+          }
+
+          /* step 2: construct cubic spline using the coefficients stored in cmat */
+          vectY(scoreLocation1, 0) = inverseCubicPolynomial(ynodes(scoreLocation2, 0),
+                                                            ynodes(scoreLocation2 + 1, 0),
+                                                            smoothingSplineCoefficientMatrix(scoreLocation2, 0),
+                                                            smoothingSplineCoefficientMatrix(numberOfScores2 + scoreLocation2, 0),
+                                                            smoothingSplineCoefficientMatrix(2 * numberOfScores2 + scoreLocation2, 0),
+                                                            smoothingSplineCoefficientMatrix(3 * numberOfScores2 + scoreLocation2, 0),
+                                                            vectX(scoreLocation1, 0));
         }
-
-        /* step 2: construct cubic spline using the coefficients stored in cmat */
-        vectY(scoreLocation1, 0) = inverseCubicPolynomial(ynodes(scoreLocation2, 0),
-                                                          ynodes(scoreLocation2 + 1, 0),
-                                                          smoothingSplineCoefficientMatrix(scoreLocation2, 0),
-                                                          smoothingSplineCoefficientMatrix(numberOfScores2 + scoreLocation2, 0),
-                                                          smoothingSplineCoefficientMatrix(2 * numberOfScores2 + scoreLocation2, 0),
-                                                          smoothingSplineCoefficientMatrix(3 * numberOfScores2 + scoreLocation2, 0),
-                                                          vectX(scoreLocation1, 0));
       }
-    }
 
-    /* Purpose/functionality
+      /* Purpose/functionality
       Implementation of the inverse post-smoothing method dx  (x) defined piecewise
       from -0.5 to Ky+0.5 (see Kolen & Brennan, 2004, pp. 84-89).
         Inverts the following function
@@ -1377,94 +1378,95 @@ namespace EquatingRecipes {
       Author: Jaehoon Seol
       Date of last revision: 7/8/08 
     */
-    void inversePostSmoothing(const Eigen::MatrixXd& yvalues,                      // double *yvalues
-                              const Eigen::MatrixXd& xvalues,                      // double *xvalues
-                              const Eigen::MatrixXd& dxi,                          // double *dxi
-                              const size_t& numberOfScores1,                       // int num1
-                              const double& smoothingParameter,                    // double s
-                              const double& percentileRankLowestScore,             // int ylow
-                              const double& percentileRankHighestScore,            // int yhigh
-                              const double& kx,                                    // double kx
-                              const Eigen::MatrixXd& vectX,                        // double *vectX
-                              const size_t& numberOfScores2,                       // int num2
-                              Eigen::MatrixXd& vectY,                        // double *vectY
-                              Eigen::MatrixXd& smoothingSplineCoefficientMatrix) { // double *cmat
-      // int i,                                                                             /* loop index */
-      //     numcoeff;                                                                      /* number of cubic spline pieces */
-      // double dx_ylow, /* dx(ylow)  */
-      //     dx_yhigh,   /* dx(yhigh) */
-      //     ky,         /* maximum y value (Ky in Kolen & Brennan, 2004)*/
-      //     temp;       /* temp. var. to store vectX[i] */
+      void inversePostSmoothing(const Eigen::MatrixXd& yvalues,                      // double *yvalues
+                                const Eigen::MatrixXd& xvalues,                      // double *xvalues
+                                const Eigen::MatrixXd& dxi,                          // double *dxi
+                                const size_t& numberOfScores1,                       // int num1
+                                const double& smoothingParameter,                    // double s
+                                const double& percentileRankLowestScore,             // int ylow
+                                const double& percentileRankHighestScore,            // int yhigh
+                                const double& kx,                                    // double kx
+                                const Eigen::MatrixXd& vectX,                        // double *vectX
+                                const size_t& numberOfScores2,                       // int num2
+                                Eigen::MatrixXd& vectY,                              // double *vectY
+                                Eigen::MatrixXd& smoothingSplineCoefficientMatrix) { // double *cmat
+        // int i,                                                                             /* loop index */
+        //     numcoeff;                                                                      /* number of cubic spline pieces */
+        // double dx_ylow, /* dx(ylow)  */
+        //     dx_yhigh,   /* dx(yhigh) */
+        //     ky,         /* maximum y value (Ky in Kolen & Brennan, 2004)*/
+        //     temp;       /* temp. var. to store vectX[i] */
 
-      /* compute coefficient matrix of the cubic spline */
+        /* compute coefficient matrix of the cubic spline */
 
-      size_t scoreLocationPercentileRankLowestScore = static_cast<size_t>(percentileRankLowestScore);
-      size_t scoreLocationPercentileRankHighestScore = static_cast<size_t>(percentileRankHighestScore);
+        size_t scoreLocationPercentileRankLowestScore = static_cast<size_t>(percentileRankLowestScore);
+        size_t scoreLocationPercentileRankHighestScore = static_cast<size_t>(percentileRankHighestScore);
 
-      size_t numcoeff = scoreLocationPercentileRankHighestScore - scoreLocationPercentileRankLowestScore;
+        size_t numcoeff = scoreLocationPercentileRankHighestScore - scoreLocationPercentileRankLowestScore;
 
-      getCubicSplineSmoothingCoefficients(yvalues(Eigen::seq(scoreLocationPercentileRankLowestScore, yvalues.rows() - 1), 0),
-                                          xvalues(Eigen::seq(scoreLocationPercentileRankLowestScore, xvalues.rows() - 1), 0),
-                                          dxi(Eigen::seq(percentileRankLowestScore, dxi.rows() - 1), 0),
-                                          numcoeff + 1,
-                                          smoothingParameter,
-                                          smoothingSplineCoefficientMatrix);
+        getCubicSplineSmoothingCoefficients(yvalues(Eigen::seq(scoreLocationPercentileRankLowestScore, yvalues.rows() - 1), 0),
+                                            xvalues(Eigen::seq(scoreLocationPercentileRankLowestScore, xvalues.rows() - 1), 0),
+                                            dxi(Eigen::seq(percentileRankLowestScore, dxi.rows() - 1), 0),
+                                            numcoeff + 1,
+                                            smoothingParameter,
+                                            smoothingSplineCoefficientMatrix);
 
-      double dx_ylow = cubicPolynomial(yvalues(scoreLocationPercentileRankHighestScore - 1, 0),
-                                       yvalues(scoreLocationPercentileRankHighestScore, 0),
-                                       smoothingSplineCoefficientMatrix(0, 0),
-                                       smoothingSplineCoefficientMatrix(numcoeff - 1, 0),
-                                       smoothingSplineCoefficientMatrix(2 * numcoeff, 0),
-                                       smoothingSplineCoefficientMatrix(3 * numcoeff, 0),
-                                       yvalues(scoreLocationPercentileRankLowestScore, 0));
+        double dx_ylow = cubicPolynomial(yvalues(scoreLocationPercentileRankHighestScore - 1, 0),
+                                         yvalues(scoreLocationPercentileRankHighestScore, 0),
+                                         smoothingSplineCoefficientMatrix(0, 0),
+                                         smoothingSplineCoefficientMatrix(numcoeff - 1, 0),
+                                         smoothingSplineCoefficientMatrix(2 * numcoeff, 0),
+                                         smoothingSplineCoefficientMatrix(3 * numcoeff, 0),
+                                         yvalues(scoreLocationPercentileRankLowestScore, 0));
 
-      double dx_yhigh = cubicPolynomial(yvalues(scoreLocationPercentileRankHighestScore - 1, 0),
-                                        yvalues(scoreLocationPercentileRankHighestScore, 0),
-                                        smoothingSplineCoefficientMatrix(numcoeff - 1),
-                                        smoothingSplineCoefficientMatrix(2 * numcoeff - 1),
-                                        smoothingSplineCoefficientMatrix(3 * numcoeff - 1, 0),
-                                        smoothingSplineCoefficientMatrix(4 * numcoeff - 1, 0),
-                                        yvalues(scoreLocationPercentileRankHighestScore));
+        double dx_yhigh = cubicPolynomial(yvalues(scoreLocationPercentileRankHighestScore - 1, 0),
+                                          yvalues(scoreLocationPercentileRankHighestScore, 0),
+                                          smoothingSplineCoefficientMatrix(numcoeff - 1),
+                                          smoothingSplineCoefficientMatrix(2 * numcoeff - 1),
+                                          smoothingSplineCoefficientMatrix(3 * numcoeff - 1, 0),
+                                          smoothingSplineCoefficientMatrix(4 * numcoeff - 1, 0),
+                                          yvalues(scoreLocationPercentileRankHighestScore));
 
-      double ky = yvalues(numberOfScores1 - 1, 0); //[num1 - 1];
+        double ky = yvalues(numberOfScores1 - 1, 0); //[num1 - 1];
 
-      for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
-        double temp = vectX(scoreLocation, 0);
+        for (size_t scoreLocation = 0; scoreLocation < numberOfScores2; scoreLocation++) {
+          double temp = vectX(scoreLocation, 0);
 
-        if (-0.5 <= temp && temp < dx_ylow) { /* inverse of Eq. 1 */
-          vectY(scoreLocation, 0) = linearPolynomial(-0.5,
-                                                     -0.5,
-                                                     dx_ylow,
-                                                     yvalues(scoreLocationPercentileRankLowestScore, 0),
-                                                     temp);
-        } else if (dx_yhigh < temp && temp <= kx + 0.5) { /* inverse of Eq. 3 */
-          vectY(scoreLocation, 0) = linearPolynomial(dx_yhigh,
-                                                     yvalues(scoreLocationPercentileRankHighestScore, 0),
-                                                     kx + 0.5,
-                                                     ky + 0.5,
-                                                     temp);
-        } else if (dx_ylow <= temp && temp <= dx_yhigh) { /* inverse of Eq. 2 */
-          Eigen::MatrixXd tempVectY = vectY(Eigen::seq(scoreLocation, vectY.rows() - 1), Eigen::seq(0, vectY.cols() - 1));
+          if (-0.5 <= temp && temp < dx_ylow) { /* inverse of Eq. 1 */
+            vectY(scoreLocation, 0) = linearPolynomial(-0.5,
+                                                       -0.5,
+                                                       dx_ylow,
+                                                       yvalues(scoreLocationPercentileRankLowestScore, 0),
+                                                       temp);
+          } else if (dx_yhigh < temp && temp <= kx + 0.5) { /* inverse of Eq. 3 */
+            vectY(scoreLocation, 0) = linearPolynomial(dx_yhigh,
+                                                       yvalues(scoreLocationPercentileRankHighestScore, 0),
+                                                       kx + 0.5,
+                                                       ky + 0.5,
+                                                       temp);
+          } else if (dx_ylow <= temp && temp <= dx_yhigh) { /* inverse of Eq. 2 */
+            Eigen::MatrixXd tempVectY = vectY(Eigen::seq(scoreLocation, vectY.rows() - 1), Eigen::seq(0, vectY.cols() - 1));
 
-          inverseCubicSplineSmoothing(yvalues(Eigen::seq(scoreLocationPercentileRankLowestScore, yvalues.rows() - 1), 0),
-                                      smoothingSplineCoefficientMatrix,
-                                      numcoeff,
-                                      vectX(Eigen::seq(scoreLocation, vectX.rows() - 1), Eigen::seq(0, vectX.cols() - 1)),
-                                      1,
-                                      tempVectY);
+            inverseCubicSplineSmoothing(yvalues(Eigen::seq(scoreLocationPercentileRankLowestScore, yvalues.rows() - 1), 0),
+                                        smoothingSplineCoefficientMatrix,
+                                        numcoeff,
+                                        vectX(Eigen::seq(scoreLocation, vectX.rows() - 1), Eigen::seq(0, vectX.cols() - 1)),
+                                        1,
+                                        tempVectY);
 
-          vectY(Eigen::seq(scoreLocation, vectY.rows() - 1), Eigen::seq(0, vectY.cols() - 1)) = tempVectY;
-        } else {
-          std::string msg = fmt::format("inversePostSmooth: Input Error\nxvalue = {:8.5f} {:8.5f} {:8.5f}\n",
-                                        temp,
-                                        dx_ylow,
-                                        dx_yhigh);
+            vectY(Eigen::seq(scoreLocation, vectY.rows() - 1), Eigen::seq(0, vectY.cols() - 1)) = tempVectY;
+          } else {
+            std::string msg = fmt::format("inversePostSmooth: Input Error\nxvalue = {:8.5f} {:8.5f} {:8.5f}\n",
+                                          temp,
+                                          dx_ylow,
+                                          dx_yhigh);
 
-          throw std::runtime_error(msg);
+            throw std::runtime_error(msg);
+          }
         }
       }
-    }
-  };
+    };
+  } // namespace Implementation
 } // namespace EquatingRecipes
 
 #endif

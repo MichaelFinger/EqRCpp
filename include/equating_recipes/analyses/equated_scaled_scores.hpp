@@ -10,7 +10,7 @@
 #include <equating_recipes/structures/equated_scaled_scores_results.hpp>
 #include <equating_recipes/structures/raw_to_scaled_score_table.hpp>
 #include <equating_recipes/structures/p_data.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/implementation/utilities.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -40,15 +40,15 @@ namespace EquatingRecipes {
         outputData.pData = inputData.pData;
 
         EquatingRecipes::Implementation::Utilities::runEquatedScaledScores(outputData.pData,
-                                                           inputData.equatedRawScoreResults,
-                                                           inputData.lowestObservableEquatedRawScore,
-                                                           inputData.highestObservableEquatedRawScore,
-                                                           inputData.scoreIncrementEquatedRawScore,
-                                                           inputData.rawToScaledScoreTable,
-                                                           inputData.roundToNumberOfDecimalPlaces,
-                                                           inputData.lowestObservableScaledScore,
-                                                           inputData.highestObservableScaledScore,
-                                                           outputData.equatedScaledScoreResults);
+                                                                           inputData.equatedRawScoreResults,
+                                                                           inputData.lowestObservableEquatedRawScore,
+                                                                           inputData.highestObservableEquatedRawScore,
+                                                                           inputData.scoreIncrementEquatedRawScore,
+                                                                           inputData.rawToScaledScoreTable,
+                                                                           inputData.roundToNumberOfDecimalPlaces,
+                                                                           inputData.lowestObservableScaledScore,
+                                                                           inputData.highestObservableScaledScore,
+                                                                           outputData.equatedScaledScoreResults);
 
         nlohmann::json results = nlohmann::json::object();
         results["DatasetName"] = inputData.datasetName;

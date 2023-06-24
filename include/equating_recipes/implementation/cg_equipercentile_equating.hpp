@@ -232,8 +232,91 @@ namespace EquatingRecipes {
         return results;
       }
 
-      private:
-      
+      /*
+        Chained equipercentile equating using the composed function
+        discussed in Kolen and Brennan (2004, pp. 145-147)
+
+        Input
+
+          nsx    = number of score categories for X in pop 1
+          prx1[] = PR for X in pop 1
+          minv   = min score for V in both pop 1 and pop 2
+          maxv   = max score for V in both pop 1 and pop 2
+          incv   = increment for V in both pop 1 and pop 2
+          nsv    = # of score categories for V in both pops
+          Gv1[]  = crfd for V in pop 1
+
+          miny   = min score for Y in pop 2
+          incy   = increment for Y in pop 2
+          nsy    = number of score categories for Y in pop 2
+          Gy2[]  = crfd for Y in pop 2
+          Gv2[]  = crfd for V in pop 2
+
+        Output
+
+          eraw[] = chained equipercentile Y-equivalents of X
+          
+        Notes.  (a) It is assumed that space for eraw[] allocated
+                    prior to function call
+                (b) minv, maxv, incv, and nsv are 
+                    necessarily the same for both pops
+
+        Function calls other than C or NR utilities:
+          EquiEquate()
+          perc_rank()
+                                                      
+        R. L. Brennan
+
+        Date of last revision: 6/30/08 
+      */
+      Eigen::VectorXd runChainedEquipercentileEquating(const size_t& numberOfScoresX,
+                                                       const Eigen::VectorXd& percentileRanksX,
+                                                       const double& minimumScoreV,
+                                                       const double& maximumScoreV,
+                                                       const double& scoreIncrementV,
+                                                       const size_t& numberOfScoresV,
+                                                       const Eigen::VectorXd& cumlativeRelativeFreqDistVPop1,
+                                                       const double& minimumScoreY,
+                                                       const double& scoreIncrementY,
+                                                       const size_t& numberOfScoresY,
+                                                       const Eigen::VectorXd& cumlativeRelativeFreqDistYPop2,
+                                                       const Eigen::VectorXd& cumlativeRelativeFreqDistVPop2) {
+        Eigen::VectorXd percentileRanksVEquivalents(numberOfScoresX);
+
+        /* Put X on scale of V in pop 1; there are nsx
+        (non-integer) V equivalents in extov[] */
+        Eigen::VectorXd vEquivalentsXPop1 = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(numberOfScoresV,
+                                                                                                                     minimumScoreV,
+                                                                                                                     scoreIncrementV,
+                                                                                                                     cumlativeRelativeFreqDistVPop1,
+                                                                                                                     numberOfScoresX,
+                                                                                                                     percentileRanksX);
+
+        /* Get PRs (relative to V for pop 2)
+        for the non-integer V scores in extov[].
+        Note that there are nsx equivalents */
+        for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
+          percentileRanksVEquivalents(scoreLocationX) = EquatingRecipes::Implementation::Utilities::getPercentileRank(minimumScoreV,
+                                                                                                                      maximumScoreV,
+                                                                                                                      scoreIncrementV,
+                                                                                                                      cumlativeRelativeFreqDistVPop2,
+                                                                                                                      vEquivalentsXPop1(scoreLocationX));
+        }
+
+        /* Using the PRs in prv2[] get the Y equivalents of X;
+      i.e., put V equivalents on scale of Y */
+
+        Eigen::VectorXd equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(numberOfScoresY,
+                                                                                                                    minimumScoreY,
+                                                                                                                    scoreIncrementY,
+                                                                                                                    cumlativeRelativeFreqDistYPop2,
+                                                                                                                    numberOfScoresX,
+                                                                                                                    percentileRanksVEquivalents);
+
+        return equatedRawScores;
+      }
+
+    private:
       /*
       Synthetic population densities for x and y
 
@@ -662,90 +745,6 @@ namespace EquatingRecipes {
             }
           }
         }
-      }
-
-      /*
-      Chained equipercentile equating using the composed function
-      discussed in Kolen and Brennan (2004, pp. 145-147)
-
-      Input
-
-        nsx    = number of score categories for X in pop 1
-        prx1[] = PR for X in pop 1
-        minv   = min score for V in both pop 1 and pop 2
-        maxv   = max score for V in both pop 1 and pop 2
-        incv   = increment for V in both pop 1 and pop 2
-        nsv    = # of score categories for V in both pops
-        Gv1[]  = crfd for V in pop 1
-
-        miny   = min score for Y in pop 2
-        incy   = increment for Y in pop 2
-        nsy    = number of score categories for Y in pop 2
-        Gy2[]  = crfd for Y in pop 2
-        Gv2[]  = crfd for V in pop 2
-
-      Output
-
-        eraw[] = chained equipercentile Y-equivalents of X
-        
-      Notes.  (a) It is assumed that space for eraw[] allocated
-                  prior to function call
-              (b) minv, maxv, incv, and nsv are 
-                  necessarily the same for both pops
-
-      Function calls other than C or NR utilities:
-        EquiEquate()
-        perc_rank()
-                                                    
-      R. L. Brennan
-
-      Date of last revision: 6/30/08 
-    */
-      Eigen::VectorXd chainedEquipercentileEquating(const size_t& numberOfScoresX,
-                                                    const Eigen::VectorXd& percentileRanksX,
-                                                    const double& minimumScoreV,
-                                                    const double& maximumScoreV,
-                                                    const double& scoreIncrementV,
-                                                    const size_t& numberOfScoresV,
-                                                    const Eigen::VectorXd& cumlativeRelativeFreqDistVPop1,
-                                                    const double& minimumScoreY,
-                                                    const double& scoreIncrementY,
-                                                    const size_t& numberOfScoresY,
-                                                    const Eigen::VectorXd& cumlativeRelativeFreqDistYPop2,
-                                                    const Eigen::VectorXd& cumlativeRelativeFreqDistVPop2) {
-        Eigen::VectorXd percentileRanksVEquivalents(numberOfScoresX);
-
-        /* Put X on scale of V in pop 1; there are nsx
-        (non-integer) V equivalents in extov[] */
-        Eigen::VectorXd vEquivalentsXPop1 = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(numberOfScoresV,
-                                                                                                                     minimumScoreV,
-                                                                                                                     scoreIncrementV,
-                                                                                                                     cumlativeRelativeFreqDistVPop1,
-                                                                                                                     numberOfScoresX,
-                                                                                                                     percentileRanksX);
-
-        /* Get PRs (relative to V for pop 2)
-        for the non-integer V scores in extov[].
-        Note that there are nsx equivalents */
-        for (size_t scoreLocationX = 0; scoreLocationX < numberOfScoresX; scoreLocationX++) {
-          percentileRanksVEquivalents(scoreLocationX) = EquatingRecipes::Implementation::Utilities::getPercentileRank(minimumScoreV,
-                                                                                                                      maximumScoreV,
-                                                                                                                      scoreIncrementV,
-                                                                                                                      cumlativeRelativeFreqDistVPop2,
-                                                                                                                      vEquivalentsXPop1(scoreLocationX));
-        }
-
-        /* Using the PRs in prv2[] get the Y equivalents of X;
-      i.e., put V equivalents on scale of Y */
-
-        Eigen::VectorXd equatedRawScores = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(numberOfScoresY,
-                                                                                                                    minimumScoreY,
-                                                                                                                    scoreIncrementY,
-                                                                                                                    cumlativeRelativeFreqDistYPop2,
-                                                                                                                    numberOfScoresX,
-                                                                                                                    percentileRanksVEquivalents);
-
-        return equatedRawScores;
       }
     };
   } // namespace Implementation

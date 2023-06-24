@@ -7,7 +7,7 @@
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/implementation/utilities.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {

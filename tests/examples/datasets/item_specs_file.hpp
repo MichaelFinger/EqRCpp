@@ -205,7 +205,8 @@ namespace EquatingRecipes {
                                                                                                        b,
                                                                                                        c,
                                                                                                        scalingConstant,
-                                                                                                       scoringFunctionValues);
+                                                                                                       scoringFunctionValues,
+                                                                                                       true);
               } else if (irtModel == EquatingRecipes::Structures::IRTModel::GRADED_RESPONSE) {
                 double a = std::stod(values[fieldIndex]);
                 fieldIndex++;
@@ -220,7 +221,8 @@ namespace EquatingRecipes {
                                                                                                a,
                                                                                                b,
                                                                                                scalingConstant,
-                                                                                               scoringFunctionValues);
+                                                                                               scoringFunctionValues,
+                                                                                               true);
               } else if (irtModel == EquatingRecipes::Structures::IRTModel::PARTIAL_CREDIT) {
                 double a = std::stod(values[fieldIndex]);
                 fieldIndex++;

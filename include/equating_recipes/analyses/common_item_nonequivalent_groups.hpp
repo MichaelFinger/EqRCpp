@@ -11,11 +11,8 @@
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/cg_equipercentile_equating.hpp>
-#include <equating_recipes/cg_no_smoothing.hpp>
-#include <equating_recipes/utilities.hpp>
-
-#include <equating_recipes/analyses/bivariate_statistics.hpp>
+#include <equating_recipes/implementation/cg_equipercentile_equating.hpp>
+#include <equating_recipes/implementation/cg_no_smoothing.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -46,23 +43,23 @@ namespace EquatingRecipes {
 
       nlohmann::json operator()(const EquatingRecipes::Analyses::CommonItemNonequivalentGroups::InputData& inputData,
                                 EquatingRecipes::Analyses::CommonItemNonequivalentGroups::OutputData& outputData) {
-        EquatingRecipes::CGEquatingNoSmoothing cgEquatingNoSmoothing;
+        EquatingRecipes::Implementation::CGEquatingNoSmoothing cgEquatingNoSmoothing;
 
         outputData.bivariateStatisticsXV = inputData.bivariateStatisticsXV;
         outputData.bivariateStatisticsYV = inputData.bivariateStatisticsYV;
 
-        cgEquatingNoSmoothing.run(inputData.design,
-                                  inputData.method,
-                                  inputData.smoothing,
-                                  inputData.populationWeight,
-                                  inputData.isInternalAnchor,
-                                  inputData.reliabilityCommonItemsPopulation1,
-                                  inputData.reliabilityCommonItemsPopulation2,
-                                  outputData.bivariateStatisticsXV,
-                                  outputData.bivariateStatisticsYV,
-                                  inputData.bootstrapReplicationNumber,
-                                  outputData.pData,
-                                  outputData.equatedRawScoreResults);
+        cgEquatingNoSmoothing.runWithNoSmoothing(inputData.design,
+                                                 inputData.method,
+                                                 inputData.smoothing,
+                                                 inputData.populationWeight,
+                                                 inputData.isInternalAnchor,
+                                                 inputData.reliabilityCommonItemsPopulation1,
+                                                 inputData.reliabilityCommonItemsPopulation2,
+                                                 outputData.bivariateStatisticsXV,
+                                                 outputData.bivariateStatisticsYV,
+                                                 inputData.bootstrapReplicationNumber,
+                                                 outputData.pData,
+                                                 outputData.equatedRawScoreResults);
 
         nlohmann::json results = nlohmann::json::object();
         results["DatasetName"] = inputData.datasetName;

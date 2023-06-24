@@ -6,8 +6,8 @@
 #include <nlohmann/json.hpp>
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/utilities.hpp>
-#include <equating_recipes/analytic_standard_errors.hpp>
+#include <equating_recipes/implementation/utilities.hpp>
+#include <equating_recipes/implementation/analytic_standard_errors.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -23,7 +23,7 @@ namespace EquatingRecipes {
 
       nlohmann::json operator()(const EquatingRecipes::Analyses::AnalyticStandardErrors::InputData& inputData,
                                 Eigen::VectorXd& standardErrors) {
-        EquatingRecipes::AnalyticStandardErrors analyticStandardErrors;
+        EquatingRecipes::Implementation::AnalyticStandardErrors analyticStandardErrors;
 
         standardErrors = analyticStandardErrors.calculate(inputData.univariateStatisticsY.numberOfScores,
                                                           inputData.univariateStatisticsY.numberOfExaminees,

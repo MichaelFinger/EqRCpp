@@ -12,8 +12,7 @@
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
-#include <equating_recipes/rg_and_sg_equating.hpp>
-#include <equating_recipes/utilities.hpp>
+#include <equating_recipes/implementation/rg_and_sg_equating.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -36,12 +35,12 @@ namespace EquatingRecipes {
 
       nlohmann::json operator()(const EquatingRecipes::Analyses::RandomGroupsEquating::InputData& inputData,
                                 EquatingRecipes::Analyses::RandomGroupsEquating::OutputData& outputData) {
-        EquatingRecipes::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
+        EquatingRecipes::Implementation::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
 
         EquatingRecipes::Structures::PData pData;
         EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
 
-        randomAndSingleGroupEquating.randomGroupEquating(inputData.design,
+        randomAndSingleGroupEquating.runRandomGroupEquating(inputData.design,
                                                          inputData.method,
                                                          inputData.smoothing,
                                                          inputData.univariateStatisticsX,

@@ -141,18 +141,18 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-      void runCGEquatingNoSmoothing(const EquatingRecipes::Structures::Design& design,
-               const EquatingRecipes::Structures::Method& method,
-               const EquatingRecipes::Structures::Smoothing& smoothing,
-               const double& population1Weight,
-               const bool& isInternalAnchor,
-               const double& reliabilityCommonItemsPopulation1,
-               const double& reliabilityCommonItemsPopulation2,
-               EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
-               EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
-               const size_t& bootstrapReplicationNumber,
-               EquatingRecipes::Structures::PData& pData,
-               EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      void runWithNoSmoothing(const EquatingRecipes::Structures::Design& design,
+                              const EquatingRecipes::Structures::Method& method,
+                              const EquatingRecipes::Structures::Smoothing& smoothing,
+                              const double& population1Weight,
+                              const bool& isInternalAnchor,
+                              const double& reliabilityCommonItemsPopulation1,
+                              const double& reliabilityCommonItemsPopulation2,
+                              EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
+                              EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
+                              const size_t& bootstrapReplicationNumber,
+                              EquatingRecipes::Structures::PData& pData,
+                              EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
         std::vector<std::string> methodNames = {"    Tucker",
                                                 "   Lev Obs",
                                                 "  Lev True",
@@ -333,21 +333,21 @@ namespace EquatingRecipes {
         /* FE + BH-FE in positions 0 and 1 */
         if (methodCode == "E" || methodCode == "G" || methodCode == "A" || methodCode == "H") {
           EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
-              cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
-                                                            pData.isInternalAnchor,
-                                                            bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
-                                                            true,
-                                                            bivariateStatisticsXV.bivariateProportions,
-                                                            bivariateStatisticsYV.bivariateProportions,
-                                                            0.0,
-                                                            0.0);
+              cgEquipercentileEquating.runCGEquipercentileEquating(pData.weightSyntheticPopulation1,
+                                                                   pData.isInternalAnchor,
+                                                                   bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                                   true,
+                                                                   bivariateStatisticsXV.bivariateProportions,
+                                                                   bivariateStatisticsYV.bivariateProportions,
+                                                                   0.0,
+                                                                   0.0);
 
           equatedRawScoreResults.relativeFreqDistsX.row(0) = cgResults.syntheticPopulationRelativeFreqDistX;
           equatedRawScoreResults.relativeFreqDistsY.row(0) = cgResults.syntheticPopulationRelativeFreqDistY;
@@ -368,21 +368,21 @@ namespace EquatingRecipes {
         if (methodCode == "F") {
           /* MFE + BH-MFE in positions 0 and 1 */
           EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
-              cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
-                                                            pData.isInternalAnchor,
-                                                            bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
-                                                            true,
-                                                            bivariateStatisticsXV.bivariateProportions,
-                                                            bivariateStatisticsYV.bivariateProportions,
-                                                            pData.reliabilityCommonItemsPopulation1,
-                                                            pData.reliabilityCommonItemsPopulation2);
+              cgEquipercentileEquating.runCGEquipercentileEquating(pData.weightSyntheticPopulation1,
+                                                                   pData.isInternalAnchor,
+                                                                   bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                                   true,
+                                                                   bivariateStatisticsXV.bivariateProportions,
+                                                                   bivariateStatisticsYV.bivariateProportions,
+                                                                   pData.reliabilityCommonItemsPopulation1,
+                                                                   pData.reliabilityCommonItemsPopulation2);
 
           equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
           equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
@@ -404,21 +404,21 @@ namespace EquatingRecipes {
         if (methodCode == "G" || methodCode == "A") {
           /* MFE + BH-MFE in positions 2 and 3 */
           EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
-              cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
-                                                            pData.isInternalAnchor,
-                                                            bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
-                                                            bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
-                                                            bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
-                                                            true,
-                                                            bivariateStatisticsXV.bivariateProportions,
-                                                            bivariateStatisticsYV.bivariateProportions,
-                                                            pData.reliabilityCommonItemsPopulation1,
-                                                            pData.reliabilityCommonItemsPopulation2);
+              cgEquipercentileEquating.runCGEquipercentileEquating(pData.weightSyntheticPopulation1,
+                                                                   pData.isInternalAnchor,
+                                                                   bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                                                   bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+                                                                   bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                                   true,
+                                                                   bivariateStatisticsXV.bivariateProportions,
+                                                                   bivariateStatisticsYV.bivariateProportions,
+                                                                   pData.reliabilityCommonItemsPopulation1,
+                                                                   pData.reliabilityCommonItemsPopulation2);
 
           equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
           equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
@@ -441,54 +441,54 @@ namespace EquatingRecipes {
         if (methodCode == "C") {
           /* Chained in position 0 */
           equatedRawScoreResults.equatedRawScores.row(0) =
-              cgEquipercentileEquating.chainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
-                                                                     bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.maximumScore,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.cumulativeRelativeFreqDist,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.cumulativeRelativeFreqDist,
-                                                                     bivariateStatisticsYV.univariateStatisticsColumn.cumulativeRelativeFreqDist);
+              cgEquipercentileEquating.runChainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                                        bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.maximumScore,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.cumulativeRelativeFreqDist,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.cumulativeRelativeFreqDist,
+                                                                        bivariateStatisticsYV.univariateStatisticsColumn.cumulativeRelativeFreqDist);
         }
 
         /* All methods: FE, BF under FE, MFE, BH under MFE, Chained */
         if (methodCode == "A") {
           /* Chained in position 4 */
           equatedRawScoreResults.equatedRawScores.row(4) =
-              cgEquipercentileEquating.chainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
-                                                                     bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.maximumScore,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.cumulativeRelativeFreqDist,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.cumulativeRelativeFreqDist,
-                                                                     bivariateStatisticsYV.univariateStatisticsColumn.cumulativeFreqDist);
+              cgEquipercentileEquating.runChainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                                        bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.maximumScore,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.cumulativeRelativeFreqDist,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.cumulativeRelativeFreqDist,
+                                                                        bivariateStatisticsYV.univariateStatisticsColumn.cumulativeFreqDist);
         }
 
         //  /* FE, BF under FE, Chained */
         if (methodCode == "H") {
           /* Chained in position 2 */
           equatedRawScoreResults.equatedRawScores.row(2) =
-              cgEquipercentileEquating.chainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
-                                                                     bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.maximumScore,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
-                                                                     bivariateStatisticsXV.univariateStatisticsColumn.cumulativeRelativeFreqDist,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
-                                                                     bivariateStatisticsYV.univariateStatisticsRow.cumulativeRelativeFreqDist,
-                                                                     bivariateStatisticsYV.univariateStatisticsColumn.cumulativeFreqDist);
+              cgEquipercentileEquating.runChainedEquipercentileEquating(bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                                                        bivariateStatisticsXV.univariateStatisticsRow.percentileRankDist,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.maximumScore,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                                                        bivariateStatisticsXV.univariateStatisticsColumn.cumulativeRelativeFreqDist,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.numberOfScores,
+                                                                        bivariateStatisticsYV.univariateStatisticsRow.cumulativeRelativeFreqDist,
+                                                                        bivariateStatisticsYV.univariateStatisticsColumn.cumulativeFreqDist);
         }
 
         /* get moments */

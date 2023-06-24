@@ -44,6 +44,8 @@ University of Iowa
 #include <Eigen/LU>
 #include <fmt/core.h>
 
+#include <equating_recipes/implementation/irt_scale_transformation.hpp>
+#include <equating_recipes/implementation/utilities.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
 #include <equating_recipes/structures/irt_equating_results.hpp>
@@ -56,14 +58,12 @@ University of Iowa
 #include <equating_recipes/structures/item_specification.hpp>
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
-#include <equating_recipes/utilities.hpp>
-
-#include <equating_recipes/irt_scale_transformation.hpp>
 
 namespace EquatingRecipes {
-  class IRTEquating {
-  public:
-    /*
+  namespace Implementation {
+    class IRTEquating {
+    public:
+      /*
       Wrapper for IRT equating, including both true score equating and observed score equating
       
       Input:
@@ -123,164 +123,164 @@ namespace EquatingRecipes {
       Author's: R. L. Brennan and T. D. Wang
       Date of last revision 9/15/08
     */
-    void runIRTEquating(const EquatingRecipes::Structures::Design& design,
-                        const EquatingRecipes::Structures::IRTMethod& irtMethod,
-                        const double& w1,
-                        const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                        const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
-                        EquatingRecipes::Structures::IRTFittedDistribution& newForm,
-                        EquatingRecipes::Structures::IRTFittedDistribution& oldForm,
-                        EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults,
-                        EquatingRecipes::Structures::IRTScaleTransformationData& stInfo,
-                        const Eigen::VectorXd& newFormFrequencyDistribution,
-                        EquatingRecipes::Structures::IRTInput& irtall,
-                        EquatingRecipes::Structures::PData& pData,
-                        EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
-      std::vector<std::string> names {"IRT Tr Scr", "IRT Ob Scr"}; /* method names */
+      void runIRTEquating(const EquatingRecipes::Structures::Design& design,
+                          const EquatingRecipes::Structures::IRTMethod& irtMethod,
+                          const double& w1,
+                          const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
+                          const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
+                          EquatingRecipes::Structures::IRTFittedDistribution& newForm,
+                          EquatingRecipes::Structures::IRTFittedDistribution& oldForm,
+                          EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults,
+                          EquatingRecipes::Structures::IRTScaleTransformationData& stInfo,
+                          const Eigen::VectorXd& newFormFrequencyDistribution,
+                          EquatingRecipes::Structures::IRTInput& irtall,
+                          EquatingRecipes::Structures::PData& pData,
+                          EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+        std::vector<std::string> names {"IRT Tr Scr", "IRT Ob Scr"}; /* method names */
 
-      /* The following code segment reads quadrature distributions
+        /* The following code segment reads quadrature distributions
       only if IRT observed score equating is requested, since
       quadrature distributions are not required for IRT
       true score equating */
 
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
-          irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        // TODO: import quadrature points and weights
-      }
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
+            irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
+          // TODO: import quadrature points and weights
+        }
 
-      /* Allocate memory */
-      initializeRawEqResults(newItems,
-                             stInfo,
-                             irtEquatingResults);
+        /* Allocate memory */
+        initializeRawEqResults(newItems,
+                               stInfo,
+                               irtEquatingResults);
 
-      initializeRawFitMem(oldItems,
-                          false,
-                          stInfo,
-                          oldForm);
+        initializeRawFitMem(oldItems,
+                            false,
+                            stInfo,
+                            oldForm);
 
-      initializeRawFitMem(newItems,
-                          true,
-                          stInfo,
-                          newForm);
+        initializeRawFitMem(newItems,
+                            true,
+                            stInfo,
+                            newForm);
 
-      irtall.method = irtMethod;
-      irtall.irtScaleTransformationData = stInfo;
-      irtall.newItems = newItems;
-      irtall.oldItems = oldItems;
-      irtall.irtEquatingResults = irtEquatingResults;
-      irtall.newFormIRTFittedDistribution = newForm;
-      irtall.oldFormIRTFittedDistribution = oldForm;
+        irtall.method = irtMethod;
+        irtall.irtScaleTransformationData = stInfo;
+        irtall.newItems = newItems;
+        irtall.oldItems = oldItems;
+        irtall.irtEquatingResults = irtEquatingResults;
+        irtall.newFormIRTFittedDistribution = newForm;
+        irtall.oldFormIRTFittedDistribution = oldForm;
 
-      pData.bootstrapReplicationNumber = 0;
-      pData.design = design;
-      pData.weightSyntheticPopulation1 = w1;
-      pData.minimumScoreX = stInfo.minimumRawScoreNewForm;
-      pData.maximumScoreX = stInfo.maximumRawScoreNewForm;
-      pData.scoreIncrementX = stInfo.rawScoreIncrementNewForm;
+        pData.bootstrapReplicationNumber = 0;
+        pData.design = design;
+        pData.weightSyntheticPopulation1 = w1;
+        pData.minimumScoreX = stInfo.minimumRawScoreNewForm;
+        pData.maximumScoreX = stInfo.maximumRawScoreNewForm;
+        pData.scoreIncrementX = stInfo.rawScoreIncrementNewForm;
 
-      switch (irtMethod) {
-        case EquatingRecipes::Structures::IRTMethod::TRUE_SCORE:
-          pData.methods.push_back(names[0]);
-          break;
+        switch (irtMethod) {
+          case EquatingRecipes::Structures::IRTMethod::TRUE_SCORE:
+            pData.methods.push_back(names[0]);
+            break;
 
-        case EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE:
-          pData.methods.push_back(names[1]);
-          break;
+          case EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE:
+            pData.methods.push_back(names[1]);
+            break;
 
-        case EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE:
-          pData.methods.push_back(names[0]);
-          pData.methods.push_back(names[1]);
-          break;
+          case EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE:
+            pData.methods.push_back(names[0]);
+            pData.methods.push_back(names[1]);
+            break;
 
-        default:
-          break;
-      }
+          default:
+            break;
+        }
 
-      /* allocation and assignments for r (equivalents and moments) */
-      equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(),
-                                                     newForm.numberOfRawScoreCategories);
+        /* allocation and assignments for r (equivalents and moments) */
+        equatedRawScoreResults.equatedRawScores.resize(pData.methods.size(),
+                                                       newForm.numberOfRawScoreCategories);
 
-      equatedRawScoreResults.equatedRawScoreMoments.resize(pData.methods.size(),
-                                                           4);
+        equatedRawScoreResults.equatedRawScoreMoments.resize(pData.methods.size(),
+                                                             4);
 
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_SCORE) {
-        trueScoreEquating(stInfo,
-                          newItems,
-                          oldItems,
-                          newForm.numberOfRawScoreCategories,
-                          newForm.rawScores,
-                          irtEquatingResults.unroundedEquatedTrueScore,
-                          irtEquatingResults.thetaEquivalentFormXScore,
-                          irtEquatingResults.minimumTrueScoreNewForm,
-                          irtEquatingResults.minimumTrueScoreOldForm);
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_SCORE) {
+          trueScoreEquating(stInfo,
+                            newItems,
+                            oldItems,
+                            newForm.numberOfRawScoreCategories,
+                            newForm.rawScores,
+                            irtEquatingResults.unroundedEquatedTrueScore,
+                            irtEquatingResults.thetaEquivalentFormXScore,
+                            irtEquatingResults.minimumTrueScoreNewForm,
+                            irtEquatingResults.minimumTrueScoreOldForm);
 
-        equatedRawScoreResults.equatedRawScores.row(0) = irtEquatingResults.unroundedEquatedTrueScore;
-      }
+          equatedRawScoreResults.equatedRawScores.row(0) = irtEquatingResults.unroundedEquatedTrueScore;
+        }
 
-      /* IRT observed score equating.  First code segment declares an error and exits
+        /* IRT observed score equating.  First code segment declares an error and exits
       if IRT observed score equating cannot be done because 
       w1<0 || w1>1 || DistNewFile == NULL || DistOldFile == NULL*/
 
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
-          irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        if (w1 < 0 || w1 > 1) {
-          throw std::runtime_error("\nIRT observed-score equating cannot be performed because\nw1<0 || w1>1 || DistNewFile == NULL || DistOldFile == NULL \n");
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
+            irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
+          if (w1 < 0 || w1 > 1) {
+            throw std::runtime_error("\nIRT observed-score equating cannot be performed because\nw1<0 || w1>1 || DistNewFile == NULL || DistOldFile == NULL \n");
+          }
         }
-      }
 
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE) {
-        irtMixObsEq(stInfo,
-                    newItems,
-                    oldItems,
-                    w1,
-                    1.0 - w1,
-                    newForm,
-                    oldForm,
-                    irtEquatingResults);
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE) {
+          irtMixObsEq(stInfo,
+                      newItems,
+                      oldItems,
+                      w1,
+                      1.0 - w1,
+                      newForm,
+                      oldForm,
+                      irtEquatingResults);
 
-        equatedRawScoreResults.equatedRawScores.row(0) = irtEquatingResults.unroundedEquatedObservedScore;
-      }
-
-      /* Both IRT true-score and observed-score equating */
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        trueScoreEquating(stInfo,
-                          newItems,
-                          oldItems,
-                          newForm.numberOfRawScoreCategories,
-                          newForm.rawScores,
-                          irtEquatingResults.unroundedEquatedTrueScore,
-                          irtEquatingResults.thetaEquivalentFormXScore,
-                          irtEquatingResults.minimumTrueScoreNewForm,
-                          irtEquatingResults.minimumTrueScoreOldForm);
-
-        irtMixObsEq(stInfo,
-                    newItems,
-                    oldItems,
-                    w1,
-                    1.0 - w1,
-                    newForm,
-                    oldForm,
-                    irtEquatingResults);
-
-        equatedRawScoreResults.equatedRawScores.row(0) = irtEquatingResults.unroundedEquatedTrueScore;
-        equatedRawScoreResults.equatedRawScores.row(1) = irtEquatingResults.unroundedEquatedObservedScore;
-      }
-
-      /* get moments based on actual frequencies for group that took new form*/
-
-      if (newFormFrequencyDistribution.size() >= 1) {
-        irtall.newFormFrequencyDistribution = newFormFrequencyDistribution;
-        pData.scoreFrequenciesX = newFormFrequencyDistribution;
-
-        for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
-          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
-                                                                                                                 newFormFrequencyDistribution);
-
-          equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
+          equatedRawScoreResults.equatedRawScores.row(0) = irtEquatingResults.unroundedEquatedObservedScore;
         }
-      }
 
-      /* calculate raw score moments for both new form and old form
+        /* Both IRT true-score and observed-score equating */
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
+          trueScoreEquating(stInfo,
+                            newItems,
+                            oldItems,
+                            newForm.numberOfRawScoreCategories,
+                            newForm.rawScores,
+                            irtEquatingResults.unroundedEquatedTrueScore,
+                            irtEquatingResults.thetaEquivalentFormXScore,
+                            irtEquatingResults.minimumTrueScoreNewForm,
+                            irtEquatingResults.minimumTrueScoreOldForm);
+
+          irtMixObsEq(stInfo,
+                      newItems,
+                      oldItems,
+                      w1,
+                      1.0 - w1,
+                      newForm,
+                      oldForm,
+                      irtEquatingResults);
+
+          equatedRawScoreResults.equatedRawScores.row(0) = irtEquatingResults.unroundedEquatedTrueScore;
+          equatedRawScoreResults.equatedRawScores.row(1) = irtEquatingResults.unroundedEquatedObservedScore;
+        }
+
+        /* get moments based on actual frequencies for group that took new form*/
+
+        if (newFormFrequencyDistribution.size() >= 1) {
+          irtall.newFormFrequencyDistribution = newFormFrequencyDistribution;
+          pData.scoreFrequenciesX = newFormFrequencyDistribution;
+
+          for (size_t methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
+            EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScoreResults.equatedRawScores.row(methodIndex),
+                                                                                                                                   newFormFrequencyDistribution);
+
+            equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
+          }
+        }
+
+        /* calculate raw score moments for both new form and old form
         using IRT fitted distributions for new, old, and synthetic gps
         and the quadrature distributions for the new and old groups.
         To get these results, the quadrature distributions must be
@@ -290,59 +290,66 @@ namespace EquatingRecipes {
 
         From here to the end of the function there are 8 calls to MomentsFromRFD().
         The first three parameters of each call were revised on 3/8/09  */
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
-          irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
-                                                                                                               newForm.fittedDistributionNewGroup);
-        newForm.momentsFittedDistributionNewGroup = moments.momentValues;
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
+            irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
+          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
+                                                                                                                                 newForm.fittedDistributionNewGroup);
+          newForm.momentsFittedDistributionNewGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
-                                                                          newForm.fittedDistributionOldGroup);
-        newForm.momentsFittedDistributionOldGroup = moments.momentValues;
+          moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
+                                                                                            newForm.fittedDistributionOldGroup);
+          newForm.momentsFittedDistributionOldGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
-                                                                          newForm.fittedDistributionSyntheticGroup);
-        newForm.momentsFittedDistributionSyntheticGroup = moments.momentValues;
+          moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(newForm.rawScores,
+                                                                                            newForm.fittedDistributionSyntheticGroup);
+          newForm.momentsFittedDistributionSyntheticGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
-                                                                          oldForm.fittedDistributionNewGroup);
-        oldForm.momentsFittedDistributionNewGroup = moments.momentValues;
+          moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
+                                                                                            oldForm.fittedDistributionNewGroup);
+          oldForm.momentsFittedDistributionNewGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
-                                                                          oldForm.fittedDistributionOldGroup);
-        oldForm.momentsFittedDistributionOldGroup = moments.momentValues;
+          moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
+                                                                                            oldForm.fittedDistributionOldGroup);
+          oldForm.momentsFittedDistributionOldGroup = moments.momentValues;
 
-        moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
-                                                                          oldForm.fittedDistributionSyntheticGroup);
-        oldForm.momentsFittedDistributionSyntheticGroup = moments.momentValues;
-      }
+          moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(oldForm.rawScores,
+                                                                                            oldForm.fittedDistributionSyntheticGroup);
+          oldForm.momentsFittedDistributionSyntheticGroup = moments.momentValues;
+        }
 
-      /* moments for true-score and observed-score equivalents 
+        /* moments for true-score and observed-score equivalents 
         using quadrature distribution for group that took new form.
         These differ from the GroupFormMoments() in that these
         employ the equivalents. Caveat: the results are somewhat 
         ambiguous for IRT true-score equating which does not i
         involve synthetic groups */
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_SCORE ||
-          irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedTrueScore,
-                                                                                                               newForm.fittedDistributionNewGroup);
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_SCORE ||
+            irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
+          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedTrueScore,
+                                                                                                                                 newForm.fittedDistributionNewGroup);
 
-        irtEquatingResults.momentsEquatedTrueScores = moments.momentValues;
+          irtEquatingResults.momentsEquatedTrueScores = moments.momentValues;
+        }
+
+        if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
+            irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
+          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedObservedScore,
+                                                                                                                                 newForm.fittedDistributionNewGroup);
+
+          irtEquatingResults.momentsEquatedObservedScores = moments.momentValues;
+        }
+
+        pData.irtInput = irtall;
       }
 
-      if (irtMethod == EquatingRecipes::Structures::IRTMethod::OBSERVED_SCORE ||
-          irtMethod == EquatingRecipes::Structures::IRTMethod::TRUE_AND_OBSERVED_SCORE) {
-        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(irtEquatingResults.unroundedEquatedObservedScore,
-                                                                                                               newForm.fittedDistributionNewGroup);
+    private:
+      EquatingRecipes::Structures::IRTScaleTransformationData controlHandle;
+      std::vector<EquatingRecipes::Structures::ItemSpecification> controlNewItems;
+      EquatingRecipes::Structures::Symmetry controlSymmetry;
+      bool controlFunctionStandardization;
+      double trueS;
 
-        irtEquatingResults.momentsEquatedObservedScores = moments.momentValues;
-      }
-
-      pData.irtInput = irtall;
-    }
-
-    /*---------------------------------------------------------------------------
+      /*---------------------------------------------------------------------------
       Functionality:
         Performs IRT true score equating with mixed-format tests.
       
@@ -370,130 +377,123 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    bool trueScoreEquating(const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
-                           const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                           const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
-                           const size_t& numberOfScores,
-                           const Eigen::VectorXd& newScores,
-                           Eigen::VectorXd& oldFormEquivalents,
-                           Eigen::VectorXd& theta,
-                           double& lowestObservableScoreNewForm,
-                           double& lowestObservableScoreOldForm) {
-      double trueMinNew = 0.0;
-      double trueMinOld = 0.0;
-      double oldScoreMax = 0.0; /* Maximum old form score */
-      double newTestMin = 0;    /* Minimum new form test score */
-      double oldTestMin = 0;    /* Minimum old form test score */
+      bool trueScoreEquating(const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
+                             const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
+                             const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
+                             const size_t& numberOfScores,
+                             const Eigen::VectorXd& newScores,
+                             Eigen::VectorXd& oldFormEquivalents,
+                             Eigen::VectorXd& theta,
+                             double& lowestObservableScoreNewForm,
+                             double& lowestObservableScoreOldForm) {
+        double trueMinNew = 0.0;
+        double trueMinOld = 0.0;
+        double oldScoreMax = 0.0; /* Maximum old form score */
+        double newTestMin = 0;    /* Minimum new form test score */
+        double oldTestMin = 0;    /* Minimum old form test score */
 
-      this->controlHandle = handle;
-      this->controlNewItems = newItems;
+        this->controlHandle = handle;
+        this->controlNewItems = newItems;
 
-      std::for_each(newItems.begin(),
-                    newItems.end(),
-                    [&](const EquatingRecipes::Structures::ItemSpecification& newItem) {
-                      if (newItem.irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
-                        trueMinNew += newItem.scoringFunctionValues(0) * (1.0 - newItem.c(1) +
-                                                                          newItem.scoringFunctionValues(1) * newItem.c(1));
-                      } else {
-                        trueMinNew += newItem.scoringFunctionValues(0);
-                      }
+        std::for_each(newItems.begin(),
+                      newItems.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& newItem) {
+                        if (newItem.irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
+                          trueMinNew += newItem.scoringFunctionValues(0) * (1.0 - newItem.c(1) +
+                                                                            newItem.scoringFunctionValues(1) * newItem.c(1));
+                        } else {
+                          trueMinNew += newItem.scoringFunctionValues(0);
+                        }
 
-                      newTestMin += newItem.scoringFunctionValues(0);
-                    });
+                        newTestMin += newItem.scoringFunctionValues(0);
+                      });
 
-      std::for_each(oldItems.begin(),
-                    oldItems.end(),
-                    [&](const EquatingRecipes::Structures::ItemSpecification& oldItem) {
-                      if (oldItem.irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
-                        trueMinOld += (oldItem.scoringFunctionValues(0) + (oldItem.scoringFunctionValues(1)) * oldItem.c(1));
-                      } else {
-                        trueMinOld += oldItem.scoringFunctionValues(0);
-                      }
+        std::for_each(oldItems.begin(),
+                      oldItems.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& oldItem) {
+                        if (oldItem.irtModel == EquatingRecipes::Structures::IRTModel::THREE_PARAMETER_LOGISTIC) {
+                          trueMinOld += (oldItem.scoringFunctionValues(0) + (oldItem.scoringFunctionValues(1)) * oldItem.c(1));
+                        } else {
+                          trueMinOld += oldItem.scoringFunctionValues(0);
+                        }
 
-                      size_t maximumCategory = oldItem.numberOfCategories;
-                      oldScoreMax += oldItem.scoringFunctionValues(maximumCategory - 1);
-                      oldTestMin += oldItem.scoringFunctionValues(0);
-                    });
+                        size_t maximumCategory = oldItem.numberOfCategories;
+                        oldScoreMax += oldItem.scoringFunctionValues(maximumCategory - 1);
+                        oldTestMin += oldItem.scoringFunctionValues(0);
+                      });
 
-      /* Find index of largest score below sum of c's */
-      size_t chance;
-      for (chance = 0; chance < numberOfScores - 1; chance++) {
-        if (newScores(chance) > trueMinNew) {
-          break;
-        }
-      }
-
-      /* Compute slope and intercept of interpolating function for 
-        new form scores below chance */
-      double slope = trueMinNew - newTestMin;
-
-      if (slope > 0) {
-        slope = (trueMinOld - oldTestMin) / slope;
-      }
-
-      double intercept = oldTestMin - slope * newTestMin;
-
-      double xh = 99;
-      double xl = -99;
-
-      this->trueS = newScores(chance); /* Check if true score at theta=-99 is greater      */
-      if (f_mix(xl) < 0.0) {           /* than computed largest score less than the        */
-        ++chance;                      /* the sum of the c's, if so increase chance index. */
-      }
-
-      /* Assign score equivalents */
-      for (size_t scoreLocation = 0; scoreLocation <= chance; scoreLocation++) {
-        oldFormEquivalents(scoreLocation) = intercept + newScores(scoreLocation) * slope;
-        theta(scoreLocation) = xl;
-      }
-
-      double x1 = -99.0;
-      double x2 = 99.0;
-
-      for (size_t scoreLocation = chance + 1; scoreLocation < numberOfScores - 1; scoreLocation++) {
-        this->trueS = newScores(scoreLocation);
-
-        for (size_t r = 0; r <= 10; r++) {
-          theta(scoreLocation) = er_rtsafe(x1, x2, 0.00001);
-
-          if (theta(scoreLocation) == -9999.0) {
-            theta(scoreLocation) = -99.0; /* tianyou added this line 7/18/08 */
-          }
-
-          if (theta(scoreLocation) != -9999.0 &&
-              theta(scoreLocation) != -99.0 &&
-              theta(scoreLocation) != 99.0) {
+        /* Find index of largest score below sum of c's */
+        size_t chance;
+        for (chance = 0; chance < numberOfScores - 1; chance++) {
+          if (newScores(chance) > trueMinNew) {
             break;
-          } else {
-            x1 = -1.0 * std::pow(2.0, static_cast<double>(r));
-            x2 = std::pow(2.0, static_cast<double>(r));
           }
         }
 
-        oldFormEquivalents(scoreLocation) = trueScore(oldItems,
-                                                      theta(scoreLocation));
+        /* Compute slope and intercept of interpolating function for 
+        new form scores below chance */
+        double slope = trueMinNew - newTestMin;
+
+        if (slope > 0) {
+          slope = (trueMinOld - oldTestMin) / slope;
+        }
+
+        double intercept = oldTestMin - slope * newTestMin;
+
+        double xh = 99;
+        double xl = -99;
+
+        this->trueS = newScores(chance); /* Check if true score at theta=-99 is greater      */
+        if (f_mix(xl) < 0.0) {           /* than computed largest score less than the        */
+          ++chance;                      /* the sum of the c's, if so increase chance index. */
+        }
+
+        /* Assign score equivalents */
+        for (size_t scoreLocation = 0; scoreLocation <= chance; scoreLocation++) {
+          oldFormEquivalents(scoreLocation) = intercept + newScores(scoreLocation) * slope;
+          theta(scoreLocation) = xl;
+        }
+
+        double x1 = -99.0;
+        double x2 = 99.0;
+
+        for (size_t scoreLocation = chance + 1; scoreLocation < numberOfScores - 1; scoreLocation++) {
+          this->trueS = newScores(scoreLocation);
+
+          for (size_t r = 0; r <= 10; r++) {
+            theta(scoreLocation) = er_rtsafe(x1, x2, 0.00001);
+
+            if (theta(scoreLocation) == -9999.0) {
+              theta(scoreLocation) = -99.0; /* tianyou added this line 7/18/08 */
+            }
+
+            if (theta(scoreLocation) != -9999.0 &&
+                theta(scoreLocation) != -99.0 &&
+                theta(scoreLocation) != 99.0) {
+              break;
+            } else {
+              x1 = -1.0 * std::pow(2.0, static_cast<double>(r));
+              x2 = std::pow(2.0, static_cast<double>(r));
+            }
+          }
+
+          oldFormEquivalents(scoreLocation) = trueScore(oldItems,
+                                                        theta(scoreLocation));
+        }
+
+        /* Convert maximum score on new form to maximum score on old form */
+        oldFormEquivalents(numberOfScores - 1) = oldScoreMax;
+        theta(numberOfScores - 1) = xh;
+
+        lowestObservableScoreNewForm = trueMinNew;
+        lowestObservableScoreOldForm = trueMinOld;
+
+        return 0;
       }
 
-      /* Convert maximum score on new form to maximum score on old form */
-      oldFormEquivalents(numberOfScores - 1) = oldScoreMax;
-      theta(numberOfScores - 1) = xh;
+      /* IRT observed score equating functions */
 
-      lowestObservableScoreNewForm = trueMinNew;
-      lowestObservableScoreOldForm = trueMinOld;
-
-      return 0;
-    }
-
-  private:
-    EquatingRecipes::Structures::IRTScaleTransformationData controlHandle;
-    std::vector<EquatingRecipes::Structures::ItemSpecification> controlNewItems;
-    EquatingRecipes::Structures::Symmetry controlSymmetry;
-    bool controlFunctionStandardization;
-    double trueS;
-
-    /* IRT observed score equating functions */
-
-    /*------------------------------------------------------------------------------
+      /*------------------------------------------------------------------------------
       Functionality:
         Performs calculation of IRT observed score equivalents of new form scores.
 
@@ -524,117 +524,117 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
 
     ------------------------------------------------------------------------------*/
-    void irtMixObsEq(const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
-                     const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                     const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
-                     const double& wNew,
-                     const double& wOld,
-                     EquatingRecipes::Structures::IRTFittedDistribution& newForm,
-                     EquatingRecipes::Structures::IRTFittedDistribution& oldForm,
-                     EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults) {
-      size_t newFormMaximumScore;
-      size_t oldFormMaximumScore;
-      Eigen::VectorXd newFormCumulativeFreqDist;
-      Eigen::VectorXd oldFormCumulativeFreqDist;
-      Eigen::VectorXd newFormPercentileRankDist;
+      void irtMixObsEq(const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
+                       const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
+                       const std::vector<EquatingRecipes::Structures::ItemSpecification>& oldItems,
+                       const double& wNew,
+                       const double& wOld,
+                       EquatingRecipes::Structures::IRTFittedDistribution& newForm,
+                       EquatingRecipes::Structures::IRTFittedDistribution& oldForm,
+                       EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults) {
+        size_t newFormMaximumScore;
+        size_t oldFormMaximumScore;
+        Eigen::VectorXd newFormCumulativeFreqDist;
+        Eigen::VectorXd oldFormCumulativeFreqDist;
+        Eigen::VectorXd newFormPercentileRankDist;
 
-      newFormMaximumScore = newForm.numberOfRawScoreCategories;
-      oldFormMaximumScore = oldForm.numberOfRawScoreCategories;
+        newFormMaximumScore = newForm.numberOfRawScoreCategories;
+        oldFormMaximumScore = oldForm.numberOfRawScoreCategories;
 
-      /* fitted distribution for the new form with the new group */
-      irtMixObsDist(newItems,
-                    handle.newItems.size(),
-                    newFormMaximumScore,
-                    handle.quadratureNewForm.thetaValues,
-                    handle.quadratureNewForm.thetaWeights,
-                    newForm.numberOfRawScoreCategories,
-                    newForm.rawScores,
-                    newForm.fittedDistributionNewGroup);
+        /* fitted distribution for the new form with the new group */
+        irtMixObsDist(newItems,
+                      handle.newItems.size(),
+                      newFormMaximumScore,
+                      handle.quadratureNewForm.thetaValues,
+                      handle.quadratureNewForm.thetaWeights,
+                      newForm.numberOfRawScoreCategories,
+                      newForm.rawScores,
+                      newForm.fittedDistributionNewGroup);
 
-      /* fitted distribution for the new form with the old group */
-      irtMixObsDist(newItems,
-                    handle.newItems.size(),
-                    newFormMaximumScore,
-                    handle.quadratureOldForm.thetaValues,
-                    handle.quadratureOldForm.thetaWeights,
-                    newForm.numberOfRawScoreCategories,
-                    newForm.rawScores,
-                    newForm.fittedDistributionOldGroup);
+        /* fitted distribution for the new form with the old group */
+        irtMixObsDist(newItems,
+                      handle.newItems.size(),
+                      newFormMaximumScore,
+                      handle.quadratureOldForm.thetaValues,
+                      handle.quadratureOldForm.thetaWeights,
+                      newForm.numberOfRawScoreCategories,
+                      newForm.rawScores,
+                      newForm.fittedDistributionOldGroup);
 
-      /* fitted distribution for the new form with the synthetic group */
-      for (size_t scoreLocation = 0; scoreLocation < newForm.numberOfRawScoreCategories; scoreLocation++) {
-        newForm.fittedDistributionSyntheticGroup(scoreLocation) = wNew * newForm.fittedDistributionNewGroup(scoreLocation) +
-                                                                  wOld * newForm.fittedDistributionOldGroup(scoreLocation);
+        /* fitted distribution for the new form with the synthetic group */
+        for (size_t scoreLocation = 0; scoreLocation < newForm.numberOfRawScoreCategories; scoreLocation++) {
+          newForm.fittedDistributionSyntheticGroup(scoreLocation) = wNew * newForm.fittedDistributionNewGroup(scoreLocation) +
+                                                                    wOld * newForm.fittedDistributionOldGroup(scoreLocation);
+        }
+
+        /* fitted distribution for the old form with the new group */
+        irtMixObsDist(oldItems,
+                      handle.oldItems.size(),
+                      oldFormMaximumScore,
+                      handle.quadratureNewForm.thetaValues,
+                      handle.quadratureNewForm.thetaWeights,
+                      oldForm.numberOfRawScoreCategories,
+                      oldForm.rawScores,
+                      oldForm.fittedDistributionNewGroup);
+
+        if (oldForm.numberOfRawScoreCategories != oldFormMaximumScore) {
+          throw std::runtime_error("\nPossibly wrong execution in IRTmixObsEq()\n");
+        }
+
+        /* fitted distribution for the old form with the old group */
+        irtMixObsDist(oldItems,
+                      handle.oldItems.size(),
+                      oldFormMaximumScore,
+                      handle.quadratureOldForm.thetaValues,
+                      handle.quadratureOldForm.thetaWeights,
+                      oldForm.numberOfRawScoreCategories,
+                      oldForm.rawScores,
+                      oldForm.fittedDistributionOldGroup);
+
+        if (oldForm.numberOfRawScoreCategories != oldFormMaximumScore) {
+          throw std::runtime_error("\nPossibly wrong execution in IRTmixObsEq()\n");
+        }
+
+        /* fitted distribution for the old form with the synthetic group */
+        for (size_t scoreLocation = 0; scoreLocation < oldForm.numberOfRawScoreCategories; scoreLocation++) {
+          oldForm.fittedDistributionSyntheticGroup(scoreLocation) = wNew * oldForm.fittedDistributionNewGroup(scoreLocation) +
+                                                                    wOld * (oldForm.fittedDistributionOldGroup(scoreLocation));
+        }
+
+        newFormCumulativeFreqDist.resize(newForm.numberOfRawScoreCategories);
+
+        newFormCumulativeFreqDist(0) = newForm.fittedDistributionSyntheticGroup(0);
+        for (size_t scoreLocation = 1; scoreLocation < newForm.numberOfRawScoreCategories; scoreLocation++) {
+          newFormCumulativeFreqDist(scoreLocation) = newFormCumulativeFreqDist(scoreLocation - 1) + newForm.fittedDistributionSyntheticGroup(scoreLocation);
+        }
+
+        oldFormCumulativeFreqDist.resize(oldForm.numberOfRawScoreCategories);
+
+        oldFormCumulativeFreqDist(0) = oldForm.fittedDistributionSyntheticGroup(0);
+        for (size_t scoreLocation = 1; scoreLocation < oldForm.numberOfRawScoreCategories; scoreLocation++) {
+          oldFormCumulativeFreqDist(scoreLocation) = oldFormCumulativeFreqDist(scoreLocation - 1) + oldForm.fittedDistributionSyntheticGroup(scoreLocation);
+        }
+
+        /* conduct equipercentile equating with synthetic distributions */
+        double oldFormMinimumScore = oldForm.rawScores(0);
+        double oldFormScoreIncrement = oldForm.rawScores(1) - oldFormMinimumScore;
+
+        /* compute the percentile rank function --Tianyou added 8/18/08 */
+        newFormPercentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
+                                                                                                newForm.numberOfRawScoreCategories - 1,
+                                                                                                1,
+                                                                                                newFormCumulativeFreqDist);
+
+        /* calling ERutilities equipercentile equating function (TW 8/18/08) */
+        irtEquatingResults.unroundedEquatedObservedScore = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(oldForm.numberOfRawScoreCategories,
+                                                                                                                                    oldFormMinimumScore,
+                                                                                                                                    oldFormScoreIncrement,
+                                                                                                                                    oldFormCumulativeFreqDist,
+                                                                                                                                    newForm.numberOfRawScoreCategories,
+                                                                                                                                    newFormPercentileRankDist);
       }
 
-      /* fitted distribution for the old form with the new group */
-      irtMixObsDist(oldItems,
-                    handle.oldItems.size(),
-                    oldFormMaximumScore,
-                    handle.quadratureNewForm.thetaValues,
-                    handle.quadratureNewForm.thetaWeights,
-                    oldForm.numberOfRawScoreCategories,
-                    oldForm.rawScores,
-                    oldForm.fittedDistributionNewGroup);
-
-      if (oldForm.numberOfRawScoreCategories != oldFormMaximumScore) {
-        throw std::runtime_error("\nPossibly wrong execution in IRTmixObsEq()\n");
-      }
-
-      /* fitted distribution for the old form with the old group */
-      irtMixObsDist(oldItems,
-                    handle.oldItems.size(),
-                    oldFormMaximumScore,
-                    handle.quadratureOldForm.thetaValues,
-                    handle.quadratureOldForm.thetaWeights,
-                    oldForm.numberOfRawScoreCategories,
-                    oldForm.rawScores,
-                    oldForm.fittedDistributionOldGroup);
-
-      if (oldForm.numberOfRawScoreCategories != oldFormMaximumScore) {
-        throw std::runtime_error("\nPossibly wrong execution in IRTmixObsEq()\n");
-      }
-
-      /* fitted distribution for the old form with the synthetic group */
-      for (size_t scoreLocation = 0; scoreLocation < oldForm.numberOfRawScoreCategories; scoreLocation++) {
-        oldForm.fittedDistributionSyntheticGroup(scoreLocation) = wNew * oldForm.fittedDistributionNewGroup(scoreLocation) +
-                                                                  wOld * (oldForm.fittedDistributionOldGroup(scoreLocation));
-      }
-
-      newFormCumulativeFreqDist.resize(newForm.numberOfRawScoreCategories);
-
-      newFormCumulativeFreqDist(0) = newForm.fittedDistributionSyntheticGroup(0);
-      for (size_t scoreLocation = 1; scoreLocation < newForm.numberOfRawScoreCategories; scoreLocation++) {
-        newFormCumulativeFreqDist(scoreLocation) = newFormCumulativeFreqDist(scoreLocation - 1) + newForm.fittedDistributionSyntheticGroup(scoreLocation);
-      }
-
-      oldFormCumulativeFreqDist.resize(oldForm.numberOfRawScoreCategories);
-
-      oldFormCumulativeFreqDist(0) = oldForm.fittedDistributionSyntheticGroup(0);
-      for (size_t scoreLocation = 1; scoreLocation < oldForm.numberOfRawScoreCategories; scoreLocation++) {
-        oldFormCumulativeFreqDist(scoreLocation) = oldFormCumulativeFreqDist(scoreLocation - 1) + oldForm.fittedDistributionSyntheticGroup(scoreLocation);
-      }
-
-      /* conduct equipercentile equating with synthetic distributions */
-      double oldFormMinimumScore = oldForm.rawScores(0);
-      double oldFormScoreIncrement = oldForm.rawScores(1) - oldFormMinimumScore;
-
-      /* compute the percentile rank function --Tianyou added 8/18/08 */
-      newFormPercentileRankDist = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
-                                                                              newForm.numberOfRawScoreCategories - 1,
-                                                                              1,
-                                                                              newFormCumulativeFreqDist);
-
-      /* calling ERutilities equipercentile equating function (TW 8/18/08) */
-      irtEquatingResults.unroundedEquatedObservedScore = EquatingRecipes::Implementation::Utilities::getEquipercentileEquivalents(oldForm.numberOfRawScoreCategories,
-                                                                                                                  oldFormMinimumScore,
-                                                                                                                  oldFormScoreIncrement,
-                                                                                                                  oldFormCumulativeFreqDist,
-                                                                                                                  newForm.numberOfRawScoreCategories,
-                                                                                                                  newFormPercentileRankDist);
-    }
-
-    /*------------------------------------------------------------------------------
+      /*------------------------------------------------------------------------------
       Functionality:
         Calculates the marginal distribution of total score for IRT models. The IRT
         models include the 3PL, LGR, GPC, and NR models.
@@ -657,48 +657,48 @@ namespace EquatingRecipes {
       Date of last revision 9/25/08
 
     ------------------------------------------------------------------------------*/
-    void irtMixObsDist(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
-                       const size_t& numberOfItemsOnTestForm,
-                       const size_t& maximumScorePoint,
-                       const Eigen::VectorXd& quadraturePoints,
-                       const Eigen::VectorXd& quadratureWeights,
-                       size_t& numberOfScores,
-                       Eigen::VectorXd& scores,
-                       Eigen::VectorXd& marginalResponseProbabilities) {
-      // int i, j, k, MaxCat;
-      // 	double theta, xx, *xnew;
+      void irtMixObsDist(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                         const size_t& numberOfItemsOnTestForm,
+                         const size_t& maximumScorePoint,
+                         const Eigen::VectorXd& quadraturePoints,
+                         const Eigen::VectorXd& quadratureWeights,
+                         size_t& numberOfScores,
+                         Eigen::VectorXd& scores,
+                         Eigen::VectorXd& marginalResponseProbabilities) {
+        // int i, j, k, MaxCat;
+        // 	double theta, xx, *xnew;
 
-      /* finds the maximum number of categories across items */
-      size_t maximumNumberOfCategories = 2;
-      std::for_each(items.begin(),
-                    items.end(),
-                    [&](const EquatingRecipes::Structures::ItemSpecification& item) {
-                      maximumNumberOfCategories = std::max(maximumNumberOfCategories, item.numberOfCategories);
-                    });
+        /* finds the maximum number of categories across items */
+        size_t maximumNumberOfCategories = 2;
+        std::for_each(items.begin(),
+                      items.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                        maximumNumberOfCategories = std::max(maximumNumberOfCategories, item.numberOfCategories);
+                      });
 
-      Eigen::VectorXd xnew(maximumNumberOfCategories);
+        Eigen::VectorXd xnew(maximumNumberOfCategories);
 
-      marginalResponseProbabilities.setZero();
+        marginalResponseProbabilities.setZero();
 
-      for (size_t quadraturePointIndex = 0; quadraturePointIndex < quadraturePoints.size(); quadraturePointIndex++) {
-        double theta = quadraturePoints(quadraturePointIndex);
+        for (size_t quadraturePointIndex = 0; quadraturePointIndex < quadraturePoints.size(); quadraturePointIndex++) {
+          double theta = quadraturePoints(quadraturePointIndex);
 
-        ObsDistGivenTheta(theta,
-                          items,
-                          numberOfItemsOnTestForm,
-                          maximumNumberOfCategories,
-                          maximumScorePoint,
-                          numberOfScores,
-                          scores,
-                          xnew);
+          ObsDistGivenTheta(theta,
+                            items,
+                            numberOfItemsOnTestForm,
+                            maximumNumberOfCategories,
+                            maximumScorePoint,
+                            numberOfScores,
+                            scores,
+                            xnew);
 
-        marginalResponseProbabilities += quadratureWeights(quadraturePointIndex) * xnew;
+          marginalResponseProbabilities += quadratureWeights(quadraturePointIndex) * xnew;
+        }
+
+        marginalResponseProbabilities /= marginalResponseProbabilities.sum();
       }
 
-      marginalResponseProbabilities /= marginalResponseProbabilities.sum();
-    }
-
-    /*------------------------------------------------------------------------------
+      /*------------------------------------------------------------------------------
       Functionality:
         Calculates the conditional distribution of total score given theta
         for IRT models. The IRT models include the 3PL, LGR, GPC, and NR models.
@@ -722,87 +722,87 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    void ObsDistGivenTheta(const double& theta,
-                           const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
-                           const size_t& numberOfItemsOnForm,
-                           const size_t& maximumCategoryIndex,
-                           const size_t& maximumScorePoint,
-                           size_t& numberOfScores,
-                           Eigen::VectorXd& scores,
-                           Eigen::VectorXd& xnew) {
-      // int i, j, k, index;
-      // int mino, maxo, minn, maxn;
-      Eigen::VectorXd xitem(maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
-      Eigen::VectorXd xold(maximumScorePoint);         /* zero-offset */
+      void ObsDistGivenTheta(const double& theta,
+                             const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                             const size_t& numberOfItemsOnForm,
+                             const size_t& maximumCategoryIndex,
+                             const size_t& maximumScorePoint,
+                             size_t& numberOfScores,
+                             Eigen::VectorXd& scores,
+                             Eigen::VectorXd& xnew) {
+        // int i, j, k, index;
+        // int mino, maxo, minn, maxn;
+        Eigen::VectorXd xitem(maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
+        Eigen::VectorXd xold(maximumScorePoint);         /* zero-offset */
 
-      EquatingRecipes::IRTModelFunctions irtModelFunctions;
+        EquatingRecipes::Implementation::IRTModelFunctions irtModelFunctions;
 
-      /* calculates probabilities for Item 1 */
-      for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
-        xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[0], categoryIndex, theta);
-      }
+        /* calculates probabilities for Item 1 */
+        for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
+          xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[0], categoryIndex, theta);
+        }
 
-      double mino = items[0].scoringFunctionValues(0);
-      double maxo = items[0].scoringFunctionValues(items[0].numberOfCategories - 1);
-      double minn = mino;
-      double maxn = maxo;
+        double mino = items[0].scoringFunctionValues(0);
+        double maxo = items[0].scoringFunctionValues(items[0].numberOfCategories - 1);
+        double minn = mino;
+        double maxn = maxo;
 
-      xold.setZero();
+        xold.setZero();
 
-      for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
-        size_t index = static_cast<size_t>(items[0].scoringFunctionValues(categoryIndex) - minn);
-        xold(index) = xitem(categoryIndex); /* mino associated with index of 0 */
-      }                                     /* mino does vary; see below      */
+        for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
+          size_t index = static_cast<size_t>(items[0].scoringFunctionValues(categoryIndex) - minn);
+          xold(index) = xitem(categoryIndex); /* mino associated with index of 0 */
+        }                                     /* mino does vary; see below      */
 
-      xnew = xold;
+        xnew = xold;
 
-      if (numberOfItemsOnForm == 1) {
-        size_t maxMinusMin = static_cast<size_t>(maxn - minn);
+        if (numberOfItemsOnForm == 1) {
+          size_t maxMinusMin = static_cast<size_t>(maxn - minn);
 
-        for (size_t score = 0; score <= maxMinusMin; score++) {
-          scores(score) = static_cast<double>(score) + minn;
+          for (size_t score = 0; score <= maxMinusMin; score++) {
+            scores(score) = static_cast<double>(score) + minn;
+          }
+
+          numberOfScores = static_cast<size_t>(maxn - minn + 1);
+
+          return;
+        }
+
+        /* updates distribution for items 2 through nitems */
+        for (size_t itemIndex = 1; itemIndex < numberOfItemsOnForm; itemIndex++) {
+          for (size_t categoryIndex = 0; categoryIndex < items[itemIndex].numberOfCategories; categoryIndex++) {
+            xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[itemIndex],
+                                                                          categoryIndex,
+                                                                          theta);
+          }
+
+          recurs(mino,
+                 maxo,
+                 xold,
+                 items[itemIndex].numberOfCategories,
+                 items[itemIndex].scoringFunctionValues,
+                 xitem,
+                 minn,
+                 maxn,
+                 xnew);
+
+          mino = minn;
+          maxo = maxn;
+
+          size_t maxIndex = static_cast<size_t>(maxn - minn);
+
+          xold(Eigen::seq(0, maxIndex)) = xnew(Eigen::seq(0, maxIndex));
+        }
+
+        size_t maxIndex = static_cast<size_t>(maxn - minn);
+        for (size_t index = 0; index <= maxIndex; index++) {
+          scores(index) = static_cast<double>(index) + minn;
         }
 
         numberOfScores = static_cast<size_t>(maxn - minn + 1);
-
-        return;
       }
 
-      /* updates distribution for items 2 through nitems */
-      for (size_t itemIndex = 1; itemIndex < numberOfItemsOnForm; itemIndex++) {
-        for (size_t categoryIndex = 0; categoryIndex < items[itemIndex].numberOfCategories; categoryIndex++) {
-          xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[itemIndex],
-                                                                        categoryIndex,
-                                                                        theta);
-        }
-
-        recurs(mino,
-               maxo,
-               xold,
-               items[itemIndex].numberOfCategories,
-               items[itemIndex].scoringFunctionValues,
-               xitem,
-               minn,
-               maxn,
-               xnew);
-
-        mino = minn;
-        maxo = maxn;
-
-        size_t maxIndex = static_cast<size_t>(maxn - minn);
-
-        xold(Eigen::seq(0, maxIndex)) = xnew(Eigen::seq(0, maxIndex));
-      }
-
-      size_t maxIndex = static_cast<size_t>(maxn - minn);
-      for (size_t index = 0; index <= maxIndex; index++) {
-        scores(index) = static_cast<double>(index) + minn;
-      }
-
-      numberOfScores = static_cast<size_t>(maxn - minn + 1);
-    }
-
-    /*------------------------------------------------------------------------------
+      /*------------------------------------------------------------------------------
       Functionality:
         Updates a distribution of scores using Hanson's (1994) generalization of
         the Lord-Wingersky (1982) formula.
@@ -829,34 +829,34 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    void recurs(const int& mino,
-                const int& maxo,
-                const Eigen::VectorXd& xold,
-                const size_t& numberOfCategories,
-                const Eigen::VectorXd& iitem,
-                const Eigen::VectorXd& xitem,
-                double& minn,
-                double& maxn,
-                Eigen::VectorXd& xnew) {
-      minn = mino + iitem(0);
-      maxn = maxo + iitem(numberOfCategories - 1);
+      void recurs(const int& mino,
+                  const int& maxo,
+                  const Eigen::VectorXd& xold,
+                  const size_t& numberOfCategories,
+                  const Eigen::VectorXd& iitem,
+                  const Eigen::VectorXd& xitem,
+                  double& minn,
+                  double& maxn,
+                  Eigen::VectorXd& xnew) {
+        minn = mino + iitem(0);
+        maxn = maxo + iitem(numberOfCategories - 1);
 
-      for (double i = minn; i <= maxn; i += 1.0) {
-        double in = i - minn;
+        for (double i = minn; i <= maxn; i += 1.0) {
+          double in = i - minn;
 
-        xnew(static_cast<size_t>(in)) = 0.0;
+          xnew(static_cast<size_t>(in)) = 0.0;
 
-        for (size_t j = 0; j < numberOfCategories; j++) {
-          double io = i - iitem(j) - mino;
+          for (size_t j = 0; j < numberOfCategories; j++) {
+            double io = i - iitem(j) - mino;
 
-          if (io >= 0 && io <= maxo - mino) {
-            xnew(static_cast<size_t>(in)) += xold(static_cast<size_t>(io)) * xitem(j);
+            if (io >= 0 && io <= maxo - mino) {
+              xnew(static_cast<size_t>(in)) += xold(static_cast<size_t>(io)) * xitem(j);
+            }
           }
         }
       }
-    }
 
-    /*
+      /*
       Purpose:  
           This function implements bisection method to find x such that
 
@@ -881,38 +881,38 @@ namespace EquatingRecipes {
         David S. Watkins, Fundamentals of Matrix Computations,2002
       Comments:
     */
-    double er_rtsafe(double x0, double x1, double error) {
-      double left = f_mix(x0);
-      double right = f_mix(x1);
+      double er_rtsafe(double x0, double x1, double error) {
+        double left = f_mix(x0);
+        double right = f_mix(x1);
 
-      /* assert that there is a root between x1 and x2 */
-      if (left * right > 0) { /* function values have the same sign */
-        std::string msg = "Equating Recipes error occured\n";
-        msg.append("Source: er_find_root, Error: no root found exists on the interval\n");
-        throw std::runtime_error(msg);
-      }
-
-      double diff = std::abs(right - left);
-      double mid = (left + right) / 2.0;
-
-      while (diff > error) {
-        mid = (left + right) / 2.0;
-        double side1 = f_mix(mid);
-        double side2 = f_mix(right);
-
-        if (side1 * side2 <= 0) {
-          left = mid;
-        } else {
-          right = mid;
+        /* assert that there is a root between x1 and x2 */
+        if (left * right > 0) { /* function values have the same sign */
+          std::string msg = "Equating Recipes error occured\n";
+          msg.append("Source: er_find_root, Error: no root found exists on the interval\n");
+          throw std::runtime_error(msg);
         }
 
-        diff = std::abs(right - left);
+        double diff = std::abs(right - left);
+        double mid = (left + right) / 2.0;
+
+        while (diff > error) {
+          mid = (left + right) / 2.0;
+          double side1 = f_mix(mid);
+          double side2 = f_mix(right);
+
+          if (side1 * side2 <= 0) {
+            left = mid;
+          } else {
+            right = mid;
+          }
+
+          diff = std::abs(right - left);
+        }
+
+        return mid;
       }
 
-      return mid;
-    }
-
-    /*------------------------------------------------------------------------------
+      /*------------------------------------------------------------------------------
       Functionality:
         Allocate memory to the pointer members of the RawFitDist structure.
         
@@ -926,44 +926,44 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim (with some modifications by Tianyou Wang and R. L. Brennan)
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    void initializeRawFitMem(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
-                             const bool& isNewForm,
-                             EquatingRecipes::Structures::IRTScaleTransformationData& handle,
-                             EquatingRecipes::Structures::IRTFittedDistribution& irtFittedDistribution) {
-      int minimumNumberOfScoreCategories;
-      int maximumNumberOfScoreCategories;
-      double minimumScore;
-      double maximumScore;
+      void initializeRawFitMem(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                               const bool& isNewForm,
+                               EquatingRecipes::Structures::IRTScaleTransformationData& handle,
+                               EquatingRecipes::Structures::IRTFittedDistribution& irtFittedDistribution) {
+        int minimumNumberOfScoreCategories;
+        int maximumNumberOfScoreCategories;
+        double minimumScore;
+        double maximumScore;
 
-      minMaxNumberOfScoreCategories(items,
-                                    minimumNumberOfScoreCategories,
-                                    maximumNumberOfScoreCategories,
-                                    minimumScore,
-                                    maximumScore);
+        minMaxNumberOfScoreCategories(items,
+                                      minimumNumberOfScoreCategories,
+                                      maximumNumberOfScoreCategories,
+                                      minimumScore,
+                                      maximumScore);
 
-      if (isNewForm) {
-        handle.minimumRawScoreNewForm = static_cast<double>(minimumNumberOfScoreCategories);
-        handle.maximumRawScoreNewForm = maximumScore;
-        handle.rawScoreIncrementNewForm = 1;
-      } else {
-        handle.minimumRawScoreOldForm = static_cast<double>(minimumNumberOfScoreCategories);
-        handle.maximumRawScoreOldForm = maximumScore;
-        handle.rawScoreIncrementOldForm = 1;
+        if (isNewForm) {
+          handle.minimumRawScoreNewForm = static_cast<double>(minimumNumberOfScoreCategories);
+          handle.maximumRawScoreNewForm = maximumScore;
+          handle.rawScoreIncrementNewForm = 1;
+        } else {
+          handle.minimumRawScoreOldForm = static_cast<double>(minimumNumberOfScoreCategories);
+          handle.maximumRawScoreOldForm = maximumScore;
+          handle.rawScoreIncrementOldForm = 1;
+        }
+
+        irtFittedDistribution.numberOfRawScoreCategories = static_cast<size_t>(maximumNumberOfScoreCategories);
+        irtFittedDistribution.rawScores.resize(irtFittedDistribution.numberOfRawScoreCategories);
+        irtFittedDistribution.fittedDistributionNewGroup.resize(irtFittedDistribution.numberOfRawScoreCategories);
+        irtFittedDistribution.fittedDistributionOldGroup.resize(irtFittedDistribution.numberOfRawScoreCategories);
+        irtFittedDistribution.fittedDistributionSyntheticGroup.resize(irtFittedDistribution.numberOfRawScoreCategories);
+
+        for (size_t scoreLocation = 0; scoreLocation < irtFittedDistribution.numberOfRawScoreCategories; scoreLocation++) {
+          irtFittedDistribution.rawScores(scoreLocation) = static_cast<double>(minimumNumberOfScoreCategories) +
+                                                           static_cast<double>(scoreLocation);
+        }
       }
 
-      irtFittedDistribution.numberOfRawScoreCategories = static_cast<size_t>(maximumNumberOfScoreCategories);
-      irtFittedDistribution.rawScores.resize(irtFittedDistribution.numberOfRawScoreCategories);
-      irtFittedDistribution.fittedDistributionNewGroup.resize(irtFittedDistribution.numberOfRawScoreCategories);
-      irtFittedDistribution.fittedDistributionOldGroup.resize(irtFittedDistribution.numberOfRawScoreCategories);
-      irtFittedDistribution.fittedDistributionSyntheticGroup.resize(irtFittedDistribution.numberOfRawScoreCategories);
-
-      for (size_t scoreLocation = 0; scoreLocation < irtFittedDistribution.numberOfRawScoreCategories; scoreLocation++) {
-        irtFittedDistribution.rawScores(scoreLocation) = static_cast<double>(minimumNumberOfScoreCategories) +
-                                                         static_cast<double>(scoreLocation);
-      }
-    }
-
-    /*------------------------------------------------------------------------------
+      /*------------------------------------------------------------------------------
       Functionality:
         Allocate memory to the pointer members of the RawTruObsEquiv structure.
         
@@ -976,112 +976,113 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-    void initializeRawEqResults(const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
-                                const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
-                                EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults) {
-      int minimumNumberOfScoreCategories;
-      int maximumNumberOfScoreCategories;
-      double maximumScore;
-      double minimumScore;
+      void initializeRawEqResults(const std::vector<EquatingRecipes::Structures::ItemSpecification>& newItems,
+                                  const EquatingRecipes::Structures::IRTScaleTransformationData& handle,
+                                  EquatingRecipes::Structures::IRTEquatingResults& irtEquatingResults) {
+        int minimumNumberOfScoreCategories;
+        int maximumNumberOfScoreCategories;
+        double maximumScore;
+        double minimumScore;
 
-      minMaxNumberOfScoreCategories(newItems,
-                                    minimumNumberOfScoreCategories,
-                                    maximumNumberOfScoreCategories,
-                                    minimumScore,
-                                    maximumScore);
+        minMaxNumberOfScoreCategories(newItems,
+                                      minimumNumberOfScoreCategories,
+                                      maximumNumberOfScoreCategories,
+                                      minimumScore,
+                                      maximumScore);
 
-      irtEquatingResults.numberOfRawScoreCategoriesNewForm = static_cast<size_t>(maximumNumberOfScoreCategories);
-      irtEquatingResults.thetaEquivalentFormXScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
-      irtEquatingResults.unroundedEquatedTrueScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
-      irtEquatingResults.unroundedEquatedObservedScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
-      irtEquatingResults.roundedEquatedTrueScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
-      irtEquatingResults.roundedEquatedObservedScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
-    }
-
-    /*
-      Author: Seonghoon Kim
-      Date of last revision 9/25/08
-    */
-    double f_mix(const double& theta) {
-      double expectedRawScore = trueScore(this->controlNewItems,
-                                          theta);
-
-      return (this->trueS - expectedRawScore);
-    }
-
-    /*
-      Author: Seonghoon Kim
-      Date of last revision 9/25/08
-    */
-    double f_mixDer(const double& theta) {
-      EquatingRecipes::IRTModelFunctions irtModelFunctions;
-
-      double v = 0.0;
-      std::for_each(this->controlNewItems.begin(),
-                    this->controlNewItems.end(),
-                    [&](const EquatingRecipes::Structures::ItemSpecification& item) {
-                      for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
-                        double pd = irtModelFunctions.itemResponseFunctionDerivative(item, categoryIndex, theta);
-
-                        v += pd * item.scoringFunctionValues(categoryIndex);
-                      }
-                    });
-
-      v *= -1.0;
-
-      return v;
-    }
-
-    /*
-      Author: Seonghoon Kim
-      Date of last revision 9/25/08
-    */
-    double trueScore(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
-                     const double& theta) {
-      double expectedRawScore = 0.0;
-
-      EquatingRecipes::IRTModelFunctions irtModelFunctions;
-
-      std::for_each(items.begin(),
-                    items.end(),
-                    [&](const EquatingRecipes::Structures::ItemSpecification& item) {
-                      for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
-                        double probResponse = irtModelFunctions.itemResponseFunction(item,
-                                                                   categoryIndex,
-                                                                   theta);
-
-                        expectedRawScore += probResponse * item.scoringFunctionValues(categoryIndex);
-                      }
-                    });
-
-      return expectedRawScore;
-    }
-
-    void minMaxNumberOfScoreCategories(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
-                                       int& minimumNumberOfScoreCategories,
-                                       int& maximumNumberOfScoreCategories,
-                                       double& minimumScore,
-                                       double& maximumScore) {
-      /* Calculate the largest possible number of observed score categories */
-      maximumScore = 0;
-      minimumScore = 0;
-
-      std::for_each(items.begin(),
-                    items.end(),
-                    [&](const EquatingRecipes::Structures::ItemSpecification& item) {
-                      minimumScore += item.scoringFunctionValues(0);
-                      maximumScore += item.scoringFunctionValues(item.scoringFunctionValues.size() - 1);
-                    });
-
-      if (minimumScore < 0.0) {
-        minimumNumberOfScoreCategories = static_cast<int>(minimumScore - 0.5);
-      } else {
-        minimumNumberOfScoreCategories = static_cast<int>(minimumScore + 0.5);
+        irtEquatingResults.numberOfRawScoreCategoriesNewForm = static_cast<size_t>(maximumNumberOfScoreCategories);
+        irtEquatingResults.thetaEquivalentFormXScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
+        irtEquatingResults.unroundedEquatedTrueScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
+        irtEquatingResults.unroundedEquatedObservedScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
+        irtEquatingResults.roundedEquatedTrueScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
+        irtEquatingResults.roundedEquatedObservedScore.resize(static_cast<size_t>(maximumNumberOfScoreCategories));
       }
 
-      maximumNumberOfScoreCategories = static_cast<int>(maximumScore) - minimumNumberOfScoreCategories + 1;
-    }
-  };
+      /*
+      Author: Seonghoon Kim
+      Date of last revision 9/25/08
+    */
+      double f_mix(const double& theta) {
+        double expectedRawScore = trueScore(this->controlNewItems,
+                                            theta);
+
+        return (this->trueS - expectedRawScore);
+      }
+
+      /*
+      Author: Seonghoon Kim
+      Date of last revision 9/25/08
+    */
+      double f_mixDer(const double& theta) {
+        EquatingRecipes::Implementation::IRTModelFunctions irtModelFunctions;
+
+        double v = 0.0;
+        std::for_each(this->controlNewItems.begin(),
+                      this->controlNewItems.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                        for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
+                          double pd = irtModelFunctions.itemResponseFunctionDerivative(item, categoryIndex, theta);
+
+                          v += pd * item.scoringFunctionValues(categoryIndex);
+                        }
+                      });
+
+        v *= -1.0;
+
+        return v;
+      }
+
+      /*
+      Author: Seonghoon Kim
+      Date of last revision 9/25/08
+    */
+      double trueScore(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                       const double& theta) {
+        double expectedRawScore = 0.0;
+
+        EquatingRecipes::Implementation::IRTModelFunctions irtModelFunctions;
+
+        std::for_each(items.begin(),
+                      items.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                        for (size_t categoryIndex = 0; categoryIndex < item.scoringFunctionValues.size(); categoryIndex++) {
+                          double probResponse = irtModelFunctions.itemResponseFunction(item,
+                                                                                       categoryIndex,
+                                                                                       theta);
+
+                          expectedRawScore += probResponse * item.scoringFunctionValues(categoryIndex);
+                        }
+                      });
+
+        return expectedRawScore;
+      }
+
+      void minMaxNumberOfScoreCategories(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                                         int& minimumNumberOfScoreCategories,
+                                         int& maximumNumberOfScoreCategories,
+                                         double& minimumScore,
+                                         double& maximumScore) {
+        /* Calculate the largest possible number of observed score categories */
+        maximumScore = 0;
+        minimumScore = 0;
+
+        std::for_each(items.begin(),
+                      items.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                        minimumScore += item.scoringFunctionValues(0);
+                        maximumScore += item.scoringFunctionValues(item.scoringFunctionValues.size() - 1);
+                      });
+
+        if (minimumScore < 0.0) {
+          minimumNumberOfScoreCategories = static_cast<int>(minimumScore - 0.5);
+        } else {
+          minimumNumberOfScoreCategories = static_cast<int>(minimumScore + 0.5);
+        }
+
+        maximumNumberOfScoreCategories = static_cast<int>(maximumScore) - minimumNumberOfScoreCategories + 1;
+      }
+    };
+  } // namespace Implementation
 } // namespace EquatingRecipes
 
 #endif
