@@ -4,8 +4,8 @@
   Description: beta-binomial smoothing: 2 or 4 parameter beta with binomial or compound binomial error
 */
 
-#ifndef IMPLEMENTATION_BETA_BINOMIAL_SMOOTHING_HPP
-#define IMPLEMENTATION_BETA_BINOMIAL_SMOOTHING_HPP
+#ifndef STRUCTURES_BETA_BINOMIAL_SMOOTHING_HPP
+#define STRUCTURES_BETA_BINOMIAL_SMOOTHING_HPP
 
 #include <string>
 

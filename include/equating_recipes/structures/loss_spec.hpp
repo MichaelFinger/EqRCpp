@@ -1,5 +1,5 @@
-#ifndef IMPLEMENTATION_LOSS_SPEC_HPP
-#define IMPLEMENTATION_LOSS_SPEC_HPP
+#ifndef STRUCTURES_LOSS_SPEC_HPP
+#define STRUCTURES_LOSS_SPEC_HPP
 
 // Original coding:
 //   enum LossSpec {mix_ha, mix_sl};

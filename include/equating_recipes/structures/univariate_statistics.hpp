@@ -12,8 +12,8 @@
   Description: Read raw data and get or assign all elements for struct s
 */
 
-#ifndef IMPLEMENTATION_UNIVARIATE_STATISTICS_HPP
-#define IMPLEMENTATION_UNIVARIATE_STATISTICS_HPP
+#ifndef STRUCTURES_UNIVARIATE_STATISTICS_HPP
+#define STRUCTURES_UNIVARIATE_STATISTICS_HPP
 
 #include <algorithm>
 #include <string>

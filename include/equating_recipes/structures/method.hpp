@@ -1,5 +1,5 @@
-#ifndef IMPLEMENTATION_METHOD_HPP
-#define IMPLEMENTATION_METHOD_HPP
+#ifndef STRUCTURES_METHOD_HPP
+#define STRUCTURES_METHOD_HPP
 
 #include <map>
 #include <string>

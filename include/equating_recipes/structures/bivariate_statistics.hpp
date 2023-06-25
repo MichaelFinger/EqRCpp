@@ -4,8 +4,8 @@
   Description: raw-score statistics for a bivariate distribution 
 */
 
-#ifndef IMPLEMENTATION_BIVARIATE_STATISTICS_HPP
-#define IMPLEMENTATION_BIVARIATE_STATISTICS_HPP
+#ifndef STRUCTURES_BIVARIATE_STATISTICS_HPP
+#define STRUCTURES_BIVARIATE_STATISTICS_HPP
 
 #include <string>
 #include <Eigen/Core>

@@ -6,8 +6,8 @@
     for Wrapper and Print functions 
 */
 
-#ifndef IMPLEMENTATION_PDATA_HPP
-#define IMPLEMENTATION_PDATA_HPP
+#ifndef STRUCTURES_PDATA_HPP
+#define STRUCTURES_PDATA_HPP
 
 #include <limits>
 #include <string>

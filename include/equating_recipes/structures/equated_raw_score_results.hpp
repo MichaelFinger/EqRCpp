@@ -4,8 +4,8 @@
   Description: equated raw score results
 */
 
-#ifndef IMPLEMENTATION_EQUATED_RAW_SCORE_RESULTS_HPP
-#define IMPLEMENTATION_EQUATED_RAW_SCORE_RESULTS_HPP
+#ifndef STRUCTURES_EQUATED_RAW_SCORE_RESULTS_HPP
+#define STRUCTURES_EQUATED_RAW_SCORE_RESULTS_HPP
 
 #include <string>
 #include <Eigen/Core>

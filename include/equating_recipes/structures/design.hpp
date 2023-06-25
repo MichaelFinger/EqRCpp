@@ -1,5 +1,5 @@
-#ifndef IMPLEMENTATION_DESIGN_HPP
-#define IMPLEMENTATION_DESIGN_HPP
+#ifndef STRUCTURES_DESIGN_HPP
+#define STRUCTURES_DESIGN_HPP
 
 // Original coding: 'R' = RG; 'S' = SG; 'C' = CINEG, 'B' (single group w/ counter balance)
 

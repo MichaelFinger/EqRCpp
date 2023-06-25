@@ -4,8 +4,8 @@
   Description: raw to scaled score table
 */
 
-#ifndef IMPLEMENTATION_RAW_TO_SCALED_SCORE_TABLE_HPP
-#define IMPLEMENTATION_RAW_TO_SCALED_SCORE_TABLE_HPP
+#ifndef STRUCTURES_RAW_TO_SCALED_SCORE_TABLE_HPP
+#define STRUCTURES_RAW_TO_SCALED_SCORE_TABLE_HPP
 
 #include <map>
 #include <string>
