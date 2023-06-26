@@ -18,11 +18,6 @@ namespace EquatingRecipes {
       struct InputData {
         std::string title;
         std::string datasetName;
-        double lowestObservableEquatedRawScore;
-        double highestObservableEquatedRawScore;
-        double scoreIncrementEquatedRawScore;
-        double lowestObservableScaledScore;
-        double highestObservableScaledScore;
         EquatingRecipes::Structures::PData pData;
         EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
         EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
@@ -41,13 +36,13 @@ namespace EquatingRecipes {
 
         EquatingRecipes::Implementation::Utilities::runEquatedScaledScores(outputData.pData,
                                                                            inputData.equatedRawScoreResults,
-                                                                           inputData.lowestObservableEquatedRawScore,
-                                                                           inputData.highestObservableEquatedRawScore,
-                                                                           inputData.scoreIncrementEquatedRawScore,
+                                                                           inputData.rawToScaledScoreTable.lowestObservableEquatedRawScore,
+                                                                           inputData.rawToScaledScoreTable.highestObservableEquatedRawScore,
+                                                                           inputData.rawToScaledScoreTable.scoreIncrementEquatedRawScore,
                                                                            inputData.rawToScaledScoreTable,
                                                                            inputData.roundToNumberOfDecimalPlaces,
-                                                                           inputData.lowestObservableScaledScore,
-                                                                           inputData.highestObservableScaledScore,
+                                                                           inputData.rawToScaledScoreTable.lowestObservableScaledScore,
+                                                                           inputData.rawToScaledScoreTable.highestObservableScaledScore,
                                                                            outputData.equatedScaledScoreResults);
 
         nlohmann::json results = nlohmann::json::object();

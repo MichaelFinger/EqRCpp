@@ -25,6 +25,11 @@ namespace EquatingRecipes {
         double scaledScore;
       };
 
+      double lowestObservableEquatedRawScore;
+      double highestObservableEquatedRawScore;
+      double scoreIncrementEquatedRawScore;
+      double lowestObservableScaledScore;
+      double highestObservableScaledScore;
       std::map<size_t, Entry> lookup;
 
       Entry getEntry(const size_t& scoreLocation) const {

@@ -13,6 +13,7 @@
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/implementation/cg_equipercentile_equating.hpp>
 #include <equating_recipes/implementation/cg_no_smoothing.hpp>
+#include <equating_recipes/analyses/bivariate_statistics.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -32,8 +33,8 @@ namespace EquatingRecipes {
             double reliabilityCommonItemsPopulation1 = 0;
             double reliabilityCommonItemsPopulation2 = 0;
             size_t bootstrapReplicationNumber = 0;
-            EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXV;
-            EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV;
+            EquatingRecipes::Analyses::BivariateStatistics::InputData bivariateStatisticsInputDataXV;
+            EquatingRecipes::Analyses::BivariateStatistics::InputData bivariateStatisticsInputDataYV;
           };
 
           struct OutputData {
@@ -43,12 +44,24 @@ namespace EquatingRecipes {
             EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
           };
 
-          nlohmann::json operator()(const EquatingRecipes::Analyses::CommonItemNonequivalentGroups::InputData& inputData,
-                                    EquatingRecipes::Analyses::CommonItemNonequivalentGroups::OutputData& outputData) {
+          nlohmann::json operator()(const InputData& inputData,
+                                    OutputData& outputData) {
+            EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
+            EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataXV;
+            EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataYV;
+            EquatingRecipes::Analyses::BivariateStatistics::OutputData outputDataXV;
+            EquatingRecipes::Analyses::BivariateStatistics::OutputData outputDataYV;
+
+            nlohmann::json bivariateStatisticsXVResults = bivariateStatistics(inputData.bivariateStatisticsInputDataXV,
+                                                                              outputDataXV);
+
+            nlohmann::json bivariateStatisticsYVResults = bivariateStatistics(inputData.bivariateStatisticsInputDataYV,
+                                                                              outputDataYV);
+
             EquatingRecipes::Implementation::CGEquatingNoSmoothing cgEquatingNoSmoothing;
 
-            outputData.bivariateStatisticsXV = inputData.bivariateStatisticsXV;
-            outputData.bivariateStatisticsYV = inputData.bivariateStatisticsYV;
+            outputData.bivariateStatisticsXV = outputDataXV.bivariateStatistics;
+            outputData.bivariateStatisticsYV = outputDataYV.bivariateStatistics;
 
             cgEquatingNoSmoothing.runWithNoSmoothing(inputData.design,
                                                      inputData.method,
@@ -70,19 +83,14 @@ namespace EquatingRecipes {
             results["PData"] = outputData.pData;
             results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
 
+            nlohmann::json cineGroupsEquatingResults = nlohmann::json {{"analysis_type", "common_item_nonequivalent_groups"},
+                                                                       {"analysis_results", results}};
+
             nlohmann::json j = nlohmann::json::array();
 
-            j.push_back({{"analysis_title", inputData.title},
-                         {"analysis_type", "bivariate_statistics"},
-                         {"analysis_results", outputData.bivariateStatisticsXV}});
-
-            j.push_back({{"analysis_title", inputData.title},
-                         {"analysis_type", "bivariate_statistics"},
-                         {"analysis_results", outputData.bivariateStatisticsYV}});
-
-            j.push_back({{"analysis_title", inputData.title},
-                         {"analysis_type", "common_item_nonequivalent_groups"},
-                         {"analysis_results", results}});
+            j.push_back(bivariateStatisticsXVResults);
+            j.push_back(bivariateStatisticsYVResults);
+            j.push_back(cineGroupsEquatingResults);
 
             return j;
           }

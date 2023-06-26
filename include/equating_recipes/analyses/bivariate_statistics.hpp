@@ -8,35 +8,54 @@
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/implementation/utilities.hpp>
-#include <equating_recipes/structures/bivariate_statistics_input_data.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
     struct BivariateStatistics {
-      nlohmann::json operator()(const std::string& title,
-                                const std::string& datasetName,
-                                const EquatingRecipes::Structures::BivariateStatisticsInputData& inputData,
-                                EquatingRecipes::Structures::BivariateStatistics& bivariateStatistics) {
+      struct InputData {
+        std::string datasetName;
+        std::string rowVariableName;
+        std::string columnVariableName;
+
+        Eigen::VectorXd rowScores;
+        double rowMinimumScore;
+        double rowMaximumScore;
+        double rowScoreIncrement;
+
+        Eigen::VectorXd columnScores;
+        double columnMinimumScore;
+        double columnMaximumScore;
+        double columnScoreIncrement;
+
+        std::string rowScoreId = "X";
+        std::string columnScoreId = "Y";
+      };
+
+      struct OutputData {
+        EquatingRecipes::Structures::BivariateStatistics bivariateStatistics;
+      };
+
+      nlohmann::json operator()(const InputData& inputData,
+                                OutputData& outputData) {
         Eigen::MatrixXd scores(inputData.rowScores.size(), 2);
         scores.col(0) = inputData.rowScores;
         scores.col(1) = inputData.columnScores;
 
-        bivariateStatistics = EquatingRecipes::Implementation::Utilities::bivariateFromScores(scores,
-                                                                                              inputData.rowMinimumScore,
-                                                                                              inputData.rowMaximumScore,
-                                                                                              inputData.rowScoreIncrement,
-                                                                                              inputData.columnMinimumScore,
-                                                                                              inputData.columnMaximumScore,
-                                                                                              inputData.columnScoreIncrement,
-                                                                                              inputData.rowScoreId,
-                                                                                              inputData.columnScoreId,
-                                                                                              datasetName,
-                                                                                              inputData.rowVariableName,
-                                                                                              inputData.columnVariableName);
+        outputData.bivariateStatistics = EquatingRecipes::Implementation::Utilities::bivariateFromScores(scores,
+                                                                                                         inputData.rowMinimumScore,
+                                                                                                         inputData.rowMaximumScore,
+                                                                                                         inputData.rowScoreIncrement,
+                                                                                                         inputData.columnMinimumScore,
+                                                                                                         inputData.columnMaximumScore,
+                                                                                                         inputData.columnScoreIncrement,
+                                                                                                         inputData.rowScoreId,
+                                                                                                         inputData.columnScoreId,
+                                                                                                         inputData.datasetName,
+                                                                                                         inputData.rowVariableName,
+                                                                                                         inputData.columnVariableName);
 
-        nlohmann::json j = {{"analysis_title", title},
-                            {"analysis_type", "bivariate_statistics"},
-                            {"analysis_results", bivariateStatistics}};
+        nlohmann::json j = {{"analysis_type", "bivariate_statistics"},
+                            {"analysis_results", outputData.bivariateStatistics}};
 
         return j;
       }

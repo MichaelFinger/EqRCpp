@@ -1,11 +1,13 @@
 #include "chapter2.hpp"
 #include "chapter3.hpp"
-#include "chapter4.hpp"
-#include "chapter5.hpp"
-#include "chapter6.hpp"
-#include "chapter7.hpp"
-#include "chapter8.hpp"
-#include "irt_scale_transformation.hpp"
+// #include "chapter4.hpp"
+// #include "chapter5.hpp"
+// #include "chapter6.hpp"
+// #include "chapter7.hpp"
+// #include "chapter8.hpp"
+// #include "irt_scale_transformation.hpp"
+
+#include <equating_recipes/analyses/analyses.hpp>
 
 int main(int argc, char const *argv[]) {
   // EquatingRecipes::Tests::Examples::Chapter2 ch2;
@@ -29,8 +31,8 @@ int main(int argc, char const *argv[]) {
   // EquatingRecipes::Tests::Examples::Chapter8 ch8;
   // ch8();
 
-  EquatingRecipes::Tests::Examples::IRTScaleTransformation irtScaleTransformation; 
-  irtScaleTransformation();
+  // EquatingRecipes::Tests::Examples::IRTScaleTransformation irtScaleTransformation; 
+  // irtScaleTransformation();
 
   return 0;
 }

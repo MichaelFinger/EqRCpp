@@ -1,13 +1,13 @@
 {
   "files.associations": {
-    "*.ejs": "html",
-    "*.njk": "handlebars",
     "*.json.liquid": "json",
     "*.yaml.liquid": "yaml",
     "*.md.liquid": "markdown",
     "*.js.liquid": "liquid-javascript",
     "*.css.liquid": "liquid-css",
     "*.scss.liquid": "liquid-scss",
+    "*.njk": "handlebars",
+    "*.ejs": "html",
     "__locale": "cpp",
     "core": "cpp",
     "superlusupport": "cpp",
@@ -125,6 +125,7 @@
     "utility": "cpp",
     "stop_token": "cpp",
     "filesystem": "cpp",
-    "source_location": "cpp"
+    "source_location": "cpp",
+    "__verbose_abort": "cpp"
   }
 }

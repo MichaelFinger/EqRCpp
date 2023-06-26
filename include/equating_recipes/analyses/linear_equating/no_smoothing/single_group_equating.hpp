@@ -11,8 +11,11 @@
 #include <equating_recipes/structures/method.hpp>
 #include <equating_recipes/structures/p_data.hpp>
 #include <equating_recipes/structures/smoothing.hpp>
-#include <equating_recipes/structures/bivariate_statistics.hpp>
+#include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/implementation/rg_and_sg_equating.hpp>
+#include <equating_recipes/analyses/bivariate_statistics.hpp>
+#include <equating_recipes/analyses/equated_scaled_scores.hpp>
+#include <equating_recipes/structures/raw_to_scaled_score_table.hpp>
 
 namespace EquatingRecipes {
   namespace Analyses {
@@ -25,40 +28,68 @@ namespace EquatingRecipes {
             EquatingRecipes::Structures::Design design;
             EquatingRecipes::Structures::Method method;
             EquatingRecipes::Structures::Smoothing smoothing;
-            EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXY;
-            size_t roundToNumberOfDecimalPlaces = 1;
+            EquatingRecipes::Analyses::BivariateStatistics::InputData bivariateStatisticsInputDataXY;
+            EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
           };
 
           struct OutputData {
             EquatingRecipes::Structures::PData pData;
             EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+            EquatingRecipes::Structures::EquatedScaledScoresResults equatedScaledScoreResults;
+            EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXY;
           };
 
-          nlohmann::json operator()(const EquatingRecipes::Analyses::SingleGroupEquating::InputData& inputData,
-                                    EquatingRecipes::Analyses::SingleGroupEquating::OutputData& outputData) {
-            EquatingRecipes::Implementation::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
+          nlohmann::json operator()(const InputData& inputData,
+                                    OutputData& outputData) {
+            EquatingRecipes::Analyses::BivariateStatistics bivariateStatisticsAnalysis;
 
-            EquatingRecipes::Structures::PData pData;
-            EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+            EquatingRecipes::Analyses::BivariateStatistics::OutputData bivariateStatisticsXYOutputData;
+
+            nlohmann::json bivariateStatisticsXYResults = bivariateStatisticsAnalysis(inputData.bivariateStatisticsInputDataXY,
+                                                                                      bivariateStatisticsXYOutputData);
+
+            outputData.bivariateStatisticsXY = bivariateStatisticsXYOutputData.bivariateStatistics;
+
+            EquatingRecipes::Implementation::RandomAndSingleGroupEquating randomAndSingleGroupEquating;
 
             randomAndSingleGroupEquating.runSingleGroupEquating(inputData.design,
                                                                 inputData.method,
                                                                 inputData.smoothing,
-                                                                inputData.bivariateStatisticsXY,
+                                                                outputData.bivariateStatisticsXY,
                                                                 0,
                                                                 outputData.pData,
                                                                 outputData.equatedRawScoreResults);
 
+            EquatingRecipes::Analyses::EquatedScaledScores equatedScaledScores;
+            EquatingRecipes::Analyses::EquatedScaledScores::InputData inputDataScaledScores;
+            EquatingRecipes::Analyses::EquatedScaledScores::OutputData outputDataScaledScores;
+
+            inputDataScaledScores.datasetName = "ACT Math";
+            inputDataScaledScores.equatedRawScoreResults = outputData.equatedRawScoreResults;
+            inputDataScaledScores.pData = outputData.pData;
+            inputDataScaledScores.rawToScaledScoreTable = inputData.rawToScaledScoreTable;
+
+            nlohmann::json equatedScaledScoresResults = equatedScaledScores(inputDataScaledScores,
+                                                                            outputDataScaledScores);
+
+            outputData.pData = outputDataScaledScores.pData;
+            outputData.equatedScaledScoreResults = outputDataScaledScores.equatedScaledScoreResults;
+
             nlohmann::json results = nlohmann::json::object();
             results["DatasetName"] = inputData.datasetName;
-            results["RowVariableName"] = inputData.univariateStatisticsX.variableName;
-            results["ColumnwVariableName"] = inputData.univariateStatisticsY.variableName;
+            results["RowVariableName"] = outputData.bivariateStatisticsXY.univariateStatisticsRow.id;
+            results["ColumnwVariableName"] = outputData.bivariateStatisticsXY.univariateStatisticsRow.id;
             results["PData"] = outputData.pData;
             results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
+            results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
 
-            nlohmann::json j = {{"analysis_title", inputData.title},
-                                {"analysis_type", "single_group_equating"},
-                                {"analysis_results", results}};
+            nlohmann::json singleGroupEquatingResults = nlohmann::json {{"analysis_type", "single_group_equating"},
+                                                                         {"analysis_results", results}};
+
+            nlohmann::json j = nlohmann::json::array();
+            j.push_back(bivariateStatisticsXYResults);
+            j.push_back(singleGroupEquatingResults);
+            j.push_back(equatedScaledScoresResults);
 
             return j;
           }

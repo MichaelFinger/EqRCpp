@@ -28,27 +28,30 @@ namespace EquatingRecipes {
            Chapter 2 example (see pp. 50-52) */
 
           EquatingRecipes::Analyses::UnivariateStatistics univariateStatistics;
-          EquatingRecipes::Analyses::UnivariateStatistics::InputData inputData;
+          EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
 
-          inputData.datasetName = "ACTMathFreq";
-          inputData.id = "X";
-          inputData.variableName = "ACTMathScore";
-          inputData.minimumScore = 0;
-          inputData.maximumScore = 40;
-          inputData.scoreIncrement = 1;
-          inputData.scoreFrequencies = actMathFreq.freqX;
+          EquatingRecipes::Analyses::UnivariateStatistics::InputData inputDataACTMath;
 
-          EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsACTMath;
-          nlohmann::json univariateStatisticsACTMathJson = univariateStatistics(inputData, univariateStatisticsACTMath);
+          inputDataACTMath.id = "X";
+          inputDataACTMath.variableName = "ACTMathScore";
+          inputDataACTMath.minimumScore = 0;
+          inputDataACTMath.maximumScore = 40;
+          inputDataACTMath.scoreIncrement = 1;
+          inputDataACTMath.scoreFrequencies = actMathFreq.freqX;
+
+          EquatingRecipes::Analyses::UnivariateStatistics::OutputData univariateStatisticsACTMathOutputData;
+
+          nlohmann::json univariateStatisticsACTMathJson = univariateStatistics(inputDataACTMath,
+                                                                                univariateStatisticsACTMathOutputData);
 
           /* Common-items Nonequivalent Groups Design: 
           Kolen and Brennan (2004) Chapter 4 example (see page 123)*/
           EquatingRecipes::Tests::Examples::Datasets::MondatX mondatX;
 
           EquatingRecipes::Analyses::BivariateStatistics::InputData inputDataXY;
-          
+
           inputDataXY.datasetName = "MondatX";
-          inputDataXY.rowVariableName =  "RawScoreForm1";
+          inputDataXY.rowVariableName = "RawScoreForm1";
           inputDataXY.columnVariableName = "RawScoreForm2";
           inputDataXY.rowScores = mondatX.rawScores.col(0);
           inputDataXY.rowMinimumScore = 0;
@@ -57,17 +60,17 @@ namespace EquatingRecipes {
           inputDataXY.columnScores = mondatX.rawScores.col(1);
           inputDataXY.columnMinimumScore = 0;
           inputDataXY.columnMaximumScore = 12;
-          inputDataXY.columnScoreIncrement =1 ;
+          inputDataXY.columnScoreIncrement = 1;
           inputDataXY.rowScoreId = "X";
           inputDataXY.columnScoreId = "Y";
 
-          EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXY;
-          EquatingRecipes::Analyses::BivariateStatistics bivariateStatistics;
-          nlohmann::json bivariateStatisticsMondatXJson = bivariateStatistics(inputDataXY, bivariateStatisticsXY);
+          EquatingRecipes::Analyses::BivariateStatistics::OutputData outputDataXY;
+          nlohmann::json bivariateStatisticsMondatXJson = bivariateStatistics(inputDataXY,
+                                                                              outputDataXY);
 
-
-          nlohmann::json j = {univariateStatisticsACTMathJson,
-                              bivariateStatisticsMondatXJson};
+          nlohmann::json j = nlohmann::json::array();
+          j.push_back(univariateStatisticsACTMathJson);
+          j.push_back(bivariateStatisticsMondatXJson);
 
           EquatingRecipes::JSON::JsonDocument doc;
           doc.setJson(j);

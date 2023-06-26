@@ -14,7 +14,7 @@
 #include "datasets/actmathfreq.hpp"
 #include "datasets/yctmath.hpp"
 
-#include <equating_recipes/analyses/random_groups_equating.hpp>
+#include <equating_recipes/analyses/linear_equating/no_smoothing/random_groups_equating.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/analyses/equated_scaled_scores.hpp>
 
@@ -25,8 +25,6 @@ namespace EquatingRecipes {
         void operator()() {
           EquatingRecipes::Tests::Examples::Datasets::ACTMathFreq actMathFreq;
           EquatingRecipes::Tests::Examples::Datasets::YctMath yctMath;
-
-          EquatingRecipes::Analyses::UnivariateStatistics univariateStatistics;
 
           EquatingRecipes::Analyses::UnivariateStatistics::InputData inputDataX;
           EquatingRecipes::Analyses::UnivariateStatistics::InputData inputDataY;
@@ -47,44 +45,24 @@ namespace EquatingRecipes {
           inputDataY.scoreIncrement = 1;
           inputDataY.id = "Y";
 
-          EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
-          EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
+          EquatingRecipes::Analyses::UnivariateStatistics::OutputData outputDataX;
+          EquatingRecipes::Analyses::UnivariateStatistics::OutputData outputDataY;
 
-          nlohmann::json univariateStatisticsXJson = univariateStatistics(inputDataX, univariateStatisticsX);
-          nlohmann::json univariateStatisticsYJson = univariateStatistics(inputDataY, univariateStatisticsY);
+          EquatingRecipes::Analyses::LinearEquating::NoSmoothing::RandomGroupsEquating randomGroupsEquating;
+          EquatingRecipes::Analyses::LinearEquating::NoSmoothing::RandomGroupsEquating::InputData inputData;
+          EquatingRecipes::Analyses::LinearEquating::NoSmoothing::RandomGroupsEquating::OutputData outputData;
 
-          EquatingRecipes::Analyses::RandomGroupsEquating::InputData inputData;
           inputData.title = actMathFreq.datasetName + "---Linear";
           inputData.datasetName = actMathFreq.datasetName;
           inputData.design = EquatingRecipes::Structures::Design::RANDOM_GROUPS;
           inputData.method = EquatingRecipes::Structures::Method::LINEAR;
           inputData.smoothing = EquatingRecipes::Structures::Smoothing::NOT_SPECIFIED;
+          inputData.rawToScaledScoreTable = yctMath.rawToScaledScoreTable;
+          inputData.univariateStatisticsInputDataX = inputDataX;
+          inputData.univariateStatisticsInputDataY = inputDataY;
 
-          inputData.univariateStatisticsX = univariateStatisticsX;
-          inputData.univariateStatisticsY = univariateStatisticsY;
-          
-          EquatingRecipes::Analyses::RandomGroupsEquating linearEquatingRandomGroups;
-
-          EquatingRecipes::Analyses::RandomGroupsEquating::OutputData linearEquatingRandomGroupsOutputData;
-
-          nlohmann::json linearEquatingRandomGroupsJson = linearEquatingRandomGroups(inputData,
-                                                                                     linearEquatingRandomGroupsOutputData);
-
-          EquatingRecipes::Analyses::EquatedScaledScores equatedScaledScores;
-          EquatingRecipes::Analyses::EquatedScaledScores::InputData inputDataScaledScores;
-          inputDataScaledScores.datasetName = "ACT Math";
-          inputDataScaledScores.equatedRawScoreResults = linearEquatingRandomGroupsOutputData.equatedRawScoreResults;
-          inputDataScaledScores.pData = linearEquatingRandomGroupsOutputData.pData;
-          inputDataScaledScores.lowestObservableEquatedRawScore = 0;
-          inputDataScaledScores.highestObservableEquatedRawScore = 40;
-          inputDataScaledScores.scoreIncrementEquatedRawScore = 1;
-          inputDataScaledScores.lowestObservableScaledScore = 1;
-          inputDataScaledScores.highestObservableScaledScore = 36;
-          inputDataScaledScores.rawToScaledScoreTable = yctMath.rawToScaledScoreTable;
-
-          nlohmann::json j = {univariateStatisticsXJson,
-                              univariateStatisticsYJson,
-                              linearEquatingRandomGroupsJson};
+          nlohmann::json j = randomGroupsEquating(inputData,
+                                                  outputData);
 
           EquatingRecipes::JSON::JsonDocument jsonDoc;
           jsonDoc.setJson(j);
