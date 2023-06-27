@@ -11,6 +11,9 @@
 #include <equating_recipes/analyses/linear_equating/no_smoothing/random_groups_equating.hpp>
 #include <equating_recipes/analyses/linear_equating/no_smoothing/single_group_equating.hpp>
 #include <equating_recipes/analyses/linear_equating/pre_smoothing/beta_binomial/random_groups_equating.hpp>
+#include <equating_recipes/analyses/linear_equating/pre_smoothing/log_linear/random_groups_equating.hpp>
+#include <equating_recipes/analyses/linear_equating/pre_smoothing/log_linear/single_group_equating.hpp>
+// #include <equating_recipes/analyses/linear_equating/pre_smoothing/log_linear/common_item_nonequivalent_groups.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 
 #endif

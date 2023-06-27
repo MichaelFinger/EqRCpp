@@ -60,56 +60,56 @@ University of Iowa
 #include <equating_recipes/structures/smoothing.hpp>
 #include <equating_recipes/structures/univariate_log_linear_smoothing.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
+#include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/implementation/cg_equipercentile_equating.hpp>
 #include <equating_recipes/implementation/utilities.hpp>
-
-
 
 namespace EquatingRecipes {
   namespace Implementation {
     class LogLinearEquating {
     public:
       /*
-      Wrapper to do univariate log-linear smoothing.
+        Wrapper to do univariate log-linear smoothing.
 
-      Input
-        x   =  UTATS structure
-        c   = number of degrees for polynomial smoothing
-        scale = type of scaling:
-              0 --> no scaling; 
-                1 --> scale such that each column of B has
-                      sum (elements) = 0 and sum (elements^2) = 1
-        Btype = type of moments for criterion mathching:
-                0 --> moments based on B 
-                (if scale = 0, design matrix is based on raw scores,
-                which means that the moments are based on raw scores;
-                if scale = 1, design matrix is based on scaled raw scores,
-                which means that the moments are based on scaled raw scores) 
-                1 -->  moments based on B_raw, whether scale is 0 or 1
-      ctype = comparison type for criterion:
-              0 --> means use absolute criterion; 
-          1 --> means use relative criterion
-      crit = convergence criterion value
-        fp  = pointer to output file (if NULL then no output printed;
-            in particular, results for each iteration step are not printed)
+        Input
+          x   =  UTATS structure
+          c   = number of degrees for polynomial smoothing
+          scale = type of scaling:
+                0 --> no scaling; 
+                  1 --> scale such that each column of B has
+                        sum (elements) = 0 and sum (elements^2) = 1
+          Btype = type of moments for criterion mathching:
+                  0 --> moments based on B 
+                  (if scale = 0, design matrix is based on raw scores,
+                  which means that the moments are based on raw scores;
+                  if scale = 1, design matrix is based on scaled raw scores,
+                  which means that the moments are based on scaled raw scores) 
+                  1 -->  moments based on B_raw, whether scale is 0 or 1
+        ctype = comparison type for criterion:
+                0 --> means use absolute criterion; 
+            1 --> means use relative criterion
+        crit = convergence criterion value
+          fp  = pointer to output file (if NULL then no output printed;
+              in particular, results for each iteration step are not printed)
 
-      Output
-        populates s, which is a ULL_SMOOTH structure
+        Output
+          populates s, which is a ULL_SMOOTH structure
 
-      Function calls other than C or NR utilities:  
-        Smooth_ULL()
+        Function calls other than C or NR utilities:  
+          Smooth_ULL()
 
-      R. L. Brennan
+        R. L. Brennan
 
-      Date of last revision: 6/30/08
-    */
-      void runUnivariateLogLinearSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
-                                           const size_t& numberOfDegreesSmoothing,
-                                           const bool& useStandardizedScale,
-                                           const EquatingRecipes::Structures::DesignMatrixType& designMatrixType,
-                                           const EquatingRecipes::Structures::CriterionComparisonType& criterionComparisonType,
-                                           const double& criterion,
-                                           EquatingRecipes::Structures::UnivariateLogLinearSmoothing& smoothingResults) {
+        Date of last revision: 6/30/08
+      */
+      EquatingRecipes::Structures::UnivariateLogLinearSmoothing runUnivariateLogLinearSmoothing(const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                                                                                                const size_t& numberOfDegreesSmoothing,
+                                                                                                const bool& useStandardizedScale,
+                                                                                                const EquatingRecipes::Structures::DesignMatrixType& designMatrixType,
+                                                                                                const EquatingRecipes::Structures::CriterionComparisonType& criterionComparisonType,
+                                                                                                const double& criterion) {
+        EquatingRecipes::Structures::UnivariateLogLinearSmoothing smoothingResults;
+
         smoothUnivaraiteLogLinear(univariateStatisticsX.numberOfExaminees,
                                   univariateStatisticsX.numberOfScores,
                                   univariateStatisticsX.minimumScore,
@@ -121,7 +121,177 @@ namespace EquatingRecipes {
                                   criterionComparisonType,
                                   criterion,
                                   smoothingResults);
+
+        return smoothingResults;
       }
+
+      
+      /*
+        Wrapper to do univariate log-linear smoothing.
+
+        NOTE: if this function is used with the SG design,
+              anchor should be set to 0 (external)
+
+        Input
+          xv      =  BTATS structure
+          anchor  = 0 (external); = 1 (internal) 
+          cu      = number of degrees of smoothing for u
+          cv      = number of degrees of smoothing for v
+          cuv     = number of cross-product moments
+          cpm[cuv-1][2] = zero-offset matrix designating cross-
+                          product moments.  Example: let cuv = 3,
+                          and the desired cross-product moments be 
+                          (u^1)*(v^1), (u^1)*(v^2), and (u^2)*(v^1). 
+                          Then cpm[0] = {1,1}; cpm[1] = {1,2}; and
+                          cpm[2] = {2,1}. 
+          scale = type of scaling:
+                0 --> no scaling; 
+                  1 --> scale such that each column of B has
+                        sum (elements) = 0 and sum (elements^2) = 1
+          Btype = type of moments for criterion mathching:
+                  0 --> moments based on B 
+                  (if scale = 0, design matrix is based on raw scores,
+                  which means that the moments are based on raw scores;
+                  if scale = 1, design matrix is based on scaled raw scores,
+                  which means that the moments are based on scaled raw scores) 
+                  1 -->  moments based on B_raw, whether scale is 0 or 1
+        ctype = comparison type for criterion:
+                0 --> means use absolute criterion; 
+            1 --> means use relative criterion
+        crit = convergence criterion value
+          fp  = pointer to output file (if NULL then no output printed;
+              in particular, results for each iteration step are not printed) 
+
+        Output
+          gets s->nct and 
+          calls function that populates other elements of s
+
+        NOTE: When anchor is internal, smoothing is done on matrix of
+            (non-common-item scores) by (common-item scores).  For an
+          internal anchor, smoothing could be done on matrix of
+          (total scores) by (common-item scores), and convergence
+          should not be a problem, but structural zeros likely would be
+          given fitted positive values.  (For an internal anchor,
+          structural zeros occur when a total score is impossible
+          given a particular common item score.)
+
+        Function calls other than C or NR utilities:  
+          get_nct_bfd()
+          Smooth_BLL()
+          get_bfd_mct()
+
+        R. L. Brennan
+
+        Date of last revision: 6/30/08
+      */
+     EquatingRecipes::Structures::BivariateLogLinearSmoothing runBivariateLogLinearSmoothing() {
+      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing;
+
+      return bivariateLogLinearSmoothing;
+  //    void Wrapper_Smooth_BLL(struct BSTATS *xv, int anchor,
+  //                       int cu, int cv, int cuv, int cpm[][2],
+	// 					int scale, int Btype, int ctype, double crit,
+  //                       FILE *fp, struct BLL_SMOOTH *s) {
+  // int i,j,
+  //     nsx = xv->ns1, 
+  //     nsv = xv->ns2,
+	//   ns = nsx*nsv,
+  //     nsu = (anchor) ? xv->ns1 - xv->ns2 + 1: xv->ns1;
+  // double *ptr,                                /* pointer variable */
+	//      minu = (anchor) ?  xv->min1 - xv->min2: xv->min1,
+  //        incu = xv->inc1;    /* to be sensible, it must be true that
+  //                                      xv->inc1 = xv->inc2 = incu */
+
+  // /* nsu is number of categories for non-common items */
+ 
+  // s->nct = dvector(0,nsu*nsv-1);
+  // s->bfd = dmatrix(0,nsx-1,0,nsv-1);  
+
+  // /* For an external anchor, directly convert xv->bfd[][] 
+  //    to a row-major vector nct[]. For an internal anchor, 
+  //    conceptually we first collapse xv->bfd[][] to 
+  //    uv->bfd[][], and then convert to nct[].  
+  //    In the end this means that nct[] is a row-major vector 
+  //    with nsu*nsv elements */
+
+  // get_nct_bfd(anchor, xv->ns1, xv->ns2, xv->dbl_bfd, s->nct); 
+
+  // /* call bivariate log-linear smoothing function, which
+  //    assumes that row categores are NOT included in
+  //    column categories */ 
+
+  // Smooth_BLL(xv->n, nsu, minu, incu, 
+  //            xv->ns2, xv->min2, xv->inc2, s->nct, 
+  //            anchor, cu, cv, cuv, cpm, 
+	// 		 scale, Btype, ctype, crit, fp, s); 
+
+  // /* For an external anchor, directly convert the row major 
+  //    vector s->mct[nsu*nsv] to s->bfd[nsu][nsv]. For an 
+  //    internal anchor, convert s->mct[nsu*nsv] to
+  //    s->bfd[nsu+nsv-1][nsv] repositioning elements and
+	//  adding structural zeros. */
+
+  // get_bfd_mct(anchor, xv->ns1, xv->ns2, s->mct, s->bfd);
+
+  // /* get row and col marginal densities, crfd's and prd's for bfd[][] */
+
+  // s->nsx = nsx;
+  // s->minx = xv->min1;
+  // s->incx = xv->inc1;
+
+  // s->fd_x = dvector(0,nsx-1);    /* row marginal frequencies for bfd[][] */
+  // s->density_x = dvector(0,nsx-1);   /* row marginal density for bfd[][] */
+  // s->crfd_x = dvector(0,nsx-1);         /* row marginal crfd for bfd[][] */
+  // s->prd_x = dvector(0,nsx-1);            /* row marginal PR for bfd[][] */
+
+  // s->fd_v = dvector(0,nsv-1);    /* col marginal frequencies for bfd[][] */
+  // s->density_v = dvector(0,nsv-1);   /* col marginal density for bfd[][] */
+  // s->crfd_v = dvector(0,nsv-1);         /* col marginal crfd for bfd[][] */
+  // s->prd_v = dvector(0,nsv-1);            /* col marginal PR for bfd[][] */
+                      
+  // for(j=0;j<nsv;j++) s->fd_v[j] = 0.; 
+  // for(i=0;i<nsx;i++){   
+	// s->fd_x[i] = 0.; 
+	// for(j=0;j<nsv;j++){
+  //     s->fd_x[i] += s->bfd[i][j];                             /* row fd */
+	//   s->fd_v[j] += s->bfd[i][j];                             /* col fd */
+	// }
+	// s->density_x[i] = s->fd_x[i]/s->num_persons;         /* row density */
+  // }
+  // for(j=0;j<nsv;j++) 
+	// s->density_v[j] = s->fd_v[j]/s->num_persons;         /* col density */
+
+  // cum_rel_freqs(0, nsx-1, 1, s->density_x, s->crfd_x);      /* row crfd */
+  // for (i=0;i<nsx;i++)
+  //   s->prd_x[i] = perc_rank(0, nsx-1, 1, s->crfd_x, i);      /* row prd */
+
+  // cum_rel_freqs(0, nsv-1, 1, s->density_v, s->crfd_v);      /* col crfd */
+  // for (j=0;j<nsv;j++)
+  //   s->prd_v[j] = perc_rank(0, nsv-1, 1, s->crfd_v, j);      /* col prd */
+
+  // /* following code gets cum rel fd as a row-major vector from bfd[][];
+  //    this is needed for bootstrap --- see Parametric_boot_biv() */    
+
+  // s->crfd_vector_bfd = dvector(0,ns-1);
+  // ptr = s->bfd[0];
+  // for(j=0;j<ns;j++) s->crfd_vector_bfd[j] = *ptr++;     /* assign freqs */   
+
+  // for(j=1;j<ns;j++) 
+	// s->crfd_vector_bfd[j] += s->crfd_vector_bfd[j-1];  /* get cum freqs */
+  // for(j=0;j<ns;j++) 
+	// s->crfd_vector_bfd[j] /= s->num_persons;       /* get cum rel freqs */
+
+  // /* following code gets rel fd version of bfd[][]; i.e., brfd[][] is
+  //    the smoothed rel freq biv dist for x by v; needed for FEorMFE_EE() */ 
+
+  // s->brfd = dmatrix(0,nsx-1,0,nsv-1);
+  // for(i=0;i<nsx;i++)
+  //   for(j=0;j<nsv;j++) 
+	//   s->brfd[i][j] = s->bfd[i][j]/s->num_persons;
+
+  // return; 
+} 
+
 
       /*
       Wrapper for doing equipercentile equating with RG design
@@ -173,16 +343,17 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08       
     */
-      void runRGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
-                                                   const EquatingRecipes::Structures::Method& method,
-                                                   const EquatingRecipes::Structures::Smoothing& smoothing,
-                                                   const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
-                                                   const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
-                                                   const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingX,
-                                                   const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingY,
-                                                   const size_t& replicationNumber,
-                                                   EquatingRecipes::Structures::PData& pData,
-                                                   EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      EquatingRecipes::Structures::EquatedRawScoreResults runRGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
+                                                                                                  const EquatingRecipes::Structures::Method& method,
+                                                                                                  const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                                                                  const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                                                                                                  const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
+                                                                                                  const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingX,
+                                                                                                  const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingY,
+                                                                                                  const size_t& replicationNumber,
+                                                                                                  EquatingRecipes::Structures::PData& pData) {
+        EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+
         pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
                                                               /* counting of replications done in Wrapper_Bootstrap() */
 
@@ -234,6 +405,8 @@ namespace EquatingRecipes {
         for (size_t index = 0; index < moments.momentValues.size(); index++) {
           equatedRawScoreResults.equatedRawScoreMoments(0, index) = moments.momentValues(index);
         }
+
+        return equatedRawScoreResults;
       }
 
       /*
@@ -301,14 +474,14 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-      void runSGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
-                                                   const EquatingRecipes::Structures::Method& method,
-                                                   const EquatingRecipes::Structures::Smoothing& smoothing,
-                                                   const EquatingRecipes::Structures::BivariateStatistics& xy,
-                                                   const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY,
-                                                   const size_t& replicationNumber,
-                                                   EquatingRecipes::Structures::PData& pData,
-                                                   EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      EquatingRecipes::Structures::EquatedRawScoreResults runSGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
+                                                                                                  const EquatingRecipes::Structures::Method& method,
+                                                                                                  const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                                                                  const EquatingRecipes::Structures::BivariateStatistics& xy,
+                                                                                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY,
+                                                                                                  const size_t& replicationNumber,
+                                                                                                  EquatingRecipes::Structures::PData& pData) {
+        EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
         pData.bootstrapReplicationNumber = replicationNumber; /* should be set to 0 for actual equating */
                                                               /* counting of replications done in Wrapper_Bootstrap() */
 
@@ -372,6 +545,8 @@ namespace EquatingRecipes {
         for (size_t index = 0; index < moments.momentValues.size(); index++) {
           equatedRawScoreResults.equatedRawScoreMoments(0, index) = moments.momentValues(index);
         }
+
+        return equatedRawScoreResults;
       }
 
       /*
@@ -455,20 +630,21 @@ namespace EquatingRecipes {
 
       Date of last revision: 6/30/08   
     */
-      void runCGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
-                                                   const EquatingRecipes::Structures::Method& method,
-                                                   const EquatingRecipes::Structures::Smoothing& smoothing,
-                                                   const double& populationWeight1,
-                                                   const bool& isInternalAnchor,
-                                                   const double& reliabilityCommonItemsPopulation1,
-                                                   const double& reliabilityCommonItemsPopulation2,
-                                                   const EquatingRecipes::Structures::BivariateStatistics& xv,
-                                                   const EquatingRecipes::Structures::BivariateStatistics& yv,
-                                                   EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
-                                                   EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
-                                                   const size_t& replicationNumber,
-                                                   EquatingRecipes::Structures::PData& pData,
-                                                   EquatingRecipes::Structures::EquatedRawScoreResults& equatedRawScoreResults) {
+      EquatingRecipes::Structures::EquatedRawScoreResults runCGEquiEquatingWithLoglinearSmoothing(const EquatingRecipes::Structures::Design& design,
+                                                                                                  const EquatingRecipes::Structures::Method& method,
+                                                                                                  const EquatingRecipes::Structures::Smoothing& smoothing,
+                                                                                                  const double& populationWeight1,
+                                                                                                  const bool& isInternalAnchor,
+                                                                                                  const double& reliabilityCommonItemsPopulation1,
+                                                                                                  const double& reliabilityCommonItemsPopulation2,
+                                                                                                  const EquatingRecipes::Structures::BivariateStatistics& xv,
+                                                                                                  const EquatingRecipes::Structures::BivariateStatistics& yv,
+                                                                                                  EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
+                                                                                                  EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
+                                                                                                  const size_t& replicationNumber,
+                                                                                                  EquatingRecipes::Structures::PData& pData) {
+        EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+
         // char *names[] ={"        FE", "     BH-FE", "       MFE", "    BH-MFE",
         //             "  ChainedE"};
         std::vector<std::string> names {"        FE",
@@ -570,24 +746,24 @@ namespace EquatingRecipes {
         For BH under MFE, slope in a[1] and intercept in b[1] */
 
         /* FE + BH-FE in positions 0 and 1*/
-        EquatingRecipes::CGEquipercentileEquating cgEquipercentileEquating;
+        EquatingRecipes::Implementation::CGEquipercentileEquating cgEquipercentileEquating;
 
         if (methodCode == "E" || methodCode == "G" || methodCode == "A" || methodCode == "H") {
-          EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults = cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
-                                                                                                                                 pData.isInternalAnchor,
-                                                                                                                                 xv.univariateStatisticsColumn.numberOfScores,
-                                                                                                                                 xv.univariateStatisticsRow.numberOfScores,
-                                                                                                                                 xv.univariateStatisticsRow.minimumScore,
-                                                                                                                                 xv.univariateStatisticsRow.maximumScore,
-                                                                                                                                 yv.univariateStatisticsRow.numberOfScores,
-                                                                                                                                 yv.univariateStatisticsRow.minimumScore,
-                                                                                                                                 yv.univariateStatisticsRow.maximumScore,
-                                                                                                                                 yv.univariateStatisticsRow.scoreIncrement,
-                                                                                                                                 true,
-                                                                                                                                 bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
-                                                                                                                                 bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
-                                                                                                                                 0,
-                                                                                                                                 0);
+          EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults = cgEquipercentileEquating.runCGEquipercentileEquating(pData.weightSyntheticPopulation1,
+                                                                                                                                        pData.isInternalAnchor,
+                                                                                                                                        xv.univariateStatisticsColumn.numberOfScores,
+                                                                                                                                        xv.univariateStatisticsRow.numberOfScores,
+                                                                                                                                        xv.univariateStatisticsRow.minimumScore,
+                                                                                                                                        xv.univariateStatisticsRow.maximumScore,
+                                                                                                                                        yv.univariateStatisticsRow.numberOfScores,
+                                                                                                                                        yv.univariateStatisticsRow.minimumScore,
+                                                                                                                                        yv.univariateStatisticsRow.maximumScore,
+                                                                                                                                        yv.univariateStatisticsRow.scoreIncrement,
+                                                                                                                                        true,
+                                                                                                                                        bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
+                                                                                                                                        bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
+                                                                                                                                        0,
+                                                                                                                                        0);
           equatedRawScoreResults.relativeFreqDistsX.row(0) = cgResults.syntheticPopulationRelativeFreqDistX;
           equatedRawScoreResults.relativeFreqDistsY.row(0) = cgResults.syntheticPopulationRelativeFreqDistY;
           equatedRawScoreResults.equatedRawScores.row(0) = cgResults.equatedRawScores;
@@ -607,21 +783,21 @@ namespace EquatingRecipes {
 
         if (methodCode == "F") {
           EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
-              cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
-                                                            pData.isInternalAnchor,
-                                                            xv.univariateStatisticsColumn.numberOfScores,
-                                                            xv.univariateStatisticsRow.numberOfScores,
-                                                            xv.univariateStatisticsRow.minimumScore,
-                                                            xv.univariateStatisticsRow.maximumScore,
-                                                            yv.univariateStatisticsRow.numberOfScores,
-                                                            yv.univariateStatisticsRow.minimumScore,
-                                                            yv.univariateStatisticsRow.maximumScore,
-                                                            yv.univariateStatisticsRow.scoreIncrement,
-                                                            true,
-                                                            bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
-                                                            bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
-                                                            pData.reliabilityCommonItemsPopulation1,
-                                                            pData.reliabilityCommonItemsPopulation2);
+              cgEquipercentileEquating.runCGEquipercentileEquating(pData.weightSyntheticPopulation1,
+                                                                   pData.isInternalAnchor,
+                                                                   xv.univariateStatisticsColumn.numberOfScores,
+                                                                   xv.univariateStatisticsRow.numberOfScores,
+                                                                   xv.univariateStatisticsRow.minimumScore,
+                                                                   xv.univariateStatisticsRow.maximumScore,
+                                                                   yv.univariateStatisticsRow.numberOfScores,
+                                                                   yv.univariateStatisticsRow.minimumScore,
+                                                                   yv.univariateStatisticsRow.maximumScore,
+                                                                   yv.univariateStatisticsRow.scoreIncrement,
+                                                                   true,
+                                                                   bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
+                                                                   bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
+                                                                   pData.reliabilityCommonItemsPopulation1,
+                                                                   pData.reliabilityCommonItemsPopulation2);
 
           equatedRawScoreResults.relativeFreqDistsX.row(1) = cgResults.syntheticPopulationRelativeFreqDistX;
           equatedRawScoreResults.relativeFreqDistsY.row(1) = cgResults.syntheticPopulationRelativeFreqDistY;
@@ -641,21 +817,21 @@ namespace EquatingRecipes {
 
         if (methodCode == "G" || methodCode == "A") {
           EquatingRecipes::Structures::CGEquipercentileEquatingResults cgResults =
-              cgEquipercentileEquating.feOrMFEEquipEquating(pData.weightSyntheticPopulation1,
-                                                            pData.isInternalAnchor,
-                                                            xv.univariateStatisticsColumn.numberOfScores,
-                                                            xv.univariateStatisticsRow.numberOfScores,
-                                                            xv.univariateStatisticsRow.minimumScore,
-                                                            xv.univariateStatisticsRow.maximumScore,
-                                                            yv.univariateStatisticsRow.numberOfScores,
-                                                            yv.univariateStatisticsRow.minimumScore,
-                                                            yv.univariateStatisticsRow.maximumScore,
-                                                            yv.univariateStatisticsRow.scoreIncrement,
-                                                            true,
-                                                            bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
-                                                            bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
-                                                            pData.reliabilityCommonItemsPopulation1,
-                                                            pData.reliabilityCommonItemsPopulation2);
+              cgEquipercentileEquating.runCGEquipercentileEquating(pData.weightSyntheticPopulation1,
+                                                                   pData.isInternalAnchor,
+                                                                   xv.univariateStatisticsColumn.numberOfScores,
+                                                                   xv.univariateStatisticsRow.numberOfScores,
+                                                                   xv.univariateStatisticsRow.minimumScore,
+                                                                   xv.univariateStatisticsRow.maximumScore,
+                                                                   yv.univariateStatisticsRow.numberOfScores,
+                                                                   yv.univariateStatisticsRow.minimumScore,
+                                                                   yv.univariateStatisticsRow.maximumScore,
+                                                                   yv.univariateStatisticsRow.scoreIncrement,
+                                                                   true,
+                                                                   bivariateLogLinearSmoothingXV.fittedBivariateRelativeFreqDistXV,
+                                                                   bivariateLogLinearSmoothingYV.fittedBivariateRelativeFreqDistXV,
+                                                                   pData.reliabilityCommonItemsPopulation1,
+                                                                   pData.reliabilityCommonItemsPopulation2);
 
           // if (method == 'G' || method == 'A') /* MFE + BH-MFE in positions 2 and 3 */
           //   FEorMFE_EE(inall->w1, inall->anchor, xv->ns2, xv->ns1, xv->min1, xv->max1,
@@ -700,18 +876,18 @@ namespace EquatingRecipes {
         }
 
         if (isChainedEquipercentileMethod) {
-          Eigen::VectorXd equatedRawScores = cgEquipercentileEquating.chainedEquipercentileEquating(xv.univariateStatisticsRow.numberOfScores,
-                                                                                                    bivariateLogLinearSmoothingXV.fittedRawScorePercentileRankDistX,
-                                                                                                    xv.univariateStatisticsColumn.minimumScore,
-                                                                                                    xv.univariateStatisticsColumn.maximumScore,
-                                                                                                    xv.univariateStatisticsColumn.scoreIncrement,
-                                                                                                    xv.univariateStatisticsColumn.numberOfScores,
-                                                                                                    bivariateLogLinearSmoothingXV.fittedRawScoreCumulativeRelativeFreqDistV,
-                                                                                                    yv.univariateStatisticsRow.minimumScore,
-                                                                                                    yv.univariateStatisticsRow.scoreIncrement,
-                                                                                                    yv.univariateStatisticsRow.numberOfScores,
-                                                                                                    bivariateLogLinearSmoothingYV.fittedRawScoreCumulativeRelativeFreqDistX,
-                                                                                                    bivariateLogLinearSmoothingXV.fittedRawScoreCumulativeRelativeFreqDistV);
+          Eigen::VectorXd equatedRawScores = cgEquipercentileEquating.runChainedEquipercentileEquating(xv.univariateStatisticsRow.numberOfScores,
+                                                                                                       bivariateLogLinearSmoothingXV.fittedRawScorePercentileRankDistX,
+                                                                                                       xv.univariateStatisticsColumn.minimumScore,
+                                                                                                       xv.univariateStatisticsColumn.maximumScore,
+                                                                                                       xv.univariateStatisticsColumn.scoreIncrement,
+                                                                                                       xv.univariateStatisticsColumn.numberOfScores,
+                                                                                                       bivariateLogLinearSmoothingXV.fittedRawScoreCumulativeRelativeFreqDistV,
+                                                                                                       yv.univariateStatisticsRow.minimumScore,
+                                                                                                       yv.univariateStatisticsRow.scoreIncrement,
+                                                                                                       yv.univariateStatisticsRow.numberOfScores,
+                                                                                                       bivariateLogLinearSmoothingYV.fittedRawScoreCumulativeRelativeFreqDistX,
+                                                                                                       bivariateLogLinearSmoothingXV.fittedRawScoreCumulativeRelativeFreqDistV);
 
           equatedRawScoreResults.equatedRawScores.row(equatedRawScoresRowIndex) = equatedRawScores;
         }
@@ -725,6 +901,8 @@ namespace EquatingRecipes {
 
           equatedRawScoreResults.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
         }
+
+        return equatedRawScoreResults;
       }
 
     private:
@@ -868,6 +1046,158 @@ namespace EquatingRecipes {
                                                                                                                                     univariateLogLinearSmoothing.numberOfScores - 1,
                                                                                                                                     1,
                                                                                                                                     univariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeDist);
+      }
+
+      /*
+        Performs bivariate log-linear smoothing in terms of the
+        multinomial model as described by Holland and Thayer (1987),
+        abbreviated here as H&T.  Assumes v NOT included in u.
+
+        Input
+        
+          n = number of persons
+          nsu = number of score categories for u
+          minu = minimum raw score for u
+          incu = increment in raw scores for u
+          nsv = number of score categories for v
+          minv = minimum raw score for v
+          incv = increment in raw scores for v
+          nct[] = bivariate frequency distribution 
+                  in row major vector form (see get_nct_bfd())
+          cu = number of degrees for smoothing for u
+          cu = number of degrees for smoothing for v
+          cuv = number of degrees for smoothing for cross-product mts
+          cpm[][2] = cross-product moments
+          scale = type of scaling:
+                0 --> no scaling; 
+                  1 --> scale such that each column of B has
+                        sum (elements) = 0 and sum (elements^2) = 1
+          Btype = type of moments for criterion mathching:
+                  0 --> moments based on B 
+                  (if scale = 0, design matrix is based on raw scores,
+                  which means that the moments are based on raw scores;
+                  if scale = 1, design matrix is based on scaled raw scores,
+                  which means that the moments are based on scaled raw scores) 
+                  1 -->  moments based on B_raw, whether scale is 0 or 1
+        ctype = comparison type for criterion:
+                0 --> means use absolute criterion; 
+            1 --> means use relative criterion
+        crit = convergence criterion value
+          *fp = pointer to output file
+          
+        Output: populates struct BLL_SMOOTH s 
+
+        NOTE: nct[] already stored in s by prior call to get_nct_bfd()
+
+        Function calls other than C or NR utilities:
+          design_matrix()
+          iteration()
+
+        R. L. Brennan
+
+        Date of last revision: 6/30/08
+
+      */
+      EquatingRecipes::Structures::BivariateLogLinearSmoothing smoothBivaraiteLogLinear(const size_t& numberOfExaminees,
+                                                                                        const size_t& numberOfScoresU,
+                                                                                        const double& minimumScoreU,
+                                                                                        const double& scoreIncrementU,
+                                                                                        const size_t& numberOfScoresV,
+                                                                                        const double& minimumScoreV,
+                                                                                        const double& scoreIncrementV,
+                                                                                        const Eigen::MatrixXd& crossProductMoments,
+                                                                                        const bool& isInternalAnchor,
+                                                                                        const size_t& numberOfDegreesSmoothingU,
+                                                                                        const size_t& numberOfDegreesSmoothingV,
+                                                                                        const size_t& numberOfCrossProductMoments,
+                                                                                        const bool& useStandardizedScale,
+                                                                                        const EquatingRecipes::Structures::DesignMatrixType& designMatrixType,
+                                                                                        const EquatingRecipes::Structures::CriterionComparisonType& criterionComparisonType,
+                                                                                        const double& criterion) {
+        EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing;
+        size_t maximumNumberOfIterations = 40;
+
+        size_t numberOfDesigmMatrixRows = numberOfScoresU * numberOfScoresV; /* # score cats = # rows in design mat */
+        size_t numberOfDesignMatrixColumns = numberOfDegreesSmoothingU +
+                                             numberOfDegreesSmoothingV +
+                                             numberOfCrossProductMoments;
+
+        bivariateLogLinearSmoothing.numberOfExaminees = numberOfExaminees;
+        bivariateLogLinearSmoothing.numberOfScoresU = numberOfScoresU;
+        bivariateLogLinearSmoothing.minimumRawScoreU = minimumScoreU;
+        bivariateLogLinearSmoothing.scoreIncrementU = scoreIncrementU;
+        bivariateLogLinearSmoothing.numberOfScoresV = numberOfScoresV;
+        bivariateLogLinearSmoothing.minimumRawScoreV = minimumScoreV;
+        bivariateLogLinearSmoothing.scoreIncrementV = scoreIncrementV;
+
+        bivariateLogLinearSmoothing.isInternalAnchor = isInternalAnchor;
+        bivariateLogLinearSmoothing.numberOfDegreesOfSmoothingU = numberOfDegreesSmoothingU;
+        bivariateLogLinearSmoothing.numberOfDegreesOfSmoothingV = numberOfDegreesSmoothingV;
+        bivariateLogLinearSmoothing.numberOfCrossProductMoments = numberOfCrossProductMoments;
+
+        bivariateLogLinearSmoothing.crossProductMoments = crossProductMoments;
+        bivariateLogLinearSmoothing.useScalingForBDeisngMatrix = useStandardizedScale;
+        bivariateLogLinearSmoothing.maximumNumberOfIterations = maximumNumberOfIterations;
+        bivariateLogLinearSmoothing.designMatrixType = designMatrixType;
+        bivariateLogLinearSmoothing.criterionComparisonType = criterionComparisonType;
+
+        bivariateLogLinearSmoothing.totalNumberOfScores = numberOfDesigmMatrixRows;
+        bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix = numberOfDesignMatrixColumns;
+        bivariateLogLinearSmoothing.rawScoreDesignMatrix.resize(bivariateLogLinearSmoothing.totalNumberOfScores,
+                                                                bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+        bivariateLogLinearSmoothing.solutionDesignMatrix.resize(bivariateLogLinearSmoothing.totalNumberOfScores,
+                                                                bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+        bivariateLogLinearSmoothing.fittedFrequencies.resize(bivariateLogLinearSmoothing.totalNumberOfScores);
+        bivariateLogLinearSmoothing.betaCoefficients.resize(bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+        bivariateLogLinearSmoothing.solutionDesignMatrixObservedMoments.resize(bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+        bivariateLogLinearSmoothing.solutionDesignMatrixFittedMoments.resize(bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+        bivariateLogLinearSmoothing.rawScoreDesignMatrixObservedCentralMoments.resize(bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+        bivariateLogLinearSmoothing.rawScoreDesignMatrixFittedCentralMoments.resize(bivariateLogLinearSmoothing.numberOfColumnsInDesignMatrix);
+
+        designMatrix(bivariateLogLinearSmoothing.numberOfScoresU,
+                     bivariateLogLinearSmoothing.minimumRawScoreU,
+                     bivariateLogLinearSmoothing.scoreIncrementU,
+                     bivariateLogLinearSmoothing.numberOfScoresV,
+                     bivariateLogLinearSmoothing.minimumRawScoreV,
+                     bivariateLogLinearSmoothing.scoreIncrementV,
+                     bivariateLogLinearSmoothing.numberOfDegreesOfSmoothingU,
+                     bivariateLogLinearSmoothing.numberOfDegreesOfSmoothingV,
+                     bivariateLogLinearSmoothing.numberOfCrossProductMoments,
+                     bivariateLogLinearSmoothing.crossProductMoments,
+                     bivariateLogLinearSmoothing.useScalingForBDeisngMatrix,
+                     bivariateLogLinearSmoothing.rawScoreDesignMatrix,
+                     bivariateLogLinearSmoothing.solutionDesignMatrix);
+
+        /* iteration-step results not printed if first parameter is NULL;
+           results are printed if first parameter is fp!=NULL. Note that fp
+	         can be set to NULL in Wrapper_Smooth_BLL() */
+
+        std::optional<Eigen::VectorXd> uConstants;
+
+        bivariateLogLinearSmoothing.numberOfIterations = iteration(bivariateLogLinearSmoothing.solutionDesignMatrix,
+                                                                   bivariateLogLinearSmoothing.rawScoreDesignMatrix,
+                                                                   bivariateLogLinearSmoothing.observedFrequencies,
+                                                                   uConstants,
+                                                                   bivariateLogLinearSmoothing.numberOfDegreesOfSmoothingU,
+                                                                   bivariateLogLinearSmoothing.numberOfDegreesOfSmoothingV,
+                                                                   bivariateLogLinearSmoothing.numberOfCrossProductMoments,
+                                                                   bivariateLogLinearSmoothing.crossProductMoments,
+                                                                   maximumNumberOfIterations,
+                                                                   bivariateLogLinearSmoothing.criterionComparisonType,
+                                                                   bivariateLogLinearSmoothing.designMatrixType,
+                                                                   criterion,
+                                                                   bivariateLogLinearSmoothing.betaCoefficients,
+                                                                   bivariateLogLinearSmoothing.fittedFrequencies,
+                                                                   bivariateLogLinearSmoothing.solutionDesignMatrixObservedMoments,
+                                                                   bivariateLogLinearSmoothing.solutionDesignMatrixFittedMoments,
+                                                                   bivariateLogLinearSmoothing.rawScoreDesignMatrixObservedCentralMoments,
+                                                                   bivariateLogLinearSmoothing.rawScoreDesignMatrixFittedCentralMoments,
+                                                                   bivariateLogLinearSmoothing.likelihoodRatioChiSquare,
+                                                                   bivariateLogLinearSmoothing.numberOfZeros,
+                                                                   bivariateLogLinearSmoothing.cllNormalizingConstant,
+                                                                   false);
+
+        return bivariateLogLinearSmoothing;
       }
 
       /*
@@ -1566,37 +1896,37 @@ namespace EquatingRecipes {
                               fittedMoments,
                               fittedCentralMoments);
 
-          if (debug) {
-            std::cout << fmt::format("\n        {:2d}    ", iterationNumber);
-            std::cout << fmt::format("  {:10.5f}", normalizingConstant);
-            for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-              std::cout << fmt::format("  {:10.5f}\n", uConstants.has_value() ? (uConstants.value())(columnIndex) : 0.0);
-            }
+          // if (debug) {
+          //   std::cout << fmt::format("\n        {:2d}    ", iterationNumber);
+          //   std::cout << fmt::format("  {:10.5f}", normalizingConstant);
+          //   for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+          //     std::cout << fmt::format("  {:10.5f}\n", uConstants.has_value() ? (uConstants.value())(columnIndex) : 0.0);
+          //   }
 
-            for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-              std::cout << fmt::format("{:12.3f}\n", betaParameterEstimates(columnIndex));
-            }
+          //   for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+          //     std::cout << fmt::format("{:12.3f}\n", betaParameterEstimates(columnIndex));
+          //   }
 
-            for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-              std::cout << fmt::format("{:12.5f}\n", fittedMoments(columnIndex));
-            }
+          //   for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+          //     std::cout << fmt::format("{:12.5f}\n", fittedMoments(columnIndex));
+          //   }
 
-            for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-              std::cout << fmt::format("{:12.5f}\n", fittedCentralMoments(columnIndex));
-            }
+          //   for (size_t columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+          //     std::cout << fmt::format("{:12.5f}\n", fittedCentralMoments(columnIndex));
+          //   }
 
-            std::cout << fmt::format("{:12.5f}\n", likelihoodRatioChiSquare);
+          //   std::cout << fmt::format("{:12.5f}\n", likelihoodRatioChiSquare);
 
-            std::cout << fmt::format("{:7d}\n", numberOfZeroFrequencies);
+          //   std::cout << fmt::format("{:7d}\n", numberOfZeroFrequencies);
 
-            for (size_t cellIndex = 0; cellIndex < numberOfCellsToPrint; cellIndex++) {
-              std::cout << fmt::format("{:12.5f}\n", fittedFrequencies(cellIndex));
-            }
+          //   for (size_t cellIndex = 0; cellIndex < numberOfCellsToPrint; cellIndex++) {
+          //     std::cout << fmt::format("{:12.5f}\n", fittedFrequencies(cellIndex));
+          //   }
 
-            if (numberOfCellsToPrint > 250) {
-              std::cout << "  ...\n";
-            }
-          }
+          //   if (numberOfCellsToPrint > 250) {
+          //     std::cout << "  ...\n";
+          //   }
+          // }
 
           if (momentsCriterion(numberOfColumns,
                                numberOfDegreesOfSmoothingU,
