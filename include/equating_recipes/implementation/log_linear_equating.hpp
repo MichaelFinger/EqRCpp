@@ -125,7 +125,6 @@ namespace EquatingRecipes {
         return smoothingResults;
       }
 
-      
       /*
         Wrapper to do univariate log-linear smoothing.
 
@@ -184,114 +183,163 @@ namespace EquatingRecipes {
 
         Date of last revision: 6/30/08
       */
-     EquatingRecipes::Structures::BivariateLogLinearSmoothing runBivariateLogLinearSmoothing() {
-      EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing;
+      EquatingRecipes::Structures::BivariateLogLinearSmoothing runBivariateLogLinearSmoothing(const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
+                                                                                              const bool& isInternalAnchor,
+                                                                                              const size_t& numberOfDegreesSmoothingU,
+                                                                                              const size_t& numberOfDegreesSmoothingV,
+                                                                                              const size_t& numberOfCrossProductMoments,
+                                                                                              const Eigen::MatrixXi& crossProductMatrix,
+                                                                                              const bool& useStandardizedScale,
+                                                                                              const EquatingRecipes::Structures::DesignMatrixType& designMatrixType,
+                                                                                              const EquatingRecipes::Structures::CriterionComparisonType& criterionComparisonType,
+                                                                                              const double& criterion) {
+        EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing;
 
-      return bivariateLogLinearSmoothing;
-  //    void Wrapper_Smooth_BLL(struct BSTATS *xv, int anchor,
-  //                       int cu, int cv, int cuv, int cpm[][2],
-	// 					int scale, int Btype, int ctype, double crit,
-  //                       FILE *fp, struct BLL_SMOOTH *s) {
-  // int i,j,
-  //     nsx = xv->ns1, 
-  //     nsv = xv->ns2,
-	//   ns = nsx*nsv,
-  //     nsu = (anchor) ? xv->ns1 - xv->ns2 + 1: xv->ns1;
-  // double *ptr,                                /* pointer variable */
-	//      minu = (anchor) ?  xv->min1 - xv->min2: xv->min1,
-  //        incu = xv->inc1;    /* to be sensible, it must be true that
-  //                                      xv->inc1 = xv->inc2 = incu */
+        size_t numberOfScoresX = bivariateStatisticsXV.univariateStatisticsRow.numberOfScores;
+        size_t numberOfScoresV = bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores;
+        size_t totalNumberOfScores = numberOfScoresX * numberOfScoresV;
 
-  // /* nsu is number of categories for non-common items */
- 
-  // s->nct = dvector(0,nsu*nsv-1);
-  // s->bfd = dmatrix(0,nsx-1,0,nsv-1);  
+        size_t numberOfScoresU;
+        double minimumScoreU;
 
-  // /* For an external anchor, directly convert xv->bfd[][] 
-  //    to a row-major vector nct[]. For an internal anchor, 
-  //    conceptually we first collapse xv->bfd[][] to 
-  //    uv->bfd[][], and then convert to nct[].  
-  //    In the end this means that nct[] is a row-major vector 
-  //    with nsu*nsv elements */
+        if (isInternalAnchor) {
+          numberOfScoresU = bivariateStatisticsXV.univariateStatisticsRow.numberOfScores -
+                            bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores + 1;
+          minimumScoreU = bivariateStatisticsXV.univariateStatisticsRow.minimumScore -
+                          bivariateStatisticsXV.univariateStatisticsColumn.minimumScore;
+        } else {
+          numberOfScoresU = bivariateStatisticsXV.univariateStatisticsRow.numberOfScores;
+          minimumScoreU = bivariateStatisticsXV.univariateStatisticsRow.minimumScore;
+        }
 
-  // get_nct_bfd(anchor, xv->ns1, xv->ns2, xv->dbl_bfd, s->nct); 
+        double scoreIncrementU = bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement; /* to be sensible, it must be true that xv->inc1 = xv->inc2 = incu */
 
-  // /* call bivariate log-linear smoothing function, which
-  //    assumes that row categores are NOT included in
-  //    column categories */ 
+        bivariateLogLinearSmoothing.observedFrequencies.resize(numberOfScoresU * numberOfScoresV - 1);
+        bivariateLogLinearSmoothing.fittedBivariateRelativeFreqDistXV.resize(numberOfScoresX, numberOfScoresV);
 
-  // Smooth_BLL(xv->n, nsu, minu, incu, 
-  //            xv->ns2, xv->min2, xv->inc2, s->nct, 
-  //            anchor, cu, cv, cuv, cpm, 
-	// 		 scale, Btype, ctype, crit, fp, s); 
+        /* For an external anchor, directly convert xv->bfd[][]
+           to a row-major vector nct[]. For an internal anchor,
+           conceptually we first collapse xv->bfd[][] to
+           uv->bfd[][], and then convert to nct[].
+           In the end this means that nct[] is a row-major vector
+           with nsu*nsv elements */
+        getNctBfd(isInternalAnchor,
+                  numberOfScoresX,
+                  numberOfScoresV,
+                  bivariateStatisticsXV.bivariateFreqDistDouble,
+                  bivariateLogLinearSmoothing.observedFrequencies);
 
-  // /* For an external anchor, directly convert the row major 
-  //    vector s->mct[nsu*nsv] to s->bfd[nsu][nsv]. For an 
-  //    internal anchor, convert s->mct[nsu*nsv] to
-  //    s->bfd[nsu+nsv-1][nsv] repositioning elements and
-	//  adding structural zeros. */
+        /* call bivariate log-linear smoothing function, which
+           assumes that row categores are NOT included in
+           column categories */
 
-  // get_bfd_mct(anchor, xv->ns1, xv->ns2, s->mct, s->bfd);
+        smoothBivaraiteLogLinear(bivariateStatisticsXV.numberOfExaminees,
+                                 bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                                 bivariateStatisticsXV.univariateStatisticsRow.minimumScore,
+                                 bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement,
+                                 bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                                 bivariateStatisticsXV.univariateStatisticsColumn.minimumScore,
+                                 bivariateStatisticsXV.univariateStatisticsColumn.scoreIncrement,
+                                 crossProductMatrix,
+                                 isInternalAnchor,
+                                 numberOfDegreesSmoothingU,
+                                 numberOfDegreesSmoothingV,
+                                 numberOfCrossProductMoments,
+                                 useStandardizedScale,
+                                 designMatrixType,
+                                 criterionComparisonType,
+                                 criterion,
+                                 bivariateLogLinearSmoothing);
 
-  // /* get row and col marginal densities, crfd's and prd's for bfd[][] */
+        /* For an external anchor, directly convert the row major
+           vector s->mct[nsu*nsv] to s->bfd[nsu][nsv]. For an
+           internal anchor, convert s->mct[nsu*nsv] to
+           s->bfd[nsu+nsv-1][nsv] repositioning elements and
+           adding structural zeros. */
+        getBfdMct(isInternalAnchor,
+                  bivariateStatisticsXV.univariateStatisticsRow.numberOfScores,
+                  bivariateStatisticsXV.univariateStatisticsColumn.numberOfScores,
+                  bivariateLogLinearSmoothing.fittedFrequencies,
+                  bivariateLogLinearSmoothing.fittedBivariateFreqDist);
 
-  // s->nsx = nsx;
-  // s->minx = xv->min1;
-  // s->incx = xv->inc1;
+        /* get row and col marginal densities, crfd's and prd's for bfd[][] */
 
-  // s->fd_x = dvector(0,nsx-1);    /* row marginal frequencies for bfd[][] */
-  // s->density_x = dvector(0,nsx-1);   /* row marginal density for bfd[][] */
-  // s->crfd_x = dvector(0,nsx-1);         /* row marginal crfd for bfd[][] */
-  // s->prd_x = dvector(0,nsx-1);            /* row marginal PR for bfd[][] */
+        bivariateLogLinearSmoothing.numberOfScoresX = numberOfScoresX;
+        bivariateLogLinearSmoothing.minimumRawScoreX = bivariateStatisticsXV.univariateStatisticsRow.minimumScore;
+        bivariateLogLinearSmoothing.scoreIncrementX = bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement;
 
-  // s->fd_v = dvector(0,nsv-1);    /* col marginal frequencies for bfd[][] */
-  // s->density_v = dvector(0,nsv-1);   /* col marginal density for bfd[][] */
-  // s->crfd_v = dvector(0,nsv-1);         /* col marginal crfd for bfd[][] */
-  // s->prd_v = dvector(0,nsv-1);            /* col marginal PR for bfd[][] */
-                      
-  // for(j=0;j<nsv;j++) s->fd_v[j] = 0.; 
-  // for(i=0;i<nsx;i++){   
-	// s->fd_x[i] = 0.; 
-	// for(j=0;j<nsv;j++){
-  //     s->fd_x[i] += s->bfd[i][j];                             /* row fd */
-	//   s->fd_v[j] += s->bfd[i][j];                             /* col fd */
-	// }
-	// s->density_x[i] = s->fd_x[i]/s->num_persons;         /* row density */
-  // }
-  // for(j=0;j<nsv;j++) 
-	// s->density_v[j] = s->fd_v[j]/s->num_persons;         /* col density */
+        bivariateLogLinearSmoothing.fittedFrequencesX.resize(numberOfScoresX);                         /* row marginal frequencies for bfd[][] */
+        bivariateLogLinearSmoothing.fittedRawScoreDensityX.resize(numberOfScoresX);                    /* row marginal density for bfd[][] */
+        bivariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeFreqDistX.resize(numberOfScoresX); /* row marginal crfd for bfd[][] */
+        bivariateLogLinearSmoothing.fittedRawScorePercentileRankDistX.resize(numberOfScoresX);         /* row marginal PR for bfd[][] */
 
-  // cum_rel_freqs(0, nsx-1, 1, s->density_x, s->crfd_x);      /* row crfd */
-  // for (i=0;i<nsx;i++)
-  //   s->prd_x[i] = perc_rank(0, nsx-1, 1, s->crfd_x, i);      /* row prd */
+        bivariateLogLinearSmoothing.fittedFrequencesV.resize(numberOfScoresV);                         /* col marginal frequencies for bfd[][] */
+        bivariateLogLinearSmoothing.fittedRawScoreDensityV.resize(numberOfScoresV);                    /* col marginal density for bfd[][] */
+        bivariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeFreqDistV.resize(numberOfScoresV); /* col marginal crfd for bfd[][] */
+        bivariateLogLinearSmoothing.fittedRawScorePercentileRankDistV.resize(numberOfScoresV);         /* col marginal PR for bfd[][] */
 
-  // cum_rel_freqs(0, nsv-1, 1, s->density_v, s->crfd_v);      /* col crfd */
-  // for (j=0;j<nsv;j++)
-  //   s->prd_v[j] = perc_rank(0, nsv-1, 1, s->crfd_v, j);      /* col prd */
+        bivariateLogLinearSmoothing.fittedFrequencesX.setZero();
+        bivariateLogLinearSmoothing.fittedFrequencesV.setZero();
 
-  // /* following code gets cum rel fd as a row-major vector from bfd[][];
-  //    this is needed for bootstrap --- see Parametric_boot_biv() */    
+        for (size_t scoreIndexX = 0; scoreIndexX < numberOfScoresX; scoreIndexX++) {
+          for (size_t scoreIndexV = 0; scoreIndexV < numberOfScoresV; scoreIndexV++) {
+            bivariateLogLinearSmoothing.fittedFrequencesX(scoreIndexX) += bivariateLogLinearSmoothing.fittedBivariateFreqDist(scoreIndexX, scoreIndexV);
+            bivariateLogLinearSmoothing.fittedFrequencesV(scoreIndexV) += bivariateLogLinearSmoothing.fittedBivariateFreqDist(scoreIndexX, scoreIndexV);
+          }
+        }
 
-  // s->crfd_vector_bfd = dvector(0,ns-1);
-  // ptr = s->bfd[0];
-  // for(j=0;j<ns;j++) s->crfd_vector_bfd[j] = *ptr++;     /* assign freqs */   
+        bivariateLogLinearSmoothing.fittedRawScoreDensityX = bivariateLogLinearSmoothing.fittedFrequencesX /
+                                                             static_cast<double>(bivariateLogLinearSmoothing.numberOfExaminees);
 
-  // for(j=1;j<ns;j++) 
-	// s->crfd_vector_bfd[j] += s->crfd_vector_bfd[j-1];  /* get cum freqs */
-  // for(j=0;j<ns;j++) 
-	// s->crfd_vector_bfd[j] /= s->num_persons;       /* get cum rel freqs */
+        bivariateLogLinearSmoothing.fittedRawScoreDensityV = bivariateLogLinearSmoothing.fittedFrequencesV /
+                                                             static_cast<double>(bivariateLogLinearSmoothing.numberOfExaminees);
 
-  // /* following code gets rel fd version of bfd[][]; i.e., brfd[][] is
-  //    the smoothed rel freq biv dist for x by v; needed for FEorMFE_EE() */ 
+        bivariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeFreqDistX = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
+                                                                                                                                                       numberOfScoresX - 1,
+                                                                                                                                                       1,
+                                                                                                                                                       bivariateLogLinearSmoothing.fittedRawScoreDensityX);
 
-  // s->brfd = dmatrix(0,nsx-1,0,nsv-1);
-  // for(i=0;i<nsx;i++)
-  //   for(j=0;j<nsv;j++) 
-	//   s->brfd[i][j] = s->bfd[i][j]/s->num_persons;
+        bivariateLogLinearSmoothing.fittedRawScorePercentileRankDistX = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
+                                                                                                                                    numberOfScoresX,
+                                                                                                                                    1,
+                                                                                                                                    bivariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeFreqDistX);
 
-  // return; 
-} 
+        bivariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeFreqDistV = EquatingRecipes::Implementation::Utilities::cumulativeRelativeFreqDist(0,
+                                                                                                                                                       numberOfScoresV - 1,
+                                                                                                                                                       1,
+                                                                                                                                                       bivariateLogLinearSmoothing.fittedRawScoreDensityV);
 
+        bivariateLogLinearSmoothing.fittedRawScorePercentileRankDistV = EquatingRecipes::Implementation::Utilities::percentileRanks(0,
+                                                                                                                                    numberOfScoresV,
+                                                                                                                                    1,
+                                                                                                                                    bivariateLogLinearSmoothing.fittedRawScoreCumulativeRelativeFreqDistV);
+
+        /* following code gets cum rel fd as a row-major vector from bfd[][];
+           this is needed for bootstrap --- see Parametric_boot_biv() */
+
+        bivariateLogLinearSmoothing.cumulativeRelativeFreqDistRowMajorVector.resize(totalNumberOfScores);
+        bivariateLogLinearSmoothing.cumulativeRelativeFreqDistRowMajorVector =
+            bivariateLogLinearSmoothing.fittedBivariateFreqDist.reshaped<Eigen::RowMajor>();
+
+        for (size_t scoreIndex = 1; scoreIndex < totalNumberOfScores; scoreIndex++) {
+          bivariateLogLinearSmoothing.cumulativeRelativeFreqDistRowMajorVector(scoreIndex) +=
+              bivariateLogLinearSmoothing.cumulativeRelativeFreqDistRowMajorVector(scoreIndex - 1);
+        }
+
+        bivariateLogLinearSmoothing.cumulativeRelativeFreqDistRowMajorVector /= static_cast<double>(bivariateLogLinearSmoothing.numberOfExaminees);
+
+        /* following code gets rel fd version of bfd[][]; i.e., brfd[][] is
+           the smoothed rel freq biv dist for x by v; needed for FEorMFE_EE() */
+
+        bivariateLogLinearSmoothing.fittedBivariateRelativeFreqDistXV.resize(numberOfScoresX,
+                                                                             numberOfScoresV);
+
+        bivariateLogLinearSmoothing.fittedBivariateRelativeFreqDistXV = 
+          bivariateLogLinearSmoothing.fittedBivariateFreqDist / 
+          static_cast<double>(bivariateLogLinearSmoothing.numberOfExaminees);
+
+        return bivariateLogLinearSmoothing;
+      }
 
       /*
       Wrapper for doing equipercentile equating with RG design
@@ -1098,23 +1146,23 @@ namespace EquatingRecipes {
         Date of last revision: 6/30/08
 
       */
-      EquatingRecipes::Structures::BivariateLogLinearSmoothing smoothBivaraiteLogLinear(const size_t& numberOfExaminees,
-                                                                                        const size_t& numberOfScoresU,
-                                                                                        const double& minimumScoreU,
-                                                                                        const double& scoreIncrementU,
-                                                                                        const size_t& numberOfScoresV,
-                                                                                        const double& minimumScoreV,
-                                                                                        const double& scoreIncrementV,
-                                                                                        const Eigen::MatrixXd& crossProductMoments,
-                                                                                        const bool& isInternalAnchor,
-                                                                                        const size_t& numberOfDegreesSmoothingU,
-                                                                                        const size_t& numberOfDegreesSmoothingV,
-                                                                                        const size_t& numberOfCrossProductMoments,
-                                                                                        const bool& useStandardizedScale,
-                                                                                        const EquatingRecipes::Structures::DesignMatrixType& designMatrixType,
-                                                                                        const EquatingRecipes::Structures::CriterionComparisonType& criterionComparisonType,
-                                                                                        const double& criterion) {
-        EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing;
+      void smoothBivaraiteLogLinear(const size_t& numberOfExaminees,
+                                    const size_t& numberOfScoresU,
+                                    const double& minimumScoreU,
+                                    const double& scoreIncrementU,
+                                    const size_t& numberOfScoresV,
+                                    const double& minimumScoreV,
+                                    const double& scoreIncrementV,
+                                    const Eigen::MatrixXi& crossProductMoments,
+                                    const bool& isInternalAnchor,
+                                    const size_t& numberOfDegreesSmoothingU,
+                                    const size_t& numberOfDegreesSmoothingV,
+                                    const size_t& numberOfCrossProductMoments,
+                                    const bool& useStandardizedScale,
+                                    const EquatingRecipes::Structures::DesignMatrixType& designMatrixType,
+                                    const EquatingRecipes::Structures::CriterionComparisonType& criterionComparisonType,
+                                    const double& criterion,
+                                    EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing) {
         size_t maximumNumberOfIterations = 40;
 
         size_t numberOfDesigmMatrixRows = numberOfScoresU * numberOfScoresV; /* # score cats = # rows in design mat */
@@ -1196,8 +1244,6 @@ namespace EquatingRecipes {
                                                                    bivariateLogLinearSmoothing.numberOfZeros,
                                                                    bivariateLogLinearSmoothing.cllNormalizingConstant,
                                                                    false);
-
-        return bivariateLogLinearSmoothing;
       }
 
       /*
