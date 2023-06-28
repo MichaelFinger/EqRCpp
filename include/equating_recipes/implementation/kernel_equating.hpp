@@ -26,6 +26,7 @@ University of Iowa
 #include <cmath>
 #include <Eigen/Dense>
 #include <Eigen/QR>
+#include <boost/math/distributions/normal.hpp>
 
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/method.hpp>
@@ -97,15 +98,15 @@ namespace EquatingRecipes {
 			Date of last revision: 6/30/08       
 		*/
       void runWithRGDesign(const EquatingRecipes::Structures::Design& design,
-                                         const EquatingRecipes::Structures::Method& method,
-                                         const EquatingRecipes::Structures::Smoothing& smoothing,
-                                         const EquatingRecipes::Structures::UnivariateStatistics& x,
-                                         const EquatingRecipes::Structures::UnivariateStatistics& y,
-                                         const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
-                                         const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
-                                         const size_t& replicationNumber,
-                                         EquatingRecipes::Structures::PData& pData,
-                                         EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+                           const EquatingRecipes::Structures::Method& method,
+                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                           const EquatingRecipes::Structures::UnivariateStatistics& x,
+                           const EquatingRecipes::Structures::UnivariateStatistics& y,
+                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
+                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
+                           const size_t& replicationNumber,
+                           EquatingRecipes::Structures::PData& pData,
+                           EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method name --- 10 characters; right justified */
         char* names[] = {"   y-equiv"};
         double maxx, maxy, *scoresx, *scoresy;
@@ -236,13 +237,13 @@ namespace EquatingRecipes {
 			Date of last revision: 6/30/08   
 		*/
       void runWithSGDesign(const EquatingRecipes::Structures::Design& design,
-                                         const EquatingRecipes::Structures::Method& method,
-                                         const EquatingRecipes::Structures::Smoothing& smoothing,
-                                         const EquatingRecipes::Structures::BivariateStatistics& xy,
-                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
-                                         const size_t& replicationNumber,
-                                         EquatingRecipes::Structures::PData& pData,
-                                         EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+                           const EquatingRecipes::Structures::Method& method,
+                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                           const EquatingRecipes::Structures::BivariateStatistics& xy,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
+                           const size_t& replicationNumber,
+                           EquatingRecipes::Structures::PData& pData,
+                           EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
         char* names[] = {"   y-equiv"};
 
@@ -382,19 +383,19 @@ namespace EquatingRecipes {
       Date of last revision: 6/30/08   
     */
       void runWithCGDesign(const EquatingRecipes::Structures::Design& design,
-                                         const EquatingRecipes::Structures::Method& method,
-                                         const EquatingRecipes::Structures::Smoothing& smoothing,
-                                         const double& w1,
-                                         const bool& isInternalAnchor,
-                                         const double& reliabilityCommonItemsPopulation1,
-                                         const double& reliabilityCommonItemsPopulation2,
-                                         const EquatingRecipes::Structures::BivariateStatistics& xv,
-                                         const EquatingRecipes::Structures::BivariateStatistics& yv,
-                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
-                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllyv,
-                                         const size_t& replicationNumber,
-                                         EquatingRecipes::Structures::PData& pData,
-                                         EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+                           const EquatingRecipes::Structures::Method& method,
+                           const EquatingRecipes::Structures::Smoothing& smoothing,
+                           const double& w1,
+                           const bool& isInternalAnchor,
+                           const double& reliabilityCommonItemsPopulation1,
+                           const double& reliabilityCommonItemsPopulation2,
+                           const EquatingRecipes::Structures::BivariateStatistics& xv,
+                           const EquatingRecipes::Structures::BivariateStatistics& yv,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllyv,
+                           const size_t& replicationNumber,
+                           EquatingRecipes::Structures::PData& pData,
+                           EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         int i;
         double* ptr; /* pointer for eraw[] */
                      /* method names --- 10 characters; right justified */
@@ -570,17 +571,17 @@ namespace EquatingRecipes {
       Date of last revision: 6/30/08   
     */
       void runWithSGCounterBalanceDesign(const EquatingRecipes::Structures::Design& design,
-                      const EquatingRecipes::Structures::Method& method,
-                      const EquatingRecipes::Structures::Smoothing& smoothing,
-                      const double& wtsx,
-                      const double& wtsy,
-                      const EquatingRecipes::Structures::BivariateStatistics& xy1,
-                      const EquatingRecipes::Structures::BivariateStatistics& xy2,
-                      const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy1,
-                      const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy2,
-                      const size_t& replicationNumber,
-                      EquatingRecipes::Structures::PData& pData,
-                      EquatingRecipes::Structures::EquatedRawScoreResults& results) {
+                                         const EquatingRecipes::Structures::Method& method,
+                                         const EquatingRecipes::Structures::Smoothing& smoothing,
+                                         const double& wtsx,
+                                         const double& wtsy,
+                                         const EquatingRecipes::Structures::BivariateStatistics& xy1,
+                                         const EquatingRecipes::Structures::BivariateStatistics& xy2,
+                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy1,
+                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy2,
+                                         const size_t& replicationNumber,
+                                         EquatingRecipes::Structures::PData& pData,
+                                         EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
         char* names[] = {"   y-equiv"};
         double wts[2];
@@ -641,6 +642,8 @@ namespace EquatingRecipes {
       }
 
     private:
+      boost::math::normal_distribution<> normalDist;
+
       /*--------------------------------------------------------------------------
       KernelContinuPdf
       
@@ -663,11 +666,11 @@ namespace EquatingRecipes {
       output
         The function returns the kernel pdf
     --------------------------------------------------------------------------*/
-      double KernelContinuPdf(const size_t& ncat,
-                              const Eigen::VectorXd& scores,
-                              const Eigen::VectorXd& fd,
-                              const double& hx,
-                              const double& x) {
+      double kernelPdf(const size_t& numberOfScores,
+                       const Eigen::VectorXd& scores,
+                       const Eigen::VectorXd& scoreRelativeFreqDist,
+                       const double& bandwithX,
+                       const double& scoreValue) {
         double zscore; /*the standardized normal random variable */
 
         // double ax, sumsq = 0.0; /*ax, and second moment */
@@ -675,15 +678,15 @@ namespace EquatingRecipes {
         double pdf = 0;
 
         /*the mean and standard deviation of the unsmoothed distribution */
-        double mu = scores.cwiseProduct(fd).sum();
-        double sigma = (scores.cwiseProduct(scores)).cwiseProduct(fd).sum() - std::pow(mu, 2);
+        double mu = scores.dot(scoreRelativeFreqDist);
+        double sigma = (scores.cwiseProduct(scores)).dot(scoreRelativeFreqDist) - std::pow(mu, 2);
 
-        double ax = std::sqrt(sigma / (sigma + hx * hx));
+        double ax = std::sqrt(sigma / (sigma + std::pow(bandwithX, 2));
 
-        for (size_t i = 0; i < ncat; i++) {
-          double zscore = (x - ax * scores(i) - (1.0 - ax) * mu) / ax / hx;
-          double temp1 = StdNormalPdf(zscore);
-          pdf += fd(i) * temp1 / ax / hx;
+        for (size_t scoreIndex = 0; scoreIndex < numberOfScores; scoreIndex++) {
+          double zscore = (scoreValue - ax * scores(scoreIndex) - (1.0 - ax) * mu) / ax / bandwithX;
+          double temp1 = stdNormalPdf(zscore);
+          pdf += scoreRelativeFreqDist(scoreIndex) * temp1 / ax / bandwithX;
         }
 
         return pdf;
@@ -711,22 +714,22 @@ namespace EquatingRecipes {
       output:
         The function returns the kernel cdf
     --------------------------------------------------------------------------*/
-      double KernelContinuCdf(const size_t& ncat,
-                              const Eigen::VectorXd& scores,
-                              const Eigen::VectorXd& fd,
-                              const double& hx,
-                              const double& x) {
-        double mu = scores.cwiseProduct(fd).sum();
-        double sigma = (scores.cwiseProduct(scores).cwiseProduct(fd)).sum() - std::pow(mu, 2);
+      double kernelCdf(const size_t& numberOfScores,
+                       const Eigen::VectorXd& scores,
+                       const Eigen::VectorXd& scoreRelativeFreqDist,
+                       const double& bandwithX,
+                       const double& scoreValue) {
+        double mu = scores.dot(scoreRelativeFreqDist);
+        double sigma = (scores.cwiseProduct(scores)).dot(scoreRelativeFreqDist) - std::pow(mu, 2);
 
-        double ax = sqrt(sigma / (sigma + hx * hx));
+        double ax = sqrt(sigma / (sigma + std::pow(bandwithX, 2)));
 
         double cdf = 0;
 
-        for (size_t i = 0; i < ncat; i++) {
-          double zscore = (x - ax * scores(i) - (1.0 - ax) * mu) / ax / hx;
-          double temp1 = StdNormalCdf(zscore);
-          cdf += fd(i) * temp1;
+        for (size_t scoreIndex = 0; scoreIndex < numberOfScores; scoreIndex++) {
+          double zscore = (scoreValue - ax * scores(scoreIndex) - (1.0 - ax) * mu) / ax / bandwithX;
+          double temp1 = stdNormalCdf(zscore);
+          cdf += scoreRelativeFreqDist(scoreIndex) * temp1;
         }
 
         return cdf;
@@ -748,19 +751,9 @@ namespace EquatingRecipes {
       output
         the function returns the normal cdf for x.
     --------------------------------------------------------------------------*/
-      double StdNormalCdf(const double& x) {
-        double sum = 0.0;
-        double t, z;
-
-        t = 1 / (1 + .2316419 * std::abs(x));
-        z = 0.398942280401433 * std::exp(-0.5 * x * x);
-        sum = 1 - z * t * (.319381530 + t * (-.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
-
-        if (x >= 0) {
-          return sum;
-        } else {
-          return 1 - sum;
-        }
+      double stdNormalCdf(const double& x) {
+        double result = boost::math::cdf(normalDist, x);
+        return result;
       }
 
       /*--------------------------------------------------------------------------
@@ -779,8 +772,9 @@ namespace EquatingRecipes {
       output
         the function returns the normal cdf for x.
     --------------------------------------------------------------------------*/
-      double StdNormalPdf(const double& x) {
-        return 0.398942280401433 * std::exp(-0.5 * x * x);
+      double stdNormalPdf(const double& x) {
+        double result = boost::math::pdf(normalDist, x);
+        return result;
       }
 
       /*--------------------------------------------------------------------------
@@ -799,7 +793,7 @@ namespace EquatingRecipes {
       output
         the function returns the normal cdf for x.
     --------------------------------------------------------------------------*/
-      double NormalPdf(const Eigen::VectorXd& para,
+      double normalPdf(const Eigen::VectorXd& para,
                        const double& x) {
         double mu;
         double sigma;
@@ -811,9 +805,10 @@ namespace EquatingRecipes {
           sigma = 1.0;
         }
 
-        double pdf = 0.398942280401433 * std::exp(-0.5 * std::pow((x - mu) / sigma, 2)) / sigma;
+        boost::math::normal_distribution<> unstdNormalDist(mu, sigma);
+        double result = boost::math::pdf(unstdNormalDist, x);
 
-        return pdf;
+        return result;
       }
 
       /*------------------------------------------------------------------------------
@@ -835,84 +830,82 @@ namespace EquatingRecipes {
 
       output -
         moments - mean, sd, skewness and kurtosis of distribution
-
-    ------------------------------------------------------------------------------*/
-      void CalcKernelMoments(const double& a,
+      ------------------------------------------------------------------------------*/
+      void calcKernelMoments(const double& a,
                              const double& b,
-                             const size_t& ncat,
+                             const size_t& numberOfScores,
                              const Eigen::VectorXd& score,
-                             const Eigen::VectorXd& fd,
-                             const double& hx,
+                             const Eigen::VectorXd& scoreRelativeFreqDist,
+                             const double& bandwithX,
                              Eigen::VectorXd& moments) {
-        //   size_t j;
-        //   double xr, xm, dx, ss, s1, s2, s3, s4;
-        //   std::vector<double> x {0.02435029266342, 0.07299312178780, 0.12146281929612,
-        //                          0.16964442042399, 0.21742364374001, 0.26468716220877, 0.31132287199021,
-        //                          0.35722015833767, 0.40227015796399, 0.44636601725346, 0.48940314570705,
-        //                          0.53127946401989, 0.57189564620263, 0.61115535517239, 0.64896547125466,
-        //                          0.68523631305423, 0.71988185017161, 0.75281990726053, 0.78397235894334,
-        //                          0.81326531512280, 0.84062929625258, 0.86599939815409, 0.88931544599511,
-        //                          0.91052213707850, 0.92956917213194, 0.94641137485840, 0.96100879965205,
-        //                          0.97332682778991, 0.98333625388463, 0.99101337147674, 0.99634011677196,
-        //                          0.99930504173577};
-        //   std::vector<double> w {0.04869095700914, 0.04857546744150, 0.04834476223480,
-        //                          0.04799938859646, 0.04754016571483, 0.04696818281621, 0.04628479658131,
-        //                          0.04549162792742, 0.04459055816376, 0.04358372452932, 0.04247351512365,
-        //                          0.04126256324262, 0.03995374113272, 0.03855015317862, 0.03705512854024,
-        //                          0.03547221325688, 0.03380516183714, 0.03205792835485, 0.03023465707240,
-        //                          0.02833967261426, 0.02637746971505, 0.02435270256871, 0.02227017380838,
-        //                          0.02013482315353, 0.01795171577570, 0.01572603047602, 0.01346304789672,
-        //                          0.01116813946013, 0.00884675982636, 0.00650445796898, 0.00414703326056,
-        //                          0.00178328072170};
+        size_t j;
+        double xr, xm, dx, ss, s1, s2, s3, s4;
+        std::vector<double> x {0.02435029266342, 0.07299312178780, 0.12146281929612,
+                               0.16964442042399, 0.21742364374001, 0.26468716220877, 0.31132287199021,
+                               0.35722015833767, 0.40227015796399, 0.44636601725346, 0.48940314570705,
+                               0.53127946401989, 0.57189564620263, 0.61115535517239, 0.64896547125466,
+                               0.68523631305423, 0.71988185017161, 0.75281990726053, 0.78397235894334,
+                               0.81326531512280, 0.84062929625258, 0.86599939815409, 0.88931544599511,
+                               0.91052213707850, 0.92956917213194, 0.94641137485840, 0.96100879965205,
+                               0.97332682778991, 0.98333625388463, 0.99101337147674, 0.99634011677196,
+                               0.99930504173577};
+        std::vector<double> w {0.04869095700914, 0.04857546744150, 0.04834476223480,
+                               0.04799938859646, 0.04754016571483, 0.04696818281621, 0.04628479658131,
+                               0.04549162792742, 0.04459055816376, 0.04358372452932, 0.04247351512365,
+                               0.04126256324262, 0.03995374113272, 0.03855015317862, 0.03705512854024,
+                               0.03547221325688, 0.03380516183714, 0.03205792835485, 0.03023465707240,
+                               0.02833967261426, 0.02637746971505, 0.02435270256871, 0.02227017380838,
+                               0.02013482315353, 0.01795171577570, 0.01572603047602, 0.01346304789672,
+                               0.01116813946013, 0.00884675982636, 0.00650445796898, 0.00414703326056,
+                               0.00178328072170};
 
-        //   xm = 0.5 * (b + a);
-        //   xr = 0.5 * (b - a);
+        xm = 0.5 * (b + a);
+        xr = 0.5 * (b - a);
 
-        //   ss = 0;
-        //   for (j = 0; j < 32; j++) {
-        //     dx = xr * x[j];
-        //     ss += w[j] * (pdf(ncat, score, fd, hx, (xm + dx)) +
-        //                   pdf(ncat, score, fd, hx, (xm - dx)));
-        //   }
-        //   ss *= xr;
+        ss = 0;
+        for (j = 0; j < 32; j++) {
+          dx = xr * x[j];
+          ss += w[j] * (kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm + dx)) +
+                        kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm - dx)));
+        }
+        ss *= xr;
 
-        //   s1 = 0;
-        //   for (j = 0; j < 32; j++) {
-        //     dx = xr * x[j];
-        //     s1 += w[j] * (pdf(ncat, score, fd, hx, (xm + dx)) / ss * (xm + dx) +
-        //                   pdf(ncat, score, fd, hx, (xm - dx)) / ss * (xm - dx));
-        //   }
-        //   s1 *= xr;
+        s1 = 0;
+        for (j = 0; j < 32; j++) {
+          dx = xr * x[j];
+          s1 += w[j] * (kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm + dx)) / ss * (xm + dx) +
+                        kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm - dx)) / ss * (xm - dx));
+        }
+        s1 *= xr;
 
-        //   s2 = 0;
-        //   for (j = 0; j < 32; j++) {
-        //     dx = xr * x[j];
-        //     s2 += w[j] * (pdf(ncat, score, fd, hx, (xm + dx)) / ss * pow(xm + dx - s1, 2) +
-        //                   pdf(ncat, score, fd, hx, (xm - dx)) / ss * pow(xm - dx - s1, 2));
-        //   }
-        //   s2 *= xr;
+        s2 = 0;
+        for (j = 0; j < 32; j++) {
+          dx = xr * x[j];
+          s2 += w[j] * (kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm + dx)) / ss * pow(xm + dx - s1, 2) +
+                        kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm - dx)) / ss * pow(xm - dx - s1, 2));
+        }
+        s2 *= xr;
 
-        //   s3 = 0;
-        //   for (j = 0; j < 32; j++) {
-        //     dx = xr * x[j];
-        //     s3 += w[j] * (pdf(ncat, score, fd, hx, (xm + dx)) / ss * pow(xm + dx - s1, 3) +
-        //                   pdf(ncat, score, fd, hx, (xm - dx)) / ss * pow(xm - dx - s1, 3));
-        //   }
-        //   s3 *= xr / pow(s2, 1.5);
+        s3 = 0;
+        for (j = 0; j < 32; j++) {
+          dx = xr * x[j];
+          s3 += w[j] * (kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm + dx)) / ss * pow(xm + dx - s1, 3) +
+                        kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm - dx)) / ss * pow(xm - dx - s1, 3));
+        }
+        s3 *= xr / pow(s2, 1.5);
 
-        //   s4 = 0;
-        //   for (j = 0; j < 32; j++) {
-        //     dx = xr * x[j];
-        //     s4 += w[j] * (pdf(ncat, score, fd, hx, (xm + dx)) / ss * pow(xm + dx - s1, 4) +
-        //                   pdf(ncat, score, fd, hx, (xm - dx)) / ss * pow(xm - dx - s1, 4));
-        //   }
-        //   s4 *= xr / pow(s2, 2);
+        s4 = 0;
+        for (j = 0; j < 32; j++) {
+          dx = xr * x[j];
+          s4 += w[j] * (kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm + dx)) / ss * pow(xm + dx - s1, 4) +
+                        kernelPdf(numberOfScores, score, scoreRelativeFreqDist, bandwithX, (xm - dx)) / ss * pow(xm - dx - s1, 4));
+        }
+        s4 *= xr / pow(s2, 2);
 
-        //   moments[0] = s1;
-        //   moments[1] = sqrt(s2);
-        //   moments[2] = s3;
-        //   moments[3] = s4;
-        // }
+        moments(0) = s1;
+        moments(1) = sqrt(s2);
+        moments(2) = s3;
+        moments(3) = s4;
       }
 
       /*****************************************************************************
@@ -934,15 +927,15 @@ namespace EquatingRecipes {
       Output:
             Pen1        The panelty function PEN1 value
     *****************************************************************************/
-      double Pen1(const size_t& ncat,
+      double Pen1(const size_t& numberOfScores,
                   const Eigen::VectorXd& scores,
-                  const Eigen::VectorXd& fd,
-                  const double& hx) {
+                  const Eigen::VectorXd& scoreRelativeFreqDist,
+                  const double& bandwithX) {
         double sum = 0;
 
-        for (size_t i = 0; i < ncat; i++) {
-          double pdf = KernelContinuPdf(ncat, scores, fd, hx, scores(i));
-          sum += (pdf - fd(i)) * (pdf - fd(i));
+        for (size_t i = 0; i < numberOfScores; i++) {
+          double pdf = kernelPdf(numberOfScores, scores, scoreRelativeFreqDist, bandwithX, scores(i));
+          sum += (pdf - scoreRelativeFreqDist(i)) * (pdf - scoreRelativeFreqDist(i));
         }
 
         return sum;
@@ -967,17 +960,17 @@ namespace EquatingRecipes {
       Output:
             Pen1        The panelty function PEN1 value
     *****************************************************************************/
-      double Pen2(const size_t& ncat,
+      double Pen2(const size_t& numberOfScores,
                   const Eigen::VectorXd& scores,
-                  const Eigen::VectorXd& fd,
-                  const double& hx) {
+                  const Eigen::VectorXd& scoreRelativeFreqDist,
+                  const double& bandwithX) {
         double sum = 0;
 
-        for (size_t i = 0; i < ncat; i++) {
-          double left = scores(i) - 0.25;
-          double right = scores(i) + 0.25;
-          double pdfPL = KernelPdfDerivative(ncat, scores, fd, hx, left);
-          double pdfPR = KernelPdfDerivative(ncat, scores, fd, hx, right);
+        for (size_t scoreIndex = 0; scoreIndex < numberOfScores; scoreIndex++) {
+          double left = scores(scoreIndex) - 0.25;
+          double right = scores(scoreIndex) + 0.25;
+          double pdfPL = kernelPdfDerivative(numberOfScores, scores, scoreRelativeFreqDist, bandwithX, left);
+          double pdfPR = kernelPdfDerivative(numberOfScores, scores, scoreRelativeFreqDist, bandwithX, right);
           double A = 0;
           double B = 1;
 
@@ -1018,29 +1011,21 @@ namespace EquatingRecipes {
       output
         The function returns the kernel pdf
     --------------------------------------------------------------------------*/
-      double KernelPdfDerivative(const size_t& ncat,
+      double kernelPdfDerivative(const size_t& numberOfScores,
                                  const Eigen::VectorXd& scores,
-                                 const Eigen::VectorXd& fd,
-                                 const double& hx,
-                                 const double& x) {
-        // int i;
-        // double zscore;                /*the standardized normal random variable */
-        // double mu = 0.0, sigma = 0.0; /*the mean and standard deviation of the
-        // 				    unsmoothed distribution                 */
-        // double ax, sumsq = 0.0;       /*ax, and second moment */
-        // double temp1;                 /*temporary variable */
-        // double pdfDer = 0;
-
-        double mu = scores.cwiseProduct(fd).sum();
-        double sigma = (scores.cwiseProduct(scores)).cwiseProduct(fd).sum() - std::pow(mu, 2);
-        double ax = sqrt(sigma / (sigma + hx * hx));
+                                 const Eigen::VectorXd& scoreRelativeFreqDist,
+                                 const double& bandwithX,
+                                 const double& scoreValue) {
+        double mu = scores.dot(scoreRelativeFreqDist);
+        double sigma = (scores.cwiseProduct(scores)).dot(scoreRelativeFreqDist) - std::pow(mu, 2);
+        double ax = sqrt(sigma / (sigma + std::pow(bandwithX, 2)));
 
         double pdfDer = 0;
 
-        for (size_t i = 0; i < ncat; i++) {
-          double zscore = (x - ax * scores(i) - (1 - ax) * mu) / ax / hx;
-          double temp1 = StdNormalPdf(zscore);
-          pdfDer += fd(i) * temp1 / ax / ax / hx / hx * zscore;
+        for (size_t scoreIndex = 0; scoreIndex < numberOfScores; scoreIndex++) {
+          double zscore = (scoreValue - ax * scores(scoreIndex) - (1 - ax) * mu) / ax / bandwithX;
+          double temp1 = stdNormalPdf(zscore);
+          pdfDer += scoreRelativeFreqDist(scoreIndex) * temp1 / ax / ax / bandwithX / bandwithX * zscore;
         }
 
         pdfDer *= -1.0;
@@ -1068,14 +1053,14 @@ namespace EquatingRecipes {
       Output:
             return the combined panelty function value
     *****************************************************************************/
-      double Pen(const size_t& ncat,
+      double Pen(const size_t& numberOfScores,
                  const Eigen::VectorXd& scores,
-                 const Eigen::VectorXd& fd,
-                 const double& hx,
-                 const double& K) {
-        double PEN1 = Pen1(ncat, scores, fd, hx);
-        double PEN2 = Pen2(ncat, scores, fd, hx);
-        double PEN = PEN1 + K * PEN2;
+                 const Eigen::VectorXd& scoreRelativeFreqDist,
+                 const double& bandwithX,
+                 const double& pen2Weight) {
+        double PEN1 = Pen1(numberOfScores, scores, scoreRelativeFreqDist, bandwithX);
+        double PEN2 = Pen2(numberOfScores, scores, scoreRelativeFreqDist, bandwithX);
+        double PEN = PEN1 + pen2Weight * PEN2;
 
         return PEN;
       }
@@ -1099,10 +1084,10 @@ namespace EquatingRecipes {
       Output:
             return the optimal hx
     *****************************************************************************/
-      double Optimalh(const size_t& ncat,
-                      const Eigen::VectorXd& scores,
-                      const Eigen::VectorXd& fd,
-                      const double& K) {
+      double optimalBandwithXParameter(const size_t& numberOfScores,
+                                       const Eigen::VectorXd& scores,
+                                       const Eigen::VectorXd& scoreRelativeFreqDist,
+                                       const double& pen2Weight) {
         double eps = .0001;
         double hxl = .0001;
         double hxu = 3;
@@ -1112,11 +1097,11 @@ namespace EquatingRecipes {
         double hxx;
         double optimhx;
 
-        double pl = Pen(ncat, scores, fd, hxl, K);
-        double pu = Pen(ncat, scores, fd, hxu, K);
-        double plplus = Pen(ncat, scores, fd, hxlplus, K);
-        double puminxs = Pen(ncat, scores, fd, hxuminxs, K);
-        double pb = Pen(ncat, scores, fd, hxb, K);
+        double pl = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxl, pen2Weight);
+        double pu = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxu, pen2Weight);
+        double plplus = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxlplus, pen2Weight);
+        double puminxs = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxuminxs, pen2Weight);
+        double pb = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxb, pen2Weight);
 
         if (pl < pb && pb < pu && pl < plplus) {
           optimhx = hxl;
@@ -1130,8 +1115,8 @@ namespace EquatingRecipes {
             if (absdif < eps) {
               break;
             }
-            pb = Pen(ncat, scores, fd, hxb, K);
-            double px = Pen(ncat, scores, fd, hxx, K);
+            pb = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxb, pen2Weight);
+            double px = Pen(numberOfScores, scores, scoreRelativeFreqDist, hxx, pen2Weight);
 
             if (px <= pb) {
               hxl = hxb;
@@ -1168,7 +1153,7 @@ namespace EquatingRecipes {
       output:
         The function returns the inverse of cdf
     --------------------------------------------------------------------------*/
-      double KernelInverseCdf(const size_t& ncat,
+      double kernelInverseCdf(const size_t& ncat,
                               const Eigen::VectorXd& scores,
                               const Eigen::VectorXd& fd,
                               const double& h,
@@ -1204,15 +1189,45 @@ namespace EquatingRecipes {
         return half;
       }
 
-      void KernelEquate(const size_t& ncatx,
-                        const Eigen::VectorXd& scoresx,
-                        const Eigen::VectorXd& fdx,
-                        const double& hx,
-                        const size_t& ncaty,
-                        const Eigen::VectorXd& scoresy,
-                        const Eigen::VectorXd& fdy,
-                        const double& hy,
-                        const Eigen::VectorXd& Equatedx) {
+      /*--------------------------------------------------------------------------
+        KernelEquate
+        
+        functionality:
+
+        Computes kernel equating function based on continuized cdf in von Davier, 
+        Holland, & Thayer 	(2004). The Kernel Method of Test Equating.
+        
+        author: Tianyou Wang 1/5/2005.
+        
+        input:
+          ncatx   Number of discrete score categories for the new form
+          scoresx     vector containing the discrete scores for the new form
+          fdx         vector containing the relative frequency distribution  for the new form
+          hx          bandwidhx for the kernel smoohxing  for the new form
+          ncaty   Number of discrete score categories for the old form
+          scoresy     vector containing the discrete scores for the old form
+          fdy         vector containing the relative frequency distribution  for the old form
+          hy          bandwidhx for the kernel smoohxing  for the old form
+
+      
+        output:
+          Equatedx   a vector containing the equated score 
+      --------------------------------------------------------------------------*/
+      void kernelEquate(const size_t& numberOfScoresX,
+                        const Eigen::VectorXd& scoresX,
+                        const Eigen::VectorXd& scoreRelativeFreqDistX,
+                        const double& bandwithX,
+                        const size_t& numberOfScoresY,
+                        const Eigen::VectorXd& scoresY,
+                        const Eigen::VectorXd& scoreRelativeFreqDistY,
+                        const double& bandwithY,
+                        Eigen::VectorXd& equatedX) {
+        equatedX.resize(numberOfScoresX);
+
+        for (size_t scoreIndex = 0; scoreIndex < numberOfScoresX; scoreIndex++) {
+          double cdfx = kernelCdf(numberOfScoresX, scoresX, scoreRelativeFreqDistX, bandwithX, scoresX(scoreIndex));
+          equatedX(scoreIndex) = kernelInverseCdf(numberOfScoresY, scoresY, scoreRelativeFreqDistY, bandwithY, cdfx);
+        }
       }
 
       /*--------------------------------------------------------------------------
@@ -1236,33 +1251,33 @@ namespace EquatingRecipes {
       output:
         Cr          C matrix in von Davier et. al. Equation 3.10
     --------------------------------------------------------------------------*/
-      void ComputeCmatrix(const size_t& ncat,
-                          const size_t& degree,
+      void computeCmatrix(const size_t& numberOfScores,
+                          const size_t& numberOfDegreesSmoothing,
                           const size_t& numberOfExaminees,
                           const Eigen::VectorXd& designMatrix,
-                          const Eigen::VectorXd& fd,
-                          Eigen::MatrixXd& Cr) {
+                          const Eigen::VectorXd& scoreRelativeFreqDist,
+                          Eigen::MatrixXd& cMatrix) {
         // int i, j, k, l;
         // double *D, **A, **a, **qt, **q, **r, rrij;
         // double *c, *d;
         // double con;
 
-        Eigen::VectorXd D = Eigen::VectorXd::Zero(ncat);
-        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(ncat, ncat);
-        Eigen::MatrixXd a = Eigen::MatrixXd::Zero(1, ncat + 1);
-        Eigen::MatrixXd qt = Eigen::MatrixXd::Zero(ncat, ncat);
-        Eigen::MatrixXd q = Eigen::MatrixXd::Zero(ncat, ncat);
-        Eigen::MatrixXd r = Eigen::MatrixXd::Zero(ncat, ncat);
-        Eigen::VectorXd c = Eigen::VectorXd::Zero(ncat + 1);
-        Eigen::VectorXd d = Eigen::VectorXd::Zero(ncat + 1);
+        Eigen::VectorXd D = Eigen::VectorXd::Zero(numberOfScores);
+        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(numberOfScores, numberOfScores);
+        Eigen::MatrixXd a = Eigen::MatrixXd::Zero(1, numberOfScores + 1);
+        Eigen::MatrixXd qt = Eigen::MatrixXd::Zero(numberOfScores, numberOfScores);
+        Eigen::MatrixXd q = Eigen::MatrixXd::Zero(numberOfScores, numberOfScores);
+        Eigen::MatrixXd r = Eigen::MatrixXd::Zero(numberOfScores, numberOfScores);
+        Eigen::VectorXd c = Eigen::VectorXd::Zero(numberOfScores + 1);
+        Eigen::VectorXd d = Eigen::VectorXd::Zero(numberOfScores + 1);
 
-        Cr.setZero(ncat, degree);
+        cMatrix.setZero(numberOfScores, numberOfDegreesSmoothing);
 
-        D = fd.cwiseSqrt();
+        D = scoreRelativeFreqDist.cwiseSqrt();
 
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < ncat; j++) {
-            double rrij = std::sqrt(fd(i)) * fd(j);
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfScores; j++) {
+            double rrij = std::sqrt(scoreRelativeFreqDist(i)) * scoreRelativeFreqDist(j);
             if (i == j) {
               A(i, j) = D(i) - rrij;
             } else {
@@ -1271,9 +1286,9 @@ namespace EquatingRecipes {
           }
         }
 
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < ncat; j++) {
-            for (size_t k = 0; k < ncat; k++) {
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfScores; j++) {
+            for (size_t k = 0; k < numberOfScores; k++) {
               a(i + 1, j + 1) += A(i, k) * designMatrix(j, k);
             }
           }
@@ -1285,8 +1300,8 @@ namespace EquatingRecipes {
         // er_qrdcmp(a, ncat, ncat, c, d);
 
         /* compute the Q and R matrices */
-        for (size_t k = 0; k < ncat; k++) {
-          for (size_t l = 0; l < ncat; l++) {
+        for (size_t k = 0; k < numberOfScores; k++) {
+          for (size_t l = 0; l < numberOfScores; l++) {
             if (l > k) {
               r(k, l) = qrMatrix(k + 1, l + 1);
               q(k, l) = 0.0;
@@ -1300,35 +1315,35 @@ namespace EquatingRecipes {
           }
         }
 
-        for (size_t i = ncat - 2; i >= 0; i--) {
+        for (size_t i = numberOfScores - 2; i >= 0; i--) {
           double con = 0.0;
 
-          for (size_t k = i; k < ncat; k++) {
+          for (size_t k = i; k < numberOfScores; k++) {
             con += std::pow(a(k + 1, i + 1), 2);
           }
 
           con /= 2.0;
 
-          for (size_t k = i; k < ncat; k++) {
-            for (size_t l = i; l < degree; l++) {
+          for (size_t k = i; k < numberOfScores; k++) {
+            for (size_t l = i; l < numberOfDegreesSmoothing; l++) {
               qt(k, l) = 0.0;
-              for (size_t j = i; j < ncat; j++) {
+              for (size_t j = i; j < numberOfScores; j++) {
                 qt(k, l) += q(j, l) * a(k + 1, i + 1) * a(j + 1, i + 1) / con;
               }
             }
           }
 
-          for (size_t k = i; k < ncat; k++) {
-            for (size_t l = i; l < degree; l++) {
+          for (size_t k = i; k < numberOfScores; k++) {
+            for (size_t l = i; l < numberOfDegreesSmoothing; l++) {
               q(k, l) -= qt(k, l);
             }
           }
         }
 
         /* compute the Cr matrix */
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < degree; j++) {
-            Cr(i, j) += (1.0 / sqrt(static_cast<double>(numberOfExaminees))) * D(i) * q(i, j);
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfDegreesSmoothing; j++) {
+            cMatrix(i, j) += (1.0 / sqrt(static_cast<double>(numberOfExaminees))) * D(i) * q(i, j);
           }
         }
       }
@@ -1355,12 +1370,12 @@ namespace EquatingRecipes {
       output:
         Cr          C matrix in von Davier et. al. Equation 3.10
     --------------------------------------------------------------------------*/
-      void ComputeCmatrixGen(const size_t& ncat,
-                             const size_t& degree,
+      void computeCmatrixGen(const size_t& numberOfScores,
+                             const size_t& numberOfDegreesSmoothing,
                              const size_t& numberOfExaminees,
                              const Eigen::MatrixXd& designMatrix,
-                             const Eigen::VectorXd& fd,
-                             Eigen::MatrixXd& Cr) {
+                             const Eigen::VectorXd& scoreRelativeFreqDist,
+                             Eigen::MatrixXd& cMatrix) {
         // int i, j, k, l;
         // double *D, **A, **a, **b, **qt, **q, **r, rrij, sum;
         // double *c, *d;
@@ -1369,21 +1384,21 @@ namespace EquatingRecipes {
         // char outfname[] = "Bmatrix.out";
         // static int ii = 0;
 
-        Eigen::VectorXd D = Eigen::VectorXd::Zero(ncat);                 // dvector(0, ncat - 1);
-        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(ncat, ncat);           // dmatrix(0, ncat - 1, 0, ncat - 1);
-        Eigen::MatrixXd a = Eigen::MatrixXd::Zero(ncat + 1, degree + 1); // dmatrix(1, ncat, 1, degree);
-        Eigen::MatrixXd b = Eigen::MatrixXd::Zero(ncat + 1, degree + 1); // dmatrix(1, ncat, 1, degree);
-        Eigen::MatrixXd qt = Eigen::MatrixXd::Zero(ncat, degree);        // dmatrix(0, ncat - 1, 0, degree - 1);
-        Eigen::MatrixXd q = Eigen::MatrixXd::Zero(ncat, degree);         // dmatrix(0, ncat - 1, 0, degree - 1);
-        Eigen::MatrixXd r = Eigen::MatrixXd::Zero(ncat, degree);         // dmatrix(0, ncat - 1, 0, degree - 1);
-        Eigen::VectorXd c = Eigen::VectorXd::Zero(ncat + 1);             // dvector(1, ncat);
-        Eigen::VectorXd d = Eigen::VectorXd::Zero(ncat + 1);             // dvector(1, ncat);
+        Eigen::VectorXd D = Eigen::VectorXd::Zero(numberOfScores);                                   // dvector(0, ncat - 1);
+        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(numberOfScores, numberOfScores);                   // dmatrix(0, ncat - 1, 0, ncat - 1);
+        Eigen::MatrixXd a = Eigen::MatrixXd::Zero(numberOfScores + 1, numberOfDegreesSmoothing + 1); // dmatrix(1, ncat, 1, degree);
+        Eigen::MatrixXd b = Eigen::MatrixXd::Zero(numberOfScores + 1, numberOfDegreesSmoothing + 1); // dmatrix(1, ncat, 1, degree);
+        Eigen::MatrixXd qt = Eigen::MatrixXd::Zero(numberOfScores, numberOfDegreesSmoothing);        // dmatrix(0, ncat - 1, 0, degree - 1);
+        Eigen::MatrixXd q = Eigen::MatrixXd::Zero(numberOfScores, numberOfDegreesSmoothing);         // dmatrix(0, ncat - 1, 0, degree - 1);
+        Eigen::MatrixXd r = Eigen::MatrixXd::Zero(numberOfScores, numberOfDegreesSmoothing);         // dmatrix(0, ncat - 1, 0, degree - 1);
+        Eigen::VectorXd c = Eigen::VectorXd::Zero(numberOfScores + 1);                               // dvector(1, ncat);
+        Eigen::VectorXd d = Eigen::VectorXd::Zero(numberOfScores + 1);                               // dvector(1, ncat);
 
-        D = fd.cwiseSqrt();
+        D = scoreRelativeFreqDist.cwiseSqrt();
 
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < ncat; j++) {
-            double rrij = std::sqrt(fd(i)) * fd(j);
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfScores; j++) {
+            double rrij = std::sqrt(scoreRelativeFreqDist(i)) * scoreRelativeFreqDist(j);
             if (i == j) {
               A(i, j) = D(i) - rrij;
             } else {
@@ -1392,9 +1407,9 @@ namespace EquatingRecipes {
           }
         }
 
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < degree; j++) {
-            for (size_t k = 0; k < ncat; k++) {
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfDegreesSmoothing; j++) {
+            for (size_t k = 0; k < numberOfScores; k++) {
               a(i + 1, j + 1) += A(i, k) * designMatrix(j, k);
             }
 
@@ -1406,8 +1421,8 @@ namespace EquatingRecipes {
         Eigen::MatrixXd qrMatrix = qrDecomp.matrixQR();
 
         /* compute the Q and R matrices */
-        for (size_t k = 0; k < ncat; k++) {
-          for (size_t l = 0; l < degree; l++) {
+        for (size_t k = 0; k < numberOfScores; k++) {
+          for (size_t l = 0; l < numberOfDegreesSmoothing; l++) {
             if (l > k) {
               r(k, l) = qrMatrix(k + 1, l + 1);
               q(k, l) = 0.0;
@@ -1422,56 +1437,56 @@ namespace EquatingRecipes {
         }
 
         /* in the next line, original i=ncat-2, now i=degree-1. i=degree-2 does not work */
-        for (size_t i = degree - 1; i >= 0; i--) {
+        for (size_t i = numberOfDegreesSmoothing - 1; i >= 0; i--) {
           double con = 0.0;
 
-          for (size_t k = i; k < ncat; k++) {
+          for (size_t k = i; k < numberOfScores; k++) {
             con += std::pow(a(k + 1, i + 1), 2);
           }
 
           con /= 2.0;
 
-          for (size_t k = i; k < ncat; k++) {
-            for (size_t l = i; l < degree; l++) {
+          for (size_t k = i; k < numberOfScores; k++) {
+            for (size_t l = i; l < numberOfDegreesSmoothing; l++) {
               qt(k, l) = 0.0;
 
-              for (size_t j = i; j < ncat; j++) {
+              for (size_t j = i; j < numberOfScores; j++) {
                 qt(k, l) += q(j, l) * a(k + 1, i + 1) * a(j + 1, i + 1) / con;
               }
             }
           }
 
-          for (size_t k = i; k < ncat; k++) {
-            for (size_t l = i; l < degree; l++) {
+          for (size_t k = i; k < numberOfScores; k++) {
+            for (size_t l = i; l < numberOfDegreesSmoothing; l++) {
               q(k, l) *= -1.0;
             }
           }
         }
 
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < degree; j++) {
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfDegreesSmoothing; j++) {
             a(i + 1, j + 1) = 0;
 
-            for (size_t k = 0; k < degree; k++) {
+            for (size_t k = 0; k < numberOfDegreesSmoothing; k++) {
               a(i + 1, j + 1) += q(i, k) * r(k, j);
             }
           }
         }
 
-        for (size_t i = 0; i < degree; i++) {
-          for (size_t j = i; j < degree; j++) {
+        for (size_t i = 0; i < numberOfDegreesSmoothing; i++) {
+          for (size_t j = i; j < numberOfDegreesSmoothing; j++) {
             double sum = 0;
 
-            for (size_t k = 0; k < ncat; k++) {
+            for (size_t k = 0; k < numberOfScores; k++) {
               sum += q(k, i) * q(k, j);
             }
           }
         }
 
         /* compute the Cr matrix */
-        for (size_t i = 0; i < ncat; i++) {
-          for (size_t j = 0; j < degree; j++) {
-            Cr(i, j) += (1.0 / std::sqrt(static_cast<double>(numberOfExaminees))) * D(i) * q(i, j);
+        for (size_t i = 0; i < numberOfScores; i++) {
+          for (size_t j = 0; j < numberOfDegreesSmoothing; j++) {
+            cMatrix(i, j) += (1.0 / std::sqrt(static_cast<double>(numberOfExaminees))) * D(i) * q(i, j);
           }
         }
       }
@@ -1501,25 +1516,25 @@ namespace EquatingRecipes {
         Fr          vector containing partial derivatives of F with respect to r
                     in von Davier et. al. Equation 5.12
     --------------------------------------------------------------------------*/
-      void PartialFPartialr(const size_t& ncat,
+      void partialFPartialr(const size_t& numberOfScores,
                             const Eigen::VectorXd& scores,
-                            const Eigen::VectorXd& fd,
-                            const double& hx,
+                            const Eigen::VectorXd& scoreRelativeFreqDist,
+                            const double& bandwithX,
                             Eigen::VectorXd& Fr,
                             const double& x) {
-        double mu = scores.cwiseProduct(fd).sum();
-        double sigma = (scores.cwiseProduct(scores)).cwiseProduct(fd).sum() - std::pow(mu, 2);
+        double mu = scores.dot(scoreRelativeFreqDist);
+        double sigma = (scores.cwiseProduct(scores)).dot(scoreRelativeFreqDist) - std::pow(mu, 2);
 
-        double ax = std::sqrt(sigma / (sigma + hx * hx));
+        double ax = std::sqrt(sigma / (sigma + std::pow(bandwithX, 2)));
 
-        Fr.resize(ncat);
+        Fr.resize(numberOfScores);
 
-        for (size_t j = 0; j < ncat; j++) {
-          double Rjx = (x - ax * scores(j) - (1 - ax) * mu) / ax / hx;
-          double temp2 = StdNormalCdf(Rjx);
+        for (size_t j = 0; j < numberOfScores; j++) {
+          double Rjx = (x - ax * scores(j) - (1 - ax) * mu) / ax / bandwithX;
+          double temp2 = stdNormalCdf(Rjx);
           double zjx = (scores(j) - mu) / sqrt(sigma);
           double Mjx = .5 * (x - mu) * (1 - ax * ax) * zjx * zjx + (1 - ax) * scores[j];
-          double pdf = KernelContinuPdf(ncat, scores, fd, hx, x);
+          double pdf = kernelPdf(numberOfScores, scores, scoreRelativeFreqDist, bandwithX, x);
           Fr(j) = temp2 - Mjx * pdf;
         }
       }
@@ -1547,16 +1562,16 @@ namespace EquatingRecipes {
         return the square of the norm in von Davier, Holland, & Thayer 
           (2004, Equation 7.5)
     --------------------------------------------------------------------------*/
-      double FrCrSqNorm(const size_t& ncat,
-                        const size_t& degree,
+      double FrCrSqNorm(const size_t& numberOfScores,
+                        const size_t& numberofDegreesSmoothing,
                         const Eigen::VectorXd& Fr,
-                        const Eigen::MatrixXd& Cr) {
+                        const Eigen::MatrixXd& cMatrix) {
         double norm = 0;
 
-        for (size_t j = 0; j < degree; j++) {
+        for (size_t j = 0; j < numberofDegreesSmoothing; j++) {
           double temp = 0;
-          for (size_t i = 0; i < ncat; i++) {
-            temp += Fr(i) * Cr(i, j);
+          for (size_t i = 0; i < numberOfScores; i++) {
+            temp += Fr(i) * cMatrix(i, j);
           }
 
           norm += temp * temp;
@@ -1587,41 +1602,33 @@ namespace EquatingRecipes {
         M           M matrix
         N           N matrix
     --------------------------------------------------------------------------*/
-      void vPMN(const size_t& ncatx,
-                const size_t& ncaty,
-                const Eigen::MatrixXd& bdist,
+      void vPMN(const size_t& numberOfScoresX,
+                const size_t& numberOfScoresY,
+                const Eigen::MatrixXd& bivariateFittedDistribution,
                 Eigen::VectorXd& vP,
-                Eigen::VectorXd& M,
-                Eigen::VectorXd& N) {
-        size_t ncat = ncatx * ncaty;
+                Eigen::MatrixXd& M,
+                Eigen::MatrixXd& N) {
+        size_t totalNumberOfScores = numberOfScoresX * numberOfScoresY;
 
-        for (size_t i = 0; i < ncaty; i++) {
-          for (size_t j = 0; j < ncatx; j++) {
-            vP(i * ncatx + j) = bdist(j, i);
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            vP(i * numberOfScoresX + j) = bivariateFittedDistribution(j, i);
           }
         }
 
-        for (size_t i = 0; i < ncatx; i++) {
-          for (size_t j = 0; j < ncat; j++) {
-            M(i, j) = 0;
+        M.setZero();
+
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          for (size_t j = 0; j < numberOfScoresY; j++) {
+            M(i, j * numberOfScoresX + i) = 1;
           }
         }
 
-        for (size_t i = 0; i < ncatx; i++) {
-          for (size_t j = 0; j < ncaty; j++) {
-            M(i, j * ncatx + i) = 1;
-          }
-        }
+        N.setZero();
 
-        for (size_t i = 0; i < ncaty; i++) {
-          for (size_t j = 0; j < ncat; j++) {
-            N(i, j) = 0;
-          }
-        }
-
-        for (size_t i = 0; i < ncaty; i++) {
-          for (size_t j = 0; j < ncatx; j++) {
-            N(i, i * ncatx + j) = 1;
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            N(i, i * numberOfScoresX + j) = 1;
           }
         }
       }
@@ -1646,15 +1653,13 @@ namespace EquatingRecipes {
       output:
           vPP         vectorized P 
     --------------------------------------------------------------------------*/
-      void vPT(const size_t& ncatx,
-               const size_t& ncaty,
-               const Eigen::MatrixXd& bdist,
+      void vPT(const size_t& numberOfScoresX,
+               const size_t& numberOfScoresY,
+               const Eigen::MatrixXd& bivariateFittedDistribution,
                Eigen::VectorXd& vPP) {
-        size_t ncat = ncatx * ncaty;
-
-        for (size_t i = 0; i < ncatx; i++) {
-          for (size_t j = 0; j < ncaty; j++) {
-            vPP(i * ncaty + j) = bdist(i, j);
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          for (size_t j = 0; j < numberOfScoresY; j++) {
+            vPP(i * numberOfScoresY + j) = bivariateFittedDistribution(i, j);
           }
         }
       }
@@ -1690,54 +1695,54 @@ namespace EquatingRecipes {
           Equatedx     vector containing equated scores
         SEE          vector containing the standard error of equating 
     -----------------------------------------------------------------------------------------*/
-      void KernelEquateSEERG(const size_t& ncatx,
-                             const size_t& degreex,
+      void kernelEquateSEERG(const size_t& numberOfScoresX,
+                             const size_t& numberOfDegreesSmoothingX,
                              const size_t& numberOfExamineesX,
-                             const Eigen::VectorXd& scoresx,
-                             const Eigen::VectorXd& fdx,
-                             const size_t& ncaty,
-                             const size_t& degreey,
+                             const Eigen::VectorXd& scoresX,
+                             const Eigen::VectorXd& scoreRelativeFreqDistX,
+                             const size_t& numberOfScoresY,
+                             const size_t& numberOfDegreesSmoothingY,
                              const size_t& numberOfExamineesY,
-                             const Eigen::VectorXd& scoresy,
-                             const Eigen::VectorXd& fdy,
-                             Eigen::VectorXd& Equatedx,
-                             Eigen::VectorXd& SEE) {
-        size_t nparax = degreex;
-        size_t nparay = degreey;
-        Eigen::MatrixXd Crx(ncatx, ncatx);
-        Eigen::MatrixXd Cry(ncaty, ncaty);
-        Eigen::MatrixXd Bx(nparax, ncatx);
-        Eigen::MatrixXd By(nparay, ncaty);
-        Eigen::VectorXd Fr(ncatx);
-        Eigen::VectorXd Gs(ncaty);
+                             const Eigen::VectorXd& scoresY,
+                             const Eigen::VectorXd& scoreRelativeFreqDistY,
+                             Eigen::VectorXd& equatedX,
+                             Eigen::VectorXd& see) {
+        size_t nparax = numberOfDegreesSmoothingX;
+        size_t nparay = numberOfDegreesSmoothingY;
+        Eigen::MatrixXd Crx(numberOfScoresX, numberOfScoresX);
+        Eigen::MatrixXd Cry(numberOfScoresY, numberOfScoresY);
+        Eigen::MatrixXd Bx(nparax, numberOfScoresX);
+        Eigen::MatrixXd By(nparay, numberOfScoresY);
+        Eigen::VectorXd Fr(numberOfScoresX);
+        Eigen::VectorXd Gs(numberOfScoresY);
 
         for (size_t i = 0; i < nparax; i++) {
-          for (size_t j = 0; j < ncatx; j++) {
-            Bx(i, j) = 2.0 * std::pow(scoresx(j), static_cast<double>(i + 1));
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            Bx(i, j) = 2.0 * std::pow(scoresX(j), static_cast<double>(i + 1));
           }
         }
 
         for (size_t i = 0; i < nparay; i++) {
-          for (size_t j = 0; j < ncaty; j++) {
-            By(i, j) = 2.0 * std::pow(scoresy(j), static_cast<double>(i + 1));
+          for (size_t j = 0; j < numberOfScoresY; j++) {
+            By(i, j) = 2.0 * std::pow(scoresY(j), static_cast<double>(i + 1));
           }
         }
 
-        ComputeCmatrixGen(ncatx, nparax, numberOfExamineesX, Bx, fdx, Crx);
-        ComputeCmatrixGen(ncaty, nparay, numberOfExamineesY, By, fdy, Cry);
+        computeCmatrixGen(numberOfScoresX, nparax, numberOfExamineesX, Bx, scoreRelativeFreqDistX, Crx);
+        computeCmatrixGen(numberOfScoresY, nparay, numberOfExamineesY, By, scoreRelativeFreqDistY, Cry);
 
-        double hx = Optimalh(ncatx, scoresx, fdx, 1);
-        double hy = Optimalh(ncaty, scoresy, fdy, 1);
+        double bandwithX = optimalBandwithXParameter(numberOfScoresX, scoresX, scoreRelativeFreqDistX, 1);
+        double bandwithY = optimalBandwithXParameter(numberOfScoresY, scoresY, scoreRelativeFreqDistY, 1);
 
-        KernelEquate(ncatx, scoresx, fdx, hx, ncaty, scoresy, fdy, hy, Equatedx);
+        kernelEquate(numberOfScoresX, scoresX, scoreRelativeFreqDistX, bandwithX, numberOfScoresY, scoresY, scoreRelativeFreqDistY, bandwithY, equatedX);
 
-        for (size_t i = 0; i < ncatx; i++) {
-          PartialFPartialr(ncatx, scoresx, fdx, hx, Fr, scoresx(i));
-          PartialFPartialr(ncaty, scoresy, fdy, hy, Gs, Equatedx(i));
-          double Gp = KernelContinuPdf(ncaty, scoresy, fdy, hy, Equatedx(i));
-          double SqNormx = FrCrSqNorm(ncatx, nparax, Fr, Crx);
-          double SqNormy = FrCrSqNorm(ncaty, nparay, Gs, Cry);
-          SEE(i) = std::sqrt(SqNormx + SqNormy) / Gp;
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          partialFPartialr(numberOfScoresX, scoresX, scoreRelativeFreqDistX, bandwithX, Fr, scoresX(i));
+          partialFPartialr(numberOfScoresY, scoresY, scoreRelativeFreqDistY, bandwithY, Gs, equatedX(i));
+          double Gp = kernelPdf(numberOfScoresY, scoresY, scoreRelativeFreqDistY, bandwithY, equatedX(i));
+          double SqNormx = FrCrSqNorm(numberOfScoresX, nparax, Fr, Crx);
+          double SqNormy = FrCrSqNorm(numberOfScoresY, nparay, Gs, Cry);
+          see(i) = std::sqrt(SqNormx + SqNormy) / Gp;
         }
       }
 
@@ -1759,142 +1764,131 @@ namespace EquatingRecipes {
         Equatedx    a vector containing the equated score 
         SEE         a vector containing standard error of equating 
     --------------------------------------------------------------------------*/
-      void KernelEquateSEESG(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivar,
-                             const Eigen::VectorXd& Equatedx,
-                             Eigen::VectorXd& SEE) {
-        // int i, j, k, ncat, ncatx, ncaty, npara, cu, cv, cuv;
-        // long np;
-        // double** fitbdist;
-        // double *vP, *vPP, **M, **N, *r, *s, **U, **V;
-        // double hx, hy;
-        // double **Cr, **B;
-        // double *Fr, *Gs, Gp, *FrU, *GsV;
-        // double *scoresx, *scoresy;
-        // int *interx, *intery;
-        // int** cpm;
+      void kernelEquateSEESG(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingUV,
+                             Eigen::VectorXd& equatedX,
+                             Eigen::VectorXd& see) {
+        size_t numberOfCrossProductMoments = bivariateLogLinearSmoothingUV.numberOfCrossProductMoments;
+        size_t numberOfDegreesOfSmoothingU = bivariateLogLinearSmoothingUV.numberOfDegreesOfSmoothingU;
+        size_t numberOfDegreesOfSmoothingV = bivariateLogLinearSmoothingUV.numberOfDegreesOfSmoothingV;
 
-        size_t cuv = bivar.numberOfCrossProductMoments;
-        size_t cu = bivar.numberOfDegreesOfSmoothingU;
-        size_t cv = bivar.numberOfDegreesOfSmoothingV;
+        Eigen::MatrixXd cpm = bivariateLogLinearSmoothingUV.crossProductMoments(Eigen::seq(0, 1),
+                                                                                Eigen::seq(0, numberOfCrossProductMoments - 1))
+                                  .cast<double>();
 
-        Eigen::MatrixXd cpm = bivar.crossProductMoments(Eigen::seq(0, 1), Eigen::seq(0, cuv));
+        size_t numberOfScoresX = bivariateLogLinearSmoothingUV.numberOfScoresU;
+        size_t numberOfScoresY = bivariateLogLinearSmoothingUV.numberOfScoresV;
+        size_t npara = bivariateLogLinearSmoothingUV.numberOfDegreesOfSmoothingU +
+                       bivariateLogLinearSmoothingUV.numberOfDegreesOfSmoothingV +
+                       bivariateLogLinearSmoothingUV.numberOfCrossProductMoments;
 
-        size_t ncatx = bivar.numberOfScoresX;
-        size_t ncaty = bivar.numberOfScoresV;
-        size_t npara = bivar.numberOfDegreesOfSmoothingU +
-                       bivar.numberOfDegreesOfSmoothingV +
-                       bivar.numberOfCrossProductMoments;
+        Eigen::VectorXd interx = cpm.row(0);
+        Eigen::VectorXd intery = cpm.row(1);
+        size_t numberOfExaminees = bivariateLogLinearSmoothingUV.numberOfExaminees;
 
-        Eigen::MatrixXd interx = cpm.row(0);
-        Eigen::MatrixXd intery = cpm.row(1);
-        size_t numberOfExaminees = bivar.numberOfExaminees;
+        Eigen::VectorXd scoresx(numberOfScoresX);
 
-        Eigen::VectorXd scoresx(ncatx);
-
-        for (size_t i = 0; i < ncatx; i++) {
-          scoresx(i) = bivar.minimumRawScoreX + static_cast<double>(i) * bivar.scoreIncrementX;
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          scoresx(i) = bivariateLogLinearSmoothingUV.minimumRawScoreX +
+                       static_cast<double>(i) * bivariateLogLinearSmoothingUV.scoreIncrementX;
         }
 
-        Eigen::VectorXd scoresy(ncaty);
-        for (size_t i = 0; i < ncaty; i++) {
-          scoresy(i) = bivar.minimumRawScoreV + static_cast<double>(i) * bivar.scoreIncrementV;
+        Eigen::VectorXd scoresy(numberOfScoresY);
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          scoresy(i) = bivariateLogLinearSmoothingUV.minimumRawScoreV +
+                       static_cast<double>(i) * bivariateLogLinearSmoothingUV.scoreIncrementV;
         }
 
-        size_t ncat = ncatx * ncaty;
+        size_t totalNumberOfScores = numberOfScoresX * numberOfScoresY;
 
-        Cr =                 // dmatrix(0, ncat - 1, 0, npara - 1);
-            B = dm           // atrix(0, npara - 1, 0, ncat - 1); /*be aware B transpose(!!) as same dimension as Cr.  */
-                U = dm       // atrix(0, ncatx - 1, 0, npara - 1);
-                    V = dm   // atrix(0, ncaty - 1, 0, npara - 1);
-                        Fr = // dvector(0, ncatx - 1);
-            Gs =             // dvector(0, ncaty - 1);
-            FrU =            // dvector(0, npara - 1);
-            GsV =            // dvector(0, npara - 1);
-            fitbdist =       // dmatrix(0, ncatx - 1, 0, ncaty - 1);
+        Eigen::MatrixXd Cr(totalNumberOfScores, npara);
+        Eigen::MatrixXd B(npara, totalNumberOfScores);
+        Eigen::MatrixXd U(numberOfScoresX, npara);
+        Eigen::MatrixXd V(numberOfScoresY, npara);
+        Eigen::VectorXd Fr(numberOfScoresX);
+        Eigen::VectorXd Gs(numberOfScoresY);
+        Eigen::VectorXd FrU(npara);
+        Eigen::VectorXd GsV(npara);
+        Eigen::MatrixXd fitbdist(numberOfScoresX, numberOfScoresY);
 
-            for (i = 0; i < ncatx; i++) for (j = 0; j < ncaty; j++)
-                fitbdist[i][j] = bivar->bfd[i][j] / np;
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          for (size_t j = 0; j < numberOfScoresY; j++) {
+            fitbdist(i, j) = bivariateLogLinearSmoothingUV.fittedBivariateFreqDist(i, j) /
+                             static_cast<double>(numberOfExaminees);
+          }
+        }
 
-        for (i = 0; i < npara; i++)
-          for (j = 0; j < ncat; j++)
-            B[i][j] = 0;
+        B.setZero();
 
         /* The following code set a natrual design matrix corresponding to a natrual basis of 
 					polynomials. The B matrix is a transpose of the design matrix in loglinear model
-				(without the first column)
+				  (without the first column)
 					First, assign natrual design matrix first for rows corresponding to x */
 
-        for (i = 0; i < cu; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i][k * (ncatx) + j] = pow((double)j, (double)(i + 1));
+        for (size_t i = 0; i < numberOfDegreesOfSmoothingU; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            for (size_t k = 0; k < numberOfScoresY; k++) {
+              B(i, k * numberOfScoresY + j) = std::pow(static_cast<double>(j), i + 1);
             }
           }
         }
+
         /* then assign values to rows corresponding to y */
-        for (i = cu; i < cu + cv; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i][k * (ncatx) + j] = pow((double)k, (double)(i - cu + 1));
+        for (size_t i = numberOfDegreesOfSmoothingU; i < numberOfDegreesOfSmoothingU + numberOfDegreesOfSmoothingV; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            for (size_t k = 0; k < numberOfScoresY; k++) {
+              B(i, k * numberOfScoresX + j) = std::pow(static_cast<double>(k), (i - numberOfDegreesOfSmoothingU + 1));
             }
           }
         }
+
         /* assign value to the last rows corresponding to the interaction terms */
-        for (i = 0; i < cuv; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i + cu + cv][k * (ncatx) + j] = pow((double)j, (double)interx[i]) *
-                                                pow((double)k, (double)intery[i]);
+        for (size_t i = 0; i < numberOfCrossProductMoments; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            for (size_t k = 0; k < numberOfScoresY; k++) {
+              B(i + numberOfDegreesOfSmoothingU + numberOfDegreesOfSmoothingV, k * numberOfScoresX + j) =
+                  std::pow(static_cast<double>(j), interx(i)) *
+                  std::pow(static_cast<double>(k), intery(i));
             }
           }
         }
 
-        vP = dvector(0, ncat - 1);
-        vPP = dvector(0, ncat - 1);
-        M = dmatrix(0, ncatx - 1, 0, ncat - 1);
-        N = dmatrix(0, ncaty - 1, 0, ncat - 1);
-        r = dvector(0, ncatx - 1);
-        s = dvector(0, ncaty - 1);
+        Eigen::VectorXd vP(totalNumberOfScores);
+        Eigen::VectorXd vPP(totalNumberOfScores);
+        Eigen::MatrixXd M(numberOfScoresX, numberOfScoresY);
+        Eigen::MatrixXd N(numberOfScoresY, totalNumberOfScores);
+        Eigen::VectorXd r(numberOfScoresX);
+        Eigen::VectorXd s(numberOfScoresY);
 
-        vPMN(ncatx, ncaty, fitbdist, vP, M, N);
-        vPT(ncatx, ncaty, fitbdist, vPP);
-        MatrixMultiVector(ncatx, ncat, M, vP, r);
-        MatrixMultiVector(ncaty, ncat, N, vP, s);
+        vPMN(numberOfScoresX, numberOfScoresY, fitbdist, vP, M, N);
+        vPT(numberOfScoresX, numberOfScoresY, fitbdist, vPP);
 
-        ComputeCmatrixGen(ncat, npara, np, B, vP, Cr);
-        MatrixMultiMatrix(ncatx, ncat, npara, M, Cr, U);
-        MatrixMultiMatrix(ncaty, ncat, npara, N, Cr, V);
+        r = M * vP;
+        s = N * vP;
 
-        hx = Optimalh(ncatx, scoresx, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        computeCmatrixGen(totalNumberOfScores, npara, numberOfExaminees, B, vP, Cr);
 
-        KernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy,
-                     Equatedx);
+        U = M * Cr;
+        V = N * Cr;
 
-        for (i = 0; i < ncatx; i++) {
-          PartialFPartialr(ncatx, scoresx, r, hx, Fr, scoresx[i]);
-          PartialFPartialr(ncaty, scoresy, s, hy, Gs, Equatedx[i]);
-          Gp = KernelContinuPdf(ncaty, scoresy, s, hy, Equatedx[i]);
-          VectorMultiMatrix(ncatx, npara, Fr, U, FrU);
-          VectorMultiMatrix(ncaty, npara, Gs, V, GsV);
-          for (j = 0; j < npara; j++)
+        double bandwithX = optimalBandwithXParameter(numberOfScoresX, scoresx, r, 1);
+        double bandwithY = optimalBandwithXParameter(numberOfScoresY, scoresy, s, 1);
+
+        kernelEquate(numberOfScoresX, scoresx, r, bandwithX, numberOfScoresY, scoresy, s, bandwithY, equatedX);
+
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          partialFPartialr(numberOfScoresX, scoresx, r, bandwithX, Fr, scoresx(i));
+          partialFPartialr(numberOfScoresY, scoresy, s, bandwithY, Gs, equatedX(i));
+          double Gp = kernelPdf(numberOfScoresY, scoresy, s, bandwithY, equatedX(i));
+
+          FrU = Fr * U;
+          GsV = Gs * V;
+
+          for (size_t j = 0; j < npara; j++) {
             FrU[j] -= GsV[j];
-          SEE[i] = sqrt(VectorNormSq(npara, FrU)) / Gp;
-        }
+          }
 
-        free_dvector(vP, 0, ncat - 1);
-        free_dvector(vPP, 0, ncat - 1);
-        free_dmatrix(M, 0, ncatx - 1, 0, ncat - 1);
-        free_dmatrix(N, 0, ncaty - 1, 0, ncat - 1);
-        free_dmatrix(Cr, 0, ncat - 1, 0, npara - 1);
-        free_dmatrix(B, 0, ncat - 1, 0, ncat - 1);
-        free_dmatrix(U, 0, ncatx - 1, 0, npara - 1);
-        free_dmatrix(V, 0, ncaty - 1, 0, npara - 1);
-        free_dvector(Fr, 0, ncatx - 1);
-        free_dvector(Gs, 0, ncaty - 1);
-        free_dvector(FrU, 0, npara - 1);
-        free_dvector(GsV, 0, npara - 1);
-        free_dmatrix(fitbdist, 0, ncatx - 1, 0, ncaty - 1);
+          see(i) = FrU.norm() / Gp;
+        }
       }
 
       /*--------------------------------------------------------------------------
@@ -1914,54 +1908,49 @@ namespace EquatingRecipes {
 			output:
 				Equatedx    a vector containing the equated score 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSG(struct BLL_SMOOTH* bivar,
-                          const Eigen::VectorXd& Equatedx) {
-        int i, j, ncat, ncatx, ncaty;
-        long np;
-        double** fitbdist;
-        double *vP, **M, **N, *r, *s;
-        double hx, hy;
-        double *scoresx, *scoresy;
+      void kernelEquateSG(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingUV,
+                          Eigen::VectorXd& equatedX) {
+        size_t numberOfScoresX = bivariateLogLinearSmoothingUV.numberOfScoresX;
+        size_t numberOfScoresY = bivariateLogLinearSmoothingUV.numberOfScoresV;
+        size_t numberOfExaminees = bivariateLogLinearSmoothingUV.numberOfExaminees;
 
-        ncatx = bivar->nsx;
-        ncaty = bivar->nsv;
-        np = bivar->num_persons;
-        scoresx = dvector(0, ncatx);
-        for (i = 0; i < ncatx; i++)
-          scoresx[i] = bivar->minx + i * bivar->incx;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar->minv + i * bivar->incv;
-        ncat = ncatx * ncaty;
+        Eigen::VectorXd scoresX(numberOfScoresX);
+        Eigen::VectorXd scoresY(numberOfScoresY);
 
-        fitbdist = dmatrix(0, ncatx - 1, 0, ncaty - 1);
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          scoresX(i) = bivariateLogLinearSmoothingUV.minimumRawScoreX + i * bivariateLogLinearSmoothingUV.scoreIncrementX;
+        }
 
-        for (i = 0; i < ncatx; i++)
-          for (j = 0; j < ncaty; j++)
-            fitbdist[i][j] = bivar->bfd[i][j] / np;
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          scoresY(i) = bivariateLogLinearSmoothingUV.minimumRawScoreV + i * bivariateLogLinearSmoothingUV.scoreIncrementV;
+        }
 
-        vP = dvector(0, ncat - 1);
-        M = dmatrix(0, ncatx - 1, 0, ncat - 1);
-        N = dmatrix(0, ncaty - 1, 0, ncat - 1);
-        r = dvector(0, ncatx - 1);
-        s = dvector(0, ncaty - 1);
+        size_t totalNumberOfScores = numberOfScoresX * numberOfScoresY;
 
-        vPMN(ncatx, ncaty, fitbdist, vP, M, N);
-        MatrixMultiVector(ncatx, ncat, M, vP, r);
-        MatrixMultiVector(ncaty, ncat, N, vP, s);
+        Eigen::MatrixXd fitbdist(numberOfScoresX, numberOfScoresY);
 
-        hx = Optimalh(ncatx, scoresx, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          for (size_t j = 0; j < numberOfScoresY; j++) {
+            fitbdist(i, j) = bivariateLogLinearSmoothingUV.fittedBivariateFreqDist(i, j) /
+                             static_cast<double>(numberOfExaminees);
+          }
+        }
 
-        KernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy,
-                     Equatedx);
+        Eigen::VectorXd vP(totalNumberOfScores);
+        Eigen::MatrixXd M(numberOfScoresX, totalNumberOfScores);
+        Eigen::MatrixXd N(numberOfScoresY, totalNumberOfScores);
+        Eigen::VectorXd r(numberOfScoresX);
+        Eigen::VectorXd s(numberOfScoresY);
 
-        free_dmatrix(fitbdist, 0, ncatx - 1, 0, ncaty - 1);
-        free_dvector(vP, 0, ncat - 1);
-        free_dmatrix(M, 0, ncatx - 1, 0, ncat - 1);
-        free_dmatrix(N, 0, ncaty - 1, 0, ncat - 1);
-        free_dvector(r, 0, ncatx - 1);
-        free_dvector(s, 0, ncaty - 1);
+        vPMN(numberOfScoresX, numberOfScoresY, fitbdist, vP, M, N);
+
+        r = M * vP;
+        s = N * vP;
+
+        double bandwithX = optimalBandwithXParameter(numberOfScoresX, scoresX, r, 1);
+        double bandwithY = optimalBandwithXParameter(numberOfScoresY, scoresY, s, 1);
+
+        kernelEquate(numberOfScoresX, scoresX, r, bandwithX, numberOfScoresY, scoresY, s, bandwithY, equatedX);
       }
 
       /*--------------------------------------------------------------------------
@@ -1986,156 +1975,164 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEECB(struct BLL_SMOOTH* bivar1,
-                             struct BLL_SMOOTH* bivar2,
+      void kernelEquateSEECB(EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing1,
+                             EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing2,
                              const Eigen::VectorXd& wts,
-                             const Eigen::VectorXd& Equatedx,
-                             const Eigen::VectorXd& SEE) {
-        int i, j, k, ncat, ncatx, ncaty, npara, cu, cv, cuv;
-        long np1, np2;
-        double *vP12, *vP21, **M, **N, *r1, *s1, *r2, *s2, *r, *s;
-        /* r1 is for X taken first(first group), r2 is for X taken second (second group),
-				s1 is for Y taken first(second group), s2 is for Y taken second (first group)
-				vP12 is for first group, vP21 is for second group */
-        double **U12, **U21, **V12, **V21;
-        double hx, hy;
-        double **Cr12, **Cr21, **B;
-        double *Fr, *Gs, Gp, *FrU12, *GsV12, *FrU21, *GsV21;
-        double *scoresx, *scoresy;
-        double **fitbdist1, **fitbdist2;
-        int *interx, *intery;
-        int** cpm1;
+                             Eigen::VectorXd& equatedX,
+                             Eigen::VectorXd& see) {
+        size_t numberOfCrossProductMoments = bivariateLogLinearSmoothing1.numberOfCrossProductMoments;
+        size_t numberOfDegreesSmoothingX = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingU;
+        size_t numberOfDegreesSmoothingY = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingV;
+        Eigen::MatrixXd crossProductMoments1(2, numberOfCrossProductMoments + 1);
 
-        cuv = bivar1->cuv;
-        cu = bivar1->cu;
-        cv = bivar1->cv;
-        cpm1 = imatrix(0, 1, 0, cuv);
-        for (i = 0; i < cuv; i++)
-          for (j = 0; j < 2; j++)
-            cpm1[j][i] = bivar1->cpm[i][j];
+        for (size_t i = 0; i < numberOfCrossProductMoments; i++) {
+          for (size_t j = 0; j < 2; j++) {
+            crossProductMoments1(j, i) = static_cast<double>(bivariateLogLinearSmoothing1.crossProductMoments(i, j));
+          }
+        }
 
-        ncatx = bivar1->nsx;
-        ncaty = bivar1->nsv;
-        npara = bivar1->cu + bivar1->cv + bivar1->cuv;
-        interx = cpm1[0];
-        intery = cpm1[1];
-        np1 = bivar1->num_persons;
-        np2 = bivar2->num_persons;
-        scoresx = dvector(0, ncatx);
-        for (i = 0; i < ncatx; i++)
-          scoresx[i] = bivar1->minx + i * bivar1->incx;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar1->minv + i * bivar1->incv;
-        ncat = ncatx * ncaty;
+        size_t numberOfScoresX = bivariateLogLinearSmoothing1.numberOfScoresX;
+        size_t numberOfScoresY = bivariateLogLinearSmoothing1.numberOfScoresV;
+        size_t npara = numberOfDegreesSmoothingX + numberOfDegreesSmoothingY + numberOfCrossProductMoments;
 
-        vP12 = dvector(0, ncat - 1);
-        vP21 = dvector(0, ncat - 1);
-        M = dmatrix(0, ncatx - 1, 0, ncat - 1);
-        N = dmatrix(0, ncaty - 1, 0, ncat - 1);
-        r1 = dvector(0, ncatx - 1);
-        s1 = dvector(0, ncaty - 1);
-        r2 = dvector(0, ncatx - 1);
-        s2 = dvector(0, ncaty - 1);
-        r = dvector(0, ncatx - 1);
-        s = dvector(0, ncaty - 1);
-        Cr12 = dmatrix(0, ncat - 1, 0, npara - 1);
-        Cr21 = dmatrix(0, ncat - 1, 0, npara - 1);
-        B = dmatrix(0, npara - 1, 0, ncat - 1);
-        U12 = dmatrix(0, ncatx - 1, 0, npara - 1);
-        V12 = dmatrix(0, ncaty - 1, 0, npara - 1);
-        U21 = dmatrix(0, ncatx - 1, 0, npara - 1);
-        V21 = dmatrix(0, ncaty - 1, 0, npara - 1);
-        Fr = dvector(0, ncatx - 1);
-        Gs = dvector(0, ncaty - 1);
-        FrU12 = dvector(0, npara - 1);
-        GsV12 = dvector(0, npara - 1);
-        FrU21 = dvector(0, npara - 1);
-        GsV21 = dvector(0, npara - 1);
-        fitbdist1 = dmatrix(0, ncatx - 1, 0, ncaty - 1);
-        fitbdist2 = dmatrix(0, ncatx - 1, 0, ncaty - 1);
+        Eigen::VectorXd interx = crossProductMoments1.row(0);
+        Eigen::VectorXd intery = crossProductMoments1.row(1);
 
-        /*The following code set a natrual design matrix corresponding to a natrual basis of 
+        size_t numberOfExaminees1 = bivariateLogLinearSmoothing1.numberOfExaminees;
+        size_t numberOfExaminees2 = bivariateLogLinearSmoothing2.numberOfExaminees;
+
+        Eigen::VectorXd scoresX(numberOfScoresX);
+        Eigen::VectorXd scoresY(numberOfScoresY);
+
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          scoresX(i) = bivariateLogLinearSmoothing1.minimumRawScoreX +
+                       static_cast<double>(i) * bivariateLogLinearSmoothing1.scoreIncrementX;
+        }
+
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          scoresY(i) = bivariateLogLinearSmoothing1.minimumRawScoreV +
+                       static_cast<double>(i) * bivariateLogLinearSmoothing1.scoreIncrementV;
+        }
+
+        size_t totalNumberOfScores = numberOfScoresX * numberOfScoresY;
+
+        Eigen::VectorXd vP12(totalNumberOfScores);                   // = dvector(0, ncat - 1);
+        Eigen::VectorXd vP21(totalNumberOfScores);                   // = dvector(0, ncat - 1);
+        Eigen::VectorXd Fr(numberOfScoresX);                         // = dvector(0, ncatx - 1);
+        Eigen::VectorXd r(numberOfScoresX);                          // = dvector(0, ncatx - 1);
+        Eigen::VectorXd r1(numberOfScoresX);                         // = dvector(0, ncatx - 1);
+        Eigen::VectorXd r2(numberOfScoresX);                         // = dvector(0, ncatx - 1);
+        Eigen::VectorXd Gs(numberOfScoresY);                         // = dvector(0, ncaty - 1);
+        Eigen::VectorXd s(numberOfScoresY);                          // = dvector(0, ncaty - 1);
+        Eigen::VectorXd s1(numberOfScoresY);                         // = dvector(0, ncaty - 1);
+        Eigen::VectorXd s2(numberOfScoresY);                         // = dvector(0, ncaty - 1);
+        Eigen::VectorXd FrU12(npara);                                // = dvector(0, npara - 1);
+        Eigen::VectorXd FrU21(npara);                                // = dvector(0, npara - 1);
+        Eigen::VectorXd GsV12(npara);                                // = dvector(0, npara - 1);
+        Eigen::VectorXd GsV21(npara);                                // = dvector(0, npara - 1);
+        Eigen::MatrixXd Cr12(totalNumberOfScores, npara);            // = dmatrix(0, ncat - 1, 0, npara - 1);
+        Eigen::MatrixXd Cr21(totalNumberOfScores, npara);            // = dmatrix(0, ncat - 1, 0, npara - 1);
+        Eigen::MatrixXd M(numberOfScoresX, totalNumberOfScores);     // = dmatrix(0, ncatx - 1, 0, ncat - 1);
+        Eigen::MatrixXd fitbdist1(numberOfScoresX, numberOfScoresY); // = dmatrix(0, ncatx - 1, 0, ncaty - 1);
+        Eigen::MatrixXd fitbdist2(numberOfScoresX, numberOfScoresY); // = dmatrix(0, ncatx - 1, 0, ncaty - 1);
+        Eigen::MatrixXd U12(numberOfScoresX, npara);                 // = dmatrix(0, ncatx - 1, 0, npara - 1);
+        Eigen::MatrixXd U21(numberOfScoresX, npara);                 // = dmatrix(0, ncatx - 1, 0, npara - 1);
+        Eigen::MatrixXd N(numberOfScoresY, totalNumberOfScores);     // = dmatrix(0, ncaty - 1, 0, ncat - 1);
+        Eigen::MatrixXd V12(numberOfScoresY, npara);                 // = dmatrix(0, ncaty - 1, 0, npara - 1);
+        Eigen::MatrixXd V21(numberOfScoresY, npara);                 // = dmatrix(0, ncaty - 1, 0, npara - 1);
+        Eigen::MatrixXd B(npara, totalNumberOfScores);               // = dmatrix(0, npara - 1, 0, ncat - 1);
+
+        /*The following code set a natural design matrix corresponding to a natural basis of 
 					polynomials. note that this B is the transpose of the design matrix in the loglinear 
 				model. */
 
-        for (i = 0; i < npara; i++)
-          for (j = 0; j < ncat; j++)
-            B[i][j] = 0;
+        B.setZero();
 
         /*First, assign natrual design matrix first for rows corresponding to x */
-        for (i = 0; i < cu; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i][k * (ncatx) + j] = pow((double)j, (double)(i + 1));
+        for (size_t i = 0; i < numberOfDegreesSmoothingX; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            for (size_t k = 0; k < numberOfScoresY; k++) {
+              B(i, k * numberOfScoresX + j) = std::pow(static_cast<double>(j), i + 1);
             }
           }
         }
+
         /* then assign values to rows corresponding to y */
-        for (i = cu; i < cu + cv; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i][k * (ncatx) + j] = pow((double)k, (double)(i - cu + 1));
+        for (size_t i = numberOfDegreesSmoothingX; i < numberOfDegreesSmoothingX + numberOfDegreesSmoothingY; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            for (size_t k = 0; k < numberOfScoresY; k++) {
+              B(i, k * numberOfScoresX + j) = std::pow(static_cast<double>(k), i - numberOfDegreesSmoothingX + 1);
             }
           }
         }
+
         /* assign value to the last rows corresponding to the interaction terms */
-        for (i = 0; i < cuv; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i + cu + cv][k * (ncatx) + j] = pow((double)j, (double)interx[i]) *
-                                                pow((double)k, (double)intery[i]);
+        for (size_t i = 0; i < numberOfDegreesSmoothingX; i++) {
+          for (size_t j = 0; j < numberOfScoresX; j++) {
+            for (size_t k = 0; k < numberOfScoresY; k++) {
+              B(i + numberOfDegreesSmoothingX + numberOfDegreesSmoothingY,
+                k * numberOfScoresX + j) = std::pow(static_cast<double>(j), interx(i)) *
+                                           std::pow(static_cast<double>(k), intery(i));
             }
           }
         }
 
-        for (i = 0; i < ncatx; i++) {
-          for (j = 0; j < ncaty; j++) {
-            fitbdist1[i][j] = bivar1->bfd[i][j] / np1;
-            fitbdist2[i][j] = bivar2->bfd[i][j] / np2;
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          for (size_t j = 0; j < numberOfScoresY; j++) {
+            fitbdist1(i, j) = bivariateLogLinearSmoothing1.fittedBivariateFreqDist(i, j) / static_cast<double>(numberOfExaminees1); // bivar1->bfd[i][j] / np1;
+            fitbdist2(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j) / static_cast<double>(numberOfExaminees2);  // bivar2->bfd[i][j] / np2;
           }
         }
 
-        vPMN(ncatx, ncaty, fitbdist1, vP12, M, N);
-        vPMN(ncatx, ncaty, fitbdist2, vP21, M, N);
-        MatrixMultiVector(ncatx, ncat, M, vP12, r1);
-        MatrixMultiVector(ncaty, ncat, N, vP12, s2);
-        MatrixMultiVector(ncatx, ncat, M, vP21, r2);
-        MatrixMultiVector(ncaty, ncat, N, vP21, s1);
+        vPMN(numberOfScoresX, numberOfScoresY, fitbdist1, vP12, M, N);
+        vPMN(numberOfScoresX, numberOfScoresY, fitbdist2, vP21, M, N);
 
-        for (i = 0; i < ncatx; i++)
-          r[i] = wts[0] * r1[i] + (1 - wts[0]) * r2[i];
-        for (i = 0; i < ncaty; i++)
-          s[i] = wts[1] * s1[i] + (1 - wts[1]) * s2[i];
+        r1 = M * vP12;
+        s2 = N * vP12;
+        r2 = M * vP21;
+        s1 = N * vP21;
 
-        ComputeCmatrixGen(ncat, npara, np1, B, vP12, Cr12);
-        ComputeCmatrixGen(ncat, npara, np2, B, vP21, Cr21);
-        MatrixMultiMatrix(ncatx, ncat, npara, M, Cr12, U12);
-        MatrixMultiMatrix(ncaty, ncat, npara, N, Cr12, V12);
-        MatrixMultiMatrix(ncatx, ncat, npara, M, Cr21, U21);
-        MatrixMultiMatrix(ncaty, ncat, npara, N, Cr21, V21);
 
-        hx = Optimalh(ncatx, scoresx, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          r(i) = wts(0) * r1(i) + (1.0 - wts(0)) * r2(i);
+        }
+          
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          s(i) = wts(1) * s1(i) + (1.0 - wts(1)) * s2(i);
+        }
 
-        KernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy,
-                     Equatedx);
+        computeCmatrixGen(totalNumberOfScores, npara, numberOfExaminees1, B, vP12, Cr12);
+        computeCmatrixGen(totalNumberOfScores, npara, numberOfExaminees2, B, vP21, Cr21);
+        
+        U12 = M * Cr12; // MatrixMultiMatrix(ncatx, ncat, npara, M, Cr12, U12);
+        V12 = N * Cr12; // MatrixMultiMatrix(ncaty, ncat, npara, N, Cr12, V12);
+        U21 = M * Cr21; // MatrixMultiMatrix(ncatx, ncat, npara, M, Cr21, U21);
+        V21 = N * Cr21; // MatrixMultiMatrix(ncaty, ncat, npara, N, Cr21, V21);
 
-        for (i = 0; i < ncatx; i++) {
-          PartialFPartialr(ncatx, scoresx, r, hx, Fr, scoresx[i]);
-          PartialFPartialr(ncaty, scoresy, s, hy, Gs, Equatedx[i]);
-          Gp = KernelContinuPdf(ncaty, scoresy, s, hy, Equatedx[i]);
-          VectorMultiMatrix(ncatx, npara, Fr, U12, FrU12);
-          VectorMultiMatrix(ncaty, npara, Gs, V12, GsV12);
-          VectorMultiMatrix(ncatx, npara, Fr, U21, FrU21);
-          VectorMultiMatrix(ncaty, npara, Gs, V21, GsV21);
-          for (j = 0; j < npara; j++) {
-            FrU12[j] *= wts[0];
-            FrU12[j] -= (1 - wts[1]) * GsV12[j];
-            FrU21[j] *= (1 - wts[0]);
-            FrU21[j] -= wts[1] * GsV21[j];
+        double bandwithX = optimalBandwithXParameter(numberOfScoresX, scoresX, r, 1);
+        double bandwithY = optimalBandwithXParameter(numberOfScoresY, scoresY, s, 1);
+
+        kernelEquate(numberOfScoresX, scoresX, r, bandwithX, numberOfScoresY, scoresY, s, bandwithY, equatedX);
+
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          partialFPartialr(numberOfScoresX, scoresX, r, bandwithX, Fr, scoresX(i));
+          partialFPartialr(numberOfScoresY, scoresY, s, bandwithY, Gs, equatedX(i));
+          
+          double Gp = kernelPdf(numberOfScoresY, scoresY, s, bandwithY, equatedX(i));
+          
+          FrU12 = Fr * U12; // VectorMultiMatrix(ncatx, npara, Fr, U12, FrU12);
+          GsV12 = Gs * V12; // VectorMultiMatrix(ncaty, npara, Gs, V12, GsV12);
+          FrU21 = Fr * U21; // VectorMultiMatrix(ncatx, npara, Fr, U21, FrU21);
+          GsV21 = Gs * V21; // VectorMultiMatrix(ncaty, npara, Gs, V21, GsV21);
+          
+          for (size_t j = 0; j < npara; j++) {
+            FrU12(j) *= wts[0];
+            FrU12(j) -= (1 - wts(1)) * GsV12(j);
+            FrU21(j) *= (1 - wts(0));
+            FrU21(j) -= wts(1) * GsV21(j);
           }
-          SEE[i] = sqrt(VectorNormSq(npara, FrU12) + VectorNormSq(npara, FrU21)) / Gp;
+
+          see(i) = std::sqrt((FrU12.squaredNorm() + FrU21.squaredNorm()) / Gp); // (VectorNormSq(npara, FrU12) + VectorNormSq(npara, FrU21)) / Gp;
         }
       }
 
@@ -2162,16 +2159,16 @@ namespace EquatingRecipes {
                               struct BLL_SMOOTH* bivar2,
                               const double& wts,
                               const Eigen::VectorXd& Equatedx) {
-        int i, j, ncat1, ncat2, ncatx, ncaty, ncatv;
-        long np1, np2;
-        double *vP1, *vP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
-        /* r1 is for X taken first(first group), r2 is for X taken second (second group),
-				s1 is for Y taken first(second group), s2 is for Y taken second (first group)
-				vP1 is for first group, vP2 is for second group */
-        double *vP121, *vP212;
-        double hx, hy;
-        double *scoresx, *scoresy;
-        double **fitbdist1, **fitbdist2;
+        // int i, j, ncat1, ncat2, ncatx, ncaty, ncatv;
+        // long np1, np2;
+        // double *vP1, *vP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
+        // /* r1 is for X taken first(first group), r2 is for X taken second (second group),
+				// s1 is for Y taken first(second group), s2 is for Y taken second (first group)
+				// vP1 is for first group, vP2 is for second group */
+        // double *vP121, *vP212;
+        // double hx, hy;
+        // double *scoresx, *scoresy;
+        // double **fitbdist1, **fitbdist2;
 
         ncatx = bivar1->nsx;
         ncaty = bivar2->nsx;
