@@ -1,5 +1,5 @@
-#ifndef ANALYSES_LINEAR_EQ_SINGLE_GROUP_NO_SMOOTHING_HPP
-#define ANALYSES_LINEAR_EQ_SINGLE_GROUP_NO_SMOOTHING_HPP
+#ifndef ANALYSES_SG_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
+#define ANALYSES_SG_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
 
 #include <string>
 #include <Eigen/Core>
@@ -19,7 +19,7 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    namespace LinearEquating {
+    namespace MeanLinearEquipercentileEquating {
       namespace NoSmoothing {
         struct SingleGroupEquating {
           struct InputData {

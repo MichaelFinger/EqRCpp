@@ -14,7 +14,7 @@
 #include "datasets/actmathfreq.hpp"
 #include "datasets/yctmath.hpp"
 
-#include <equating_recipes/analyses/linear_equating/no_smoothing/random_groups_equating.hpp>
+#include <equating_recipes/analyses/mean_linear_equipercentile_equating/no_smoothing/random_groups_equating.hpp>
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/analyses/equated_scaled_scores.hpp>
 
@@ -48,9 +48,9 @@ namespace EquatingRecipes {
           EquatingRecipes::Analyses::UnivariateStatistics::OutputData outputDataX;
           EquatingRecipes::Analyses::UnivariateStatistics::OutputData outputDataY;
 
-          EquatingRecipes::Analyses::LinearEquating::NoSmoothing::RandomGroupsEquating randomGroupsEquating;
-          EquatingRecipes::Analyses::LinearEquating::NoSmoothing::RandomGroupsEquating::InputData inputData;
-          EquatingRecipes::Analyses::LinearEquating::NoSmoothing::RandomGroupsEquating::OutputData outputData;
+          EquatingRecipes::Analyses::MeanLinearEquipercentileEquating::NoSmoothing::RandomGroupsEquating randomGroupsEquating;
+          EquatingRecipes::Analyses::MeanLinearEquipercentileEquating::NoSmoothing::RandomGroupsEquating::InputData inputData;
+          EquatingRecipes::Analyses::MeanLinearEquipercentileEquating::NoSmoothing::RandomGroupsEquating::OutputData outputData;
 
           inputData.title = actMathFreq.datasetName + "---Linear";
           inputData.datasetName = actMathFreq.datasetName;

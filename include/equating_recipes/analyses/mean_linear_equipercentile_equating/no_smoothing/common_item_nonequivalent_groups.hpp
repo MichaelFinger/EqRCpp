@@ -1,5 +1,5 @@
-#ifndef ANALYSES_LINEAR_EQ_CINE_NO_SMOOTHING_HPP
-#define ANALYSES_LINEAR_EQ_CINE_NO_SMOOTHING_HPP
+#ifndef ANALYSES_CINE_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
+#define ANALYSES_CINE_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
 
 #include <string>
 
@@ -17,7 +17,7 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    namespace LinearEquating {
+    namespace MeanLinearEquipercentileEquating {
       namespace NoSmoothing {
         struct CommonItemNonequivalentGroups {
           struct InputData {

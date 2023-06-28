@@ -1,5 +1,5 @@
-#ifndef ANALYSES_LINEAR_EQ_RANDOM_GROUPS_LOG_LIN_SMOOTHING_HPP
-#define ANALYSES_LINEAR_EQ_RANDOM_GROUPS_LOG_LIN_SMOOTHING_HPP
+#ifndef ANALYSES_RG_MEAN_LIN_EQUI_EQ_LOG_LIN_SMOOTHING_HPP
+#define ANALYSES_RG_MEAN_LIN_EQUI_EQ_LOG_LIN_SMOOTHING_HPP
 
 #include <string>
 #include <Eigen/Core>
@@ -20,12 +20,11 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    namespace LinearEquating {
+    namespace MeanLinearEquipercentileEquating {
       namespace PreSmoothing {
         namespace LogLinear {
           struct RandomGroupsEquating {
             struct InputData {
-              std::string title;
               std::string datasetName;
               std::string xVariableName;
               std::string yVariableName;

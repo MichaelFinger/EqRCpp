@@ -1,5 +1,5 @@
-#ifndef ANALYSES_LINEAR_EQ_RANDOM_GROUPS_BETA_BIN_SMOOTHING_HPP
-#define ANALYSES_LINEAR_EQ_RANDOM_GROUPS_BETA_BIN_SMOOTHING_HPP
+#ifndef ANALYSES_RG_MEAN_LIN_EQUI_EQ_BETA_BIN_SMOOTHING_HPP
+#define ANALYSES_RG_MEAN_LIN_EQUI_EQ_BETA_BIN_SMOOTHING_HPP
 
 #include <string>
 #include <Eigen/Core>
@@ -17,7 +17,7 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    namespace LinearEquating {
+    namespace MeanLinearEquipercentileEquating {
       namespace PreSmoothing {
         namespace BetaBinomial {
           struct RandomGroupsEquating {

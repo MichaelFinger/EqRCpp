@@ -1,9 +1,10 @@
-#ifndef ANALYSES_LINEAR_EQ_RANDOM_GROUPS_NO_SMOOTHING_HPP
-#define ANALYSES_LINEAR_EQ_RANDOM_GROUPS_NO_SMOOTHING_HPP
+#ifndef ANALYSES_RG_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
+#define ANALYSES_RG_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
 
 #include <string>
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
+
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
@@ -19,7 +20,7 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    namespace LinearEquating {
+    namespace MeanLinearEquipercentileEquating {
       namespace NoSmoothing {
         struct RandomGroupsEquating {
           struct InputData {
