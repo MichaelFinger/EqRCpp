@@ -108,67 +108,67 @@ namespace EquatingRecipes {
                            EquatingRecipes::Structures::PData& pData,
                            EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method name --- 10 characters; right justified */
-        char* names[] = {"   y-equiv"};
-        double maxx, maxy, *scoresx, *scoresy;
-        int i;
-        double SEE[200];
+        //   char* names[] = {"   y-equiv"};
+        //   double maxx, maxy, *scoresx, *scoresy;
+        //   int i;
+        //   double SEE[200];
 
-        scoresx = dvector(0, ullx->ns);
-        scoresy = dvector(0, ully->ns);
-        maxx = ullx->min + (ullx->ns - 1) * ullx->inc;
-        maxy = ully->min + (ully->ns - 1) * ully->inc;
-        for (i = 0; i < ullx->ns; i++)
-          scoresx[i] = i;
-        for (i = 0; i < ully->ns; i++)
-          scoresy[i] = i;
+        //   scoresx = dvector(0, ullx->ns);
+        //   scoresy = dvector(0, ully->ns);
+        //   maxx = ullx->min + (ullx->ns - 1) * ullx->inc;
+        //   maxy = ully->min + (ully->ns - 1) * ully->inc;
+        //   for (i = 0; i < ullx->ns; i++)
+        //     scoresx[i] = i;
+        //   for (i = 0; i < ully->ns; i++)
+        //     scoresy[i] = i;
 
-        inall->rep = rep; /* should be set to 0 for actual equating */
-                          /* counting of replications done in Wrapper_Bootstrap() */
+        //   inall->rep = rep; /* should be set to 0 for actual equating */
+        //                     /* counting of replications done in Wrapper_Bootstrap() */
 
-        /* allocation and assignments for struct PDATA inall
-				Note that for every assignment of the form inall->(var) = x->(var)
-				or inall->(var) = y->(var), values vary depending on whether x or y 
-			is for actual equating or a bootstrap sample; all other values are 
-			the same for the actual equating and a bootstrap sample */
+        //   /* allocation and assignments for struct PDATA inall
+        // 	Note that for every assignment of the form inall->(var) = x->(var)
+        // 	or inall->(var) = y->(var), values vary depending on whether x or y
+        // is for actual equating or a bootstrap sample; all other values are
+        // the same for the actual equating and a bootstrap sample */
 
-        if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-          strcpy(inall->xfname, x->fname);
-          strcpy(inall->yfname, y->fname);
-          inall->x = x;
-          inall->y = y;
-          inall->design = design;
-          inall->method = method;
-          inall->smoothing = smoothing;
+        //   if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
+        //     strcpy(inall->xfname, x->fname);
+        //     strcpy(inall->yfname, y->fname);
+        //     inall->x = x;
+        //     inall->y = y;
+        //     inall->design = design;
+        //     inall->method = method;
+        //     inall->smoothing = smoothing;
 
-          inall->nm = 1;
-          inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-          strcpy(inall->names[0], names[0]);
+        //     inall->nm = 1;
+        //     inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
+        //     strcpy(inall->names[0], names[0]);
 
-          inall->min = x->min;
-          inall->max = x->max;
-          inall->inc = x->inc;
-          inall->fdx = x->fd;
-          inall->n = x->n;
+        //     inall->min = x->min;
+        //     inall->max = x->max;
+        //     inall->inc = x->inc;
+        //     inall->fdx = x->fd;
+        //     inall->n = x->n;
 
-          inall->ullx = ullx;
-          inall->ully = ully;
-        }
+        //     inall->ullx = ullx;
+        //     inall->ully = ully;
+        //   }
 
-        /* allocation and assignments for r */
+        //   /* allocation and assignments for r */
 
-        if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-          r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-          r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
-        }
+        //   if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
+        //     r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
+        //     r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
+        //   }
 
-        /* Compute equating results */
-        KernelEquateSEERG(ullx->ns, ullx->c, ullx->num_persons, scoresx, ullx->density,
-                          ully->ns, ully->c, ully->num_persons, scoresy, ully->density,
-                          r->eraw[0], SEE);
+        //   /* Compute equating results */
+        //   KernelEquateSEERG(ullx->ns, ullx->c, ullx->num_persons, scoresx, ullx->density,
+        //                     ully->ns, ully->c, ully->num_persons, scoresy, ully->density,
+        //                     r->eraw[0], SEE);
 
-        /* get moments */
+        //   /* get moments */
 
-        MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+        //   MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
       }
 
       /*
@@ -245,60 +245,60 @@ namespace EquatingRecipes {
                            EquatingRecipes::Structures::PData& pData,
                            EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
-        char* names[] = {"   y-equiv"};
+        //   char* names[] = {"   y-equiv"};
 
-        inall->rep = rep; /* should be set to 0 for actual equating */
-                          /* counting of replications done in Wrapper_Bootstrap() */
+        //   inall->rep = rep; /* should be set to 0 for actual equating */
+        //                     /* counting of replications done in Wrapper_Bootstrap() */
 
-        /* Allocation and assignments for struct PDATA inall>
-				Note that for every assignment of the form inall->(var) = x->(var)
-				or inall->(var) = y->(var), values vary depending on whether x or y 
-			  is for actual equating or a bootstrap sample; all other values are 
-			  the same for the actual equating and a bootstrap sample */
+        //   /* Allocation and assignments for struct PDATA inall>
+        // 	Note that for every assignment of the form inall->(var) = x->(var)
+        // 	or inall->(var) = y->(var), values vary depending on whether x or y
+        //   is for actual equating or a bootstrap sample; all other values are
+        //   the same for the actual equating and a bootstrap sample */
 
-        if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-          strcpy(inall->xyfname, xy->fname);
-          inall->xy = xy;
-          inall->bllxy = bllxy;
-          inall->design = design;
-          inall->method = method;
-          inall->smoothing = smoothing;
-          inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
-																				smoothing with the SG design */
+        //   if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
+        //     strcpy(inall->xyfname, xy->fname);
+        //     inall->xy = xy;
+        //     inall->bllxy = bllxy;
+        //     inall->design = design;
+        //     inall->method = method;
+        //     inall->smoothing = smoothing;
+        //     inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
+        // 																	smoothing with the SG design */
 
-          inall->nm = 1;
-          inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-          strcpy(inall->names[0], names[0]);
+        //     inall->nm = 1;
+        //     inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
+        //     strcpy(inall->names[0], names[0]);
 
-          inall->min = xy->min1;
-          inall->max = xy->max1;
-          inall->inc = xy->inc1;
-          inall->fdx = xy->fd1;
-          inall->n = xy->n;
-        }
+        //     inall->min = xy->min1;
+        //     inall->max = xy->max1;
+        //     inall->inc = xy->inc1;
+        //     inall->fdx = xy->fd1;
+        //     inall->n = xy->n;
+        //   }
 
-        /* allocation and assignments for r */
+        //   /* allocation and assignments for r */
 
-        if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-          r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-          r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
-        }
+        //   if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
+        //     r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
+        //     r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
+        //   }
 
-        /* Compute equating results. Put x on scale of y.
-			Note that in struct xy, '1' designates x and '2' designates y; 
-			in struct bllxy, '_x' designates x and '_v' designates y. So: 
-				xy->ns2 = number of score categories for y
-			xy->min2 = minimum score for y
-			xy->inc2 = increment for y
-			bllxy->crfd_v = log-linear smoothed cum rel fd for y
-			xy->ns1 = number of score categories for x
-				bllxy->prd_x = log-linear smoothed PR dist for x
-			r->eraw[0] = y equivalents for x (output) */
+        //   /* Compute equating results. Put x on scale of y.
+        // Note that in struct xy, '1' designates x and '2' designates y;
+        // in struct bllxy, '_x' designates x and '_v' designates y. So:
+        // 	xy->ns2 = number of score categories for y
+        // xy->min2 = minimum score for y
+        // xy->inc2 = increment for y
+        // bllxy->crfd_v = log-linear smoothed cum rel fd for y
+        // xy->ns1 = number of score categories for x
+        // 	bllxy->prd_x = log-linear smoothed PR dist for x
+        // r->eraw[0] = y equivalents for x (output) */
 
-        KernelEquateSG(bllxy, r->eraw[0]);
-        /* get moments */
+        //   KernelEquateSG(bllxy, r->eraw[0]);
+        //   /* get moments */
 
-        MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+        //   MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
       }
 
       /*
@@ -396,108 +396,108 @@ namespace EquatingRecipes {
                            const size_t& replicationNumber,
                            EquatingRecipes::Structures::PData& pData,
                            EquatingRecipes::Structures::EquatedRawScoreResults& results) {
-        int i;
-        double* ptr; /* pointer for eraw[] */
-                     /* method names --- 10 characters; right justified */
-        char* names[] = {"        FE", "       MFE", "  ChainedE"};
+        //       int i;
+        //       double* ptr; /* pointer for eraw[] */
+        //                    /* method names --- 10 characters; right justified */
+        //       char* names[] = {"        FE", "       MFE", "  ChainedE"};
 
-        inall->rep = rep; /* should be set to 0 for actual equating. */
-                          /* Counting of replications done in Wrapper_Bootstrap(), 
-             which is why this statement cannot be in the if statement below */
+        //       inall->rep = rep; /* should be set to 0 for actual equating. */
+        //                         /* Counting of replications done in Wrapper_Bootstrap(),
+        //            which is why this statement cannot be in the if statement below */
 
-        /* allocation and assignments for inall
-     Note that for every assignment of the form inall->(var) = xv->(var)
-	 or inall->(var) = yv->(var) values vary depending on whether xv or yv
-	 is for actual equating or a bootstrap sample; all other values are 
-	 the same for the actual equating and a bootstrap sample */
+        //       /* allocation and assignments for inall
+        //    Note that for every assignment of the form inall->(var) = xv->(var)
+        //  or inall->(var) = yv->(var) values vary depending on whether xv or yv
+        //  is for actual equating or a bootstrap sample; all other values are
+        //  the same for the actual equating and a bootstrap sample */
 
-        if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-          strcpy(inall->xfname, xv->fname);
-          strcpy(inall->yfname, yv->fname);
-          inall->xv = xv;
-          inall->yv = yv;
-          inall->bllxv = bllxv;
-          inall->bllyv = bllyv;
-          inall->design = design;
-          inall->method = method;
-          inall->smoothing = smoothing;
-          inall->w1 = (w1 < 0 || w1 > 1) ? (double)(xv->n) / (xv->n + yv->n) : w1;
-          /* proportional wts if w1 outside [0,1] */
-          inall->anchor = anchor;
-          inall->rv1 = rv1;
-          inall->rv2 = rv2;
+        //       if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
+        //         strcpy(inall->xfname, xv->fname);
+        //         strcpy(inall->yfname, yv->fname);
+        //         inall->xv = xv;
+        //         inall->yv = yv;
+        //         inall->bllxv = bllxv;
+        //         inall->bllyv = bllyv;
+        //         inall->design = design;
+        //         inall->method = method;
+        //         inall->smoothing = smoothing;
+        //         inall->w1 = (w1 < 0 || w1 > 1) ? (double)(xv->n) / (xv->n + yv->n) : w1;
+        //         /* proportional wts if w1 outside [0,1] */
+        //         inall->anchor = anchor;
+        //         inall->rv1 = rv1;
+        //         inall->rv2 = rv2;
 
-          if ((method == 'F' || method == 'G' || method == 'A') &&
-              (rv1 == 0 || rv2 == 0))
-            runerror("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
+        //         if ((method == 'F' || method == 'G' || method == 'A') &&
+        //             (rv1 == 0 || rv2 == 0))
+        //           runerror("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
 
-          inall->names = cmatrix(0, 4, 0, 11); /* maximum of five names */
+        //         inall->names = cmatrix(0, 4, 0, 11); /* maximum of five names */
 
-          if (method == 'E') { /* method == 'E' */
-            inall->nm = 1;
-            strcpy(inall->names[0], names[0]);
-          } else if (method == 'F') { /* method == 'F' */
-            inall->nm = 1;
-            strcpy(inall->names[0], names[1]);
-          } else if (method == 'G') { /* method == 'G' */
-            inall->nm = 2;
-            for (i = 0; i <= 1; i++)
-              strcpy(inall->names[i], names[i]);
-          } else if (method == 'C') { /* method == 'C' */
-            inall->nm = 1;
-            strcpy(inall->names[0], names[2]);
-          } else if (method == 'H') { /* method == 'H' */
-            inall->nm = 2;
-            strcpy(inall->names[0], names[0]);
-            strcpy(inall->names[1], names[2]);
-          } else { /* method == 'A' */
-            inall->nm = 3;
-            for (i = 0; i <= 2; i++)
-              strcpy(inall->names[i], names[i]);
-          }
+        //         if (method == 'E') { /* method == 'E' */
+        //           inall->nm = 1;
+        //           strcpy(inall->names[0], names[0]);
+        //         } else if (method == 'F') { /* method == 'F' */
+        //           inall->nm = 1;
+        //           strcpy(inall->names[0], names[1]);
+        //         } else if (method == 'G') { /* method == 'G' */
+        //           inall->nm = 2;
+        //           for (i = 0; i <= 1; i++)
+        //             strcpy(inall->names[i], names[i]);
+        //         } else if (method == 'C') { /* method == 'C' */
+        //           inall->nm = 1;
+        //           strcpy(inall->names[0], names[2]);
+        //         } else if (method == 'H') { /* method == 'H' */
+        //           inall->nm = 2;
+        //           strcpy(inall->names[0], names[0]);
+        //           strcpy(inall->names[1], names[2]);
+        //         } else { /* method == 'A' */
+        //           inall->nm = 3;
+        //           for (i = 0; i <= 2; i++)
+        //             strcpy(inall->names[i], names[i]);
+        //         }
 
-          inall->min = xv->min1;
-          inall->max = xv->max1;
-          inall->inc = xv->inc1;
-          inall->fdx = xv->fd1;
-          inall->n = xv->n;
-        }
+        //         inall->min = xv->min1;
+        //         inall->max = xv->max1;
+        //         inall->inc = xv->inc1;
+        //         inall->fdx = xv->fd1;
+        //         inall->n = xv->n;
+        //       }
 
-        /* allocation and assignments for r */
+        //       /* allocation and assignments for r */
 
-        if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-          r->eraw = dmatrix(0, inall->nm - 1, 0, loc(xv->max1, xv->min1, xv->inc1));
-          r->mts = dmatrix(0, inall->nm - 1, 0, 3); /* 0,3 is for the 4 moments */
-          r->fxs = dmatrix(0, 1, 0, loc(xv->max1, xv->min1, xv->inc1));
-          r->gys = dmatrix(0, 1, 0, loc(yv->max1, yv->min1, yv->inc1));
-        }
+        //       if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
+        //         r->eraw = dmatrix(0, inall->nm - 1, 0, loc(xv->max1, xv->min1, xv->inc1));
+        //         r->mts = dmatrix(0, inall->nm - 1, 0, 3); /* 0,3 is for the 4 moments */
+        //         r->fxs = dmatrix(0, 1, 0, loc(xv->max1, xv->min1, xv->inc1));
+        //         r->gys = dmatrix(0, 1, 0, loc(yv->max1, yv->min1, yv->inc1));
+        //       }
 
-        /* Equipercentile results, including Braun-Holland (BH) linear. 
-   Note: For FE syn densities are in fxs[0] and gys[0]
-         For MFE syn densities are in fxs[1] and gys[1] 
-         For BH under FE, slope in a[0] and intercept in b[0]
-         For BH under MFE, slope in a[1] and intercept in b[1] */
+        //       /* Equipercentile results, including Braun-Holland (BH) linear.
+        //  Note: For FE syn densities are in fxs[0] and gys[0]
+        //        For MFE syn densities are in fxs[1] and gys[1]
+        //        For BH under FE, slope in a[0] and intercept in b[0]
+        //        For BH under MFE, slope in a[1] and intercept in b[1] */
 
-        /* FE + BH-FE in positions 0 and 1*/
-        if (method == 'E' || method == 'G' || method == 'A' || method == 'H')
-          KernelEquateNEATPS(bllxv, bllyv, inall->w1, r->eraw[0]);
+        //       /* FE + BH-FE in positions 0 and 1*/
+        //       if (method == 'E' || method == 'G' || method == 'A' || method == 'H')
+        //         KernelEquateNEATPS(bllxv, bllyv, inall->w1, r->eraw[0]);
 
-        if (method == 'C')
-          ptr = r->eraw[0];
-        else if (method == 'A')
-          ptr = r->eraw[2];
-        else if (method == 'H')
-          ptr = r->eraw[1];
-        else
-          ptr = NULL;
+        //       if (method == 'C')
+        //         ptr = r->eraw[0];
+        //       else if (method == 'A')
+        //         ptr = r->eraw[2];
+        //       else if (method == 'H')
+        //         ptr = r->eraw[1];
+        //       else
+        //         ptr = NULL;
 
-        if (ptr)
-          KernelEquateNEATChn(bllxv, bllyv, ptr);
+        //       if (ptr)
+        //         KernelEquateNEATChn(bllxv, bllyv, ptr);
 
-        /* get moments */
+        //       /* get moments */
 
-        for (i = 0; i <= inall->nm - 1; i++)
-          MomentsFromFD(xv->min1, xv->max1, xv->inc1, r->eraw[i], xv->fd1, r->mts[i]);
+        //       for (i = 0; i <= inall->nm - 1; i++)
+        //         MomentsFromFD(xv->min1, xv->max1, xv->inc1, r->eraw[i], xv->fd1, r->mts[i]);
       }
 
       /*
@@ -583,62 +583,62 @@ namespace EquatingRecipes {
                                          EquatingRecipes::Structures::PData& pData,
                                          EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
-        char* names[] = {"   y-equiv"};
-        double wts[2];
-        double SEE[200];
+        //       char* names[] = {"   y-equiv"};
+        //       double wts[2];
+        //       double SEE[200];
 
-        wts[0] = wtsx;
-        wts[1] = wtsy;
+        //       wts[0] = wtsx;
+        //       wts[1] = wtsy;
 
-        inall->rep = rep; /* should be set to 0 for actual equating */
-                          /* counting of replications done in Wrapper_Bootstrap() */
+        //       inall->rep = rep; /* should be set to 0 for actual equating */
+        //                         /* counting of replications done in Wrapper_Bootstrap() */
 
-        /* Allocation and assignments for struct PDATA inall>
-    Note that for every assignment of the form inall->(var) = x->(var)
-    or inall->(var) = y->(var), values vary depending on whether x or y 
-	is for actual equating or a bootstrap sample; all other values are 
-	the same for the actual equating and a bootstrap sample */
+        //       /* Allocation and assignments for struct PDATA inall>
+        //   Note that for every assignment of the form inall->(var) = x->(var)
+        //   or inall->(var) = y->(var), values vary depending on whether x or y
+        // is for actual equating or a bootstrap sample; all other values are
+        // the same for the actual equating and a bootstrap sample */
 
-        if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-                               /*    strcpy(inall->xyfname,xy->fname);
-    inall->xy = xy;
-	inall->bllxy = bllxy; */
-          inall->design = design;
-          inall->method = method;
-          inall->smoothing = smoothing;
-          inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
-						                        smoothing with the SG design */
+        //       if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
+        //                              /*    strcpy(inall->xyfname,xy->fname);
+        //   inall->xy = xy;
+        // inall->bllxy = bllxy; */
+        //         inall->design = design;
+        //         inall->method = method;
+        //         inall->smoothing = smoothing;
+        //         inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
+        // 					                        smoothing with the SG design */
 
-          inall->nm = 1;
-          inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-          strcpy(inall->names[0], names[0]);
-        }
+        //         inall->nm = 1;
+        //         inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
+        //         strcpy(inall->names[0], names[0]);
+        //       }
 
-        /* allocation and assignments for r */
+        //       /* allocation and assignments for r */
 
-        if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-          r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-          r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
-        }
+        //       if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
+        //         r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
+        //         r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
+        //       }
 
-        /* Compute equating results. Put x on scale of y.
-   Note that in struct xy, '1' designates x and '2' designates y; 
-   in struct bllxy, '_x' designates x and '_v' designates y. So: 
-     xy->ns2 = number of score categories for y
-	 xy->min2 = minimum score for y
-	 xy->inc2 = increment for y
-	 bllxy->crfd_v = log-linear smoothed cum rel fd for y
-	 xy->ns1 = number of score categories for x
-     bllxy->prd_x = log-linear smoothed PR dist for x
-	 r->eraw[0] = y equivalents for x (output) */
+        //       /* Compute equating results. Put x on scale of y.
+        //  Note that in struct xy, '1' designates x and '2' designates y;
+        //  in struct bllxy, '_x' designates x and '_v' designates y. So:
+        //    xy->ns2 = number of score categories for y
+        //  xy->min2 = minimum score for y
+        //  xy->inc2 = increment for y
+        //  bllxy->crfd_v = log-linear smoothed cum rel fd for y
+        //  xy->ns1 = number of score categories for x
+        //    bllxy->prd_x = log-linear smoothed PR dist for x
+        //  r->eraw[0] = y equivalents for x (output) */
 
-        KernelEquateSEECB(bllxy1, bllxy2, wts, r->eraw[0], SEE);
+        //       KernelEquateSEECB(bllxy1, bllxy2, wts, r->eraw[0], SEE);
 
-        /* get moments */
+        //       /* get moments */
 
-        MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+        //       MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
 
-        return;
+        //       return;
       }
 
     private:
@@ -681,7 +681,7 @@ namespace EquatingRecipes {
         double mu = scores.dot(scoreRelativeFreqDist);
         double sigma = (scores.cwiseProduct(scores)).dot(scoreRelativeFreqDist) - std::pow(mu, 2);
 
-        double ax = std::sqrt(sigma / (sigma + std::pow(bandwithX, 2));
+        double ax = std::sqrt(sigma / (sigma + std::pow(bandwithX, 2)));
 
         for (size_t scoreIndex = 0; scoreIndex < numberOfScores; scoreIndex++) {
           double zscore = (scoreValue - ax * scores(scoreIndex) - (1.0 - ax) * mu) / ax / bandwithX;
@@ -1164,8 +1164,8 @@ namespace EquatingRecipes {
 
         double lb = scores(0) - 5.0;
         double ub = scores(ncat - 1) + 5.0;
-        double cdfl = KernelContinuCdf(ncat, scores, fd, h, lb);
-        double cdfu = KernelContinuCdf(ncat, scores, fd, h, ub);
+        double cdfl = kernelCdf(ncat, scores, fd, h, lb);
+        double cdfu = kernelCdf(ncat, scores, fd, h, ub);
 
         if (cdf < cdfl) {
           half = scores(0);
@@ -1174,7 +1174,7 @@ namespace EquatingRecipes {
         } else {
           for (size_t iter = 1; iter <= 200; iter++) {
             half = 0.5 * (lb + ub);
-            double cdfhalf = KernelContinuCdf(ncat, scores, fd, h, half);
+            double cdfhalf = kernelCdf(ncat, scores, fd, h, half);
             double absdif = std::abs(cdf - cdfhalf);
             if (absdif < eps) {
               break;
@@ -1975,8 +1975,8 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void kernelEquateSEECB(EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing1,
-                             EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothing2,
+      void kernelEquateSEECB(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+                             const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                              const Eigen::VectorXd& wts,
                              Eigen::VectorXd& equatedX,
                              Eigen::VectorXd& see) {
@@ -2080,7 +2080,7 @@ namespace EquatingRecipes {
         for (size_t i = 0; i < numberOfScoresX; i++) {
           for (size_t j = 0; j < numberOfScoresY; j++) {
             fitbdist1(i, j) = bivariateLogLinearSmoothing1.fittedBivariateFreqDist(i, j) / static_cast<double>(numberOfExaminees1); // bivar1->bfd[i][j] / np1;
-            fitbdist2(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j) / static_cast<double>(numberOfExaminees2);  // bivar2->bfd[i][j] / np2;
+            fitbdist2(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j) / static_cast<double>(numberOfExaminees2); // bivar2->bfd[i][j] / np2;
           }
         }
 
@@ -2092,18 +2092,17 @@ namespace EquatingRecipes {
         r2 = M * vP21;
         s1 = N * vP21;
 
-
         for (size_t i = 0; i < numberOfScoresX; i++) {
           r(i) = wts(0) * r1(i) + (1.0 - wts(0)) * r2(i);
         }
-          
+
         for (size_t i = 0; i < numberOfScoresY; i++) {
           s(i) = wts(1) * s1(i) + (1.0 - wts(1)) * s2(i);
         }
 
         computeCmatrixGen(totalNumberOfScores, npara, numberOfExaminees1, B, vP12, Cr12);
         computeCmatrixGen(totalNumberOfScores, npara, numberOfExaminees2, B, vP21, Cr21);
-        
+
         U12 = M * Cr12; // MatrixMultiMatrix(ncatx, ncat, npara, M, Cr12, U12);
         V12 = N * Cr12; // MatrixMultiMatrix(ncaty, ncat, npara, N, Cr12, V12);
         U21 = M * Cr21; // MatrixMultiMatrix(ncatx, ncat, npara, M, Cr21, U21);
@@ -2117,14 +2116,14 @@ namespace EquatingRecipes {
         for (size_t i = 0; i < numberOfScoresX; i++) {
           partialFPartialr(numberOfScoresX, scoresX, r, bandwithX, Fr, scoresX(i));
           partialFPartialr(numberOfScoresY, scoresY, s, bandwithY, Gs, equatedX(i));
-          
+
           double Gp = kernelPdf(numberOfScoresY, scoresY, s, bandwithY, equatedX(i));
-          
+
           FrU12 = Fr * U12; // VectorMultiMatrix(ncatx, npara, Fr, U12, FrU12);
           GsV12 = Gs * V12; // VectorMultiMatrix(ncaty, npara, Gs, V12, GsV12);
           FrU21 = Fr * U21; // VectorMultiMatrix(ncatx, npara, Fr, U21, FrU21);
           GsV21 = Gs * V21; // VectorMultiMatrix(ncaty, npara, Gs, V21, GsV21);
-          
+
           for (size_t j = 0; j < npara; j++) {
             FrU12(j) *= wts[0];
             FrU12(j) -= (1 - wts(1)) * GsV12(j);
@@ -2155,114 +2154,99 @@ namespace EquatingRecipes {
 			output:
 				Equatedx    a vector containing the equated score 
 		--------------------------------------------------------------------------*/
-      void KernelEquateNEATPS(struct BLL_SMOOTH* bivar1,
-                              struct BLL_SMOOTH* bivar2,
+      void kernelEquateNEATPS(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+                              const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                               const double& wts,
-                              const Eigen::VectorXd& Equatedx) {
-        // int i, j, ncat1, ncat2, ncatx, ncaty, ncatv;
-        // long np1, np2;
-        // double *vP1, *vP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
-        // /* r1 is for X taken first(first group), r2 is for X taken second (second group),
-				// s1 is for Y taken first(second group), s2 is for Y taken second (first group)
-				// vP1 is for first group, vP2 is for second group */
-        // double *vP121, *vP212;
-        // double hx, hy;
-        // double *scoresx, *scoresy;
-        // double **fitbdist1, **fitbdist2;
+                              Eigen::VectorXd& equatedX) {
+        size_t numberOfScoresX = bivariateLogLinearSmoothing1.numberOfScoresX;
+        size_t numberOfScoresY = bivariateLogLinearSmoothing2.numberOfScoresX;
+        size_t numberOfScoresV = bivariateLogLinearSmoothing1.numberOfScoresV;
+        size_t numberOfExaminees1 = bivariateLogLinearSmoothing1.numberOfExaminees;
+        size_t numberOFExaminees2 = bivariateLogLinearSmoothing2.numberOfExaminees;
 
-        ncatx = bivar1->nsx;
-        ncaty = bivar2->nsx;
-        ncatv = bivar1->nsv;
-        np1 = bivar1->num_persons;
-        np2 = bivar2->num_persons;
-        scoresx = dvector(0, ncatx);
-        for (i = 0; i < ncatx; i++)
-          scoresx[i] = bivar1->minx + i * bivar1->incx;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar2->minx + i * bivar2->incx;
-        ncat1 = ncatx * ncatv;
-        ncat2 = ncaty * ncatv;
+        Eigen::VectorXd scoresX(numberOfScoresX);
+        Eigen::VectorXd scoresY(numberOfScoresY);
 
-        vP1 = dvector(0, ncat1 - 1);
-        vP2 = dvector(0, ncat2 - 1);
-        vP121 = dvector(0, ncat1 - 1);
-        vP212 = dvector(0, ncat2 - 1);
-        M1 = dmatrix(0, ncatx - 1, 0, ncat1 - 1);
-        N1 = dmatrix(0, ncatv - 1, 0, ncat1 - 1);
-        M2 = dmatrix(0, ncaty - 1, 0, ncat2 - 1);
-        N2 = dmatrix(0, ncatv - 1, 0, ncat2 - 1);
-        r1 = dvector(0, ncatx - 1);
-        s1 = dvector(0, ncaty - 1);
-        r2 = dvector(0, ncatx - 1);
-        s2 = dvector(0, ncaty - 1);
-        r = dvector(0, ncatx - 1);
-        s = dvector(0, ncaty - 1);
-        v1 = dvector(0, ncatv - 1);
-        v2 = dvector(0, ncatv - 1);
-        fitbdist1 = dmatrix(0, ncatx - 1, 0, ncatv - 1);
-        fitbdist2 = dmatrix(0, ncaty - 1, 0, ncatv - 1);
-
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++)
-            fitbdist1[i][j] = bivar1->bfd[i][j] / np1;
-          for (i = 0; i < ncaty; i++)
-            fitbdist2[i][j] = bivar2->bfd[i][j] / np2;
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          scoresX(i) = bivariateLogLinearSmoothing1.minimumRawScoreX +
+                       static_cast<double>(i) * bivariateLogLinearSmoothing1.scoreIncrementX;
         }
 
-        vPMN(ncatx, ncatv, fitbdist1, vP1, M1, N1);
-        vPMN(ncaty, ncatv, fitbdist2, vP2, M2, N2);
-        MatrixMultiVector(ncatx, ncat1, M1, vP1, r1);
-        MatrixMultiVector(ncatv, ncat1, N1, vP1, v1);
-        MatrixMultiVector(ncaty, ncat2, M2, vP2, s2);
-        MatrixMultiVector(ncatv, ncat2, N2, vP2, v2);
+        for (size_t i = 0; i < numberOfScoresY; i++) {
+          scoresY(i) = bivariateLogLinearSmoothing2.numberOfScoresX +
+                       static_cast<double>(i) * bivariateLogLinearSmoothing2.scoreIncrementX;
+        }
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++) {
-            vP121[i + j * ncatx] = vP1[i + j * ncatx] * v2[j] / v1[j];
-            /*	for (k=0; k<npara1; k++) 
-						Cr1Star[i+j*ncatx][k] = Cr1[i+j*ncatx][k] * v2[j] / v1[j]; */
+        size_t numberOfScores1 = numberOfScoresX * numberOfScoresV;
+        size_t numberOfScores2 = numberOfScoresY * numberOfScoresV;
+
+        Eigen::VectorXd vP1(numberOfScores1);   // = dvector(0, ncat1 - 1);
+        Eigen::VectorXd vP2(numberOfScores2);   // = dvector(0, ncat2 - 1);
+        Eigen::VectorXd vP121(numberOfScores1); // = dvector(0, ncat1 - 1);
+        Eigen::VectorXd vP212(numberOfScores2); // = dvector(0, ncat2 - 1);
+        Eigen::VectorXd r1(numberOfScoresX);    // = dvector(0, ncatx - 1);
+        Eigen::VectorXd s1(numberOfScoresY);    // = dvector(0, ncaty - 1);
+        Eigen::VectorXd r2(numberOfScoresX);    // = dvector(0, ncatx - 1);
+        Eigen::VectorXd s2(numberOfScoresY);    // = dvector(0, ncaty - 1);
+        Eigen::VectorXd r(numberOfScoresX);     // = dvector(0, ncatx - 1);
+        Eigen::VectorXd s(numberOfScoresY);     // = dvector(0, ncaty - 1);
+        Eigen::VectorXd v1(numberOfScoresV);    // = dvector(0, ncatv - 1);
+        Eigen::VectorXd v2(numberOfScoresV);    // = dvector(0, ncatv - 1);
+
+        Eigen::MatrixXd M1(numberOfScoresX, numberOfScores1);        // = dmatrix(0, ncatx - 1, 0, ncat1 - 1);
+        Eigen::MatrixXd N1(numberOfScoresV, numberOfScores1);        // = dmatrix(0, ncatv - 1, 0, ncat1 - 1);
+        Eigen::MatrixXd M2(numberOfScoresY, numberOfScores2);        // = dmatrix(0, ncaty - 1, 0, ncat2 - 1);
+        Eigen::MatrixXd N2(numberOfScoresV, numberOfScores2);        // = dmatrix(0, ncatv - 1, 0, ncat2 - 1);
+        Eigen::MatrixXd fitbdist1(numberOfScoresX, numberOfScoresV); // = dmatrix(0, ncatx - 1, 0, ncatv - 1);
+        Eigen::MatrixXd fitbdist2(numberOfScoresY, numberOfScoresV); // = dmatrix(0, ncaty - 1, 0, ncatv - 1);
+
+        for (size_t j = 0; j < numberOfScoresV; j++) {
+          for (size_t i = 0; i < numberOfScoresX; i++) {
+            fitbdist1(i, j) = bivariateLogLinearSmoothing1.fittedBivariateFreqDist(i, j) /
+                              static_cast<double>(numberOfExaminees1); // bivar1->bfd[i][j] / np1;
+          }
+
+          for (size_t i = 0; i < numberOfScoresY; i++) {
+            fitbdist2(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j) /
+                              static_cast<double>(numberOFExaminees2); // fitbdist2[i][j] = bivar2->bfd[i][j] / np2;
           }
         }
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncaty; i++) {
-            vP212[i + j * ncaty] = vP2[i + j * ncaty] * v1[j] / v2[j];
-            /*	for (k=0; k<npara2; k++) 
-						Cr2Star[i+j*ncatx][k] =  Cr2[i+j*ncatx][k] * v1[j] / v2[j]; */
+        vPMN(numberOfScoresX, numberOfScoresV, fitbdist1, vP1, M1, N1);
+        vPMN(numberOfScoresY, numberOfScoresV, fitbdist2, vP2, M2, N2);
+
+        r1 = M1 * vP1; // MatrixMultiVector(numberOfScoresX, numberOfScores1, M1, vP1, r1);
+        v1 = N1 * vP1; // MatrixMultiVector(numberOfScoresV, numberOfScores1, N1, vP1, v1);
+        s2 = M2 * vP2; // MatrixMultiVector(numberOfScoresY, numberOfScores2, M2, vP2, s2);
+        v2 = N2 * vP2; // MatrixMultiVector(ncatv, ncat2, N2, vP2, v2);
+
+        for (size_t j = 0; j < numberOfScoresV; j++) {
+          for (size_t i = 0; i < numberOfScoresX; i++) {
+            vP121(i + j * numberOfScoresX) = vP1(i + j * numberOfScoresX) * v2(j) / v1(j);
           }
         }
-        MatrixMultiVector(ncatx, ncat1, M1, vP121, r2);
-        MatrixMultiVector(ncatx, ncat2, M2, vP212, s1);
 
-        for (i = 0; i < ncatx; i++)
-          r[i] = wts * r1[i] + (1 - wts) * r2[i];
-        for (i = 0; i < ncaty; i++)
+        for (size_t j = 0; j < numberOfScoresV; j++) {
+          for (size_t i = 0; i < numberOfScoresY; i++) {
+            vP212(i + j + numberOfScoresY) = vP2(i + j * numberOfScoresY) * v1(j) / v2(j);
+          }
+        }
+
+        r2 = M1 * vP121;
+        s1 = M2 * vP212;
+
+        for (size_t i = 0; i < numberOfScoresX; i++) {
+          r(i) = wts * r1(i) + (1.0 - wts) * r2(i);
+        }
+
+        for (size_t i = 0; i < numberOfScoresY; i++) {
           s[i] = wts * s1[i] + (1 - wts) * s2[i];
+        }
 
-        hx = Optimalh(ncatx, scoresx, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        double bandwithX = optimalBandwithXParameter(numberOfScoresX, scoresX, r, 1);
+        double bandwithY = optimalBandwithXParameter(numberOfScoresY, scoresY, s, 1);
 
-        KernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy, Equatedx);
-
-        free_dvector(vP1, 0, ncat1 - 1);
-        free_dvector(vP2, 0, ncat2 - 1);
-        free_dvector(vP121, 0, ncat1 - 1);
-        free_dvector(vP212, 0, ncat2 - 1);
-        free_dmatrix(M1, 0, ncatx - 1, 0, ncat1 - 1);
-        free_dmatrix(N1, 0, ncatv - 1, 0, ncat1 - 1);
-        free_dmatrix(M2, 0, ncaty - 1, 0, ncat2 - 1);
-        free_dmatrix(N2, 0, ncatv - 1, 0, ncat2 - 1);
-        free_dvector(r1, 0, ncatx - 1);
-        free_dvector(s1, 0, ncaty - 1);
-        free_dvector(r2, 0, ncatx - 1);
-        free_dvector(s2, 0, ncaty - 1);
-        free_dvector(r, 0, ncatx - 1);
-        free_dvector(s, 0, ncaty - 1);
-        free_dvector(v1, 0, ncatv - 1);
-        free_dvector(v2, 0, ncatv - 1);
-        free_dmatrix(fitbdist1, 0, ncatx - 1, 0, ncatv - 1);
-        free_dmatrix(fitbdist2, 0, ncaty - 1, 0, ncatv - 1);
+        kernelEquate(numberOfScoresX, scoresX, r, bandwithX, numberOfScoresY, scoresY, s, bandwithY, equatedX);
       }
 
       /*--------------------------------------------------------------------------
@@ -2285,187 +2269,215 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEENEATPS3(struct BLL_SMOOTH* bivar1, struct BLL_SMOOTH* bivar2, double wts,
-                                  double* Equatedx, double* SEE) {
-        int i, j, k, ncat1, ncat2, ncatx, ncaty, ncatv, npara1, npara2;
-        int cu1, cv1, cuv1, cu2, cv2, cuv2;
-        long np1, np2;
-        double *vP1, *vP2, *vPP1, *vPP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
-        /* r1 is for X taken first(first group), r2 is for X taken second (second group),
-				s1 is for Y taken first(second group), s2 is for Y taken second (first group)
-				vP1 is for first group, vP2 is for second group */
-        double *vP121, *vP212;
-        double **UR, **US, **VR, **VS, **UP, **UPStar, **UQ, **UQStar, **Utemp, **Vtemp;
-        double *pl, *vPl, *ql, *vQl;
-        double hx, hy;
-        double **Cr1, **Cr1Star, **Cr2, **Cr2Star, **B1, **B2;
-        double *Fr, *Gs, Gp, *FrUR, *GsVR, *FrUS, *GsVS;
-        double *scoresx, *scoresy;
-        int *interx, *interv1, *interv2, *intery;
-        double **fitbdist1, **fitbdist2, sum1 = 0, sum2 = 0;
-        int currentrow1, currentrow2;
-        int **cpm1, **cpm2;
+      void KernelEquateSEENEATPS3(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
+                                  const double& wts,
+                                  Eigen::VectorXd& equatedX,
+                                  Eigen::VectorXd& see) {
+        // int i, j, k, ncat1, ncat2, ncatx, ncaty, ncatv, npara1, npara2;
+        // int cu1, cv1, cuv1, cu2, cv2, cuv2;
+        // long np1, np2;
+        // double *vP1, *vP2, *vPP1, *vPP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
+        // /* r1 is for X taken first(first group), r2 is for X taken second (second group),
+        // s1 is for Y taken first(second group), s2 is for Y taken second (first group)
+        // vP1 is for first group, vP2 is for second group */
+        // double *vP121, *vP212;
+        // double **UR, **US, **VR, **VS, **UP, **UPStar, **UQ, **UQStar, **Utemp, **Vtemp;
+        // double *pl, *vPl, *ql, *vQl;
+        // double hx, hy;
+        // double **Cr1, **Cr1Star, **Cr2, **Cr2Star, **B1, **B2;
+        // double *Fr, *Gs, Gp, *FrUR, *GsVR, *FrUS, *GsVS;
+        // double *scoresx, *scoresy;
+        // int *interx, *interv1, *interv2, *intery;
+        // double **fitbdist1, **fitbdist2, sum1 = 0, sum2 = 0;
+        // int currentrow1, currentrow2;
+        // int **cpm1, **cpm2;
 
-        cuv1 = bivar1->cuv;
-        cu1 = bivar1->cu;
-        cv1 = bivar1->cv;
-        cuv2 = bivar2->cuv;
-        cu2 = bivar2->cu;
-        cv2 = bivar2->cv;
-        cpm1 = imatrix(0, 1, 0, cuv1);
-        for (i = 0; i < cuv1; i++)
-          for (j = 0; j < 2; j++)
-            cpm1[j][i] = bivar1->cpm[i][j];
-        cpm2 = imatrix(0, 1, 0, cuv2);
-        for (i = 0; i < cuv2; i++)
-          for (j = 0; j < 2; j++)
-            cpm2[j][i] = bivar2->cpm[i][j];
+        size_t cuv1 = bivariateLogLinearSmoothing1.numberOfCrossProductMoments;
+        size_t cu1 = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingU;
+        size_t cv1 = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingV;
+        size_t cuv2 = bivariateLogLinearSmoothing2.numberOfCrossProductMoments;
+        size_t cu2 = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingU;
+        size_t cv2 = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingV;
 
-        ncatx = bivar1->nsx;
-        ncaty = bivar2->nsx;
-        ncatv = bivar1->nsv;
-        npara1 = bivar1->cu + bivar1->cv + bivar1->cuv + 10;
-        npara2 = bivar2->cu + bivar2->cv + bivar2->cuv + 10;
-        interx = cpm1[0];
-        interv1 = cpm1[1];
-        intery = cpm2[0];
-        interv2 = cpm2[1];
-        np1 = bivar1->num_persons;
-        np2 = bivar2->num_persons;
-        scoresx = dvector(0, ncatx);
-        for (i = 0; i < ncatx; i++)
-          scoresx[i] = bivar1->minx + i * bivar1->incx;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar2->minx + i * bivar2->incx;
-        ncat1 = ncatx * ncatv;
-        ncat2 = ncaty * ncatv;
+        Eigen::MatrixXi cpm1(2, cuv1);
 
-        vP1 = dvector(0, ncat1 - 1);
-        vP2 = dvector(0, ncat2 - 1);
-        vPP1 = dvector(0, ncat1 - 1);
-        vPP2 = dvector(0, ncat2 - 1);
-        vP121 = dvector(0, ncat1 - 1);
-        vP212 = dvector(0, ncat2 - 1);
-        M1 = dmatrix(0, ncatx - 1, 0, ncat1 - 1);
-        N1 = dmatrix(0, ncatv - 1, 0, ncat1 - 1);
-        M2 = dmatrix(0, ncaty - 1, 0, ncat2 - 1);
-        N2 = dmatrix(0, ncatv - 1, 0, ncat2 - 1);
-        r1 = dvector(0, ncatx - 1);
-        s1 = dvector(0, ncaty - 1);
-        r2 = dvector(0, ncatx - 1);
-        s2 = dvector(0, ncaty - 1);
-        r = dvector(0, ncatx - 1);
-        s = dvector(0, ncaty - 1);
-        v1 = dvector(0, ncatv - 1);
-        v2 = dvector(0, ncatv - 1);
-        Cr1 = dmatrix(0, ncat1 - 1, 0, npara1 - 1);
-        Cr2 = dmatrix(0, ncat2 - 1, 0, npara2 - 1);
-        Cr1Star = dmatrix(0, ncat1 - 1, 0, npara1 - 1);
-        Cr2Star = dmatrix(0, ncat2 - 1, 0, npara2 - 1);
-        B1 = dmatrix(0, npara1 - 1, 0, ncat1 - 1);
-        B2 = dmatrix(0, npara2 - 1, 0, ncat2 - 1);
-        UR = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        UP = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        UPStar = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        Utemp = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        VR = dmatrix(0, ncaty - 1, 0, npara1 - 1);
-        US = dmatrix(0, ncatx - 1, 0, npara2 - 1);
-        VS = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        UQ = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        UQStar = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        Vtemp = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        pl = dvector(0, ncatx - 1);
-        vPl = dvector(0, npara1 - 1);
-        ql = dvector(0, ncaty - 1);
-        vQl = dvector(0, npara2 - 1);
-        Fr = dvector(0, ncatx - 1);
-        Gs = dvector(0, ncaty - 1);
-        FrUR = dvector(0, npara1 - 1);
-        GsVR = dvector(0, npara1 - 1);
-        FrUS = dvector(0, npara2 - 1);
-        GsVS = dvector(0, npara2 - 1);
-        fitbdist1 = dmatrix(0, ncatx - 1, 0, ncatv - 1);
-        fitbdist2 = dmatrix(0, ncaty - 1, 0, ncatv - 1);
+        for (size_t i = 0; i < cuv1; i++) {
+          for (size_t j = 0; j < 2; j++) {
+            cpm1(j, i) = bivariateLogLinearSmoothing1.crossProductMoments(i, j);
+          }
+        }
 
-        /*The following code set a natrual design matrix corresponding to a natrual basis of 
+        Eigen::MatrixXi cpm2(2, cuv2);
+
+        for (size_t i = 0; i < cuv2; i++) {
+          for (size_t j = 0; j < 2; j++) {
+            cpm2(j, i) = bivariateLogLinearSmoothing2.crossProductMoments(i, j);
+          }
+        }
+
+        size_t ncatx = bivariateLogLinearSmoothing1.numberOfScoresX;
+        size_t ncaty = bivariateLogLinearSmoothing2.numberOfScoresX;
+        size_t ncatv = bivariateLogLinearSmoothing1.numberOfScoresV;
+        size_t npara1 = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingU +
+                        bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingV +
+                        bivariateLogLinearSmoothing1.numberOfCrossProductMoments + 10;
+        size_t npara2 = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingU +
+                        bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingV +
+                        bivariateLogLinearSmoothing2.numberOfCrossProductMoments + 10;
+        Eigen::VectorXd interx = cpm1.row(0).cast<double>();
+        Eigen::VectorXd interv1 = cpm1.row(1).cast<double>();
+        Eigen::VectorXd intery = cpm2.row(0).cast<double>();
+        Eigen::VectorXd interv2 = cpm2.row(1).cast<double>();
+
+        size_t np1 = bivariateLogLinearSmoothing1.numberOfExaminees;
+        size_t np2 = bivariateLogLinearSmoothing2.numberOfExaminees;
+        Eigen::VectorXd scoresX(ncatx);
+        for (size_t i = 0; i < ncatx; i++) {
+          scoresX(i) = bivariateLogLinearSmoothing1.minimumRawScoreX +
+                       static_cast<double>(i) * bivariateLogLinearSmoothing1.scoreIncrementX;
+        }
+
+        Eigen::VectorXd scoresY(ncaty);
+
+        for (size_t i = 0; i < ncaty; i++) {
+          scoresY(i) = bivariateLogLinearSmoothing2.minimumRawScoreX +
+                       static_cast<double>(i) * bivariateLogLinearSmoothing2.scoreIncrementX;
+        }
+
+        size_t ncat1 = ncatx * ncatv;
+        size_t ncat2 = ncaty * ncatv;
+
+        Eigen::VectorXd vP1(ncat1);   // vP1 =
+        Eigen::VectorXd vP121(ncat1); // vP121 =
+        Eigen::VectorXd vPP1(ncat1);  // vPP1 =
+        Eigen::VectorXd vP2(ncat2);   // vP2 =
+        Eigen::VectorXd vP212(ncat2); // vP212 =
+        Eigen::VectorXd vPP2(ncat2);  // vPP2 =
+        Eigen::VectorXd v1(ncatv);    // v1 =
+        Eigen::VectorXd v2(ncatv);    // v2 =
+        Eigen::VectorXd Fr(ncatx);    // Fr =
+        Eigen::VectorXd pl(ncatx);    // pl =
+        Eigen::VectorXd r(ncatx);     // r =
+        Eigen::VectorXd r1(ncatx);    // r1 =
+        Eigen::VectorXd r2(ncatx);    // r2 =
+        Eigen::VectorXd Gs(ncaty);    // Gs =
+        Eigen::VectorXd ql(ncaty);    // ql =
+        Eigen::VectorXd s(ncaty);     // s =
+        Eigen::VectorXd s1(ncaty);    // s1 =
+        Eigen::VectorXd s2(ncaty);    // s2 =
+        Eigen::VectorXd FrUR(npara1); // FrUR =
+        Eigen::VectorXd GsVR(npara1); // GsVR =
+        Eigen::VectorXd vPl(npara1);  // vPl =
+        Eigen::VectorXd FrUS(npara2); // FrUS =
+        Eigen::VectorXd GsVS(npara2); // GsVS =
+        Eigen::VectorXd vQl(npara2);  // vQl =
+
+        Eigen::MatrixXd Cr1(ncat1, npara1);      // Cr1 =
+        Eigen::MatrixXd Cr1Star(ncat1, npara1);  // Cr1Star =
+        Eigen::MatrixXd Cr2(ncat2, npara2);      // Cr2 =
+        Eigen::MatrixXd Cr2Star(ncat2, npara2);  // Cr2Star =
+        Eigen::MatrixXd N1(ncatv, ncat1);        // N1 =
+        Eigen::MatrixXd N2(ncatv, ncat2);        // N2 =
+        Eigen::MatrixXd M1(ncatx, ncat1);        // M1 =
+        Eigen::MatrixXd fitbdist1(ncatx, ncatv); // fitbdist1 =
+        Eigen::MatrixXd UP(ncatx, npara1);       // UP =
+        Eigen::MatrixXd UPStar(ncatx, npara1);   // UPStar =
+        Eigen::MatrixXd UR(ncatx, npara1);       // UR =
+        Eigen::MatrixXd Utemp(ncatx, npara1);    // Utemp =
+        Eigen::MatrixXd US(ncatx, npara2);       // US =
+        Eigen::MatrixXd M2(ncaty, ncat2);        // M2 =
+        Eigen::MatrixXd fitbdist2(ncaty, ncatv); // fitbdist2 =
+        Eigen::MatrixXd VR(ncaty, npara1);       // VR =
+        Eigen::MatrixXd UQ(ncaty, npara2);       // UQ =
+        Eigen::MatrixXd UQStar(ncaty, npara2);   // UQStar =
+        Eigen::MatrixXd VS(ncaty, npara2);       // VS =
+        Eigen::MatrixXd Vtemp(ncaty, npara2);    // Vtemp =
+        Eigen::MatrixXd B1(npara1, ncat1);       // B1 =
+        Eigen::MatrixXd B2(npara2, ncat2);       // B2 =
+
+        /*The following code set a natural design matrix corresponding to a natural basis of 
 					polynomials. note that this B is the transpose of the design matrix in the loglinear 
-				model. */
+				  model. */
 
-        /*First, assign natrual design matrix first for rows corresponding to x */
-        for (i = 0; i < cu1; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B1[i][k * (ncatx) + j] = pow((double)j, (double)(i + 1));
+        /*First, assign natural design matrix first for rows corresponding to x */
+        for (size_t i = 0; i < cu1; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B1(i, k + ncatx + j) = std::pow(static_cast<double>(j), i + 1);
             }
           }
         }
 
         /* then assign values to rows corresponding to v */
-        currentrow1 = cu1;
-        for (i = 0; i < cv1; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B1[currentrow1 + i][k * (ncatx) + j] = pow((double)k, (double)(i + 1));
+        size_t currentrow1 = cu1;
+        for (size_t i = 0; i < cv1; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B1(currentrow1 + i, k * ncatx + j) = std::pow(static_cast<double>(k), (i + 1));
             }
           }
         }
 
         /* assign value to the last rows corresponding to the interaction terms */
         currentrow1 += cv1;
-        for (i = 0; i < cuv1; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B1[currentrow1 + i][k * (ncatx) + j] = pow((double)j, (double)interx[i]) *
-                                                     pow((double)k, (double)interv1[i]);
+        for (size_t i = 0; i < cuv1; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B1(currentrow1 + i, k * ncatx + j) = std::pow(static_cast<double>(j), interx(i)) *
+                                                   std::pow(static_cast<double>(k), interv1(i));
             }
           }
         }
 
         /* assign values to the rows for the 0 score on form X */
         currentrow1 += cuv1;
-        for (j = 0; j < ncatx; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (j == 0)
-              B1[currentrow1][k * (ncatx) + j] = 1;
-            else
-              B1[currentrow1][k * (ncatx) + j] = 0;
+        for (size_t j = 0; j < ncatx; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (j == 0) {
+              B1(currentrow1, k * ncatx + j) = 1;
+            } else {
+              B1(currentrow1, k * ncatx + j) = 0;
+            }
           }
         }
 
         /* assign values to the rows for the 0 score on common set v */
         currentrow1++;
-        for (j = 0; j < ncatx; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (k == 0)
-              B1[currentrow1][k * (ncatx) + j] = 1;
-            else
-              B1[currentrow1][k * (ncatx) + j] = 0;
+        for (size_t j = 0; j < ncatx; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (k == 0) {
+              B1(currentrow1, k * ncatx + j) = 1;
+            } else {
+              B1(currentrow1, k * ncatx + j) = 0;
+            }
           }
         }
 
         /*assign value to the rows for score gaps in x 	*/
         currentrow1++;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              if ((j % 5) == 0 && j != 0)
-                B1[currentrow1 + i][k * (ncatx) + j] = pow((double)j, (double)i);
-              else
-                B1[currentrow1 + i][k * (ncatx) + j] = 0;
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              if ((j % 5) == 0 && j != 0) {
+                B1(currentrow1 + i, k * ncatx + j) =
+                    std::pow(static_cast<double>(j), (double)i);
+              } else {
+                B1(currentrow1 + i, k * ncatx + j) = 0;
+              }
             }
           }
         }
 
         /*assign value to the rows for score gaps in v */
         currentrow1 += 4;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
               if (((k) % 5) == 0 && k != 0)
-                B1[currentrow1 + i][k * (ncatx) + j] = pow((double)k, (double)i);
+                B1(currentrow1 + i, k * ncatx + j) = std::pow(static_cast<double>(k), i);
               else
-                B1[currentrow1 + i][k * (ncatx) + j] = 0;
+                B1(currentrow1 + i, k * ncatx + j) = 0;
             }
           }
         }
@@ -2475,93 +2487,101 @@ namespace EquatingRecipes {
 				model. */
 
         /*First, assign natrual design matrix first for rows corresponding to y */
-        for (i = 0; i < cu2; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B2[i][k * (ncaty) + j] = pow((double)j, (double)(i + 1));
+        for (size_t i = 0; i < cu2; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B2(i, k * ncaty + j) = std::pow(static_cast<double>(j), (i + 1));
             }
           }
         }
 
         /* then assign values to rows corresponding to v */
-        currentrow2 = cu2;
-        for (i = 0; i < cv2; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B2[currentrow2 + i][k * (ncaty) + j] = pow((double)k, (double)(i + 1));
+        size_t currentrow2 = cu2;
+        for (size_t i = 0; i < cv2; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B2(currentrow2 + 1, k * ncaty + j) = std::pow(static_cast<double>(k), (i + 1));
             }
           }
         }
 
         /* assign value to the last rows corresponding to the interaction terms */
         currentrow2 += cv2;
-        for (i = 0; i < cuv2; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B2[currentrow2 + i][k * (ncaty) + j] = pow((double)j, (double)intery[i]) *
-                                                     pow((double)k, (double)interv2[i]);
+        for (size_t i = 0; i < cuv2; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B2(currentrow2 + i, k * ncaty + j) = std::pow(static_cast<double>(j), intery(i)) *
+                                                   std::pow(static_cast<double>(k), interv2(i));
             }
           }
         }
 
         /* assign values to the rows for the 0 score on form Y  */
         currentrow2 += cuv2;
-        for (j = 0; j < ncaty; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (j == 0)
-              B2[currentrow2][k * (ncaty) + j] = 1;
-            else
-              B2[currentrow2][k * (ncaty) + j] = 0;
+        for (size_t j = 0; j < ncaty; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (j == 0) {
+              B2(currentrow2, k * ncaty + j) = 1;
+            } else {
+              B2(currentrow2, k * ncaty + j) = 0;
+            }
           }
         }
 
         /* assign values to the rows for the 0 score on common set V  */
         currentrow2++;
-        for (j = 0; j < ncaty; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (k == 0)
-              B2[currentrow2][k * (ncaty) + j] = 1;
-            else
-              B2[currentrow2][k * (ncaty) + j] = 0;
+        for (size_t j = 0; j < ncaty; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (k == 0) {
+              B2(currentrow2, k * ncaty + j) = 1;
+            } else {
+              B2(currentrow2, k * ncaty + j) = 0;
+            }
           }
         }
 
         /*assign value to the rows for score gaps in y 	*/
         currentrow2++;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              if ((j % 5) == 0 && j != 0)
-                B2[currentrow2 + i][k * (ncaty) + j] = pow((double)j, (double)i);
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              if ((j % 5) == 0 && j != 0) {
+                B2(currentrow2 + i, k * ncaty + j) = std::pow(static_cast<double>(j), i);
+              }
+
               else
-                B2[currentrow2 + i][k * (ncaty) + j] = 0;
+                B2(currentrow2 + i, k * ncaty + j) = 0;
             }
           }
         }
 
         /*assign value to the rows for score gaps in v */
         currentrow2 += 4;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              if (((k) % 5) == 0 && k != 0)
-                B2[currentrow2 + i][k * (ncaty) + j] = pow((double)k, (double)i);
-              else
-                B2[currentrow2 + i][k * (ncaty) + j] = 0;
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              if (((k) % 5) == 0 && k != 0) {
+                B2(currentrow2 + i, k * ncaty + j) = std::pow(static_cast<double>(k), i);
+              } else {
+                B2(currentrow2 + i, k * ncaty + j) = 0;
+              }
             }
           }
         }
 
-        sum1 = 0;
-        sum2 = 0;
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++) {
-            fitbdist1[i][j] = bivar1->bfd[i][j] / np1;
-            sum1 += fitbdist1[i][j];
+        double sum1 = 0;
+        double sum2 = 0;
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncatx; i++) {
+            fitbdist1(i, j) = bivariateLogLinearSmoothing1.fittedBivariateFreqDist(i, j) /
+                              static_cast<double>(np1);
+            sum1 += fitbdist1(i, j);
           }
-          for (i = 0; i < ncaty; i++) {
-            fitbdist2[i][j] = bivar2->bfd[i][j] / np2;
-            sum2 += fitbdist2[i][j];
+
+          for (size_t i = 0; i < ncaty; i++) {
+            fitbdist2(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j) /
+                              static_cast<double>(np2);
+            sum2 += fitbdist2(i, j);
           }
         }
 
@@ -2569,161 +2589,121 @@ namespace EquatingRecipes {
         vPMN(ncaty, ncatv, fitbdist2, vP2, M2, N2);
         vPT(ncatx, ncatv, fitbdist1, vPP1);
         vPT(ncaty, ncatv, fitbdist2, vPP2);
-        MatrixMultiVector(ncatx, ncat1, M1, vP1, r1);
-        MatrixMultiVector(ncatv, ncat1, N1, vP1, v1);
-        MatrixMultiVector(ncaty, ncat2, M2, vP2, s2);
-        MatrixMultiVector(ncatv, ncat2, N2, vP2, v2);
+        r1 = M1 * vP1; // MatrixMultiVector(ncatx, ncat1, M1, vP1, r1);
+        v1 = N1 * vP1; // MatrixMultiVector(ncatv, ncat1, N1, vP1, v1);
+        s2 = M2 * vP2; // MatrixMultiVector(ncaty, ncat2, M2, vP2, s2);
+        v2 = N2 * vP2; // MatrixMultiVector(ncatv, ncat2, N2, vP2, v2);
 
-        ComputeCmatrixGen(ncat1, npara1, np1, B1, vP1, Cr1);
-        ComputeCmatrixGen(ncat2, npara2, np2, B2, vP2, Cr2);
+        computeCmatrixGen(ncat1, npara1, np1, B1, vP1, Cr1);
+        computeCmatrixGen(ncat2, npara2, np2, B2, vP2, Cr2);
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++) {
-            vP121[i + j * ncatx] = vP1[i + j * ncatx] * v2[j] / v1[j];
-            for (k = 0; k < npara1; k++)
-              Cr1Star[i + j * ncatx][k] = Cr1[i + j * ncatx][k] * v2[j] / v1[j];
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncatx; i++) {
+            vP121(i + j * ncatx) = vP1(i + j * ncatx) * v2(j) / v1(j);
+            for (size_t k = 0; k < npara1; k++)
+              Cr1Star(i + j * ncatx, k) = Cr1(i + j * ncatx, k) * v2[j] / v1[j];
           }
         }
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncaty; i++) {
-            vP212[i + j * ncaty] = vP2[i + j * ncaty] * v1[j] / v2[j];
-            for (k = 0; k < npara2; k++)
-              Cr2Star[i + j * ncatx][k] = Cr2[i + j * ncatx][k] * v1[j] / v2[j];
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncaty; i++) {
+            vP212(i + j * ncaty) = vP2(i + j * ncaty) * v1(j) / v2(j);
+            for (size_t k = 0; k < npara2; k++)
+              Cr2Star(i + j * ncatx, k) = Cr2(i + j * ncatx, k) * v1(j) / v2(j);
           }
         }
-        for (i = 0; i < ncatx; i++) {
-          for (k = 0; k < npara1; k++)
-            Utemp[i][k] = 0;
-          for (k = 0; k < npara2; k++)
-            US[i][k] = 0;
+
+        for (size_t i = 0; i < ncatx; i++) {
+          for (size_t k = 0; k < npara1; k++)
+            Utemp(i, k) = 0;
+          for (size_t k = 0; k < npara2; k++)
+            US(i, k) = 0;
         }
 
-        for (i = 0; i < ncaty; i++) {
-          for (k = 0; k < npara2; k++)
-            Vtemp[i][k] = 0;
-          for (k = 0; k < npara1; k++)
-            VR[i][k] = 0;
+        for (size_t i = 0; i < ncaty; i++) {
+          for (size_t k = 0; k < npara2; k++)
+            Vtemp(i, k) = 0;
+          for (size_t k = 0; k < npara1; k++)
+            VR(i, k) = 0;
         }
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++)
-            pl[i] = fitbdist1[i][j];
-          for (k = 0; k < npara1; k++) {
-            for (vPl[k] = 0, i = 0; i < ncatx; i++)
-              vPl[k] += Cr1[j * ncatx + i][k];
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncatx; i++)
+            pl(i) = fitbdist1(i, j);
+          for (size_t k = 0; k < npara1; k++) {
+            vPl(k) = 0;
+
+            for (size_t i = 0; i < ncatx; i++)
+              vPl(k) += Cr1(j * ncatx + i, k);
           }
-          for (i = 0; i < ncatx; i++)
-            for (k = 0; k < npara1; k++)
-              Utemp[i][k] += v2[j] / v1[j] / v1[j] * pl[i] * vPl[k];
+          for (size_t i = 0; i < ncatx; i++)
+            for (size_t k = 0; k < npara1; k++)
+              Utemp(i, k) += v2(j) / v1(j) / v1(j) * pl(i) * vPl(k);
 
-          for (i = 0; i < ncaty; i++)
-            ql[i] = fitbdist2[i][j];
-          for (k = 0; k < npara2; k++) {
-            for (vQl[k] = 0, i = 0; i < ncaty; i++)
-              vQl[k] += Cr2[j * ncaty + i][k];
+          for (size_t i = 0; i < ncaty; i++)
+            ql(i) = fitbdist2(i, j);
+          for (size_t k = 0; k < npara2; k++) {
+            vQl(k) = 0;
+
+            for (size_t i = 0; i < ncaty; i++)
+              vQl(k) += Cr2(j * ncaty + i, k);
           }
-          for (i = 0; i < ncaty; i++)
-            for (k = 0; k < npara2; k++)
-              Vtemp[i][k] += v1[j] / v2[j] / v2[j] * ql[i] * vQl[k];
+          for (size_t i = 0; i < ncaty; i++)
+            for (size_t k = 0; k < npara2; k++)
+              Vtemp(i, k) += v1(j) / v2(j) / v2(j) * ql(i) * vQl(k);
 
-          for (i = 0; i < ncaty; i++)
-            for (k = 0; k < npara1; k++)
-              VR[i][k] += wts / v2[j] * ql[i] * vPl[k];
+          for (size_t i = 0; i < ncaty; i++)
+            for (size_t k = 0; k < npara1; k++)
+              VR(i, k) += wts / v2(j) * ql(i) * vPl(k);
 
-          for (i = 0; i < ncatx; i++)
-            for (k = 0; k < npara2; k++)
-              US[i][k] += (1 - wts) / v1[j] * pl[i] * vQl[k];
+          for (size_t i = 0; i < ncatx; i++)
+            for (size_t k = 0; k < npara2; k++)
+              US(i, k) += (1 - wts) / v1(j) * pl(i) * vQl(k);
         }
 
-        MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1, UP);
-        MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2, UQ);
-        MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1Star, UPStar);
-        MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2Star, UQStar);
-        MatrixMultiVector(ncatx, ncat1, M1, vP121, r2);
-        MatrixMultiVector(ncatx, ncat2, M2, vP212, s1);
+        UP = M1 * Cr1;         // MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1, UP);
+        UQ = M2 * Cr2;         // MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2, UQ);
+        UPStar = M1 * Cr1Star; // MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1Star, UPStar);
+        UQStar = M2 * Cr2Star; // MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2Star, UQStar);
+        r2 = M1 * vP121;       // MatrixMultiVector(ncatx, ncat1, M1, vP121, r2);
+        s1 = M2 * vP212;       // MatrixMultiVector(ncatx, ncat2, M2, vP212, s1);
 
-        for (i = 0; i < ncatx; i++)
-          r[i] = wts * r1[i] + (1 - wts) * r2[i];
-        for (i = 0; i < ncaty; i++)
-          s[i] = wts * s1[i] + (1 - wts) * s2[i];
+        for (size_t i = 0; i < ncatx; i++)
+          r(i) = wts * r1(i) + (1 - wts) * r2(i);
+        for (size_t i = 0; i < ncaty; i++)
+          s(i) = wts * s1(i) + (1 - wts) * s2(i);
 
-        hx = Optimalh(ncatx, scoresx, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        double hx = optimalBandwithXParameter(ncatx, scoresX, r, 1);
+        double hy = optimalBandwithXParameter(ncaty, scoresY, s, 1);
         hx = 1.9243;
         hy = 2.0056;
 
-        KernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy, Equatedx);
+        kernelEquate(ncatx, scoresX, r, hx, ncaty, scoresY, s, hy, equatedX);
 
-        for (i = 0; i < ncatx; i++) {
-          for (k = 0; k < npara1; k++)
-            UR[i][k] = wts * UP[i][k] + (1 - wts) * (UPStar[i][k] - Utemp[i][k]);
+        for (size_t i = 0; i < ncatx; i++) {
+          for (size_t k = 0; k < npara1; k++)
+            UR(i, k) = wts * UP(i, k) + (1 - wts) * (UPStar(i, k) - Utemp(i, k));
         }
 
-        for (i = 0; i < ncaty; i++) {
-          for (k = 0; k < npara2; k++)
-            VS[i][k] = (1 - wts) * UQ[i][k] + wts * (UQStar[i][k] - Vtemp[i][k]);
+        for (size_t i = 0; i < ncaty; i++) {
+          for (size_t k = 0; k < npara2; k++)
+            VS(i, k) = (1 - wts) * UQ(i, k) + wts * (UQStar(i, k) - Vtemp(i, k));
         }
 
-        for (i = 0; i < ncatx; i++) {
-          PartialFPartialr(ncatx, scoresx, r, hx, Fr, scoresx[i]);
-          PartialFPartialr(ncaty, scoresy, s, hy, Gs, Equatedx[i]);
-          Gp = KernelContinuPdf(ncaty, scoresy, s, hy, Equatedx[i]);
-          VectorMultiMatrix(ncatx, npara1, Fr, UR, FrUR);
-          VectorMultiMatrix(ncaty, npara1, Gs, VR, GsVR);
-          VectorMultiMatrix(ncatx, npara2, Fr, US, FrUS);
-          VectorMultiMatrix(ncaty, npara2, Gs, VS, GsVS);
-          for (j = 0; j < npara1; j++)
-            FrUR[j] -= GsVR[j];
-          for (j = 0; j < npara2; j++)
-            FrUS[j] -= GsVS[j];
-          SEE[i] = sqrt(VectorNormSq(npara1, FrUR) + VectorNormSq(npara2, FrUS)) / Gp;
+        for (size_t i = 0; i < ncatx; i++) {
+          partialFPartialr(ncatx, scoresX, r, hx, Fr, scoresX(i));
+          partialFPartialr(ncaty, scoresY, s, hy, Gs, equatedX(i));
+          double Gp = kernelPdf(ncaty, scoresY, s, hy, equatedX(i));
+          FrUR = Fr * UR; // VectorMultiMatrix(ncatx, npara1, Fr, UR, FrUR);
+          GsVR = Gs * VR; // VectorMultiMatrix(ncaty, npara1, Gs, VR, GsVR);
+          FrUS = Fr * US; // VectorMultiMatrix(ncatx, npara2, Fr, US, FrUS);
+          GsVS = Gs * VS; // VectorMultiMatrix(ncaty, npara2, Gs, VS, GsVS);
+          for (size_t j = 0; j < npara1; j++)
+            FrUR(j) -= GsVR(j);
+          for (size_t j = 0; j < npara2; j++)
+            FrUS(j) -= GsVS(j);
+          see(i) = std::sqrt(FrUR.squaredNorm() + FrUS.squaredNorm()) / Gp;
         }
-
-        free_dvector(vP1, 0, ncat1 - 1);
-        free_dvector(vP2, 0, ncat2 - 1);
-        free_dvector(vP121, 0, ncat1 - 1);
-        free_dvector(vP212, 0, ncat2 - 1);
-        free_dmatrix(M1, 0, ncatx - 1, 0, ncat1 - 1);
-        free_dmatrix(N1, 0, ncatv - 1, 0, ncat1 - 1);
-        free_dmatrix(M2, 0, ncaty - 1, 0, ncat2 - 1);
-        free_dmatrix(N2, 0, ncatv - 1, 0, ncat2 - 1);
-        free_dvector(r1, 0, ncatx - 1);
-        free_dvector(s1, 0, ncaty - 1);
-        free_dvector(r2, 0, ncatx - 1);
-        free_dvector(s2, 0, ncaty - 1);
-        free_dvector(r, 0, ncatx - 1);
-        free_dvector(s, 0, ncaty - 1);
-        free_dvector(v1, 0, ncatv - 1);
-        free_dvector(v2, 0, ncatv - 1);
-        free_dmatrix(Cr1, 0, ncat1 - 1, 0, npara1 - 1);
-        free_dmatrix(Cr2, 0, ncat2 - 1, 0, npara2 - 1);
-        free_dmatrix(Cr1Star, 0, ncat1 - 1, 0, npara1 - 1);
-        free_dmatrix(Cr2Star, 0, ncat2 - 1, 0, npara2 - 1);
-        free_dmatrix(B1, 0, npara1 - 1, 0, ncat1 - 1);
-        free_dmatrix(B2, 0, npara2 - 1, 0, ncat2 - 1);
-        free_dmatrix(UR, 0, ncatx - 1, 0, npara1 - 1);
-        free_dmatrix(UP, 0, ncatx - 1, 0, npara1 - 1);
-        free_dmatrix(UPStar, 0, ncatx - 1, 0, npara1 - 1);
-        free_dmatrix(Utemp, 0, ncatx - 1, 0, npara1 - 1);
-        free_dmatrix(VR, 0, ncaty - 1, 0, npara1 - 1);
-        free_dmatrix(US, 0, ncatx - 1, 0, npara2 - 1);
-        free_dmatrix(VS, 0, ncaty - 1, 0, npara2 - 1);
-        free_dmatrix(UQ, 0, ncaty - 1, 0, npara2 - 1);
-        free_dmatrix(UQStar, 0, ncaty - 1, 0, npara2 - 1);
-        free_dmatrix(Vtemp, 0, ncaty - 1, 0, npara2 - 1);
-        free_dvector(pl, 0, ncatx - 1);
-        free_dvector(vPl, 0, npara1 - 1);
-        free_dvector(ql, 0, ncaty - 1);
-        free_dvector(vQl, 0, npara2 - 1);
-        free_dvector(Fr, 0, ncatx - 1);
-        free_dvector(Gs, 0, ncaty - 1);
-        free_dvector(FrUR, 0, npara1 - 1);
-        free_dvector(GsVR, 0, npara1 - 1);
-        free_dvector(FrUS, 0, npara2 - 1);
-        free_dvector(GsVS, 0, npara2 - 1);
-        free_dmatrix(fitbdist1, 0, ncatx - 1, 0, ncatv - 1);
-        free_dmatrix(fitbdist2, 0, ncaty - 1, 0, ncatv - 1);
       }
 
       /*--------------------------------------------------------------------------
@@ -2746,189 +2726,208 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEENEATPS(struct BLL_SMOOTH* bivar1,
-                                 struct BLL_SMOOTH* bivar2,
+      void KernelEquateSEENEATPS(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+                                 const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                                  const double& wts,
-                                 const Eigen::VectorXd& Equatedx,
-                                 const Eigen::VectorXd& SEE) {
-        int i, j, k, ncat1, ncat2, ncatx, ncaty, ncatv, npara1, npara2;
-        int cu1, cv1, cuv1, cu2, cv2, cuv2;
-        long np1, np2;
-        double *vP1, *vP2, *vPP1, *vPP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
-        /* r1 is for X taken first(first group), r2 is for X taken second (second group),
-				s1 is for Y taken first(second group), s2 is for Y taken second (first group)
-				vP1 is for first group, vP2 is for second group */
-        double *vP121, *vP212;
-        double **UR, **US, **VR, **VS, **UP, **UPStar, **UQ, **UQStar, **Utemp, **Vtemp;
-        double *pl, *vPl, *ql, *vQl;
-        double hx, hy;
-        double **Cr1, **Cr1Star, **Cr2, **Cr2Star, **B1, **B2;
-        double *Fr, *Gs, Gp, *FrUR, *GsVR, *FrUS, *GsVS;
-        double *scoresx, *scoresy;
-        int *interx, *interv1, *interv2, *intery;
-        double **fitbdist1, **fitbdist2, sum1 = 0, sum2 = 0;
-        int currentrow1, currentrow2;
-        int **cpm1, **cpm2;
+                                 Eigen::VectorXd& equatedX,
+                                 Eigen::VectorXd& see) {
+        // int i, j, k, ncat1, ncat2, ncatx, ncaty, ncatv, npara1, npara2;
+        // int cu1, cv1, cuv1, cu2, cv2, cuv2;
+        // long np1, np2;
+        // double *vP1, *vP2, *vPP1, *vPP2, **M1, **N1, **M2, **N2, *r1, *s1, *r2, *s2, *r, *s, *v1, *v2;
+        // /* r1 is for X taken first(first group), r2 is for X taken second (second group),
+        // s1 is for Y taken first(second group), s2 is for Y taken second (first group)
+        // vP1 is for first group, vP2 is for second group */
+        // double *vP121, *vP212;
+        // double **UR, **US, **VR, **VS, **UP, **UPStar, **UQ, **UQStar, **Utemp, **Vtemp;
+        // double *pl, *vPl, *ql, *vQl;
+        // double hx, hy;
+        // double **Cr1, **Cr1Star, **Cr2, **Cr2Star, **B1, **B2;
+        // double *Fr, *Gs, Gp, *FrUR, *GsVR, *FrUS, *GsVS;
+        // double *scoresx, *scoresy;
+        // int *interx, *interv1, *interv2, *intery;
+        // double **fitbdist1, **fitbdist2, sum1 = 0, sum2 = 0;
+        // int currentrow1, currentrow2;
+        // int **cpm1, **cpm2;
 
-        cuv1 = bivar1->cuv;
-        cu1 = bivar1->cu;
-        cv1 = bivar1->cv;
-        cuv2 = bivar2->cuv;
-        cu2 = bivar2->cu;
-        cv2 = bivar2->cv;
-        cpm1 = imatrix(0, 1, 0, cuv1);
-        for (i = 0; i < cuv1; i++)
-          for (j = 0; j < 2; j++)
-            cpm1[j][i] = bivar1->cpm[i][j];
-        cpm2 = imatrix(0, 1, 0, cuv2);
-        for (i = 0; i < cuv2; i++)
-          for (j = 0; j < 2; j++)
-            cpm2[j][i] = bivar2->cpm[i][j];
+        size_t cuv1 = bivariateLogLinearSmoothing1.numberOfCrossProductMoments;
+        size_t cu1 = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingU;
+        size_t cv1 = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingV;
+        size_t cuv2 = bivariateLogLinearSmoothing2.numberOfCrossProductMoments;
+        size_t cu2 = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingU;
+        size_t cv2 = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingV;
+        Eigen::MatrixXi cpm1(2, cuv1);
 
-        ncatx = bivar1->nsx;
-        ncaty = bivar2->nsx;
-        ncatv = bivar1->nsv;
-        npara1 = bivar1->cu + bivar1->cv + bivar1->cuv + 10;
-        npara2 = bivar2->cu + bivar2->cv + bivar2->cuv + 10;
-        interx = cpm1[0];
-        interv1 = cpm1[1];
-        intery = cpm2[0];
-        interv2 = cpm2[1];
-        np1 = bivar1->num_persons;
-        np2 = bivar2->num_persons;
-        scoresx = dvector(0, ncatx);
-        for (i = 0; i < ncatx; i++)
-          scoresx[i] = bivar1->minx + i * bivar1->incx;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar2->minx + i * bivar2->incx;
-        ncat1 = ncatx * ncatv;
-        ncat2 = ncaty * ncatv;
+        for (size_t i = 0; i < cuv1; i++)
+          for (size_t j = 0; j < 2; j++)
+            cpm1(j, i) = bivariateLogLinearSmoothing1.crossProductMoments(i, j);
 
-        vP1 = dvector(0, ncat1 - 1);
-        vP2 = dvector(0, ncat2 - 1);
-        vPP1 = dvector(0, ncat1 - 1);
-        vPP2 = dvector(0, ncat2 - 1);
-        vP121 = dvector(0, ncat1 - 1);
-        vP212 = dvector(0, ncat2 - 1);
-        M1 = dmatrix(0, ncatx - 1, 0, ncat1 - 1);
-        N1 = dmatrix(0, ncatv - 1, 0, ncat1 - 1);
-        M2 = dmatrix(0, ncaty - 1, 0, ncat2 - 1);
-        N2 = dmatrix(0, ncatv - 1, 0, ncat2 - 1);
-        r1 = dvector(0, ncatx - 1);
-        s1 = dvector(0, ncaty - 1);
-        r2 = dvector(0, ncatx - 1);
-        s2 = dvector(0, ncaty - 1);
-        r = dvector(0, ncatx - 1);
-        s = dvector(0, ncaty - 1);
-        v1 = dvector(0, ncatv - 1);
-        v2 = dvector(0, ncatv - 1);
-        Cr1 = dmatrix(0, ncat1 - 1, 0, npara1 - 1);
-        Cr2 = dmatrix(0, ncat2 - 1, 0, npara2 - 1);
-        Cr1Star = dmatrix(0, ncat1 - 1, 0, npara1 - 1);
-        Cr2Star = dmatrix(0, ncat2 - 1, 0, npara2 - 1);
-        B1 = dmatrix(0, npara1 - 1, 0, ncat1 - 1);
-        B2 = dmatrix(0, npara2 - 1, 0, ncat2 - 1);
-        UR = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        UP = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        UPStar = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        Utemp = dmatrix(0, ncatx - 1, 0, npara1 - 1);
-        VR = dmatrix(0, ncaty - 1, 0, npara1 - 1);
-        US = dmatrix(0, ncatx - 1, 0, npara2 - 1);
-        VS = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        UQ = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        UQStar = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        Vtemp = dmatrix(0, ncaty - 1, 0, npara2 - 1);
-        pl = dvector(0, ncatx - 1);
-        vPl = dvector(0, npara1 - 1);
-        ql = dvector(0, ncaty - 1);
-        vQl = dvector(0, npara2 - 1);
-        Fr = dvector(0, ncatx - 1);
-        Gs = dvector(0, ncaty - 1);
-        FrUR = dvector(0, npara1 - 1);
-        GsVR = dvector(0, npara1 - 1);
-        FrUS = dvector(0, npara2 - 1);
-        GsVS = dvector(0, npara2 - 1);
-        fitbdist1 = dmatrix(0, ncatx - 1, 0, ncatv - 1);
-        fitbdist2 = dmatrix(0, ncaty - 1, 0, ncatv - 1);
+        Eigen::MatrixXi cpm2(2, cuv2);
+        for (size_t i = 0; i < cuv2; i++)
+          for (size_t j = 0; j < 2; j++)
+            cpm2(j, i) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j);
+
+        size_t ncatx = bivariateLogLinearSmoothing1.numberOfScoresX;
+        size_t ncaty = bivariateLogLinearSmoothing2.numberOfScoresX;
+        size_t ncatv = bivariateLogLinearSmoothing1.numberOfScoresV;
+        size_t npara1 = bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingU +
+                        bivariateLogLinearSmoothing1.numberOfDegreesOfSmoothingV +
+                        bivariateLogLinearSmoothing1.numberOfCrossProductMoments + 10;
+        size_t npara2 = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingU +
+                        bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingV +
+                        bivariateLogLinearSmoothing2.numberOfCrossProductMoments + 10;
+
+        Eigen::VectorXd interx = cpm1.row(0).cast<double>();
+        Eigen::VectorXd interv1 = cpm1.row(1).cast<double>();
+        Eigen::VectorXd intery = cpm2.row(0).cast<double>();
+        Eigen::VectorXd interv2 = cpm2.row(1).cast<double>();
+
+        size_t np1 = bivariateLogLinearSmoothing1.numberOfExaminees;
+        size_t np2 = bivariateLogLinearSmoothing2.numberOfExaminees;
+        Eigen::VectorXd scoresx(ncatx);
+
+        for (size_t i = 0; i < ncatx; i++)
+          scoresx(i) = bivariateLogLinearSmoothing1.minimumRawScoreX +
+                       i * bivariateLogLinearSmoothing1.scoreIncrementX;
+
+        Eigen::VectorXd scoresy(ncaty);
+        for (size_t i = 0; i < ncaty; i++)
+          scoresy(i) = bivariateLogLinearSmoothing2.minimumRawScoreX +
+                       i * bivariateLogLinearSmoothing2.scoreIncrementX;
+
+        size_t ncat1 = ncatx * ncatv;
+        size_t ncat2 = ncaty * ncatv;
+
+        Eigen::VectorXd vP1(ncat1);   // vP1 =
+        Eigen::VectorXd vP121(ncat1); // vP121 =
+        Eigen::VectorXd vPP1(ncat1);  // vPP1 =
+        Eigen::VectorXd vP2(ncat2);   // vP2 =
+        Eigen::VectorXd vP212(ncat2); // vP212 =
+        Eigen::VectorXd vPP2(ncat2);  // vPP2 =
+        Eigen::VectorXd v1(ncatv);    // v1 =
+        Eigen::VectorXd v2(ncatv);    // v2 =
+        Eigen::VectorXd Fr(ncatx);    // Fr =
+        Eigen::VectorXd pl(ncatx);    // pl =
+        Eigen::VectorXd r(ncatx);     // r =
+        Eigen::VectorXd r1(ncatx);    // r1 =
+        Eigen::VectorXd r2(ncatx);    // r2 =
+        Eigen::VectorXd Gs(ncaty);    // Gs =
+        Eigen::VectorXd ql(ncaty);    // ql =
+        Eigen::VectorXd s(ncaty);     // s =
+        Eigen::VectorXd s1(ncaty);    // s1 =
+        Eigen::VectorXd s2(ncaty);    // s2 =
+        Eigen::VectorXd FrUR(npara1); // FrUR =
+        Eigen::VectorXd GsVR(npara1); // GsVR =
+        Eigen::VectorXd vPl(npara1);  // vPl =
+        Eigen::VectorXd FrUS(npara2); // FrUS =
+        Eigen::VectorXd GsVS(npara2); // GsVS =
+        Eigen::VectorXd vQl(npara2);  // vQl =
+
+        Eigen::MatrixXd Cr1(ncat1, npara1);      // Cr1 =
+        Eigen::MatrixXd Cr1Star(ncat1, npara1);  // Cr1Star =
+        Eigen::MatrixXd Cr2(ncat2, npara2);      // Cr2 =
+        Eigen::MatrixXd Cr2Star(ncat2, npara2);  // Cr2Star =
+        Eigen::MatrixXd N1(ncatv, ncat1);        // N1 =
+        Eigen::MatrixXd N2(ncatv, ncat2);        // N2 =
+        Eigen::MatrixXd M1(ncatx, ncat1);        // M1 =
+        Eigen::MatrixXd fitbdist1(ncatx, ncatv); // fitbdist1 =
+        Eigen::MatrixXd UP(ncatx, npara1);       // UP =
+        Eigen::MatrixXd UPStar(ncatx, npara1);   // UPStar =
+        Eigen::MatrixXd UR(ncatx, npara1);       // UR =
+        Eigen::MatrixXd Utemp(ncatx, npara1);    // Utemp =
+        Eigen::MatrixXd US(ncatx, npara2);       // US =
+        Eigen::MatrixXd M2(ncaty, ncat2);        // M2 =
+        Eigen::MatrixXd fitbdist2(ncaty, ncatv); // fitbdist2 =
+        Eigen::MatrixXd VR(ncaty, npara1);       // VR =
+        Eigen::MatrixXd UQ(ncaty, npara2);       // UQ =
+        Eigen::MatrixXd UQStar(ncaty, npara2);   // UQStar =
+        Eigen::MatrixXd VS(ncaty, npara2);       // VS =
+        Eigen::MatrixXd Vtemp(ncaty, npara2);    // Vtemp =
+        Eigen::MatrixXd B1(npara1, ncat1);       // B1 =
+        Eigen::MatrixXd B2(npara2, ncat2);       // B2 =
 
         /*The following code set a natrual design matrix corresponding to a natrual basis of 
 					polynomials. note that this B is the transpose of the design matrix in the loglinear 
 				model. */
 
         /*First, assign natrual design matrix first for rows corresponding to x */
-        for (i = 0; i < cu1; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B1[i][k * (ncatx) + j] = pow((double)j, (double)(i + 1));
+        for (size_t i = 0; i < cu1; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B1(i, k + ncatx + j) = std::pow(static_cast<double>(j), i + 1);
             }
           }
         }
 
         /* then assign values to rows corresponding to v */
-        currentrow1 = cu1;
-        for (i = 0; i < cv1; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B1[currentrow1 + i][k * (ncatx) + j] = pow((double)k, (double)(i + 1));
+        size_t currentrow1 = cu1;
+        for (size_t i = 0; i < cv1; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B1(currentrow1 + i, k * ncatx + j) = std::pow(static_cast<double>(k), (i + 1));
             }
           }
         }
+
         /* assign value to the last rows corresponding to the interaction terms */
         currentrow1 += cv1;
-        for (i = 0; i < cuv1; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B1[currentrow1 + i][k * (ncatx) + j] = pow((double)j, (double)interx[i]) *
-                                                     pow((double)k, (double)interv1[i]);
+        for (size_t i = 0; i < cuv1; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B1(currentrow1 + i, k * ncatx + j) = std::pow(static_cast<double>(j), interx(i)) *
+                                                   std::pow(static_cast<double>(k), interv1(i));
             }
           }
         }
 
         /* assign values to the rows for the 0 score on form X */
         currentrow1 += cuv1;
-        for (j = 0; j < ncatx; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (j == 0)
-              B1[currentrow1][k * (ncatx) + j] = 1;
-            else
-              B1[currentrow1][k * (ncatx) + j] = 0;
+        for (size_t j = 0; j < ncatx; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (j == 0) {
+              B1(currentrow1, k * ncatx + j) = 1;
+            } else {
+              B1(currentrow1, k * ncatx + j) = 0;
+            }
           }
         }
 
         /* assign values to the rows for the 0 score on common set v */
         currentrow1++;
-        for (j = 0; j < ncatx; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (k == 0)
-              B1[currentrow1][k * (ncatx) + j] = 1;
-            else
-              B1[currentrow1][k * (ncatx) + j] = 0;
+        for (size_t j = 0; j < ncatx; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (k == 0) {
+              B1(currentrow1, k * ncatx + j) = 1;
+            } else {
+              B1(currentrow1, k * ncatx + j) = 0;
+            }
           }
         }
 
         /*assign value to the rows for score gaps in x 	*/
         currentrow1++;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
-              if ((j % 5) == 0 && j != 0)
-                B1[currentrow1 + i][k * (ncatx) + j] = pow((double)j, (double)i);
-              else
-                B1[currentrow1 + i][k * (ncatx) + j] = 0;
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              if ((j % 5) == 0 && j != 0) {
+                B1(currentrow1 + i, k * ncatx + j) =
+                    std::pow(static_cast<double>(j), (double)i);
+              } else {
+                B1(currentrow1 + i, k * ncatx + j) = 0;
+              }
             }
           }
         }
 
         /*assign value to the rows for score gaps in v */
         currentrow1 += 4;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncatx; j++) {
-            for (k = 0; k < ncatv; k++) {
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncatx; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
               if (((k) % 5) == 0 && k != 0)
-                B1[currentrow1 + i][k * (ncatx) + j] = pow((double)k, (double)i);
+                B1(currentrow1 + i, k * ncatx + j) = std::pow(static_cast<double>(k), i);
               else
-                B1[currentrow1 + i][k * (ncatx) + j] = 0;
+                B1(currentrow1 + i, k * ncatx + j) = 0;
             }
           }
         }
@@ -2938,92 +2937,101 @@ namespace EquatingRecipes {
 				model. */
 
         /*First, assign natrual design matrix first for rows corresponding to y */
-        for (i = 0; i < cu2; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B2[i][k * (ncaty) + j] = pow((double)j, (double)(i + 1));
+        for (size_t i = 0; i < cu2; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B2(i, k * ncaty + j) = std::pow(static_cast<double>(j), (i + 1));
             }
           }
         }
+
         /* then assign values to rows corresponding to v */
-        currentrow2 = cu2;
-        for (i = 0; i < cv2; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B2[currentrow2 + i][k * (ncaty) + j] = pow((double)k, (double)(i + 1));
+        size_t currentrow2 = cu2;
+        for (size_t i = 0; i < cv2; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B2(currentrow2 + 1, k * ncaty + j) = std::pow(static_cast<double>(k), (i + 1));
             }
           }
         }
 
         /* assign value to the last rows corresponding to the interaction terms */
         currentrow2 += cv2;
-        for (i = 0; i < cuv2; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              B2[currentrow2 + i][k * (ncaty) + j] = pow((double)j, (double)intery[i]) *
-                                                     pow((double)k, (double)interv2[i]);
+        for (size_t i = 0; i < cuv2; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              B2(currentrow2 + i, k * ncaty + j) = std::pow(static_cast<double>(j), intery(i)) *
+                                                   std::pow(static_cast<double>(k), interv2(i));
             }
           }
         }
 
         /* assign values to the rows for the 0 score on form Y  */
         currentrow2 += cuv2;
-        for (j = 0; j < ncaty; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (j == 0)
-              B2[currentrow2][k * (ncaty) + j] = 1;
-            else
-              B2[currentrow2][k * (ncaty) + j] = 0;
+        for (size_t j = 0; j < ncaty; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (j == 0) {
+              B2(currentrow2, k * ncaty + j) = 1;
+            } else {
+              B2(currentrow2, k * ncaty + j) = 0;
+            }
           }
         }
 
         /* assign values to the rows for the 0 score on common set V  */
         currentrow2++;
-        for (j = 0; j < ncaty; j++) {
-          for (k = 0; k < ncatv; k++) {
-            if (k == 0)
-              B2[currentrow2][k * (ncaty) + j] = 1;
-            else
-              B2[currentrow2][k * (ncaty) + j] = 0;
+        for (size_t j = 0; j < ncaty; j++) {
+          for (size_t k = 0; k < ncatv; k++) {
+            if (k == 0) {
+              B2(currentrow2, k * ncaty + j) = 1;
+            } else {
+              B2(currentrow2, k * ncaty + j) = 0;
+            }
           }
         }
 
         /*assign value to the rows for score gaps in y 	*/
         currentrow2++;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              if ((j % 5) == 0 && j != 0)
-                B2[currentrow2 + i][k * (ncaty) + j] = pow((double)j, (double)i);
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              if ((j % 5) == 0 && j != 0) {
+                B2(currentrow2 + i, k * ncaty + j) = std::pow(static_cast<double>(j), i);
+              }
+
               else
-                B2[currentrow2 + i][k * (ncaty) + j] = 0;
+                B2(currentrow2 + i, k * ncaty + j) = 0;
             }
           }
         }
 
         /*assign value to the rows for score gaps in v */
         currentrow2 += 4;
-        for (i = 0; i <= 3; i++) {
-          for (j = 0; j < ncaty; j++) {
-            for (k = 0; k < ncatv; k++) {
-              if (((k) % 5) == 0 && k != 0)
-                B2[currentrow2 + i][k * (ncaty) + j] = pow((double)k, (double)i);
-              else
-                B2[currentrow2 + i][k * (ncaty) + j] = 0;
+        for (size_t i = 0; i <= 3; i++) {
+          for (size_t j = 0; j < ncaty; j++) {
+            for (size_t k = 0; k < ncatv; k++) {
+              if (((k) % 5) == 0 && k != 0) {
+                B2(currentrow2 + i, k * ncaty + j) = std::pow(static_cast<double>(k), i);
+              } else {
+                B2(currentrow2 + i, k * ncaty + j) = 0;
+              }
             }
           }
         }
 
-        sum1 = 0;
-        sum2 = 0;
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++) {
-            fitbdist1[i][j] = bivar1->bfd[i][j] / np1;
-            sum1 += fitbdist1[i][j];
+        double sum1 = 0;
+        double sum2 = 0;
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncatx; i++) {
+            fitbdist1(i, j) = bivariateLogLinearSmoothing1.fittedBivariateFreqDist(i, j) /
+                              static_cast<double>(np1);
+            sum1 += fitbdist1(i, j);
           }
-          for (i = 0; i < ncaty; i++) {
-            fitbdist2[i][j] = bivar2->bfd[i][j] / np2;
-            sum2 += fitbdist2[i][j];
+
+          for (size_t i = 0; i < ncaty; i++) {
+            fitbdist2(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(i, j) /
+                              static_cast<double>(np2);
+            sum2 += fitbdist2(i, j);
           }
         }
 
@@ -3031,113 +3039,117 @@ namespace EquatingRecipes {
         vPMN(ncaty, ncatv, fitbdist2, vP2, M2, N2);
         vPT(ncatx, ncatv, fitbdist1, vPP1);
         vPT(ncaty, ncatv, fitbdist2, vPP2);
-        MatrixMultiVector(ncatx, ncat1, M1, vP1, r1);
-        MatrixMultiVector(ncatv, ncat1, N1, vP1, v1);
-        MatrixMultiVector(ncaty, ncat2, M2, vP2, s2);
-        MatrixMultiVector(ncatv, ncat2, N2, vP2, v2);
+        r1 = M1 * vP1; // MatrixMultiVector(ncatx, ncat1, M1, vP1, r1);
+        v1 = N1 * vP1; // MatrixMultiVector(ncatv, ncat1, N1, vP1, v1);
+        s2 = M2 * vP2; // MatrixMultiVector(ncaty, ncat2, M2, vP2, s2);
+        v2 = N2 * vP2; // MatrixMultiVector(ncatv, ncat2, N2, vP2, v2);
 
-        ComputeCmatrixGen(ncat1, npara1, np1, B1, vP1, Cr1);
-        ComputeCmatrixGen(ncat2, npara2, np2, B2, vP2, Cr2);
+        computeCmatrixGen(ncat1, npara1, np1, B1, vP1, Cr1);
+        computeCmatrixGen(ncat2, npara2, np2, B2, vP2, Cr2);
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++) {
-            vP121[i + j * ncatx] = vP1[i + j * ncatx] * v2[j] / v1[j];
-            for (k = 0; k < npara1; k++)
-              Cr1Star[i + j * ncatx][k] = Cr1[i + j * ncatx][k] * v2[j] / v1[j];
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncatx; i++) {
+            vP121(i + j * ncatx) = vP1(i + j * ncatx) * v2(j) / v1(j);
+            for (size_t k = 0; k < npara1; k++)
+              Cr1Star(i + j * ncatx, k) = Cr1(i + j * ncatx, k) * v2(j) / v1(j);
           }
         }
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncaty; i++) {
-            vP212[i + j * ncaty] = vP2[i + j * ncaty] * v1[j] / v2[j];
-            for (k = 0; k < npara2; k++)
-              Cr2Star[i + j * ncatx][k] = Cr2[i + j * ncatx][k] * v1[j] / v2[j];
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncaty; i++) {
+            vP212(i + j * ncaty) = vP2(i + j * ncaty) * v1(j) / v2(j);
+            for (size_t k = 0; k < npara2; k++)
+              Cr2Star(i + j * ncatx, k) = Cr2(i + j * ncatx, k) * v1(j) / v2(j);
           }
         }
-        for (i = 0; i < ncatx; i++) {
-          for (k = 0; k < npara1; k++)
-            Utemp[i][k] = 0;
-          for (k = 0; k < npara2; k++)
-            US[i][k] = 0;
+        for (size_t i = 0; i < ncatx; i++) {
+          for (size_t k = 0; k < npara1; k++)
+            Utemp(i, k) = 0;
+          for (size_t k = 0; k < npara2; k++)
+            US(i, k) = 0;
         }
 
-        for (i = 0; i < ncaty; i++) {
-          for (k = 0; k < npara2; k++)
-            Vtemp[i][k] = 0;
-          for (k = 0; k < npara1; k++)
-            VR[i][k] = 0;
+        for (size_t i = 0; i < ncaty; i++) {
+          for (size_t k = 0; k < npara2; k++)
+            Vtemp(i, k) = 0;
+          for (size_t k = 0; k < npara1; k++)
+            VR(i, k) = 0;
         }
 
-        for (j = 0; j < ncatv; j++) {
-          for (i = 0; i < ncatx; i++)
-            pl[i] = fitbdist1[i][j];
-          for (k = 0; k < npara1; k++) {
-            for (vPl[k] = 0, i = 0; i < ncatx; i++)
-              vPl[k] += Cr1[j * ncatx + i][k];
+        for (size_t j = 0; j < ncatv; j++) {
+          for (size_t i = 0; i < ncatx; i++)
+            pl(i) = fitbdist1(i, j);
+          for (size_t k = 0; k < npara1; k++) {
+            vPl(k) = 0;
+            for (size_t i = 0; i < ncatx; i++)
+              vPl(k) += Cr1(j * ncatx + i, k);
           }
-          for (i = 0; i < ncatx; i++)
-            for (k = 0; k < npara1; k++)
-              Utemp[i][k] += v2[j] / v1[j] / v1[j] * pl[i] * vPl[k];
+          for (size_t i = 0; i < ncatx; i++)
+            for (size_t k = 0; k < npara1; k++)
+              Utemp(i, k) += v2(j) / v1(j) / v1(j) * pl(i) * vPl(k);
 
-          for (i = 0; i < ncaty; i++)
-            ql[i] = fitbdist2[i][j];
-          for (k = 0; k < npara2; k++) {
-            for (vQl[k] = 0, i = 0; i < ncaty; i++)
-              vQl[k] += Cr2[j * ncaty + i][k];
+          for (size_t i = 0; i < ncaty; i++)
+            ql(i) = fitbdist2(i, j);
+          for (size_t k = 0; k < npara2; k++) {
+            vQl(k) = 0;
+            for (size_t i = 0; i < ncaty; i++)
+              vQl(k) += Cr2(j * ncaty + i, k);
           }
-          for (i = 0; i < ncaty; i++)
-            for (k = 0; k < npara2; k++)
-              Vtemp[i][k] += v1[j] / v2[j] / v2[j] * ql[i] * vQl[k];
+          for (size_t i = 0; i < ncaty; i++)
+            for (size_t k = 0; k < npara2; k++)
+              Vtemp(i, k) += v1(j) / v2(j) / v2(j) * ql(i) * vQl(k);
 
-          for (i = 0; i < ncaty; i++)
-            for (k = 0; k < npara1; k++)
-              VR[i][k] += wts / v2[j] * ql[i] * vPl[k];
+          for (size_t i = 0; i < ncaty; i++)
+            for (size_t k = 0; k < npara1; k++)
+              VR(i, k) += wts / v2(j) * ql(i) * vPl(k);
 
-          for (i = 0; i < ncatx; i++)
-            for (k = 0; k < npara2; k++)
-              US[i][k] += (1 - wts) / v1[j] * pl[i] * vQl[k];
+          for (size_t i = 0; i < ncatx; i++)
+            for (size_t k = 0; k < npara2; k++)
+              US(i, k) += (1 - wts) / v1(j) * pl(i) * vQl(k);
         }
 
-        MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1, UP);
-        MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2, UQ);
-        MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1Star, UPStar);
-        MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2Star, UQStar);
-        MatrixMultiVector(ncatx, ncat1, M1, vP121, r2);
-        MatrixMultiVector(ncatx, ncat2, M2, vP212, s1);
+        UP = M1 * Cr1;         // MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1, UP);
+        UQ = M2 * Cr2;         // MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2, UQ);
+        UPStar = M1 * Cr1Star; // MatrixMultiMatrix(ncatx, ncat1, npara1, M1, Cr1Star, UPStar);
+        UQStar = M2 * Cr2Star; // MatrixMultiMatrix(ncaty, ncat2, npara2, M2, Cr2Star, UQStar);
+        r2 = M1 * vP121;       // MatrixMultiVector(ncatx, ncat1, M1, vP121, r2);
+        s1 = M2 * vP212;       // MatrixMultiVector(ncatx, ncat2, M2, vP212, s1);
 
-        for (i = 0; i < ncatx; i++)
-          r[i] = wts * r1[i] + (1 - wts) * r2[i];
-        for (i = 0; i < ncaty; i++)
-          s[i] = wts * s1[i] + (1 - wts) * s2[i];
+        for (size_t i = 0; i < ncatx; i++)
+          r(i) = wts * r1(i) + (1 - wts) * r2(i);
+        for (size_t i = 0; i < ncaty; i++)
+          s(i) = wts * s1(i) + (1 - wts) * s2(i);
 
-        hx = Optimalh(ncatx, scoresx, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        double hx = optimalBandwithXParameter(ncatx, scoresx, r, 1);
+        double hy = optimalBandwithXParameter(ncaty, scoresy, s, 1);
 
-        KernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy, Equatedx);
+        kernelEquate(ncatx, scoresx, r, hx, ncaty, scoresy, s, hy, equatedX);
 
-        for (i = 0; i < ncatx; i++) {
-          for (k = 0; k < npara1; k++)
-            UR[i][k] = wts * UP[i][k] + (1 - wts) * (UPStar[i][k] - Utemp[i][k]);
+        for (size_t i = 0; i < ncatx; i++) {
+          for (size_t k = 0; k < npara1; k++)
+            UR(i, k) = wts * UP(i, k) + (1 - wts) * (UPStar(i, k) - Utemp(i, k));
         }
 
-        for (i = 0; i < ncaty; i++) {
-          for (k = 0; k < npara2; k++)
-            VS[i][k] = (1 - wts) * UQ[i][k] + wts * (UQStar[i][k] - Vtemp[i][k]);
+        for (size_t i = 0; i < ncaty; i++) {
+          for (size_t k = 0; k < npara2; k++)
+            VS(i, k) = (1 - wts) * UQ(i, k) + wts * (UQStar(i, k) - Vtemp(i, k));
         }
 
-        for (i = 0; i < ncatx; i++) {
-          PartialFPartialr(ncatx, scoresx, r, hx, Fr, scoresx[i]);
-          PartialFPartialr(ncaty, scoresy, s, hy, Gs, Equatedx[i]);
-          Gp = KernelContinuPdf(ncaty, scoresy, s, hy, Equatedx[i]);
-          VectorMultiMatrix(ncatx, npara1, Fr, UR, FrUR);
-          VectorMultiMatrix(ncaty, npara1, Gs, VR, GsVR);
-          VectorMultiMatrix(ncatx, npara2, Fr, US, FrUS);
-          VectorMultiMatrix(ncaty, npara2, Gs, VS, GsVS);
-          for (j = 0; j < npara1; j++)
-            FrUR[j] -= GsVR[j];
-          for (j = 0; j < npara2; j++)
-            FrUS[j] -= GsVS[j];
-          SEE[i] = sqrt(VectorNormSq(npara1, FrUR) + VectorNormSq(npara2, FrUS)) / Gp;
+        for (size_t i = 0; i < ncatx; i++) {
+          partialFPartialr(ncatx, scoresx, r, hx, Fr, scoresx(i));
+          partialFPartialr(ncaty, scoresy, s, hy, Gs, equatedX(i));
+          double Gp = kernelPdf(ncaty, scoresy, s, hy, equatedX(i));
+          FrUR = Fr * UR; // VectorMultiMatrix(ncatx, npara1, Fr, UR, FrUR);
+          GsVR = Gs * VR; // VectorMultiMatrix(ncaty, npara1, Gs, VR, GsVR);
+          FrUS = Fr * US; // VectorMultiMatrix(ncatx, npara2, Fr, US, FrUS);
+          GsVS = Gs * VS; // VectorMultiMatrix(ncaty, npara2, Gs, VS, GsVS);
+          for (size_t j = 0; j < npara1; j++)
+            FrUR(j) -= GsVR(j);
+
+          for (size_t j = 0; j < npara2; j++)
+            FrUS(j) -= GsVS(j);
+
+          see(i) = std::sqrt(FrUR.squaredNorm() + FrUS.squaredNorm()) / Gp;
         }
       }
 
@@ -3161,131 +3173,151 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEENEATChn(struct BLL_SMOOTH* bivar1,
-                                  struct BLL_SMOOTH* bivar2,
-                                  const Eigen::VectorXd& Equatedx,
-                                  const Eigen::VectorXd& SEE) {
-        int i, j, k, ncat, ncatx, ncaty, ncatv, npara, cu, cv, cuv;
-        long np;
-        double *SEEA, *EquatedxA, *SEEY;
-        double** fitbdist;
-        double *vP, **M, **N, *r, *s, **U, **V;
-        double hv, hy;
-        double **Cr, **B;
-        double *Fr, *Gs, GpQ, HpQ, *FrU, *GsV;
-        double cdfv;
-        double *scoresv, *scoresy;
-        int *intery, *interv;
-        int** cpm2;
+      void KernelEquateSEENEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
+                                  Eigen::VectorXd& equatedX,
+                                  Eigen::VectorXd& see) {
+        // int i, j, k, ncat, ncatx, ncaty, ncatv, npara, cu, cv, cuv;
+        // long np;
+        // double *SEEA, *EquatedxA, *SEEY;
+        // double** fitbdist;
+        // double *vP, **M, **N, *r, *s, **U, **V;
+        // double hv, hy;
+        // double **Cr, **B;
+        // double *Fr, *Gs, GpQ, HpQ, *FrU, *GsV;
+        // double cdfv;
+        // double *scoresv, *scoresy;
+        // int *intery, *interv;
+        // int** cpm2;
 
-        cuv = bivar2->cuv;
-        cu = bivar2->cu;
-        cv = bivar2->cv;
-        cpm2 = imatrix(0, 1, 0, cuv);
-        for (i = 0; i < cuv; i++)
-          for (j = 0; j < 2; j++)
-            cpm2[j][i] = bivar2->cpm[i][j];
+        size_t cuv = bivariateLogLinearSmoothing2.numberOfCrossProductMoments;
+        size_t cu = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingU;
+        size_t cv = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingV;
 
-        ncatx = bivar1->nsx;
-        SEEA = dvector(0, ncatx - 1);
-        EquatedxA = dvector(0, ncatx - 1);
-        SEEY = dvector(0, ncatx - 1);
+        Eigen::MatrixXi cpm2(2, cuv);
+        for (size_t i = 0; i < cuv; i++)
+          for (size_t j = 0; j < 2; j++)
+            cpm2(j, i) = bivariateLogLinearSmoothing2.crossProductMoments(i, j);
 
-        KernelEquateSEESG(bivar1, EquatedxA, SEEA);
+        size_t ncatx = bivariateLogLinearSmoothing1.numberOfScoresX;
+        Eigen::VectorXd seeA(ncatx);
+        Eigen::VectorXd equatedxA(ncatx);
+        Eigen::VectorXd seeY(ncatx);
 
-        ncaty = bivar2->nsx;
-        ncatv = bivar2->nsv;
-        npara = bivar2->cu + bivar2->cv + bivar2->cuv;
-        intery = cpm2[0];
-        interv = cpm2[1];
-        np = bivar2->num_persons;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar2->minx + i * bivar2->incx;
-        scoresv = dvector(0, ncatv);
-        for (i = 0; i < ncatv; i++)
-          scoresv[i] = bivar2->minv + i * bivar2->incv;
-        ncat = ncatv * ncaty;
+        kernelEquateSEESG(bivariateLogLinearSmoothing1, equatedxA, seeA);
 
-        Cr = dmatrix(0, ncat - 1, 0, npara - 1);
-        B = dmatrix(0, npara - 1, 0, ncat - 1);
-        U = dmatrix(0, ncatv - 1, 0, npara - 1);
-        V = dmatrix(0, ncaty - 1, 0, npara - 1);
-        Fr = dvector(0, ncatv - 1);
-        Gs = dvector(0, ncaty - 1);
-        FrU = dvector(0, npara - 1);
-        GsV = dvector(0, npara - 1);
-        fitbdist = dmatrix(0, ncatv - 1, 0, ncaty - 1);
+        size_t ncaty = bivariateLogLinearSmoothing2.numberOfScoresX;
+        size_t ncatv = bivariateLogLinearSmoothing2.numberOfScoresV;
+        size_t npara = bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingU +
+                       bivariateLogLinearSmoothing2.numberOfDegreesOfSmoothingV +
+                       bivariateLogLinearSmoothing2.numberOfCrossProductMoments;
+        Eigen::VectorXd intery = cpm2.row(0).cast<double>();
+        Eigen::VectorXd interv = cpm2.row(1).cast<double>();
+        size_t np = bivariateLogLinearSmoothing2.numberOfExaminees;
+        Eigen::VectorXd scoresy(ncaty);
+        for (size_t i = 0; i < ncaty; i++)
+          scoresy(i) = bivariateLogLinearSmoothing2.minimumRawScoreX +
+                       i * bivariateLogLinearSmoothing2.scoreIncrementX;
 
-        for (i = 0; i < ncatv; i++)
-          for (j = 0; j < ncaty; j++)
-            fitbdist[i][j] = bivar2->bfd[j][i] / np;
+        Eigen::VectorXd scoresv(ncatv);
+        for (size_t i = 0; i < ncatv; i++)
+          scoresv(i) = bivariateLogLinearSmoothing2.minimumRawScoreV +
+                       i * bivariateLogLinearSmoothing2.scoreIncrementV;
+        size_t ncat = ncatv * ncaty;
+
+        Eigen::VectorXd Fr(ncatv);
+        Eigen::VectorXd Gs(ncaty);
+        Eigen::VectorXd FrU(npara);
+        Eigen::VectorXd GsV(npara);
+
+        Eigen::MatrixXd Cr(ncat, npara);
+        Eigen::MatrixXd B(npara, ncat);
+        Eigen::MatrixXd U(ncatv, npara);
+        Eigen::MatrixXd V(ncaty, npara);
+        Eigen::MatrixXd fitbdist(ncatv, ncaty);
+
+        for (size_t i = 0; i < ncatv; i++)
+          for (size_t j = 0; j < ncaty; j++)
+            fitbdist(i, j) =  bivariateLogLinearSmoothing2.fittedBivariateFreqDist(j, i) / np;
 
         /*The following code set a natrual design matrix corresponding to a natrual basis of 
 					polynomials. This B matrix is the transpose of the design matrix in log-linear model
 					First, assign natrual design matrix first for rows corresponding to x */
 
-        for (i = 0; i < cu; i++) {
-          for (j = 0; j < ncatv; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i][k * (ncatv) + j] = pow((double)j, (double)(i + 1));
+        for (size_t i = 0; i < cu; i++) {
+          for (size_t j = 0; j < ncatv; j++) {
+            for (size_t k = 0; k < ncaty; k++) {
+              B(i, k * (ncatv) + j) = std::pow(static_cast<double>(j), (i + 1));
             }
           }
         }
 
         /* then assign values to rows corresponding to y */
-        for (i = cu; i < cu + cv; i++) {
-          for (j = 0; j < ncatv; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i][k * (ncatv) + j] = pow((double)k, (double)(i - cu + 1));
+        for (size_t i = cu; i < cu + cv; i++) {
+          for (size_t j = 0; j < ncatv; j++) {
+            for (size_t k = 0; k < ncaty; k++) {
+              B(i, k * ncatv + j) = std::pow(static_cast<double>(k), (i - cu + 1));
             }
           }
         }
 
         /* assign value to the last columns corresponding to the interaction terms */
-        for (i = 0; i < cuv; i++) {
-          for (j = 0; j < ncatv; j++) {
-            for (k = 0; k < ncaty; k++) {
-              B[i + cu + cv][k * (ncatv) + j] = pow((double)j, (double)interv[i]) *
-                                                pow((double)k, (double)intery[i]);
+        for (size_t i = 0; i < cuv; i++) {
+          for (size_t j = 0; j < ncatv; j++) {
+            for (size_t k = 0; k < ncaty; k++) {
+              B(i + cu + cv, k * (ncatv) + j) = std::pow(static_cast<double>(j), interv(i)) *
+                                                std::pow(static_cast<double>(k), intery(i));
             }
           }
         }
 
-        vP = dvector(0, ncat - 1);
-        M = dmatrix(0, ncatv - 1, 0, ncat - 1);
-        N = dmatrix(0, ncaty - 1, 0, ncat - 1);
-        r = dvector(0, ncatv - 1);
-        s = dvector(0, ncaty - 1);
+        Eigen::VectorXd vP(ncat);
+        // Eigen::VectorXd vP(ncat);
+        Eigen::VectorXd r(ncatv);
+        Eigen::VectorXd s(ncaty);
+        Eigen::MatrixXd M(ncatv, ncat);
+        Eigen::MatrixXd N(ncaty, ncat);
 
         vPMN(ncatv, ncaty, fitbdist, vP, M, N);
-        MatrixMultiVector(ncatv, ncat, M, vP, r);
-        MatrixMultiVector(ncaty, ncat, N, vP, s);
+        r = M * vP; // MatrixMultiVector(ncatv, ncat, M, vP, r);
+        s = N * vP; // MatrixMultiVector(ncaty, ncat, N, vP, s);
 
-        ComputeCmatrixGen(ncat, npara, np, B, vP, Cr);
-        MatrixMultiMatrix(ncatv, ncat, npara, M, Cr, U);
-        MatrixMultiMatrix(ncaty, ncat, npara, N, Cr, V);
+        computeCmatrixGen(ncat, npara, np, B, vP, Cr);
+        U = M * Cr; // MatrixMultiMatrix(ncatv, ncat, npara, M, Cr, U);
+        V = N * Cr; // MatrixMultiMatrix(ncaty, ncat, npara, N, Cr, V);
 
-        hv = Optimalh(ncatv, scoresv, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        double hv = optimalBandwithXParameter(ncatv, scoresv, r, 1);
+        double hy = optimalBandwithXParameter(ncaty, scoresy, s, 1);
 
-        for (i = 0; i < ncatx; i++) {
-          cdfv = KernelContinuCdf(ncatv, scoresv, r, hv, EquatedxA[i]);
-          Equatedx[i] = KernelInverseCdf(ncaty, scoresy, s, hy, cdfv);
+        for (size_t i = 0; i < ncatx; i++) {
+          double cdfv = kernelCdf(ncatv, scoresv, r, hv, equatedxA(i));
+          equatedX(i) = kernelInverseCdf(ncaty, scoresy, s, hy, cdfv);
         }
 
-        for (i = 0; i < ncatx; i++) {
-          PartialFPartialr(ncatv, scoresv, r, hv, Fr, EquatedxA[i]);
-          PartialFPartialr(ncaty, scoresy, s, hy, Gs, Equatedx[i]);
-          HpQ = KernelContinuPdf(ncatv, scoresv, r, hv, EquatedxA[i]);
-          GpQ = KernelContinuPdf(ncaty, scoresy, s, hy, Equatedx[i]);
-          VectorMultiMatrix(ncatv, npara, Fr, U, FrU);
-          VectorMultiMatrix(ncaty, npara, Gs, V, GsV);
-          for (j = 0; j < npara; j++)
-            FrU[j] -= GsV[j];
-          SEEY[i] = sqrt(VectorNormSq(npara, FrU)) / GpQ;
-          SEE[i] = sqrt(DSQR(HpQ / GpQ * SEEA[i]) + DSQR(SEEY[i]));
+        for (size_t i = 0; i < ncatx; i++) {
+          partialFPartialr(ncatv, scoresv, r, hv, Fr, equatedxA(i));
+          partialFPartialr(ncaty, scoresy, s, hy, Gs, equatedX(i));
+          double HpQ = kernelPdf(ncatv, scoresv, r, hv, equatedxA(i));
+          double GpQ = kernelPdf(ncaty, scoresy, s, hy, equatedX(i));
+          FrU = Fr * U; //VectorMultiMatrix(ncatv, npara, Fr, U, FrU);
+          GsV = Gs * V; // VectorMultiMatrix(ncaty, npara, Gs, V, GsV);
+          for (size_t j = 0; j < npara; j++)
+            FrU(j) -= GsV(j);
+
+          seeY(i) = FrU.norm() / GpQ;
+          see(i) = std::sqrt(DSQR(HpQ / GpQ * seeA(i)) + DSQR(seeY(i)));
         }
+      }
+
+      double DSQR(double a) {
+        double result;
+        if (a == 0.0) {
+          result = 0.0;
+        } else {
+          result = std::pow(a, 2);
+        }
+        
+        return result;
       }
 
       /*--------------------------------------------------------------------------
@@ -3307,56 +3339,59 @@ namespace EquatingRecipes {
 			output:
 				Equatedx    a vector containing the equated score 
 		--------------------------------------------------------------------------*/
-      void KernelEquateNEATChn(struct BLL_SMOOTH* bivar1,
-                               struct BLL_SMOOTH* bivar2,
-                               const Eigen::VectorXd& Equatedx) {
-        int i, j, ncat, ncatx, ncaty, ncatv;
-        long np;
-        double* EquatedxA;
-        double** fitbdist;
-        double *vP, **M, **N, *r, *s;
-        double hv, hy;
-        double cdfv;
-        double *scoresv, *scoresy;
+      void KernelEquateNEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+                               const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
+                               Eigen::VectorXd& equatedX) {
+        // int i, j, ncat, ncatx, ncaty, ncatv;
+        // long np;
+        // double* EquatedxA;
+        // double** fitbdist;
+        // double *vP, **M, **N, *r, *s;
+        // double hv, hy;
+        // double cdfv;
+        // double *scoresv, *scoresy;
 
-        ncatx = bivar1->nsx;
-        EquatedxA = dvector(0, ncatx - 1);
+        size_t ncatx = bivariateLogLinearSmoothing1.numberOfScoresX;
+        Eigen::VectorXd equatedxA(ncatx);
 
-        KernelEquateSG(bivar1, EquatedxA);
+        kernelEquateSG(bivariateLogLinearSmoothing1, equatedxA);
 
-        ncaty = bivar2->nsx;
-        ncatv = bivar2->nsv;
-        np = bivar2->num_persons;
-        scoresy = dvector(0, ncaty);
-        for (i = 0; i < ncaty; i++)
-          scoresy[i] = bivar2->minx + i * bivar2->incx;
-        scoresv = dvector(0, ncatv);
-        for (i = 0; i < ncatv; i++)
-          scoresv[i] = bivar2->minv + i * bivar2->incv;
-        ncat = ncatv * ncaty;
+        size_t ncaty = bivariateLogLinearSmoothing2.numberOfScoresX;
+        size_t ncatv = bivariateLogLinearSmoothing2.numberOfScoresV;
+        size_t np = bivariateLogLinearSmoothing2.numberOfExaminees;
+        
+        Eigen::VectorXd scoresy(ncaty);
+        for (size_t i = 0; i < ncaty; i++)
+          scoresy(i) = bivariateLogLinearSmoothing2.minimumRawScoreX + i * bivariateLogLinearSmoothing2.scoreIncrementX;
+        
+        Eigen::VectorXd scoresv(ncatv);
+        for (size_t i = 0; i < ncatv; i++)
+          scoresv(i) = bivariateLogLinearSmoothing2.minimumRawScoreV + i * bivariateLogLinearSmoothing2.scoreIncrementV;
+        
+        size_t ncat = ncatv * ncaty;
 
-        fitbdist = dmatrix(0, ncatv - 1, 0, ncaty - 1);
+        Eigen::MatrixXd fitbdist(ncatv, ncaty);
 
-        for (i = 0; i < ncatv; i++)
-          for (j = 0; j < ncaty; j++)
-            fitbdist[i][j] = bivar2->bfd[j][i] / np;
+        for (size_t i = 0; i < ncatv; i++)
+          for (size_t j = 0; j < ncaty; j++)
+            fitbdist(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(j, i) / np;
 
-        vP = dvector(0, ncat - 1);
-        M = dmatrix(0, ncatv - 1, 0, ncat - 1);
-        N = dmatrix(0, ncaty - 1, 0, ncat - 1);
-        r = dvector(0, ncatv - 1);
-        s = dvector(0, ncaty - 1);
-
+        Eigen::VectorXd vP(ncat);
+        Eigen::VectorXd r(ncatv);
+        Eigen::VectorXd s(ncaty);
+        Eigen::MatrixXd M(ncatv, ncat);
+        Eigen::MatrixXd N(ncaty, ncat);
+        
         vPMN(ncatv, ncaty, fitbdist, vP, M, N);
-        MatrixMultiVector(ncatv, ncat, M, vP, r);
-        MatrixMultiVector(ncaty, ncat, N, vP, s);
+        r = M * vP; // MatrixMultiVector(ncatv, ncat, M, vP, r);
+        s = N * vP; // MatrixMultiVector(ncaty, ncat, N, vP, s);
 
-        hv = Optimalh(ncatv, scoresv, r, 1);
-        hy = Optimalh(ncaty, scoresy, s, 1);
+        double hv = optimalBandwithXParameter(ncatv, scoresv, r, 1);
+        double hy = optimalBandwithXParameter(ncaty, scoresy, s, 1);
 
-        for (i = 0; i < ncatx; i++) {
-          cdfv = KernelContinuCdf(ncatv, scoresv, r, hv, EquatedxA[i]);
-          Equatedx[i] = KernelInverseCdf(ncaty, scoresy, s, hy, cdfv);
+        for (size_t i = 0; i < ncatx; i++) {
+          double cdfv = kernelCdf(ncatv, scoresv, r, hv, equatedxA(i));
+          equatedX(i) = kernelCdf(ncaty, scoresy, s, hy, cdfv);
         }
       }
     };
