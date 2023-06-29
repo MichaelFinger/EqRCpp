@@ -2,6 +2,7 @@
 #define ANALYSES_CINE_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
 
 #include <string>
+#include <fmt/core.h>
 
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/design.hpp>
@@ -79,11 +80,14 @@ namespace EquatingRecipes {
             nlohmann::json results = nlohmann::json::object();
             results["DatasetName"] = inputData.datasetName;
             results["RowVariableName"] = inputData.xVariableName;
-            results["ColumnwVariableName"] = inputData.yVariableName;
+            results["ColumnVariableName"] = inputData.yVariableName;
             results["PData"] = outputData.pData;
             results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
 
-            nlohmann::json cineGroupsEquatingResults = nlohmann::json {{"analysis_type", "common_item_nonequivalent_groups"},
+            std::string analysisType = fmt::format("{}_mean_linear_equipercentile_equating",
+                                                   EquatingRecipes::Implementation::Utilities::getDesignName(inputData.design));
+
+            nlohmann::json cineGroupsEquatingResults = nlohmann::json {{"analysis_type", analysisType},
                                                                        {"analysis_results", results}};
 
             nlohmann::json j = nlohmann::json::array();
@@ -96,7 +100,7 @@ namespace EquatingRecipes {
           }
         };
       } // namespace NoSmoothing
-    }   // namespace LinearEquating
+    }   // namespace MeanLinearEquipercentileEquating
   }     // namespace Analyses
 } // namespace EquatingRecipes
 

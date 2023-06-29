@@ -1191,6 +1191,67 @@ namespace EquatingRecipes {
         double rndNumber = distrib(gen);
         return rndNumber;
       }
+
+      static std::string getMethodName(const EquatingRecipes::Structures::Method& method) {
+        std::string name = "";
+        
+        switch (method) {
+          case EquatingRecipes::Structures::Method::MEAN:
+            name = "mean";
+            break;
+          case EquatingRecipes::Structures::Method::LINEAR:
+            name = "linear";
+            break;
+          case EquatingRecipes::Structures::Method::EQUIPERCENTILE:
+            name = "equipercentile";
+            break;
+          case EquatingRecipes::Structures::Method::FE_BH:
+            name = "frequency estimation with Braun-Holland";
+            break;
+          case EquatingRecipes::Structures::Method::MFE_BH:
+            name = "modified frequency estimation with Braun-Holland";
+            break;
+          case EquatingRecipes::Structures::Method::FE_BH_MFE_BH:
+            name = "frequency estimation with Braun-Holland & modified estimation with Braun-Holland";
+            break;
+          case EquatingRecipes::Structures::Method::CHAINED:
+            name = "chained";
+            break;
+          case EquatingRecipes::Structures::Method::FE_BH_CHAINED:
+            name = "chained frequency estimation with Braun-Holland";
+            break;
+          case EquatingRecipes::Structures::Method::FE_BH_MFE_BH_CHAINED:
+            name = "chained frequency estimation with Braun-Holland & modified estimation with Braun-Holland";
+            break;
+          case EquatingRecipes::Structures::Method::NOT_SPECIFIED:
+          default:
+            break;
+        }
+
+        return name;
+      }
+
+      static std::string getDesignName(const EquatingRecipes::Structures::Design& design) {
+        std::string designName = "";
+
+        switch (design) {
+          case EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS:
+            designName = "common_iten_non_equivalent_groups";
+            break;
+          case EquatingRecipes::Structures::Design::RANDOM_GROUPS:
+            designName = "random_groups";
+            break;
+          case EquatingRecipes::Structures::Design::SINGLE_GROUP:
+            designName = "single_group";
+            break;
+          case EquatingRecipes::Structures::Design::SINGLE_GROUP_COUNTER_BALANCE:
+            designName = "single_group_counter_balance";
+            break;
+          case EquatingRecipes::Structures::Design::NOT_SPECIFIED:
+          default:
+            break;
+        }
+      }
     };
   } // namespace Implementation
 } // namespace EquatingRecipes

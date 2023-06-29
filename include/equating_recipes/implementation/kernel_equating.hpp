@@ -24,6 +24,10 @@ University of Iowa
 #define KERNEL_EQUATING_HPP
 
 #include <cmath>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <Eigen/Dense>
 #include <Eigen/QR>
 #include <boost/math/distributions/normal.hpp>
@@ -100,75 +104,91 @@ namespace EquatingRecipes {
       void runWithRGDesign(const EquatingRecipes::Structures::Design& design,
                            const EquatingRecipes::Structures::Method& method,
                            const EquatingRecipes::Structures::Smoothing& smoothing,
-                           const EquatingRecipes::Structures::UnivariateStatistics& x,
-                           const EquatingRecipes::Structures::UnivariateStatistics& y,
-                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ullx,
-                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& ully,
+                           const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsX,
+                           const EquatingRecipes::Structures::UnivariateStatistics& univariateStatisticsY,
+                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingX,
+                           const EquatingRecipes::Structures::UnivariateLogLinearSmoothing& univariateLogLinearSmoothingY,
                            const size_t& replicationNumber,
                            EquatingRecipes::Structures::PData& pData,
                            EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method name --- 10 characters; right justified */
-        //   char* names[] = {"   y-equiv"};
-        //   double maxx, maxy, *scoresx, *scoresy;
-        //   int i;
-        //   double SEE[200];
+        std::vector<std::string> methodNames {"   y-equiv"};
 
-        //   scoresx = dvector(0, ullx->ns);
-        //   scoresy = dvector(0, ully->ns);
-        //   maxx = ullx->min + (ullx->ns - 1) * ullx->inc;
-        //   maxy = ully->min + (ully->ns - 1) * ully->inc;
-        //   for (i = 0; i < ullx->ns; i++)
-        //     scoresx[i] = i;
-        //   for (i = 0; i < ully->ns; i++)
-        //     scoresy[i] = i;
+        Eigen::VectorXd scoresX(0, univariateLogLinearSmoothingX.numberOfScores);
+        Eigen::VectorXd scoresY(0, univariateLogLinearSmoothingY.numberOfScores);
 
-        //   inall->rep = rep; /* should be set to 0 for actual equating */
-        //                     /* counting of replications done in Wrapper_Bootstrap() */
+        for (size_t scoreIndex = 0; scoreIndex < univariateLogLinearSmoothingX.numberOfScores; scoreIndex++) {
+          scoresX(scoreIndex) = univariateLogLinearSmoothingX.minimumRawScore +
+                                static_cast<double>(scoreIndex) * univariateLogLinearSmoothingX.rawScoreIncrement;
+        }
 
-        //   /* allocation and assignments for struct PDATA inall
-        // 	Note that for every assignment of the form inall->(var) = x->(var)
-        // 	or inall->(var) = y->(var), values vary depending on whether x or y
-        // is for actual equating or a bootstrap sample; all other values are
-        // the same for the actual equating and a bootstrap sample */
+        Eigen::VectorXd scoresY(univariateLogLinearSmoothingY.numberOfScores);
+        for (size_t scoreIndex = 0; scoreIndex < univariateLogLinearSmoothingY.numberOfScores; scoreIndex++) {
+          scoresY(scoreIndex) = univariateLogLinearSmoothingY.minimumRawScore +
+                                static_cast<double>(scoreIndex) * univariateLogLinearSmoothingY.rawScoreIncrement;
+        }
 
-        //   if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        //     strcpy(inall->xfname, x->fname);
-        //     strcpy(inall->yfname, y->fname);
-        //     inall->x = x;
-        //     inall->y = y;
-        //     inall->design = design;
-        //     inall->method = method;
-        //     inall->smoothing = smoothing;
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                                   pData.minimumScoreX,
+                                                                                                   pData.scoreIncrementX);
 
-        //     inall->nm = 1;
-        //     inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-        //     strcpy(inall->names[0], names[0]);
+        pData.bootstrapReplicationNumber = replicationNumber;
 
-        //     inall->min = x->min;
-        //     inall->max = x->max;
-        //     inall->inc = x->inc;
-        //     inall->fdx = x->fd;
-        //     inall->n = x->n;
+        /* allocation and assignments for struct PDATA inall
+          Note that for every assignment of the form inall->(var) = x->(var)
+          or inall->(var) = y->(var), values vary depending on whether x or y
+          is for actual equating or a bootstrap sample; all other values are
+          the same for the actual equating and a bootstrap sample */
 
-        //     inall->ullx = ullx;
-        //     inall->ully = ully;
-        //   }
+        if (pData.bootstrapReplicationNumber == 0) {
+          pData.summaryRawDataX = univariateStatisticsX;
+          pData.summaryRawDataY = univariateStatisticsY;
+          pData.design = design;
+          pData.method = method;
+          pData.smoothing = smoothing;
+          pData.methods = methodNames;
+          pData.minimumScoreX = univariateStatisticsX.minimumScore;
+          pData.maximumScoreX = univariateStatisticsX.maximumScore;
+          pData.scoreIncrementX = univariateStatisticsX.scoreIncrement;
+          pData.scoreFrequenciesX = univariateStatisticsX.freqDistDouble;
+          pData.numberOfExaminees = univariateStatisticsX.numberOfExaminees;
 
-        //   /* allocation and assignments for r */
+          pData.univariateLogLinearSmoothingX = univariateLogLinearSmoothingX;
+          pData.univariateLogLinearSmoothingY = univariateLogLinearSmoothingY;
+        }
 
-        //   if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        //     r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-        //     r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
-        //   }
+        /* allocation and assignments for r */
 
-        //   /* Compute equating results */
-        //   KernelEquateSEERG(ullx->ns, ullx->c, ullx->num_persons, scoresx, ullx->density,
-        //                     ully->ns, ully->c, ully->num_persons, scoresy, ully->density,
-        //                     r->eraw[0], SEE);
+        if (pData.bootstrapReplicationNumber <= 1) { /* no storage allocation for bootstrap reps >1 */
+          results.equatedRawScores.resize(1, maximumScoreLocation);
+          results.equatedRawScoreMoments.resize(1, 4);
+          results.equatingStandardErrors.resize(1, maximumScoreLocation + 1);
+        }
 
-        //   /* get moments */
+        /* Compute equating results */
+        Eigen::VectorXd equatedRawScores(maximumScoreLocation + 1);
+        Eigen::VectorXd equatingStandardErrors(maximumScoreLocation + 1);
 
-        //   MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+        kernelEquateSEERG(univariateLogLinearSmoothingX.numberOfScores,
+                          univariateLogLinearSmoothingX.degreesOfSmoothing,
+                          univariateLogLinearSmoothingX.numberOfExaminees,
+                          scoresX,
+                          univariateLogLinearSmoothingX.fittedRawScoreDist,
+                          univariateLogLinearSmoothingY.numberOfScores,
+                          univariateLogLinearSmoothingY.degreesOfSmoothing,
+                          univariateLogLinearSmoothingY.numberOfExaminees,
+                          scoresY,
+                          univariateLogLinearSmoothingY.fittedRawScoreDist,
+                          equatedRawScores,
+                          equatingStandardErrors);
+
+        results.equatedRawScores.row(0) = equatedRawScores;
+        results.equatingStandardErrors.row(0) = equatingStandardErrors;
+
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(results.equatedRawScores.row(0),
+                                                                                                                               pData.scoreFrequenciesX);
+
+        results.equatedRawScoreMoments.row(0) = moments.momentValues;
       }
 
       /*
@@ -239,66 +259,65 @@ namespace EquatingRecipes {
       void runWithSGDesign(const EquatingRecipes::Structures::Design& design,
                            const EquatingRecipes::Structures::Method& method,
                            const EquatingRecipes::Structures::Smoothing& smoothing,
-                           const EquatingRecipes::Structures::BivariateStatistics& xy,
-                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
+                           const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXY,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY,
                            const size_t& replicationNumber,
                            EquatingRecipes::Structures::PData& pData,
                            EquatingRecipes::Structures::EquatedRawScoreResults& results) {
         /* method names --- 10 characters; right justified */
-        //   char* names[] = {"   y-equiv"};
+        std::vector<std::string> methodNames {"   y-equiv"};
 
-        //   inall->rep = rep; /* should be set to 0 for actual equating */
-        //                     /* counting of replications done in Wrapper_Bootstrap() */
+        pData.bootstrapReplicationNumber = replicationNumber;
 
-        //   /* Allocation and assignments for struct PDATA inall>
-        // 	Note that for every assignment of the form inall->(var) = x->(var)
-        // 	or inall->(var) = y->(var), values vary depending on whether x or y
-        //   is for actual equating or a bootstrap sample; all other values are
-        //   the same for the actual equating and a bootstrap sample */
+        /* Allocation and assignments for struct PDATA inall>
+          Note that for every assignment of the form inall->(var) = x->(var)
+          or inall->(var) = y->(var), values vary depending on whether x or y
+          is for actual equating or a bootstrap sample; all other values are
+          the same for the actual equating and a bootstrap sample */
 
-        //   if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        //     strcpy(inall->xyfname, xy->fname);
-        //     inall->xy = xy;
-        //     inall->bllxy = bllxy;
-        //     inall->design = design;
-        //     inall->method = method;
-        //     inall->smoothing = smoothing;
-        //     inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
-        // 																	smoothing with the SG design */
+        if (pData.bootstrapReplicationNumber == 0) {
+          pData.summaryRawDataXY = bivariateStatisticsXY;
+          pData.bivariateLogLinearSmoothingXY = bivariateLogLinearSmoothingXY;
+          pData.design = design;
+          pData.method = method;
+          pData.smoothing = smoothing;
+          pData.isInternalAnchor = false; /* implicitly, anchor is external for biv log-linear smoothing with the SG design */
+          pData.methods = methodNames;
+          pData.minimumScoreX = bivariateStatisticsXY.univariateStatisticsRow.minimumScore;
+          pData.maximumScoreX = bivariateStatisticsXY.univariateStatisticsRow.maximumScore;
+          pData.scoreIncrementX = bivariateStatisticsXY.univariateStatisticsRow.scoreIncrement;
+          pData.scoreFrequenciesX = bivariateStatisticsXY.univariateStatisticsRow.freqDistDouble;
+          pData.numberOfExaminees = bivariateStatisticsXY.numberOfExaminees;
+        }
 
-        //     inall->nm = 1;
-        //     inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-        //     strcpy(inall->names[0], names[0]);
+        /* allocation and assignments for r */
 
-        //     inall->min = xy->min1;
-        //     inall->max = xy->max1;
-        //     inall->inc = xy->inc1;
-        //     inall->fdx = xy->fd1;
-        //     inall->n = xy->n;
-        //   }
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getScoreLocation(pData.maximumScoreX,
+                                                                                                   pData.minimumScoreX,
+                                                                                                   pData.scoreIncrementX);
 
-        //   /* allocation and assignments for r */
+        if (pData.bootstrapReplicationNumber <= 1) {
+          results.equatedRawScores.resize(1, maximumScoreLocation + 1);
+          results.equatedRawScoreMoments.resize(1, 4);
+        }
 
-        //   if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        //     r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-        //     r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
-        //   }
+        /* Compute equating results. Put x on scale of y.
+            Note that in struct xy, '1' designates x and '2' designates y;
+            in struct bllxy, '_x' designates x and '_v' designates y. So:
+              xy->ns2 = number of score categories for y
+              xy->min2 = minimum score for y
+              xy->inc2 = increment for y
+              bllxy->crfd_v = log-linear smoothed cum rel fd for y
+              xy->ns1 = number of score categories for x
+              bllxy->prd_x = log-linear smoothed PR dist for x
+              r->eraw[0] = y equivalents for x (output) */
+        Eigen::VectorXd equatedScores(maximumScoreLocation + 1);
+        kernelEquateSG(bivariateLogLinearSmoothingXY, equatedScores);
+        results.equatedRawScoreMoments.row(0) = equatedScores;
 
-        //   /* Compute equating results. Put x on scale of y.
-        // Note that in struct xy, '1' designates x and '2' designates y;
-        // in struct bllxy, '_x' designates x and '_v' designates y. So:
-        // 	xy->ns2 = number of score categories for y
-        // xy->min2 = minimum score for y
-        // xy->inc2 = increment for y
-        // bllxy->crfd_v = log-linear smoothed cum rel fd for y
-        // xy->ns1 = number of score categories for x
-        // 	bllxy->prd_x = log-linear smoothed PR dist for x
-        // r->eraw[0] = y equivalents for x (output) */
-
-        //   KernelEquateSG(bllxy, r->eraw[0]);
-        //   /* get moments */
-
-        //   MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
+        /* get moments */
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedScores,
+                                                                                                                               pData.scoreFrequenciesX);
       }
 
       /*
@@ -389,115 +408,139 @@ namespace EquatingRecipes {
                            const bool& isInternalAnchor,
                            const double& reliabilityCommonItemsPopulation1,
                            const double& reliabilityCommonItemsPopulation2,
-                           const EquatingRecipes::Structures::BivariateStatistics& xv,
-                           const EquatingRecipes::Structures::BivariateStatistics& yv,
-                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxv,
-                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllyv,
+                           const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXV,
+                           const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsYV,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXV,
+                           const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingYV,
                            const size_t& replicationNumber,
                            EquatingRecipes::Structures::PData& pData,
                            EquatingRecipes::Structures::EquatedRawScoreResults& results) {
-        //       int i;
-        //       double* ptr; /* pointer for eraw[] */
-        //                    /* method names --- 10 characters; right justified */
-        //       char* names[] = {"        FE", "       MFE", "  ChainedE"};
+        std::vector<std::string> methods {"        FE",
+                                          "       MFE",
+                                          "  ChainedE"};
 
-        //       inall->rep = rep; /* should be set to 0 for actual equating. */
-        //                         /* Counting of replications done in Wrapper_Bootstrap(),
-        //            which is why this statement cannot be in the if statement below */
+        pData.bootstrapReplicationNumber = replicationNumber;
 
-        //       /* allocation and assignments for inall
-        //    Note that for every assignment of the form inall->(var) = xv->(var)
-        //  or inall->(var) = yv->(var) values vary depending on whether xv or yv
-        //  is for actual equating or a bootstrap sample; all other values are
-        //  the same for the actual equating and a bootstrap sample */
+        std::string methodCode = EquatingRecipes::Implementation::Utilities::getMethodCode(method);
 
-        //       if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        //         strcpy(inall->xfname, xv->fname);
-        //         strcpy(inall->yfname, yv->fname);
-        //         inall->xv = xv;
-        //         inall->yv = yv;
-        //         inall->bllxv = bllxv;
-        //         inall->bllyv = bllyv;
-        //         inall->design = design;
-        //         inall->method = method;
-        //         inall->smoothing = smoothing;
-        //         inall->w1 = (w1 < 0 || w1 > 1) ? (double)(xv->n) / (xv->n + yv->n) : w1;
-        //         /* proportional wts if w1 outside [0,1] */
-        //         inall->anchor = anchor;
-        //         inall->rv1 = rv1;
-        //         inall->rv2 = rv2;
+        /* allocation and assignments for inall
+           Note that for every assignment of the form inall->(var) = xv->(var)
+           or inall->(var) = yv->(var) values vary depending on whether xv or yv
+           is for actual equating or a bootstrap sample; all other values are
+           the same for the actual equating and a bootstrap sample */
 
-        //         if ((method == 'F' || method == 'G' || method == 'A') &&
-        //             (rv1 == 0 || rv2 == 0))
-        //           runerror("\nMFE cannot be conducted since rv1 == 0 or rv2 == 0");
+        if (pData.bootstrapReplicationNumber == 0) {
+          pData.summaryRawDataXV = bivariateStatisticsXV;
+          pData.summaryRawDataYV = bivariateStatisticsYV;
+          pData.bivariateLogLinearSmoothingXV = bivariateLogLinearSmoothingXV;
+          pData.bivariateLogLinearSmoothingYV = bivariateLogLinearSmoothingYV;
+          pData.design = design;
+          pData.method = method;
+          pData.smoothing = smoothing;
 
-        //         inall->names = cmatrix(0, 4, 0, 11); /* maximum of five names */
+          if (w1 < 0.0 || w1 > 1.0) {
+            pData.weightSyntheticPopulation1 = static_cast<double>(bivariateStatisticsXV.numberOfExaminees) /
+                                               static_cast<double>(bivariateStatisticsXV.numberOfExaminees + bivariateStatisticsYV.numberOfExaminees);
+          } else {
+            pData.weightSyntheticPopulation1 = w1;
+          }
 
-        //         if (method == 'E') { /* method == 'E' */
-        //           inall->nm = 1;
-        //           strcpy(inall->names[0], names[0]);
-        //         } else if (method == 'F') { /* method == 'F' */
-        //           inall->nm = 1;
-        //           strcpy(inall->names[0], names[1]);
-        //         } else if (method == 'G') { /* method == 'G' */
-        //           inall->nm = 2;
-        //           for (i = 0; i <= 1; i++)
-        //             strcpy(inall->names[i], names[i]);
-        //         } else if (method == 'C') { /* method == 'C' */
-        //           inall->nm = 1;
-        //           strcpy(inall->names[0], names[2]);
-        //         } else if (method == 'H') { /* method == 'H' */
-        //           inall->nm = 2;
-        //           strcpy(inall->names[0], names[0]);
-        //           strcpy(inall->names[1], names[2]);
-        //         } else { /* method == 'A' */
-        //           inall->nm = 3;
-        //           for (i = 0; i <= 2; i++)
-        //             strcpy(inall->names[i], names[i]);
-        //         }
+          pData.isInternalAnchor = isInternalAnchor;
+          pData.reliabilityCommonItemsPopulation1 = reliabilityCommonItemsPopulation1;
+          pData.reliabilityCommonItemsPopulation2 = reliabilityCommonItemsPopulation2;
 
-        //         inall->min = xv->min1;
-        //         inall->max = xv->max1;
-        //         inall->inc = xv->inc1;
-        //         inall->fdx = xv->fd1;
-        //         inall->n = xv->n;
-        //       }
+          if ((methodCode == "F" || methodCode == "G" || methodCode == "A") &&
+              (reliabilityCommonItemsPopulation1 == 0 || reliabilityCommonItemsPopulation2 == 0)) {
+            throw std::runtime_error("MFE cannot be conducted since rv1 == 0 or rv2 == 0");
+          }
 
-        //       /* allocation and assignments for r */
+          if (methodCode == "E") {
+            pData.methods.push_back(methods[0]);
+          } else if (methodCode == "F") {
+            pData.methods.push_back(methods[1]);
+          } else if (methodCode == "G") {
+            pData.methods.push_back(methods[0]);
+            pData.methods.push_back(methods[1]);
+          } else if (methodCode == "C") {
+            pData.methods.push_back(methods[2]);
+          } else if (methodCode == "H") {
+            pData.methods.push_back(methods[0]);
+            pData.methods.push_back(methods[2]);
+          } else {
+            // method == 'A'
+            pData.methods = methods;
+          }
 
-        //       if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        //         r->eraw = dmatrix(0, inall->nm - 1, 0, loc(xv->max1, xv->min1, xv->inc1));
-        //         r->mts = dmatrix(0, inall->nm - 1, 0, 3); /* 0,3 is for the 4 moments */
-        //         r->fxs = dmatrix(0, 1, 0, loc(xv->max1, xv->min1, xv->inc1));
-        //         r->gys = dmatrix(0, 1, 0, loc(yv->max1, yv->min1, yv->inc1));
-        //       }
+          pData.minimumScoreX = bivariateStatisticsXV.univariateStatisticsRow.minimumScore;
+          pData.maximumScoreX = bivariateStatisticsXV.univariateStatisticsRow.maximumScore;
+          pData.scoreIncrementX = bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement;
+          pData.scoreFrequenciesX = bivariateStatisticsXV.univariateStatisticsRow.freqDistDouble;
+          pData.numberOfExaminees = bivariateStatisticsXV.numberOfExaminees;
+        }
 
-        //       /* Equipercentile results, including Braun-Holland (BH) linear.
-        //  Note: For FE syn densities are in fxs[0] and gys[0]
-        //        For MFE syn densities are in fxs[1] and gys[1]
-        //        For BH under FE, slope in a[0] and intercept in b[0]
-        //        For BH under MFE, slope in a[1] and intercept in b[1] */
+        size_t maximumScoreLocationX = EquatingRecipes::Implementation::Utilities::getScoreLocation(bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                                                                    bivariateStatisticsXV.univariateStatisticsRow.maximumScore,
+                                                                                                    bivariateStatisticsXV.univariateStatisticsRow.scoreIncrement);
 
-        //       /* FE + BH-FE in positions 0 and 1*/
-        //       if (method == 'E' || method == 'G' || method == 'A' || method == 'H')
-        //         KernelEquateNEATPS(bllxv, bllyv, inall->w1, r->eraw[0]);
+        size_t maximumScoreLocationY = EquatingRecipes::Implementation::Utilities::getScoreLocation(bivariateStatisticsYV.univariateStatisticsRow.maximumScore,
+                                                                                                    bivariateStatisticsYV.univariateStatisticsRow.minimumScore,
+                                                                                                    bivariateStatisticsYV.univariateStatisticsRow.scoreIncrement);
 
-        //       if (method == 'C')
-        //         ptr = r->eraw[0];
-        //       else if (method == 'A')
-        //         ptr = r->eraw[2];
-        //       else if (method == 'H')
-        //         ptr = r->eraw[1];
-        //       else
-        //         ptr = NULL;
+        /* allocation and assignments for r */
+        if (pData.bootstrapReplicationNumber <= 1) {
+          results.equatedRawScores.resize(pData.methods.size(), maximumScoreLocationX + 1);
+          results.equatedRawScoreMoments.resize(pData.methods.size(), 4);
+          results.relativeFreqDistsX.resize(2, maximumScoreLocationX + 1);
+          results.relativeFreqDistsY.resize(2, maximumScoreLocationY + 1);
+        }
 
-        //       if (ptr)
-        //         KernelEquateNEATChn(bllxv, bllyv, ptr);
+        /* Equipercentile results, including Braun-Holland (BH) linear.
+          Note: For FE syn densities are in fxs[0] and gys[0]
+          For MFE syn densities are in fxs[1] and gys[1]
+          For BH under FE, slope in a[0] and intercept in b[0]
+          For BH under MFE, slope in a[1] and intercept in b[1] */
 
-        //       /* get moments */
+        /* FE + BH-FE in positions 0 and 1*/
+        Eigen::VectorXd equatedRawScores(maximumScoreLocationX + 1);
+        if (methodCode == "E" || methodCode == "G" || methodCode == "A" || methodCode == "H") {
+          kernelEquateNEATPS(bivariateLogLinearSmoothingXV,
+                             bivariateLogLinearSmoothingYV,
+                             pData.weightSyntheticPopulation1,
+                             equatedRawScores);
 
-        //       for (i = 0; i <= inall->nm - 1; i++)
-        //         MomentsFromFD(xv->min1, xv->max1, xv->inc1, r->eraw[i], xv->fd1, r->mts[i]);
+          results.equatedRawScores.row(0) = equatedRawScores;
+        }
+
+        size_t methodIndex;
+        bool isNEATChainedMethod = false;
+        if (methodCode == "C") {
+          methodIndex = 0;
+          isNEATChainedMethod = true;
+        } else if (methodCode == "A") {
+          methodIndex = 2;
+          isNEATChainedMethod = true;
+        } else if (methodCode == "H") {
+          methodIndex = 1;
+          isNEATChainedMethod = true;
+        }
+
+        if (isNEATChainedMethod) {
+          equatedRawScores = results.equatedRawScores.row(methodIndex);
+
+          kernelEquateNEATChn(bivariateLogLinearSmoothingXV,
+                              bivariateLogLinearSmoothingYV,
+                              equatedRawScores);
+
+          results.equatedRawScores.row(methodIndex) = equatedRawScores;
+        }
+
+        /* get moments */
+        for (methodIndex = 0; methodIndex < pData.methods.size(); methodIndex++) {
+          equatedRawScores = results.equatedRawScores.row(methodIndex);
+          EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(equatedRawScores,
+                                                                                                                                 pData.scoreFrequenciesX);
+          results.equatedRawScoreMoments.row(methodIndex) = moments.momentValues;
+        }
       }
 
       /*
@@ -573,72 +616,71 @@ namespace EquatingRecipes {
       void runWithSGCounterBalanceDesign(const EquatingRecipes::Structures::Design& design,
                                          const EquatingRecipes::Structures::Method& method,
                                          const EquatingRecipes::Structures::Smoothing& smoothing,
-                                         const double& wtsx,
-                                         const double& wtsy,
-                                         const EquatingRecipes::Structures::BivariateStatistics& xy1,
-                                         const EquatingRecipes::Structures::BivariateStatistics& xy2,
-                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy1,
-                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bllxy2,
+                                         const double& wtsX,
+                                         const double& wtsY,
+                                         const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXY1,
+                                         const EquatingRecipes::Structures::BivariateStatistics& bivariateStatisticsXY2,
+                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY1,
+                                         const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothingXY2,
                                          const size_t& replicationNumber,
                                          EquatingRecipes::Structures::PData& pData,
                                          EquatingRecipes::Structures::EquatedRawScoreResults& results) {
-        /* method names --- 10 characters; right justified */
-        //       char* names[] = {"   y-equiv"};
-        //       double wts[2];
-        //       double SEE[200];
+        std::vector<std::string> methods {"   y-equiv"};
 
-        //       wts[0] = wtsx;
-        //       wts[1] = wtsy;
+        Eigen::VectorXd wts(2);
+        wts(0) = wtsX;
+        wts(1) = wtsY;
 
-        //       inall->rep = rep; /* should be set to 0 for actual equating */
-        //                         /* counting of replications done in Wrapper_Bootstrap() */
+        pData.bootstrapReplicationNumber = replicationNumber;
 
-        //       /* Allocation and assignments for struct PDATA inall>
-        //   Note that for every assignment of the form inall->(var) = x->(var)
-        //   or inall->(var) = y->(var), values vary depending on whether x or y
-        // is for actual equating or a bootstrap sample; all other values are
-        // the same for the actual equating and a bootstrap sample */
+        if (pData.bootstrapReplicationNumber == 0) {
+          pData.design = design;
+          pData.method = method;
+          pData.smoothing = smoothing;
+          pData.isInternalAnchor = false; /* implicitly, anchor is external for biv log-linear smoothing with the SG design */
+          pData.methods = methods;
+        }
 
-        //       if (inall->rep == 0) { /* no assignment or stor alloc for bootstrap reps */
-        //                              /*    strcpy(inall->xyfname,xy->fname);
-        //   inall->xy = xy;
-        // inall->bllxy = bllxy; */
-        //         inall->design = design;
-        //         inall->method = method;
-        //         inall->smoothing = smoothing;
-        //         inall->anchor = 0; /* implicitly, anchor is external for biv log-linear
-        // 					                        smoothing with the SG design */
+        /* allocation and assignments for r */
 
-        //         inall->nm = 1;
-        //         inall->names = cmatrix(0, inall->nm - 1, 0, 11); /* only one row/method, 0 */
-        //         strcpy(inall->names[0], names[0]);
-        //       }
+        size_t maximumScoreLocation = EquatingRecipes::Implementation::Utilities::getNumberOfScores(pData.maximumScoreX,
+                                                                                                    pData.minimumScoreX,
+                                                                                                    pData.scoreIncrementX);
 
-        //       /* allocation and assignments for r */
+        if (pData.bootstrapReplicationNumber <= 1) {
+          results.equatedRawScores.resize(1, maximumScoreLocation + 1);
+          results.equatedRawScoreMoments.resize(1, 4);
+          results.equatingStandardErrors.resize(1, maximumScoreLocation + 1);
+        }
 
-        //       if (inall->rep <= 1) { /* no storage allocation for bootstrap reps >1 */
-        //         r->eraw = dmatrix(0, 0, 0, loc(inall->max, inall->min, inall->inc));
-        //         r->mts = dmatrix(0, 0, 0, 3); /* 0,3 is for the 4 moments */
-        //       }
+        /* Compute equating results. Put x on scale of y.
+          Note that in struct xy, '1' designates x and '2' designates y;
+          in struct bllxy, '_x' designates x and '_v' designates y. So:
+            xy->ns2 = number of score categories for y
+            xy->min2 = minimum score for y
+            xy->inc2 = increment for y
+            bllxy->crfd_v = log-linear smoothed cum rel fd for y
+            xy->ns1 = number of score categories for x
+            bllxy->prd_x = log-linear smoothed PR dist for x
+            r->eraw[0] = y equivalents for x (output) */
+        Eigen::VectorXd equatedRawScores(maximumScoreLocation + 1);
+        Eigen::VectorXd equatingStandardErrors(maximumScoreLocation + 1);
 
-        //       /* Compute equating results. Put x on scale of y.
-        //  Note that in struct xy, '1' designates x and '2' designates y;
-        //  in struct bllxy, '_x' designates x and '_v' designates y. So:
-        //    xy->ns2 = number of score categories for y
-        //  xy->min2 = minimum score for y
-        //  xy->inc2 = increment for y
-        //  bllxy->crfd_v = log-linear smoothed cum rel fd for y
-        //  xy->ns1 = number of score categories for x
-        //    bllxy->prd_x = log-linear smoothed PR dist for x
-        //  r->eraw[0] = y equivalents for x (output) */
+        kernelEquateSEECB(bivariateLogLinearSmoothingXY1,
+                          bivariateLogLinearSmoothingXY2,
+                          wts,
+                          equatedRawScores,
+                          equatingStandardErrors);
 
-        //       KernelEquateSEECB(bllxy1, bllxy2, wts, r->eraw[0], SEE);
+        results.equatedRawScores.row(0) = equatedRawScores;
+        results.equatingStandardErrors.row(0) = equatingStandardErrors;
 
-        //       /* get moments */
+        EquatingRecipes::Structures::Moments moments = EquatingRecipes::Implementation::Utilities::momentsFromScoreFrequencies(
+          equatedRawScores,
+          pData.scoreFrequenciesX
+        );
 
-        //       MomentsFromFD(inall->min, inall->max, inall->inc, r->eraw[0], inall->fdx, r->mts[0]);
-
-        //       return;
+        results.equatedRawScoreMoments.row(0) = moments.momentValues;
       }
 
     private:
@@ -927,7 +969,7 @@ namespace EquatingRecipes {
       Output:
             Pen1        The panelty function PEN1 value
     *****************************************************************************/
-      double Pen1(const size_t& numberOfScores,
+      double pen1(const size_t& numberOfScores,
                   const Eigen::VectorXd& scores,
                   const Eigen::VectorXd& scoreRelativeFreqDist,
                   const double& bandwithX) {
@@ -960,7 +1002,7 @@ namespace EquatingRecipes {
       Output:
             Pen1        The panelty function PEN1 value
     *****************************************************************************/
-      double Pen2(const size_t& numberOfScores,
+      double pen2(const size_t& numberOfScores,
                   const Eigen::VectorXd& scores,
                   const Eigen::VectorXd& scoreRelativeFreqDist,
                   const double& bandwithX) {
@@ -1562,7 +1604,7 @@ namespace EquatingRecipes {
         return the square of the norm in von Davier, Holland, & Thayer 
           (2004, Equation 7.5)
     --------------------------------------------------------------------------*/
-      double FrCrSqNorm(const size_t& numberOfScores,
+      double frCrSqNorm(const size_t& numberOfScores,
                         const size_t& numberofDegreesSmoothing,
                         const Eigen::VectorXd& Fr,
                         const Eigen::MatrixXd& cMatrix) {
@@ -2269,7 +2311,7 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEENEATPS3(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+      void kernelEquateSEENEATPS3(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
                                   const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                                   const double& wts,
                                   Eigen::VectorXd& equatedX,
@@ -2726,7 +2768,7 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEENEATPS(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+      void kernelEquateSEENEATPS(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
                                  const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                                  const double& wts,
                                  Eigen::VectorXd& equatedX,
@@ -3173,7 +3215,7 @@ namespace EquatingRecipes {
 				Equatedx    a vector containing the equated score 
 				SEE         a vector containing standard error of equating 
 		--------------------------------------------------------------------------*/
-      void KernelEquateSEENEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+      void kernelEquateSEENEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
                                   const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                                   Eigen::VectorXd& equatedX,
                                   Eigen::VectorXd& see) {
@@ -3238,7 +3280,7 @@ namespace EquatingRecipes {
 
         for (size_t i = 0; i < ncatv; i++)
           for (size_t j = 0; j < ncaty; j++)
-            fitbdist(i, j) =  bivariateLogLinearSmoothing2.fittedBivariateFreqDist(j, i) / np;
+            fitbdist(i, j) = bivariateLogLinearSmoothing2.fittedBivariateFreqDist(j, i) / np;
 
         /*The following code set a natrual design matrix corresponding to a natrual basis of 
 					polynomials. This B matrix is the transpose of the design matrix in log-linear model
@@ -3316,7 +3358,7 @@ namespace EquatingRecipes {
         } else {
           result = std::pow(a, 2);
         }
-        
+
         return result;
       }
 
@@ -3339,7 +3381,7 @@ namespace EquatingRecipes {
 			output:
 				Equatedx    a vector containing the equated score 
 		--------------------------------------------------------------------------*/
-      void KernelEquateNEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
+      void kernelEquateNEATChn(const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing1,
                                const EquatingRecipes::Structures::BivariateLogLinearSmoothing& bivariateLogLinearSmoothing2,
                                Eigen::VectorXd& equatedX) {
         // int i, j, ncat, ncatx, ncaty, ncatv;
@@ -3359,15 +3401,15 @@ namespace EquatingRecipes {
         size_t ncaty = bivariateLogLinearSmoothing2.numberOfScoresX;
         size_t ncatv = bivariateLogLinearSmoothing2.numberOfScoresV;
         size_t np = bivariateLogLinearSmoothing2.numberOfExaminees;
-        
+
         Eigen::VectorXd scoresy(ncaty);
         for (size_t i = 0; i < ncaty; i++)
           scoresy(i) = bivariateLogLinearSmoothing2.minimumRawScoreX + i * bivariateLogLinearSmoothing2.scoreIncrementX;
-        
+
         Eigen::VectorXd scoresv(ncatv);
         for (size_t i = 0; i < ncatv; i++)
           scoresv(i) = bivariateLogLinearSmoothing2.minimumRawScoreV + i * bivariateLogLinearSmoothing2.scoreIncrementV;
-        
+
         size_t ncat = ncatv * ncaty;
 
         Eigen::MatrixXd fitbdist(ncatv, ncaty);
@@ -3381,7 +3423,7 @@ namespace EquatingRecipes {
         Eigen::VectorXd s(ncaty);
         Eigen::MatrixXd M(ncatv, ncat);
         Eigen::MatrixXd N(ncaty, ncat);
-        
+
         vPMN(ncatv, ncaty, fitbdist, vP, M, N);
         r = M * vP; // MatrixMultiVector(ncatv, ncat, M, vP, r);
         s = N * vP; // MatrixMultiVector(ncaty, ncat, N, vP, s);

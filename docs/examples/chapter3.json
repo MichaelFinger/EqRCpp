@@ -647,7 +647,7 @@
   },
   {
     "analysis_results": {
-      "ColumnwVariableName": "Y",
+      "ColumnVariableName": "Y",
       "DatasetName": "ACT Math",
       "EquatedRawScoreResults": {
         "equatedRawScoreMoments": [

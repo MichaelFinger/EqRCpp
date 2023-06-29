@@ -4,6 +4,8 @@
 #include <string>
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
+#include <fmt/core.h>
+
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/design.hpp>
 #include <equating_recipes/structures/equated_raw_score_results.hpp>
@@ -78,12 +80,15 @@ namespace EquatingRecipes {
             nlohmann::json results = nlohmann::json::object();
             results["DatasetName"] = inputData.datasetName;
             results["RowVariableName"] = outputData.bivariateStatisticsXY.univariateStatisticsRow.id;
-            results["ColumnwVariableName"] = outputData.bivariateStatisticsXY.univariateStatisticsRow.id;
+            results["ColumnVariableName"] = outputData.bivariateStatisticsXY.univariateStatisticsRow.id;
             results["PData"] = outputData.pData;
             results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
             results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
 
-            nlohmann::json singleGroupEquatingResults = nlohmann::json {{"analysis_type", "single_group_equating"},
+            std::string analysisType = fmt::format("{}_mean_linear_equipercentile_equating",
+                                                   EquatingRecipes::Implementation::Utilities::getDesignName(inputData.design));
+
+            nlohmann::json singleGroupEquatingResults = nlohmann::json {{"analysis_type", analysisType},
                                                                          {"analysis_results", results}};
 
             nlohmann::json j = nlohmann::json::array();

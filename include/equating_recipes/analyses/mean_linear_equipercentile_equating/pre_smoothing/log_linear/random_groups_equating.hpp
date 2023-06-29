@@ -4,6 +4,7 @@
 #include <string>
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
+#include <fmt/core.h>
 
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/implementation/beta_binomial.hpp>
@@ -92,13 +93,16 @@ namespace EquatingRecipes {
               nlohmann::json results = nlohmann::json::object();
               results["DatasetName"] = inputData.datasetName;
               results["RowVariableName"] = inputData.xVariableName;
-              results["ColumnwVariableName"] = inputData.yVariableName;
+              results["ColumnVariableName"] = inputData.yVariableName;
               results["PData"] = outputData.pData;
               results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
               results["LogLinearSmoothingX"] = outputData.univariateLogLinearSmoothingX;
               results["LogLinearSmoothingY"] = outputData.univariateLogLinearSmoothingY;
 
-              nlohmann::json loglinearEquatingResults = nlohmann::json {{"analysis_type", "random_groups_log_linear_smoothing"},
+              std::string analysisType = fmt::format("{}_mean_linear_equipercentile_log_linear_equating",
+                                                   EquatingRecipes::Implementation::Utilities::getDesignName(inputData.design));
+
+              nlohmann::json loglinearEquatingResults = nlohmann::json {{"analysis_type", analysisType},
                                                                            {"analysis_results", results}};
 
               nlohmann::json j = nlohmann::json::array();

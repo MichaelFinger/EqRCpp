@@ -4,6 +4,7 @@
 #include <string>
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
+
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>

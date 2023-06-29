@@ -4,6 +4,7 @@
 #include <string>
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
+#include <fmt/core.h>
 
 #include <equating_recipes/json/structures.hpp>
 #include <equating_recipes/structures/design.hpp>
@@ -87,12 +88,14 @@ namespace EquatingRecipes {
             nlohmann::json results = nlohmann::json::object();
             results["DatasetName"] = inputData.datasetName;
             results["RowVariableName"] = outputData.univariateStatisticsX.variableName;
-            results["ColumnwVariableName"] = outputData.univariateStatisticsY.variableName;
+            results["ColumnVariableName"] = outputData.univariateStatisticsY.variableName;
             results["PData"] = outputData.pData;
             results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
             results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
 
-            nlohmann::json randomGroupsEquatingResults = nlohmann::json {{"analysis_type", "random_groups_equating"},
+            std::string analysisType = fmt::format("{}_mean_linear_equipercentile_equating",
+                                                   EquatingRecipes::Implementation::Utilities::getDesignName(inputData.design));
+            nlohmann::json randomGroupsEquatingResults = nlohmann::json {{"analysis_type", analysisType},
                                                                          {"analysis_results", results}};
 
             nlohmann::json j = nlohmann::json::array();
