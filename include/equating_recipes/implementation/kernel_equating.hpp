@@ -122,7 +122,6 @@ namespace EquatingRecipes {
                                 static_cast<double>(scoreIndex) * univariateLogLinearSmoothingX.rawScoreIncrement;
         }
 
-        Eigen::VectorXd scoresY(univariateLogLinearSmoothingY.numberOfScores);
         for (size_t scoreIndex = 0; scoreIndex < univariateLogLinearSmoothingY.numberOfScores; scoreIndex++) {
           scoresY(scoreIndex) = univariateLogLinearSmoothingY.minimumRawScore +
                                 static_cast<double>(scoreIndex) * univariateLogLinearSmoothingY.rawScoreIncrement;
@@ -1100,8 +1099,8 @@ namespace EquatingRecipes {
                  const Eigen::VectorXd& scoreRelativeFreqDist,
                  const double& bandwithX,
                  const double& pen2Weight) {
-        double PEN1 = Pen1(numberOfScores, scores, scoreRelativeFreqDist, bandwithX);
-        double PEN2 = Pen2(numberOfScores, scores, scoreRelativeFreqDist, bandwithX);
+        double PEN1 = pen1(numberOfScores, scores, scoreRelativeFreqDist, bandwithX);
+        double PEN2 = pen2(numberOfScores, scores, scoreRelativeFreqDist, bandwithX);
         double PEN = PEN1 + pen2Weight * PEN2;
 
         return PEN;
@@ -1782,8 +1781,8 @@ namespace EquatingRecipes {
           partialFPartialr(numberOfScoresX, scoresX, scoreRelativeFreqDistX, bandwithX, Fr, scoresX(i));
           partialFPartialr(numberOfScoresY, scoresY, scoreRelativeFreqDistY, bandwithY, Gs, equatedX(i));
           double Gp = kernelPdf(numberOfScoresY, scoresY, scoreRelativeFreqDistY, bandwithY, equatedX(i));
-          double SqNormx = FrCrSqNorm(numberOfScoresX, nparax, Fr, Crx);
-          double SqNormy = FrCrSqNorm(numberOfScoresY, nparay, Gs, Cry);
+          double SqNormx = frCrSqNorm(numberOfScoresX, nparax, Fr, Crx);
+          double SqNormy = frCrSqNorm(numberOfScoresY, nparay, Gs, Cry);
           see(i) = std::sqrt(SqNormx + SqNormy) / Gp;
         }
       }

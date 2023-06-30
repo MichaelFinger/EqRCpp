@@ -24,9 +24,6 @@ namespace EquatingRecipes {
         struct InputData {
           std::string title;
           std::string datasetName;
-          EquatingRecipes::Structures::Design design;
-          EquatingRecipes::Structures::Method method;
-          EquatingRecipes::Structures::Smoothing smoothing;
           EquatingRecipes::Analyses::UnivariateStatistics::InputData univariateStatisticsInputDataX;
           EquatingRecipes::Analyses::UnivariateStatistics::InputData univariateStatisticsInputDataY;
           EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
@@ -44,6 +41,8 @@ namespace EquatingRecipes {
           EquatingRecipes::Structures::UnivariateLogLinearSmoothing univariateLogLinearSmoothingY;
           EquatingRecipes::Structures::PData pData;
           EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
+          Eigen::VectorXd unroundedEquatedScaledScores;
+          Eigen::VectorXd roundedEquatedScaledScores;
         };
 
         nlohmann::json operator()(const InputData& inputData,
@@ -76,29 +75,22 @@ namespace EquatingRecipes {
                                                                                                        inputData.criterionComparisonType,
                                                                                                        inputData.criterion);
 
-          size_t numberOfScoresX = EquatingRecipes::Implementation::Utilities::getNumberOfScores(inputData.univariateStatisticsInputDataX.minimumScore,
-                                                                                                 inputData.univariateStatisticsInputDataX.maximumScore,
-                                                                                                 inputData.univariateStatisticsInputDataX.scoreIncrement);
+          /*
+            Kernel equating for Random Groups Design
 
-          size_t numberOfScoresY = EquatingRecipes::Implementation::Utilities::getNumberOfScores(inputData.univariateStatisticsInputDataY.minimumScore,
-                                                                                                 inputData.univariateStatisticsInputDataY.maximumScore,
-                                                                                                 inputData.univariateStatisticsInputDataY.scoreIncrement);
-          Eigen::VectorXd scoresX(numberOfScoresX);
-          for (size_t scoreIndex = 0; scoreIndex < numberOfScoresX; scoreIndex) {
-            scoresX(scoreIndex) = inputData.univariateStatisticsInputDataX.minimumScore +
-                                  static_cast<double>(scoreIndex) * inputData.univariateStatisticsInputDataX.scoreIncrement;
-          }
+  Wrapper_RK('R','E','K', &x, &y, &ullx, &ully, 0, &pdREK,&rREK);
+  Print_RK(outf,"ACT Math---Kernel---Log Linear Smoothing",&pdREK, &rREK);
 
-          Eigen::VectorXd scoresY(numberOfScoresY);
-          for (size_t scoreIndex = 0; scoreIndex < numberOfScoresY; scoreIndex) {
-            scoresY(scoreIndex) = inputData.univariateStatisticsInputDataY.minimumScore +
-                                  static_cast<double>(scoreIndex) * inputData.univariateStatisticsInputDataY.scoreIncrement;
-          }
+  Wrapper_ESS(&pdREK,&rREK,0,40,1,"yctmath.TXT",1,1,36,&sREK);
+  Print_ESS(outf,"ACT Math---Equipercentile",&pdREK,&sREK);
+
+          */
 
           EquatingRecipes::Implementation::KernelEquating kernelEquating;
-          kernelEquating.runWithRGDesign(inputData.design,
-                                         inputData.method,
-                                         inputData.smoothing,
+
+          kernelEquating.runWithRGDesign(EquatingRecipes::Structures::Design::RANDOM_GROUPS,
+                                         EquatingRecipes::Structures::Method::EQUIPERCENTILE,
+                                         EquatingRecipes::Structures::Smoothing::KERNEL,
                                          outputData.univariateStatisticsX,
                                          outputData.univariateStatisticsY,
                                          outputData.univariateLogLinearSmoothingX,
@@ -106,6 +98,23 @@ namespace EquatingRecipes {
                                          0,
                                          outputData.pData,
                                          outputData.equatedRawScoreResults);
+
+          outputData.unroundedEquatedScaledScores(outputData.equatedRawScoreResults.equatedRawScores.size());
+          outputData.roundedEquatedScaledScores(outputData.equatedRawScoreResults.equatedRawScores.size());
+
+          EquatingRecipes::Implementation::Utilities::getEquatedScaledScores(inputData.univariateStatisticsInputDataX.minimumScore,
+                                                                             inputData.univariateStatisticsInputDataX.maximumScore,
+                                                                             inputData.univariateStatisticsInputDataX.scoreIncrement,
+                                                                             outputData.pData.minimumRawScoreYct,
+                                                                             outputData.pData.maximumRawScoreYct,
+                                                                             outputData.pData.scoreIncrementYct,
+                                                                             outputData.equatedRawScoreResults.equatedRawScores,
+                                                                             inputData.rawToScaledScoreTable,
+                                                                             0,
+                                                                             inputData.rawToScaledScoreTable.lowestObservableScaledScore,
+                                                                             inputData.rawToScaledScoreTable.highestObservableScaledScore,
+                                                                             outputData.unroundedEquatedScaledScores,
+                                                                             outputData.roundedEquatedScaledScores);
 
           nlohmann::json results = nlohmann::json::object();
 
@@ -118,9 +127,11 @@ namespace EquatingRecipes {
           results["UnivariateLogLinearSmoothingX"] = outputData.univariateLogLinearSmoothingX;
           results["UnivariateLogLinearSmoothingY"] = outputData.univariateLogLinearSmoothingY;
           results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
+          results["UnroundedEquatedScaledScores"] = outputData.unroundedEquatedScaledScores;
+          results["RoundedEquatedScaledScores"] = outputData.roundedEquatedScaledScores;
 
           std::string analysisType = fmt::format("{}_kernel_log_linear_equating",
-                                                 EquatingRecipes::Implementation::Utilities::getDesignName(inputData.design));
+                                                 EquatingRecipes::Implementation::Utilities::getDesignName(EquatingRecipes::Structures::Design::RANDOM_GROUPS));
 
           nlohmann::json kernelEquatingResults = nlohmann::json {{"analysis_type", analysisType},
                                                                  {"analysis_results", results}};

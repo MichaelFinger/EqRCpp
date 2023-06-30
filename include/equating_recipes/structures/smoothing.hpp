@@ -10,7 +10,7 @@ namespace EquatingRecipes {
        LOG_LINEAR,
        BETA_BINOMIAL,
        CUBIC_SPLINE,
-       KERNAL,
+       KERNEL,
        CONTINUIZED_LOG_LINEAR_EQUATING
     };
   }

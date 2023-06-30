@@ -133,7 +133,7 @@ namespace EquatingRecipes {
                                                                           {EquatingRecipes::Structures::Smoothing::LOG_LINEAR, "log linear"},
                                                                           {EquatingRecipes::Structures::Smoothing::BETA_BINOMIAL, "beta binomial"},
                                                                           {EquatingRecipes::Structures::Smoothing::CUBIC_SPLINE, "cubic spline"},
-                                                                          {EquatingRecipes::Structures::Smoothing::KERNAL, "kernal"},
+                                                                          {EquatingRecipes::Structures::Smoothing::KERNEL, "kernel"},
                                                                           {EquatingRecipes::Structures::Smoothing::CONTINUIZED_LOG_LINEAR_EQUATING, "continuized log linear equating"}})
 
     NLOHMANN_JSON_SERIALIZE_ENUM(EquatingRecipes::Structures::Symmetry, {{EquatingRecipes::Structures::Symmetry::NOT_SPECIFIED, ""},

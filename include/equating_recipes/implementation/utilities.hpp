@@ -1251,6 +1251,8 @@ namespace EquatingRecipes {
           default:
             break;
         }
+
+        return designName;
       }
     };
   } // namespace Implementation
