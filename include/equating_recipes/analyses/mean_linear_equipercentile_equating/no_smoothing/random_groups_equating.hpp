@@ -1,6 +1,7 @@
 #ifndef ANALYSES_RG_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
 #define ANALYSES_RG_MEAN_LIN_EQUI_EQ_NO_SMOOTHING_HPP
 
+#include <optional>
 #include <string>
 #include <Eigen/Core>
 #include <nlohmann/json.hpp>
@@ -25,20 +26,19 @@ namespace EquatingRecipes {
       namespace NoSmoothing {
         struct RandomGroupsEquating {
           struct InputData {
-            std::string title;
             std::string datasetName;
             EquatingRecipes::Structures::Design design;
             EquatingRecipes::Structures::Method method;
             EquatingRecipes::Structures::Smoothing smoothing;
             EquatingRecipes::Analyses::UnivariateStatistics::InputData univariateStatisticsInputDataX;
             EquatingRecipes::Analyses::UnivariateStatistics::InputData univariateStatisticsInputDataY;
-            EquatingRecipes::Structures::RawToScaledScoreTable rawToScaledScoreTable;
+            std::optional<EquatingRecipes::Structures::RawToScaledScoreTable> rawToScaledScoreTable;
           };
 
           struct OutputData {
             EquatingRecipes::Structures::PData pData;
             EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
-            EquatingRecipes::Structures::EquatedScaledScoresResults equatedScaledScoreResults;
+            std::optional<EquatingRecipes::Structures::EquatedScaledScoresResults> equatedScaledScoreResults;
             EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsX;
             EquatingRecipes::Structures::UnivariateStatistics univariateStatisticsY;
           };
@@ -70,20 +70,25 @@ namespace EquatingRecipes {
                                                                 outputData.pData,
                                                                 outputData.equatedRawScoreResults);
 
-            EquatingRecipes::Analyses::EquatedScaledScores equatedScaledScores;
-            EquatingRecipes::Analyses::EquatedScaledScores::InputData inputDataScaledScores;
-            EquatingRecipes::Analyses::EquatedScaledScores::OutputData outputDataScaledScores;
+            nlohmann::json equatedScaledScoresResults;
+
+            if (inputData.rawToScaledScoreTable.has_value()) {
+              EquatingRecipes::Analyses::EquatedScaledScores equatedScaledScores;
+              EquatingRecipes::Analyses::EquatedScaledScores::InputData inputDataScaledScores;
+              EquatingRecipes::Analyses::EquatedScaledScores::OutputData outputDataScaledScores;
             
-            inputDataScaledScores.datasetName = "ACT Math";
-            inputDataScaledScores.equatedRawScoreResults = outputData.equatedRawScoreResults;
-            inputDataScaledScores.pData = outputData.pData;
-            inputDataScaledScores.rawToScaledScoreTable = inputData.rawToScaledScoreTable;
+              inputDataScaledScores.datasetName = "ACT Math";
+              inputDataScaledScores.equatedRawScoreResults = outputData.equatedRawScoreResults;
+              inputDataScaledScores.pData = outputData.pData;
+              inputDataScaledScores.rawToScaledScoreTable = inputData.rawToScaledScoreTable.value();
 
-            nlohmann::json equatedScaledScoresResults = equatedScaledScores(inputDataScaledScores,
-                                                                            outputDataScaledScores);
+              equatedScaledScoresResults = equatedScaledScores(inputDataScaledScores,
+                                                               outputDataScaledScores);
 
-            outputData.pData = outputDataScaledScores.pData;
-            outputData.equatedScaledScoreResults = outputDataScaledScores.equatedScaledScoreResults;
+              outputData.equatedScaledScoreResults = outputDataScaledScores.equatedScaledScoreResults;
+
+              outputData.pData = outputDataScaledScores.pData;
+            }
 
             nlohmann::json results = nlohmann::json::object();
             results["DatasetName"] = inputData.datasetName;
@@ -91,7 +96,10 @@ namespace EquatingRecipes {
             results["ColumnVariableName"] = outputData.univariateStatisticsY.variableName;
             results["PData"] = outputData.pData;
             results["EquatedRawScoreResults"] = outputData.equatedRawScoreResults;
-            results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults;
+
+            if (inputData.rawToScaledScoreTable.has_value()) {
+              results["EquatedScaledScoreResults"] = outputData.equatedScaledScoreResults.value();
+            }
 
             std::string analysisType = fmt::format("{}_mean_linear_equipercentile_equating",
                                                    EquatingRecipes::Implementation::Utilities::getDesignName(inputData.design));
@@ -102,13 +110,16 @@ namespace EquatingRecipes {
             j.push_back(univariateStatisticsXResults);
             j.push_back(univariateStatisticsYResults);
             j.push_back(randomGroupsEquatingResults);
-            j.push_back(equatedScaledScoresResults);
+
+            if (inputData.rawToScaledScoreTable.has_value()) {
+              j.push_back(equatedScaledScoresResults);
+            }
 
             return j;
           }
         };
       } // namespace NoSmoothing
-    }   // namespace LinearEquating
+    }   // namespace MeanLinearEquipercentileEquating
   }     // namespace Analyses
 } // namespace EquatingRecipes
 

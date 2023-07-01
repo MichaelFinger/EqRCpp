@@ -1,5 +1,5 @@
-#ifndef ANALYSES_KERNEL_EQUATING_RG_HPP
-#define ANALYSES_KERNEL_EQUATING_RG_HPP
+#ifndef ANALYSES_CLL_EQUATING_RG_HPP
+#define ANALYSES_CLL_EQUATING_RG_HPP
 
 #include <string>
 #include <Eigen/Core>
@@ -7,7 +7,7 @@
 
 #include <equating_recipes/analyses/univariate_statistics.hpp>
 #include <equating_recipes/implementation/log_linear_equating.hpp>
-#include <equating_recipes/implementation/kernel_equating.hpp>
+#include <equating_recipes/implementation/continuized_log_linear_equating.hpp>
 #include <equating_recipes/implementation/utilities.hpp>
 #include <equating_recipes/structures/univariate_statistics.hpp>
 #include <equating_recipes/structures/design.hpp>
@@ -18,7 +18,7 @@
 
 namespace EquatingRecipes {
   namespace Analyses {
-    namespace KernelEquating {
+    namespace ContinuizedLogLinearEquating {
       struct RandomGroupsEquating {
         struct InputData {
           std::string title;
@@ -74,29 +74,18 @@ namespace EquatingRecipes {
                                                                                                        inputData.criterionComparisonType,
                                                                                                        inputData.criterion);
 
-          /*
-            Kernel equating for Random Groups Design
+          EquatingRecipes::Implementation::ContinuizedLogLinearEquating continuizedLogLinearEquating;
 
-  Wrapper_RK('R','E','K', &x, &y, &ullx, &ully, 0, &pdREK,&rREK);
-  Print_RK(outf,"ACT Math---Kernel---Log Linear Smoothing",&pdREK, &rREK);
-
-  Wrapper_ESS(&pdREK,&rREK,0,40,1,"yctmath.TXT",1,1,36,&sREK);
-  Print_ESS(outf,"ACT Math---Equipercentile",&pdREK,&sREK);
-
-          */
-
-          EquatingRecipes::Implementation::KernelEquating kernelEquating;
-
-          kernelEquating.runWithRGDesign(EquatingRecipes::Structures::Design::RANDOM_GROUPS,
-                                         EquatingRecipes::Structures::Method::EQUIPERCENTILE,
-                                         EquatingRecipes::Structures::Smoothing::KERNEL,
-                                         outputData.univariateStatisticsX,
-                                         outputData.univariateStatisticsY,
-                                         outputData.univariateLogLinearSmoothingX,
-                                         outputData.univariateLogLinearSmoothingY,
-                                         0,
-                                         outputData.pData,
-                                         outputData.equatedRawScoreResults);
+          continuizedLogLinearEquating.runWithRGDesign(EquatingRecipes::Structures::Design::RANDOM_GROUPS,
+                                                       EquatingRecipes::Structures::Method::EQUIPERCENTILE,
+                                                       EquatingRecipes::Structures::Smoothing::CONTINUIZED_LOG_LINEAR_EQUATING,
+                                                       outputData.univariateStatisticsX,
+                                                       outputData.univariateStatisticsY,
+                                                       outputData.univariateLogLinearSmoothingX,
+                                                       outputData.univariateLogLinearSmoothingY,
+                                                       0,
+                                                       outputData.pData,
+                                                       outputData.equatedRawScoreResults);
 
           outputData.unroundedEquatedScaledScores(outputData.equatedRawScoreResults.equatedRawScores.size());
           outputData.roundedEquatedScaledScores(outputData.equatedRawScoreResults.equatedRawScores.size());
@@ -129,7 +118,7 @@ namespace EquatingRecipes {
           results["UnroundedEquatedScaledScores"] = outputData.unroundedEquatedScaledScores;
           results["RoundedEquatedScaledScores"] = outputData.roundedEquatedScaledScores;
 
-          std::string analysisType = fmt::format("{}_kernel_log_linear_equating",
+          std::string analysisType = fmt::format("{}_continuized_log_linear_equating",
                                                  EquatingRecipes::Implementation::Utilities::getDesignName(EquatingRecipes::Structures::Design::RANDOM_GROUPS));
 
           nlohmann::json kernelEquatingResults = nlohmann::json {{"analysis_type", analysisType},
@@ -144,7 +133,7 @@ namespace EquatingRecipes {
           return j;
         }
       };
-    } // namespace KernelEquating
+    } // namespace ContinuizedLogLinearEquating
   }   // namespace Analyses
 } // namespace EquatingRecipes
 

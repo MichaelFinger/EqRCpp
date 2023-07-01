@@ -52,7 +52,6 @@ namespace EquatingRecipes {
           EquatingRecipes::Analyses::MeanLinearEquipercentileEquating::NoSmoothing::RandomGroupsEquating::InputData inputData;
           EquatingRecipes::Analyses::MeanLinearEquipercentileEquating::NoSmoothing::RandomGroupsEquating::OutputData outputData;
 
-          inputData.title = actMathFreq.datasetName + "---Linear";
           inputData.datasetName = actMathFreq.datasetName;
           inputData.design = EquatingRecipes::Structures::Design::RANDOM_GROUPS;
           inputData.method = EquatingRecipes::Structures::Method::LINEAR;

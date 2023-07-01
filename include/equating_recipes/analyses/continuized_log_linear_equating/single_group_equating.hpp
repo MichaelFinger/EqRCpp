@@ -7,7 +7,7 @@
 
 #include <equating_recipes/analyses/bivariate_statistics.hpp>
 #include <equating_recipes/implementation/log_linear_equating.hpp>
-#include <equating_recipes/implementation/kernel_equating.hpp>
+#include <equating_recipes/implementation/continuized_log_linear_equating.hpp>
 #include <equating_recipes/implementation/utilities.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/design.hpp>
@@ -70,10 +70,10 @@ namespace EquatingRecipes {
                                                                inputData.criterionComparisonType,
                                                                inputData.criterion);
 
-          EquatingRecipes::Implementation::KernelEquating kernelEquating;
-          kernelEquating.runWithSGDesign(EquatingRecipes::Structures::Design::SINGLE_GROUP,
+          EquatingRecipes::Implementation::ContinuizedLogLinearEquating continuizedLogLinearEquating;
+          continuizedLogLinearEquating.runWithSGDesign(EquatingRecipes::Structures::Design::SINGLE_GROUP,
                                          EquatingRecipes::Structures::Method::EQUIPERCENTILE,
-                                         EquatingRecipes::Structures::Smoothing::KERNEL,
+                                         EquatingRecipes::Structures::Smoothing::CONTINUIZED_LOG_LINEAR_EQUATING,
                                          outputData.bivariateStatistics,
                                          outputData.bivariateLogLinearSmoothing,
                                          0,
@@ -108,7 +108,7 @@ namespace EquatingRecipes {
           results["UnroundedEquatedScaledScores"] = outputData.unroundedEquatedScaledScores;
           results["RoundedEquatedScaledScores"] = outputData.roundedEquatedScaledScores;
 
-          std::string analysisType = fmt::format("{}_kernel_log_linear_equating",
+          std::string analysisType = fmt::format("{}_continuized_log_linear_equating",
                                                  EquatingRecipes::Implementation::Utilities::getDesignName(EquatingRecipes::Structures::Design::RANDOM_GROUPS));
 
           nlohmann::json kernelEquatingResults = nlohmann::json {{"analysis_type", analysisType},

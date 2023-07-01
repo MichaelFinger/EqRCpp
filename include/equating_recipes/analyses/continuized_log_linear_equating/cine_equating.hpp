@@ -7,7 +7,7 @@
 
 #include <equating_recipes/analyses/bivariate_statistics.hpp>
 #include <equating_recipes/implementation/log_linear_equating.hpp>
-#include <equating_recipes/implementation/kernel_equating.hpp>
+#include <equating_recipes/implementation/continuized_log_linear_equating.hpp>
 #include <equating_recipes/implementation/utilities.hpp>
 #include <equating_recipes/structures/bivariate_statistics.hpp>
 #include <equating_recipes/structures/design.hpp>
@@ -34,7 +34,7 @@ namespace EquatingRecipes {
           size_t numberOfDegreesSmoothingX = 6;
           size_t numberOfDegreesSmoothingY = 6;
           size_t numberOfDegreesSmoothingV = 6;
-          size_t numberOfCrossProductMoments;
+          size_t numberOfCrossProductMoments = 3;
           Eigen::MatrixXi crossProductMatrix;
           bool useStandardizedScale = true;
           double population1Weight;
@@ -95,22 +95,22 @@ namespace EquatingRecipes {
                                                                inputData.criterionComparisonType,
                                                                inputData.criterion);
 
-          EquatingRecipes::Implementation::KernelEquating kernelEquating;
-          kernelEquating.runWithCGDesign(EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS,
-                                         EquatingRecipes::Structures::Method::FE_BH_CHAINED,
-                                         EquatingRecipes::Structures::Smoothing::KERNEL,
-                                         inputData.population1Weight,
-                                         inputData.isInternalAnchor,
-                                         inputData.reliabilityCommonItemsPopulation1,
-                                         inputData.reliabilityCommonItemsPopulation2,
-                                         outputData.bivariateStatisticsXV,
-                                         outputData.bivariateStatisticsYV,
-                                         outputData.bivariateLogLinearSmoothingXV,
-                                         outputData.bivariateLogLinearSmoothingYV,
-                                         0,
-                                         outputData.pData,
-                                         outputData.equatedRawScoreResults);
-          
+          EquatingRecipes::Implementation::ContinuizedLogLinearEquating continuizedLogLinearEquating;
+          continuizedLogLinearEquating.runWithCGDesign(EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS,
+                                                       EquatingRecipes::Structures::Method::EQUIPERCENTILE,
+                                                       EquatingRecipes::Structures::Smoothing::CONTINUIZED_LOG_LINEAR_EQUATING,
+                                                       inputData.population1Weight,
+                                                       inputData.isInternalAnchor,
+                                                       inputData.reliabilityCommonItemsPopulation1,
+                                                       inputData.reliabilityCommonItemsPopulation2,
+                                                       outputData.bivariateStatisticsXV,
+                                                       outputData.bivariateStatisticsYV,
+                                                       outputData.bivariateLogLinearSmoothingXV,
+                                                       outputData.bivariateLogLinearSmoothingYV,
+                                                       0,
+                                                       outputData.pData,
+                                                       outputData.equatedRawScoreResults);
+
           outputData.unroundedEquatedScaledScores(outputData.equatedRawScoreResults.equatedRawScores.size());
           outputData.roundedEquatedScaledScores(outputData.equatedRawScoreResults.equatedRawScores.size());
 
@@ -129,17 +129,8 @@ namespace EquatingRecipes {
                                                                              outputData.roundedEquatedScaledScores);
           nlohmann::json results = nlohmann::json::object();
 
-          // EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsXV;
-          // EquatingRecipes::Structures::BivariateStatistics bivariateStatisticsYV;
-          // EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingXV;
-          // EquatingRecipes::Structures::BivariateLogLinearSmoothing bivariateLogLinearSmoothingYV;
-          // EquatingRecipes::Structures::PData pData;
-          // EquatingRecipes::Structures::EquatedRawScoreResults equatedRawScoreResults;
-          // Eigen::VectorXd unroundedEquatedScaledScores;
-          // Eigen::VectorXd roundedEquatedScaledScores;
-
           results["DatasetName"] = inputData.datasetName;
-          
+
           results["PData"] = outputData.pData;
           results["BivariateStatisticsXV"] = outputData.bivariateStatisticsXV;
           results["BivariateStatisticsYV"] = outputData.bivariateStatisticsYV;
@@ -149,7 +140,7 @@ namespace EquatingRecipes {
           results["UnroundedEquatedScaledScores"] = outputData.unroundedEquatedScaledScores;
           results["RoundedEquatedScaledScores"] = outputData.roundedEquatedScaledScores;
 
-          std::string analysisType = fmt::format("{}_kernel_log_linear_equating",
+          std::string analysisType = fmt::format("{}_continuized_log_linear_equating",
                                                  EquatingRecipes::Implementation::Utilities::getDesignName(EquatingRecipes::Structures::Design::COMMON_ITEN_NON_EQUIVALENT_GROUPS));
 
           nlohmann::json kernelEquatingResults = nlohmann::json {{"analysis_type", analysisType},
