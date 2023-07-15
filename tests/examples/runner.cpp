@@ -39,28 +39,19 @@ int main(int argc, char const* argv[]) {
   // irtScaleTransformation();
 
   EquatingRecipes::Implementation::ObservedScoreDistribution observedScoreDistribution;
-  std::cout << observedScoreDistribution.probResp3P(1.5,
-                                                    1.0,
-                                                    0.2,
-                                                    -1,
-                                                    1.702,
-                                                    EquatingRecipes::Implementation::ObservedScoreDistribution::Density::LOGISTIC,
-                                                    false)
-            << "\n";
 
-  Eigen::VectorXd thresholds(5);
-  thresholds(0) = -1;
-  thresholds(1) = 0.05;
-  thresholds(2) = 0.7;
-  thresholds(3) = 1.1;
-  thresholds(4) = 2.01;
+  Eigen::VectorXd categoryParameters(4);
+  categoryParameters(0) = 1.025;
+  categoryParameters(1) = 0.005;
+  categoryParameters(2) = -1.3;
+  categoryParameters(3) = 0.0;
 
-  std::cout << observedScoreDistribution.probRespGR(1.5,
-                                                    thresholds,
-                                                    -1,
-                                                    1.702,
-                                                    EquatingRecipes::Implementation::ObservedScoreDistribution::Density::LOGISTIC,
-                                                    false)
+  std::cout << observedScoreDistribution.probRespGRRatingScale(1.5,
+                                                               0.006,
+                                                               categoryParameters,
+                                                               -1,
+                                                               1.702,
+                                                               EquatingRecipes::Implementation::ObservedScoreDistribution::Density::LOGISTIC)
             << "\n";
 
   return 0;

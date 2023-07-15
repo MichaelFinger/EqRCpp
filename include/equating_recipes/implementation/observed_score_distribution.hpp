@@ -258,7 +258,7 @@ namespace EquatingRecipes {
         }
       }
 
-    // private:
+      // private:
       boost::math::normal_distribution<> normalDist;
 
       double getCDF(const double& deviate, const Density& density) {
@@ -295,15 +295,15 @@ namespace EquatingRecipes {
         double deviate;
 
         if (locationIsIntercept) {
-            deviate = (slope * theta + location);
-          } else {
-            deviate = slope * (theta - location);
-          }
+          deviate = (slope * theta + location);
+        } else {
+          deviate = slope * (theta - location);
+        }
 
         if (density == Density::LOGISTIC) {
           deviate *= scalingConstant;
         }
-        
+
         respProbs(1) = lowerAsymptote + (1.0 - lowerAsymptote) * getCDF(deviate, density);
         respProbs(0) = 1.0 - respProbs(1);
 
@@ -323,10 +323,8 @@ namespace EquatingRecipes {
 
         cumProbs(0) = 1.0;
         cumProbs(numberOfCategories) = 0.0;
-        
-        for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
-          std::cout << itemResp << "\n";
 
+        for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
           double deviate;
 
           if (thresholdIsIntercept) {
@@ -338,7 +336,38 @@ namespace EquatingRecipes {
           if (density == Density::LOGISTIC) {
             deviate *= scalingConstant;
           }
-        
+
+          cumProbs(itemResp) = getCDF(deviate, density);
+
+          respProbs(itemResp - 1) = cumProbs(itemResp - 1) - cumProbs(itemResp);
+        }
+
+        respProbs(numberOfCategories - 1) = cumProbs(numberOfCategories - 1) - cumProbs(numberOfCategories);
+
+        return respProbs;
+      }
+
+      Eigen::VectorXd probRespGRRatingScale(const double& slope,
+                                            const double& location,
+                                            const Eigen::VectorXd& categoryParameters,
+                                            const double& theta,
+                                            const double& scalingConstant,
+                                            const Density& density) {
+        size_t numberOfCategories = categoryParameters.size();
+
+        Eigen::VectorXd cumProbs(numberOfCategories + 1);
+        Eigen::VectorXd respProbs(numberOfCategories);
+
+        cumProbs(0) = 1.0;
+        cumProbs(numberOfCategories) = 0.0;
+
+        for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
+          double deviate = slope * (theta - location + categoryParameters(itemResp - 1));
+
+          if (density == Density::LOGISTIC) {
+            deviate *= scalingConstant;
+          }
+
           cumProbs(itemResp) = getCDF(deviate, density);
 
           respProbs(itemResp - 1) = cumProbs(itemResp - 1) - cumProbs(itemResp);
