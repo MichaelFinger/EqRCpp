@@ -9,10 +9,12 @@
 #include <string>
 #include <vector>
 
-#include <boost/math/distributions/normal.hpp>
-#include <Eigen/Dense>
-#include <Eigen/LU>
+// #include <boost/math/distributions/normal.hpp>
+#include <Eigen/Core>
 #include <fmt/core.h>
+
+#include <equating_recipes/structures/item_specification.hpp>
+#include <equating_recipes/implementation/irt_model_functions.hpp>
 
 namespace EquatingRecipes {
   namespace Implementation {
@@ -42,104 +44,110 @@ namespace EquatingRecipes {
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-      enum class IRTModel {
-        THREE_PARAMETER,
-        GRADED_RESPONSE,
-        GENERALIZED_PARTIAL_CREDIT,
-        GRADED_RESPONSE_RATING_SCALE,
-        GENERALIZED_PARTIAL_CREDIT_RATING_SCALE
-      };
+      // enum class IRTModel {
+      //   THREE_PARAMETER,
+      //   GRADED_RESPONSE,
+      //   GENERALIZED_PARTIAL_CREDIT,
+      //   GRADED_RESPONSE_RATING_SCALE,
+      //   GENERALIZED_PARTIAL_CREDIT_RATING_SCALE
+      // };
 
-      enum class Density {
-        LOGISTIC,
-        NORMAL
-      };
+      // enum class Density {
+      //   LOGISTIC,
+      //   NORMAL
+      // };
 
-      struct ItemParameters {
-        size_t itemIndex;
-        double slope;
-        double location;
-        double lowerAsymptote = 0;
-        Eigen::VectorXd thresholds;
-        Eigen::VectorXd categoryParameters;
-        Density density;
-        IRTModel irtModel;
-        double scalingConstant = 1.0;
-        bool locationIsIntercept = false;
-      };
+      // struct ItemParameters {
+      //   size_t itemIndex;
+      //   double slope;
+      //   double location;
+      //   double lowerAsymptote = 0;
+      //   Eigen::VectorXd thresholds;
+      //   Eigen::VectorXd categoryParameters;
+      //   Density density;
+      //   IRTModel irtModel;
+      //   double scalingConstant = 1.0;
+      //   bool locationIsIntercept = false;
+      // };
 
-      Eigen::VectorXd itemResponseProbabilities(const ItemParameters& itemParameters,
-                                                const double& theta) {
-        Eigen::VectorXd respProbs;
+      // Eigen::VectorXd itemResponseProbabilities(const ItemParameters& itemParameters,
+      //                                           const double& theta) {
+      //   Eigen::VectorXd respProbs;
 
-        if (itemParameters.irtModel == IRTModel::THREE_PARAMETER) {
-          respProbs.setZero(2);
-          double deviate;
-          if (itemParameters.locationIsIntercept) {
-            deviate = itemParameters.scalingConstant * (itemParameters.slope * theta + itemParameters.location);
-          } else {
-            deviate = itemParameters.scalingConstant * (itemParameters.slope * (theta - itemParameters.location));
-          }
+      //   if (itemParameters.irtModel == IRTModel::THREE_PARAMETER) {
+      //     respProbs.setZero(2);
+      //     double deviate;
+      //     if (itemParameters.locationIsIntercept) {
+      //       deviate = itemParameters.scalingConstant * (itemParameters.slope * theta + itemParameters.location);
+      //     } else {
+      //       deviate = itemParameters.scalingConstant * (itemParameters.slope * (theta - itemParameters.location));
+      //     }
 
-          respProbs(1) = itemParameters.lowerAsymptote + (1.0 - itemParameters.lowerAsymptote) * getCDF(deviate, itemParameters.density);
-          respProbs(0) = 1.0 - respProbs(1);
+      //     respProbs(1) = itemParameters.lowerAsymptote + (1.0 - itemParameters.lowerAsymptote) * getCDF(deviate, itemParameters.density);
+      //     respProbs(0) = 1.0 - respProbs(1);
 
-        } else if (itemParameters.irtModel == IRTModel::GRADED_RESPONSE) {
-          size_t numberOfScoreCategories = itemParameters.thresholds.size() + 1;
-          respProbs.setZero(numberOfScoreCategories);
+      //   } else if (itemParameters.irtModel == IRTModel::GRADED_RESPONSE) {
+      //     size_t numberOfScoreCategories = itemParameters.thresholds.size() + 1;
+      //     respProbs.setZero(numberOfScoreCategories);
 
-          Eigen::VectorXd cumProbs(numberOfScoreCategories + 1);
-          cumProbs(0) = 1.0;
-          cumProbs(numberOfScoreCategories) = 0.0;
+      //     Eigen::VectorXd cumProbs(numberOfScoreCategories + 1);
+      //     cumProbs(0) = 1.0;
+      //     cumProbs(numberOfScoreCategories) = 0.0;
 
-          for (size_t itemResponseIndex = 1; itemResponseIndex < numberOfScoreCategories; itemResponseIndex++) {
-            double deviate;
+      //     for (size_t itemResponseIndex = 1; itemResponseIndex < numberOfScoreCategories; itemResponseIndex++) {
+      //       double deviate;
 
-            if (itemParameters.locationIsIntercept) {
-              deviate = itemParameters.scalingConstant * (itemParameters.slope * theta + itemParameters.thresholds(itemResponseIndex - 1));
-            } else {
-              deviate = itemParameters.scalingConstant * (itemParameters.slope * (theta - itemParameters.thresholds(itemResponseIndex - 1)));
-            }
+      //       if (itemParameters.locationIsIntercept) {
+      //         deviate = itemParameters.scalingConstant * (itemParameters.slope * theta + itemParameters.thresholds(itemResponseIndex - 1));
+      //       } else {
+      //         deviate = itemParameters.scalingConstant * (itemParameters.slope * (theta - itemParameters.thresholds(itemResponseIndex - 1)));
+      //       }
 
-            cumProbs(itemResponseIndex) = getCDF(deviate, itemParameters.density);
+      //       cumProbs(itemResponseIndex) = getCDF(deviate, itemParameters.density);
 
-            respProbs(itemResponseIndex) = cumProbs(itemResponseIndex - 1) - cumProbs(itemResponseIndex);
-          }
+      //       respProbs(itemResponseIndex) = cumProbs(itemResponseIndex - 1) - cumProbs(itemResponseIndex);
+      //     }
 
-        } else if (itemParameters.irtModel == IRTModel::GENERALIZED_PARTIAL_CREDIT) {
-        } else if (itemParameters.irtModel == IRTModel::GRADED_RESPONSE_RATING_SCALE) {
-        } else if (itemParameters.irtModel == IRTModel::GENERALIZED_PARTIAL_CREDIT_RATING_SCALE) {
-        }
+      //   } else if (itemParameters.irtModel == IRTModel::GENERALIZED_PARTIAL_CREDIT) {
+      //   } else if (itemParameters.irtModel == IRTModel::GRADED_RESPONSE_RATING_SCALE) {
+      //   } else if (itemParameters.irtModel == IRTModel::GENERALIZED_PARTIAL_CREDIT_RATING_SCALE) {
+      //   }
 
-        size_t numberOfScoreCategories;
+      //   size_t numberOfScoreCategories;
 
-        if (itemParameters.thresholds.size() >= 1) {
-          numberOfScoreCategories = itemParameters.thresholds.size() + 1;
-        } else if (itemParameters.categoryParameters.size() >= 1) {
-          numberOfScoreCategories = itemParameters.categoryParameters.size();
-        } else {
-          numberOfScoreCategories = 2;
-        }
+      //   if (itemParameters.thresholds.size() >= 1) {
+      //     numberOfScoreCategories = itemParameters.thresholds.size() + 1;
+      //   } else if (itemParameters.categoryParameters.size() >= 1) {
+      //     numberOfScoreCategories = itemParameters.categoryParameters.size();
+      //   } else {
+      //     numberOfScoreCategories = 2;
+      //   }
 
-        return respProbs;
-      }
+      //   return respProbs;
+      // }
 
       void ObsDistGivenTheta(const double& theta,
                              const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
-                             const size_t& numberOfItemsOnForm,
-                             const size_t& maximumCategoryIndex,
-                             const size_t& maximumScorePoint,
                              size_t& numberOfScores,
                              Eigen::VectorXd& scores,
                              Eigen::VectorXd& xnew) {
         // int i, j, k, index;
         // int mino, maxo, minn, maxn;
-        Eigen::VectorXd xitem(maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
-        Eigen::VectorXd xold(maximumScorePoint);         /* zero-offset */
+        size_t numberOfItemsOnForm = items.size();
+        size_t maxScorePoint = 0;
+        std::for_each(items.begin(),
+                      items.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                        maxScorePoint += item.scoringFunctionValues(item.scoringFunctionValues.size() - 1);
+                      });
+
+        Eigen::VectorXd xitem; // (maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
+        Eigen::VectorXd xold(maxScorePoint);  // (maximumScorePoint);         /* zero-offset */
 
         EquatingRecipes::Implementation::IRTModelFunctions irtModelFunctions;
 
         /* calculates probabilities for Item 1 */
+        xitem.setZero(items[0].numberOfCategories);
         for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
           xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[0], categoryIndex, theta);
         }
@@ -148,8 +156,6 @@ namespace EquatingRecipes {
         double maxo = items[0].scoringFunctionValues(items[0].numberOfCategories - 1);
         double minn = mino;
         double maxn = maxo;
-
-        xold.setZero();
 
         for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
           size_t index = static_cast<size_t>(items[0].scoringFunctionValues(categoryIndex) - minn);
@@ -160,6 +166,7 @@ namespace EquatingRecipes {
 
         if (numberOfItemsOnForm == 1) {
           size_t maxMinusMin = static_cast<size_t>(maxn - minn);
+          scores.resize(maxMinusMin + 1);
 
           for (size_t score = 0; score <= maxMinusMin; score++) {
             scores(score) = static_cast<double>(score) + minn;
@@ -197,6 +204,7 @@ namespace EquatingRecipes {
         }
 
         size_t maxIndex = static_cast<size_t>(maxn - minn);
+        scores.resize(maxIndex + 1);
         for (size_t index = 0; index <= maxIndex; index++) {
           scores(index) = static_cast<double>(index) + minn;
         }
@@ -204,6 +212,7 @@ namespace EquatingRecipes {
         numberOfScores = static_cast<size_t>(maxn - minn + 1);
       }
 
+    private:
       /*------------------------------------------------------------------------------
       Functionality:
         Updates a distribution of scores using Hanson's (1994) generalization of
@@ -240,8 +249,8 @@ namespace EquatingRecipes {
                   double& minn,
                   double& maxn,
                   Eigen::VectorXd& xnew) {
-        minn = mino + iitem(0);
-        maxn = maxo + iitem(numberOfCategories - 1);
+        minn = mino + iitem(1);
+        maxn = maxo + iitem(numberOfCategories);
 
         for (double i = minn; i <= maxn; i += 1.0) {
           double in = i - minn;
@@ -258,125 +267,124 @@ namespace EquatingRecipes {
         }
       }
 
-      // private:
-      boost::math::normal_distribution<> normalDist;
+      // boost::math::normal_distribution<> normalDist;
 
-      double getCDF(const double& deviate, const Density& density) {
-        double cdfValue;
+      // double getCDF(const double& deviate, const Density& density) {
+      //   double cdfValue;
 
-        if (density == Density::LOGISTIC) {
-          cdfValue = getLogisticCDF(deviate);
-        } else {
-          cdfValue = getNormalCDF(deviate);
-        }
+      //   if (density == Density::LOGISTIC) {
+      //     cdfValue = getLogisticCDF(deviate);
+      //   } else {
+      //     cdfValue = getNormalCDF(deviate);
+      //   }
 
-        return cdfValue;
-      }
+      //   return cdfValue;
+      // }
 
-      double getLogisticCDF(const double& deviate) {
-        double cdfValue = 1.0 / (1.0 + std::exp(-1.0 * deviate));
-        return cdfValue;
-      }
+      // double getLogisticCDF(const double& deviate) {
+      //   double cdfValue = 1.0 / (1.0 + std::exp(-1.0 * deviate));
+      //   return cdfValue;
+      // }
 
-      double getNormalCDF(const double& deviate) {
-        double cdfValue = boost::math::cdf(normalDist, deviate);
-        return cdfValue;
-      }
+      // double getNormalCDF(const double& deviate) {
+      //   double cdfValue = boost::math::cdf(normalDist, deviate);
+      //   return cdfValue;
+      // }
 
-      Eigen::VectorXd probResp3P(const double& slope,
-                                 const double& location,
-                                 const double& lowerAsymptote,
-                                 const double& theta,
-                                 const double& scalingConstant,
-                                 const Density& density,
-                                 const bool& locationIsIntercept) {
-        Eigen::VectorXd respProbs(2);
+      // Eigen::VectorXd probResp3P(const double& slope,
+      //                            const double& location,
+      //                            const double& lowerAsymptote,
+      //                            const double& theta,
+      //                            const double& scalingConstant,
+      //                            const Density& density,
+      //                            const bool& locationIsIntercept) {
+      //   Eigen::VectorXd respProbs(2);
 
-        double deviate;
+      //   double deviate;
 
-        if (locationIsIntercept) {
-          deviate = (slope * theta + location);
-        } else {
-          deviate = slope * (theta - location);
-        }
+      //   if (locationIsIntercept) {
+      //     deviate = (slope * theta + location);
+      //   } else {
+      //     deviate = slope * (theta - location);
+      //   }
 
-        if (density == Density::LOGISTIC) {
-          deviate *= scalingConstant;
-        }
+      //   if (density == Density::LOGISTIC) {
+      //     deviate *= scalingConstant;
+      //   }
 
-        respProbs(1) = lowerAsymptote + (1.0 - lowerAsymptote) * getCDF(deviate, density);
-        respProbs(0) = 1.0 - respProbs(1);
+      //   respProbs(1) = lowerAsymptote + (1.0 - lowerAsymptote) * getCDF(deviate, density);
+      //   respProbs(0) = 1.0 - respProbs(1);
 
-        return respProbs;
-      }
+      //   return respProbs;
+      // }
 
-      Eigen::VectorXd probRespGR(const double& slope,
-                                 const Eigen::VectorXd& thresholds,
-                                 const double& theta,
-                                 const double& scalingConstant,
-                                 const Density& density,
-                                 const bool& thresholdIsIntercept) {
-        size_t numberOfCategories = thresholds.size() + 1;
+      // Eigen::VectorXd probRespGR(const double& slope,
+      //                            const Eigen::VectorXd& thresholds,
+      //                            const double& theta,
+      //                            const double& scalingConstant,
+      //                            const Density& density,
+      //                            const bool& thresholdIsIntercept) {
+      //   size_t numberOfCategories = thresholds.size() + 1;
 
-        Eigen::VectorXd cumProbs(numberOfCategories + 1);
-        Eigen::VectorXd respProbs(numberOfCategories);
+      //   Eigen::VectorXd cumProbs(numberOfCategories + 1);
+      //   Eigen::VectorXd respProbs(numberOfCategories);
 
-        cumProbs(0) = 1.0;
-        cumProbs(numberOfCategories) = 0.0;
+      //   cumProbs(0) = 1.0;
+      //   cumProbs(numberOfCategories) = 0.0;
 
-        for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
-          double deviate;
+      //   for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
+      //     double deviate;
 
-          if (thresholdIsIntercept) {
-            deviate = slope * theta + thresholds(itemResp - 1);
-          } else {
-            deviate = slope * (theta - thresholds(itemResp - 1));
-          }
+      //     if (thresholdIsIntercept) {
+      //       deviate = slope * theta + thresholds(itemResp - 1);
+      //     } else {
+      //       deviate = slope * (theta - thresholds(itemResp - 1));
+      //     }
 
-          if (density == Density::LOGISTIC) {
-            deviate *= scalingConstant;
-          }
+      //     if (density == Density::LOGISTIC) {
+      //       deviate *= scalingConstant;
+      //     }
 
-          cumProbs(itemResp) = getCDF(deviate, density);
+      //     cumProbs(itemResp) = getCDF(deviate, density);
 
-          respProbs(itemResp - 1) = cumProbs(itemResp - 1) - cumProbs(itemResp);
-        }
+      //     respProbs(itemResp - 1) = cumProbs(itemResp - 1) - cumProbs(itemResp);
+      //   }
 
-        respProbs(numberOfCategories - 1) = cumProbs(numberOfCategories - 1) - cumProbs(numberOfCategories);
+      //   respProbs(numberOfCategories - 1) = cumProbs(numberOfCategories - 1) - cumProbs(numberOfCategories);
 
-        return respProbs;
-      }
+      //   return respProbs;
+      // }
 
-      Eigen::VectorXd probRespGRRatingScale(const double& slope,
-                                            const double& location,
-                                            const Eigen::VectorXd& categoryParameters,
-                                            const double& theta,
-                                            const double& scalingConstant,
-                                            const Density& density) {
-        size_t numberOfCategories = categoryParameters.size();
+      // Eigen::VectorXd probRespGRRatingScale(const double& slope,
+      //                                       const double& location,
+      //                                       const Eigen::VectorXd& categoryParameters,
+      //                                       const double& theta,
+      //                                       const double& scalingConstant,
+      //                                       const Density& density) {
+      //   size_t numberOfCategories = categoryParameters.size();
 
-        Eigen::VectorXd cumProbs(numberOfCategories + 1);
-        Eigen::VectorXd respProbs(numberOfCategories);
+      //   Eigen::VectorXd cumProbs(numberOfCategories + 1);
+      //   Eigen::VectorXd respProbs(numberOfCategories);
 
-        cumProbs(0) = 1.0;
-        cumProbs(numberOfCategories) = 0.0;
+      //   cumProbs(0) = 1.0;
+      //   cumProbs(numberOfCategories) = 0.0;
 
-        for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
-          double deviate = slope * (theta - location + categoryParameters(itemResp - 1));
+      //   for (size_t itemResp = 1; itemResp < numberOfCategories; itemResp++) {
+      //     double deviate = slope * (theta - location + categoryParameters(itemResp - 1));
 
-          if (density == Density::LOGISTIC) {
-            deviate *= scalingConstant;
-          }
+      //     if (density == Density::LOGISTIC) {
+      //       deviate *= scalingConstant;
+      //     }
 
-          cumProbs(itemResp) = getCDF(deviate, density);
+      //     cumProbs(itemResp) = getCDF(deviate, density);
 
-          respProbs(itemResp - 1) = cumProbs(itemResp - 1) - cumProbs(itemResp);
-        }
+      //     respProbs(itemResp - 1) = cumProbs(itemResp - 1) - cumProbs(itemResp);
+      //   }
 
-        respProbs(numberOfCategories - 1) = cumProbs(numberOfCategories - 1) - cumProbs(numberOfCategories);
+      //   respProbs(numberOfCategories - 1) = cumProbs(numberOfCategories - 1) - cumProbs(numberOfCategories);
 
-        return respProbs;
-      }
+      //   return respProbs;
+      // }
     };
   } // namespace Implementation
 } // namespace EquatingRecipes

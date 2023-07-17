@@ -11,7 +11,7 @@
 
 #include <equating_recipes/analyses/analyses.hpp>
 
-#include <equating_recipes/implementation/observed_score_distribution.hpp>
+#include "s-x2.hpp"
 
 int main(int argc, char const* argv[]) {
   // EquatingRecipes::Tests::Examples::Chapter2 ch2;
@@ -38,21 +38,8 @@ int main(int argc, char const* argv[]) {
   // EquatingRecipes::Tests::Examples::IRTScaleTransformation irtScaleTransformation;
   // irtScaleTransformation();
 
-  EquatingRecipes::Implementation::ObservedScoreDistribution observedScoreDistribution;
-
-  Eigen::VectorXd categoryParameters(4);
-  categoryParameters(0) = 1.025;
-  categoryParameters(1) = 0.005;
-  categoryParameters(2) = -1.3;
-  categoryParameters(3) = 0.0;
-
-  std::cout << observedScoreDistribution.probRespGRRatingScale(1.5,
-                                                               0.006,
-                                                               categoryParameters,
-                                                               -1,
-                                                               1.702,
-                                                               EquatingRecipes::Implementation::ObservedScoreDistribution::Density::LOGISTIC)
-            << "\n";
+  EquatingRecipes::Tests::Examples::S_X2 s_x2;
+  s_x2();
 
   return 0;
 }
