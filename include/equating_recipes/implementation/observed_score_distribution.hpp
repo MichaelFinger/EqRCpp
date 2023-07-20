@@ -20,134 +20,93 @@ namespace EquatingRecipes {
   namespace Implementation {
     class ObservedScoreDistribution {
     public:
-      /*------------------------------------------------------------------------------
+    /*------------------------------------------------------------------------------
       Functionality:
-        Calculates the conditional distribution of total score given theta
-        for IRT models. The IRT models include the 3PL, LGR, GPC, and NR models.
-        Uses Hanson's (1994) generalization of the Lord-Wingersky (1982) recursive
-        algorithm.
+        Calculates the marginal distribution of total score for IRT models. The IRT
+        models include the 3PL, LGR, GPC, and NR models.
 
       Input:
-        theta:   examinee ability
         Items:   pointer to designate items on a test form (0-offset)
         n :      number of items on a test form
-        MaxCat:  the maximum number of categories across items
-        MaxScrP: maximum number of score points
+        nq:      number of quadrature points
+        xqpts:   vector for quadrature points (0-offset)
+        xqwts:   vector for quadrature weights (0-offset)
 
       Output:
         nscr:    number of score categories for observed score distribution
         xscr:    vector of scores associated with each score category
                 (are consecutive integers); 0-offset
-        xnew:    vector of probabilities associated with each score category;
-                0-offset
+        xmarg:   vector of marginal probabilities associated with each score
+                category; 0-offset 
 
       Author: Seonghoon Kim
       Date of last revision 9/25/08
     ------------------------------------------------------------------------------*/
-      // enum class IRTModel {
-      //   THREE_PARAMETER,
-      //   GRADED_RESPONSE,
-      //   GENERALIZED_PARTIAL_CREDIT,
-      //   GRADED_RESPONSE_RATING_SCALE,
-      //   GENERALIZED_PARTIAL_CREDIT_RATING_SCALE
-      // };
+      void irtMixObsDist(const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                         const Eigen::VectorXd& quadraturePoints,
+                         const Eigen::VectorXd& quadratureWeights,
+                         size_t& numberOfScoreCategories,
+                         Eigen::VectorXd& scores,
+                         Eigen::VectorXd& marginalResponseProbabilities,
+                         Eigen::VectorXd& xnew) {
+        /* finds the maximum number of categories across items */
+        size_t maximumNumberOfCategories = 0;
+        size_t maximumObservedScore = 0;
 
-      // enum class Density {
-      //   LOGISTIC,
-      //   NORMAL
-      // };
+        std::for_each(items.begin(),
+                      items.end(),
+                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+                        maximumNumberOfCategories = std::max(maximumNumberOfCategories, item.numberOfCategories);
+                        maximumObservedScore += item.scoringFunctionValues(item.scoringFunctionValues.size() - 1);
+                      });
 
-      // struct ItemParameters {
-      //   size_t itemIndex;
-      //   double slope;
-      //   double location;
-      //   double lowerAsymptote = 0;
-      //   Eigen::VectorXd thresholds;
-      //   Eigen::VectorXd categoryParameters;
-      //   Density density;
-      //   IRTModel irtModel;
-      //   double scalingConstant = 1.0;
-      //   bool locationIsIntercept = false;
-      // };
+        size_t maximumNumberOfScorePoints = maximumObservedScore + 1;
 
-      // Eigen::VectorXd itemResponseProbabilities(const ItemParameters& itemParameters,
-      //                                           const double& theta) {
-      //   Eigen::VectorXd respProbs;
+        xnew.setZero(maximumNumberOfScorePoints);
+        marginalResponseProbabilities.setZero(maximumNumberOfScorePoints);
+        size_t numberOfScores;
 
-      //   if (itemParameters.irtModel == IRTModel::THREE_PARAMETER) {
-      //     respProbs.setZero(2);
-      //     double deviate;
-      //     if (itemParameters.locationIsIntercept) {
-      //       deviate = itemParameters.scalingConstant * (itemParameters.slope * theta + itemParameters.location);
-      //     } else {
-      //       deviate = itemParameters.scalingConstant * (itemParameters.slope * (theta - itemParameters.location));
-      //     }
+        for (size_t quadraturePointIndex = 0; quadraturePointIndex < quadraturePoints.size(); quadraturePointIndex++) {
+          double theta = quadraturePoints(quadraturePointIndex);
 
-      //     respProbs(1) = itemParameters.lowerAsymptote + (1.0 - itemParameters.lowerAsymptote) * getCDF(deviate, itemParameters.density);
-      //     respProbs(0) = 1.0 - respProbs(1);
+          ObsDistGivenTheta(theta,
+                            items,
+                            maximumNumberOfCategories,
+                            maximumNumberOfScorePoints,
+                            numberOfScores,
+                            scores,
+                            xnew);
 
-      //   } else if (itemParameters.irtModel == IRTModel::GRADED_RESPONSE) {
-      //     size_t numberOfScoreCategories = itemParameters.thresholds.size() + 1;
-      //     respProbs.setZero(numberOfScoreCategories);
+          marginalResponseProbabilities += quadratureWeights(quadraturePointIndex) * xnew;
+        }
 
-      //     Eigen::VectorXd cumProbs(numberOfScoreCategories + 1);
-      //     cumProbs(0) = 1.0;
-      //     cumProbs(numberOfScoreCategories) = 0.0;
-
-      //     for (size_t itemResponseIndex = 1; itemResponseIndex < numberOfScoreCategories; itemResponseIndex++) {
-      //       double deviate;
-
-      //       if (itemParameters.locationIsIntercept) {
-      //         deviate = itemParameters.scalingConstant * (itemParameters.slope * theta + itemParameters.thresholds(itemResponseIndex - 1));
-      //       } else {
-      //         deviate = itemParameters.scalingConstant * (itemParameters.slope * (theta - itemParameters.thresholds(itemResponseIndex - 1)));
-      //       }
-
-      //       cumProbs(itemResponseIndex) = getCDF(deviate, itemParameters.density);
-
-      //       respProbs(itemResponseIndex) = cumProbs(itemResponseIndex - 1) - cumProbs(itemResponseIndex);
-      //     }
-
-      //   } else if (itemParameters.irtModel == IRTModel::GENERALIZED_PARTIAL_CREDIT) {
-      //   } else if (itemParameters.irtModel == IRTModel::GRADED_RESPONSE_RATING_SCALE) {
-      //   } else if (itemParameters.irtModel == IRTModel::GENERALIZED_PARTIAL_CREDIT_RATING_SCALE) {
-      //   }
-
-      //   size_t numberOfScoreCategories;
-
-      //   if (itemParameters.thresholds.size() >= 1) {
-      //     numberOfScoreCategories = itemParameters.thresholds.size() + 1;
-      //   } else if (itemParameters.categoryParameters.size() >= 1) {
-      //     numberOfScoreCategories = itemParameters.categoryParameters.size();
-      //   } else {
-      //     numberOfScoreCategories = 2;
-      //   }
-
-      //   return respProbs;
-      // }
+        marginalResponseProbabilities /= marginalResponseProbabilities.sum();
+      }
 
       void ObsDistGivenTheta(const double& theta,
                              const std::vector<EquatingRecipes::Structures::ItemSpecification>& items,
+                             const size_t& maximumNumberOfCategories,
+                             const size_t& maximumNumberOfScorePoints,
                              size_t& numberOfScores,
                              Eigen::VectorXd& scores,
                              Eigen::VectorXd& xnew) {
         // int i, j, k, index;
         // int mino, maxo, minn, maxn;
         size_t numberOfItemsOnForm = items.size();
-        size_t maxScorePoint = 0;
-        std::for_each(items.begin(),
-                      items.end(),
-                      [&](const EquatingRecipes::Structures::ItemSpecification& item) {
-                        maxScorePoint += item.scoringFunctionValues(item.scoringFunctionValues.size() - 1);
-                      });
+        // size_t maxScorePoint = 0;
+        // std::for_each(items.begin(),
+        //               items.end(),
+        //               [&](const EquatingRecipes::Structures::ItemSpecification& item) {
+        //                 maxScorePoint += item.scoringFunctionValues(item.scoringFunctionValues.size() - 1);
+        //               });
 
-        Eigen::VectorXd xitem; // (maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
-        Eigen::VectorXd xold(maxScorePoint);  // (maximumScorePoint);         /* zero-offset */
+        Eigen::VectorXd xitem(maximumNumberOfCategories + 1); // (maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
+        Eigen::VectorXd xold(maximumNumberOfScorePoints);  // (maximumScorePoint);         /* zero-offset */
 
         EquatingRecipes::Implementation::IRTModelFunctions irtModelFunctions;
 
         /* calculates probabilities for Item 1 */
-        xitem.setZero(items[0].numberOfCategories);
+        xitem.setZero(items[0].numberOfCategories + 1);
         for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
           xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[0], categoryIndex, theta);
         }

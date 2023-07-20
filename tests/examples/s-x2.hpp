@@ -2,6 +2,7 @@
 #define TESTS_EXAMPLES_S_X2_HPP
 
 #include <iostream>
+#include <boost/math/distributions/normal.hpp>
 #include <Eigen/Core>
 #include <equating_recipes/implementation/observed_score_distribution.hpp>
 
@@ -28,19 +29,43 @@ namespace EquatingRecipes {
                                                                              item4,
                                                                              item5};
 
-          size_t numberOfScores;
+          size_t numberOfScoreCategories;
           Eigen::VectorXd scores;
           Eigen::VectorXd xnew;
+          Eigen::VectorXd marginalResponseProbabilities;
+
+          size_t numberOfQuadraturePoints = 11;
+          double minTheta = -4;
+          double maxTheta = 4;
+          double incTheta = (maxTheta - minTheta) / static_cast<double>(numberOfQuadraturePoints - 1);
+
+          boost::math::normal_distribution<> normalDist;
+          Eigen::VectorXd quadraturePoints(numberOfQuadraturePoints);
+          Eigen::VectorXd quadratureWeights(numberOfQuadraturePoints);
+          for (size_t quadratureIndex = 0; quadratureIndex < numberOfQuadraturePoints; quadratureIndex++) {
+            quadraturePoints(quadratureIndex) = minTheta + quadratureIndex * incTheta;
+            quadratureWeights(quadratureIndex) = pdf(normalDist, quadraturePoints(quadratureIndex));
+          }
+
+          quadratureWeights /= quadratureWeights.sum();
 
           EquatingRecipes::Implementation::ObservedScoreDistribution observedScoreDistribution;
 
-          observedScoreDistribution.ObsDistGivenTheta(theta,
-                                                      items,
-                                                      numberOfScores,
-                                                      scores,
-                                                      xnew);
+          observedScoreDistribution.irtMixObsDist(items,
+                                                  quadraturePoints,
+                                                  quadratureWeights,
+                                                  numberOfScoreCategories,
+                                                  scores,
+                                                  marginalResponseProbabilities,
+                                                  xnew);
 
-          std::cout << numberOfScores << "\n";
+          // observedScoreDistribution.ObsDistGivenTheta(theta,
+          //                                             items,
+          //                                             numberOfScores,
+          //                                             scores,
+          //                                             xnew);
+
+          std::cout << numberOfScoreCategories << "\n";
           std::cout << scores << "\n";
           std::cout << xnew << "\n";
         }
