@@ -174,9 +174,11 @@ namespace EquatingRecipes {
         pData.bootstrapReplicationNumber = 0;
         pData.design = design;
         pData.weightSyntheticPopulation1 = w1;
-        pData.minimumScoreX = stInfo.minimumRawScoreNewForm;
-        pData.maximumScoreX = stInfo.maximumRawScoreNewForm;
-        pData.scoreIncrementX = stInfo.rawScoreIncrementNewForm;
+
+        // TODO: Fix
+        // pData.minimumScoreX = stInfo.minimumRawScoreNewForm;
+        // pData.maximumScoreX = stInfo.maximumRawScoreNewForm;
+        // pData.scoreIncrementX = stInfo.rawScoreIncrementNewForm;
 
         switch (irtMethod) {
           case EquatingRecipes::Structures::IRTMethod::TRUE_SCORE:
@@ -342,7 +344,9 @@ namespace EquatingRecipes {
         pData.irtInput = irtall;
       }
 
-    private:
+    // TODO: Fix
+    // private:
+
       EquatingRecipes::Structures::IRTScaleTransformationData controlHandle;
       std::vector<EquatingRecipes::Structures::ItemSpecification> controlNewItems;
       EquatingRecipes::Structures::Symmetry controlSymmetry;
@@ -676,7 +680,7 @@ namespace EquatingRecipes {
                         maximumNumberOfCategories = std::max(maximumNumberOfCategories, item.numberOfCategories);
                       });
 
-        Eigen::VectorXd xnew(maximumNumberOfCategories);
+        Eigen::VectorXd xnew;
 
         marginalResponseProbabilities.setZero();
 
@@ -733,34 +737,33 @@ namespace EquatingRecipes {
         // int i, j, k, index;
         // int mino, maxo, minn, maxn;
         Eigen::VectorXd xitem(maximumCategoryIndex + 1); /* zero-offset, but not use xitem[0] */
-        Eigen::VectorXd xold(maximumScorePoint);         /* zero-offset */
+        Eigen::VectorXd xold(numberOfScores);         /* zero-offset */
+        xnew.resize(numberOfScores);
 
         EquatingRecipes::Implementation::IRTModelFunctions irtModelFunctions;
 
         /* calculates probabilities for Item 1 */
-        for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
+        for (size_t categoryIndex = 1; categoryIndex <= items[0].numberOfCategories; categoryIndex++) {
           xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[0], categoryIndex, theta);
         }
 
-        double mino = items[0].scoringFunctionValues(0);
-        double maxo = items[0].scoringFunctionValues(items[0].numberOfCategories - 1);
-        double minn = mino;
-        double maxn = maxo;
+        int mino = items[0].scoringFunctionValues(1);
+        int maxo = items[0].scoringFunctionValues(items[0].numberOfCategories);
+        int minn = mino;
+        int maxn = maxo;
 
         xold.setZero();
 
-        for (size_t categoryIndex = 0; categoryIndex < items[0].numberOfCategories; categoryIndex++) {
+        for (size_t categoryIndex = 1; categoryIndex <= items[0].numberOfCategories; categoryIndex++) {
           size_t index = static_cast<size_t>(items[0].scoringFunctionValues(categoryIndex) - minn);
           xold(index) = xitem(categoryIndex); /* mino associated with index of 0 */
         }                                     /* mino does vary; see below      */
 
-        xnew = xold;
+        xnew(Eigen::seq(0, maxn - minn)) = xold(Eigen::seq(0, maxn - minn));
 
         if (numberOfItemsOnForm == 1) {
-          size_t maxMinusMin = static_cast<size_t>(maxn - minn);
-
-          for (size_t score = 0; score <= maxMinusMin; score++) {
-            scores(score) = static_cast<double>(score) + minn;
+          for (int i = 0; i <= maxn - minn; i++) {
+            scores(i) = static_cast<double>(i) + minn;
           }
 
           numberOfScores = static_cast<size_t>(maxn - minn + 1);
@@ -769,8 +772,8 @@ namespace EquatingRecipes {
         }
 
         /* updates distribution for items 2 through nitems */
-        for (size_t itemIndex = 1; itemIndex < numberOfItemsOnForm; itemIndex++) {
-          for (size_t categoryIndex = 0; categoryIndex < items[itemIndex].numberOfCategories; categoryIndex++) {
+        for (size_t itemIndex = 1; itemIndex < items.size(); itemIndex++) {
+          for (size_t categoryIndex = 1; categoryIndex <= items[itemIndex].numberOfCategories; categoryIndex++) {
             xitem(categoryIndex) = irtModelFunctions.itemResponseFunction(items[itemIndex],
                                                                           categoryIndex,
                                                                           theta);
@@ -794,9 +797,8 @@ namespace EquatingRecipes {
           xold(Eigen::seq(0, maxIndex)) = xnew(Eigen::seq(0, maxIndex));
         }
 
-        size_t maxIndex = static_cast<size_t>(maxn - minn);
-        for (size_t index = 0; index <= maxIndex; index++) {
-          scores(index) = static_cast<double>(index) + minn;
+        for (int i = 0; i <= maxn - minn; i++) {
+          scores(static_cast<size_t>(i)) = static_cast<double>(i) + minn;
         }
 
         numberOfScores = static_cast<size_t>(maxn - minn + 1);
@@ -832,22 +834,22 @@ namespace EquatingRecipes {
       void recurs(const int& mino,
                   const int& maxo,
                   const Eigen::VectorXd& xold,
-                  const size_t& numberOfCategories,
+                  const int& numberOfCategories,
                   const Eigen::VectorXd& iitem,
                   const Eigen::VectorXd& xitem,
-                  double& minn,
-                  double& maxn,
+                  int& minn,
+                  int& maxn,
                   Eigen::VectorXd& xnew) {
-        minn = mino + iitem(0);
-        maxn = maxo + iitem(numberOfCategories - 1);
+        minn = mino + static_cast<int>(iitem(1));
+        maxn = maxo + static_cast<int>(iitem(numberOfCategories));
 
-        for (double i = minn; i <= maxn; i += 1.0) {
-          double in = i - minn;
+        for (int i = minn; i <= maxn; i++) {
+          int in = i - minn;
 
           xnew(static_cast<size_t>(in)) = 0.0;
 
-          for (size_t j = 0; j < numberOfCategories; j++) {
-            double io = i - iitem(j) - mino;
+          for (int j = 1; j <= numberOfCategories; j++) {
+            int io = i - static_cast<int>(iitem(j)) - mino;
 
             if (io >= 0 && io <= maxo - mino) {
               xnew(static_cast<size_t>(in)) += xold(static_cast<size_t>(io)) * xitem(j);
@@ -941,15 +943,16 @@ namespace EquatingRecipes {
                                       minimumScore,
                                       maximumScore);
 
-        if (isNewForm) {
-          handle.minimumRawScoreNewForm = static_cast<double>(minimumNumberOfScoreCategories);
-          handle.maximumRawScoreNewForm = maximumScore;
-          handle.rawScoreIncrementNewForm = 1;
-        } else {
-          handle.minimumRawScoreOldForm = static_cast<double>(minimumNumberOfScoreCategories);
-          handle.maximumRawScoreOldForm = maximumScore;
-          handle.rawScoreIncrementOldForm = 1;
-        }
+        // TODO: Fix
+        // if (isNewForm) {
+        //   handle.minimumRawScoreNewForm = static_cast<double>(minimumNumberOfScoreCategories);
+        //   handle.maximumRawScoreNewForm = maximumScore;
+        //   handle.rawScoreIncrementNewForm = 1;
+        // } else {
+        //   handle.minimumRawScoreOldForm = static_cast<double>(minimumNumberOfScoreCategories);
+        //   handle.maximumRawScoreOldForm = maximumScore;
+        //   handle.rawScoreIncrementOldForm = 1;
+        // }
 
         irtFittedDistribution.numberOfRawScoreCategories = static_cast<size_t>(maximumNumberOfScoreCategories);
         irtFittedDistribution.rawScores.resize(irtFittedDistribution.numberOfRawScoreCategories);

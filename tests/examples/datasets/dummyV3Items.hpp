@@ -2,7 +2,7 @@
 #define TESTS_EXAMPLES_DATASETS_DUMMY_V3_ITEMS_HPP
 
 #include <iostream>
-#include <istream>
+#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
