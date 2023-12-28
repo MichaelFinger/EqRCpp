@@ -7,8 +7,8 @@
 // #include "chapter6.hpp"
 // #include "chapter7.hpp"
 // #include "chapter8.hpp"
-// #include "irt_scale_transformation.hpp"
-#include "obs_score_dist.hpp"
+// #include "obs_score_dist.hpp"
+#include "irt_scale_transformation.hpp"
 
 #include <equating_recipes/analyses/analyses.hpp>
 
@@ -42,8 +42,8 @@ int main(int argc, char const* argv[]) {
   // EquatingRecipes::Tests::Examples::S_X2 s_x2;
   // s_x2();
 
-  EquatingRecipes::Tests::Examples::ObservedScoreDistribution observedScoreDistribution;
-  observedScoreDistribution();
+  EquatingRecipes::Tests::Examples::IRTScaleTransformation irtScaleTransformation;
+  irtScaleTransformation();
 
   return 0;
 }

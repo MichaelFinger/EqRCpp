@@ -19,17 +19,11 @@ namespace EquatingRecipes {
       class IRTScaleTransformation {
       public:
         void operator()() {
-          std::string newItemsFilename = "dummyXItems.txt";
-          std::string oldItemsFilename = "dummyYItems.txt";
-          std::string itemPairsFilename = "dummyV3Items.txt";
-          std::string newQuadDistFilename = "dummyXdist.txt";
-          std::string oldQuadDistFilename = "dummyYdist.txt";
-
-          // std::string newItemsFilename = "KB6Xitems";
-          // std::string oldItemsFilename = "KB6Yitems";
-          // std::string itemPairsFilename = "KB6Vitems";
-          // std::string newQuadDistFilename = "KB6Xdist";
-          // std::string oldQuadDistFilename = "KB6Ydist";
+          std::string newItemsFilename = "LSAT6XItems";
+          std::string oldItemsFilename = "LSAT6YItems";
+          std::string itemPairsFilename = "LSAT6VItems";
+          std::string newQuadDistFilename = "LSAT6Xdist";
+          std::string oldQuadDistFilename = "LSAT6Ydist";
 
           EquatingRecipes::Tests::Examples::Datasets::ItemSpecsFile newItems;
           newItems.import(newItemsFilename);
@@ -81,7 +75,7 @@ namespace EquatingRecipes {
           irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::HAEBARA] = EquatingRecipes::Structures::Symmetry::SYMMETRIC;
           
           irtScaleTransformationData.standardizations[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = true;
-          irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = EquatingRecipes::Structures::Symmetry::SYMMETRIC;
+          irtScaleTransformationData.symmetryOptions[EquatingRecipes::Structures::IRTScaleTransformationMethod::STOCKING_LORD] = EquatingRecipes::Structures::Symmetry::OLD_SCALE;
 
           EquatingRecipes::Analyses::IRTScaleTransformation irtScaleTransformation;
           std::string title = "IRT Scale Transformation";

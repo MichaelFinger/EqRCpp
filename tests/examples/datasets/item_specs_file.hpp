@@ -23,8 +23,8 @@ namespace EquatingRecipes {
           std::vector<EquatingRecipes::Structures::ItemSpecification> itemSpecs;
 
           void import(const std::string& filename) {
-            // itemSpecs = importItemSpecsFile(filename);
-            itemSpecs = importItemSpecsFileAlt(filename);
+            itemSpecs = importItemSpecsFile(filename);
+            // itemSpecs = importItemSpecsFileAlt(filename);
           }
 
         private:
@@ -35,7 +35,7 @@ namespace EquatingRecipes {
                               std::ios::in);
 
             for (std::string lineRead; std::getline(ifs, lineRead);) {
-              linesRead.push_back(lineRead);
+              linesRead.push_back(lineRead);              
             }
 
             ifs.close();
@@ -71,9 +71,9 @@ namespace EquatingRecipes {
               itemSpec.numberOfCategories = static_cast<unsigned long>(std::stoi(values[fieldIndex]));
               fieldIndex++;
 
-              itemSpec.scoringFunctionValues.resize(itemSpec.numberOfCategories);
+              itemSpec.scoringFunctionValues.resize(itemSpec.numberOfCategories + 1);
 
-              for (size_t respIndex = 0; respIndex < itemSpec.numberOfCategories; respIndex++) {
+              for (size_t respIndex = 1; respIndex <= itemSpec.numberOfCategories; respIndex++) {
                 itemSpec.scoringFunctionValues(respIndex) = std::stod(values[fieldIndex]);
 
                 fieldIndex++;
